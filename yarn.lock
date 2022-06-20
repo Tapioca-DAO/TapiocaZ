@@ -37,11 +37,6 @@
   dependencies:
     "regenerator-runtime" "^0.13.4"
 
-"@boringcrypto/boring-solidity@boringcrypto/BoringSolidity#21beaec5c9383c6e9312e4464ad5755fda69e09b":
-  "integrity" "sha512-Oh2PQEXaAuA7M8LMkBiX83TAjwjXHHGTiBy5OWdrRl0RpFHwBpGGeQVmcza3h/Otx320RrDQ6wyvWXuusYOszQ=="
-  "resolved" "git+ssh://git@github.com/boringcrypto/BoringSolidity.git#21beaec5c9383c6e9312e4464ad5755fda69e09b"
-  "version" "2.0.1"
-
 "@cspotcode/source-map-consumer@0.8.0":
   "integrity" "sha512-41qniHzTU8yAGbCp04ohlmSrZf8bkf/iJsl3V0dRGsQN/5GFfx+LbCSsCpp2gqrqjTVg/K6O8ycoV35JIwAzAg=="
   "resolved" "https://registry.npmjs.org/@cspotcode/source-map-consumer/-/source-map-consumer-0.8.0.tgz"
@@ -653,6 +648,11 @@
   "integrity" "sha512-fdkzKPYMjrRiPK6K4y64e6GzULR7R7RwxSigHS8DDp7aWDeoReqsQI+cxHV1UuhAqX69L1lAaWDxenfP+xiqzA=="
   "resolved" "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-4.5.0.tgz"
   "version" "4.5.0"
+
+"@rari-capital/solmate@^6.4.0":
+  "integrity" "sha512-BXWIHHbG5Zbgrxi0qVYe0Zs+bfx+XgOciVUACjuIApV0KzC0kY8XdO1higusIei/ZKCC+GUKdcdQZflxYPUTKQ=="
+  "resolved" "https://registry.npmjs.org/@rari-capital/solmate/-/solmate-6.4.0.tgz"
+  "version" "6.4.0"
 
 "@resolver-engine/core@^0.3.3":
   "integrity" "sha512-eB8nEbKDJJBi5p5SrvrvILn4a0h42bKtbCTri3ZxCGt6UvoQyp7HnGOfki944bUjBSHKK3RvgfViHn+kqdXtnQ=="
