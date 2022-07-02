@@ -24,6 +24,8 @@ describe('TapiocaOFT', () => {
     let tapiocaOFT0: TapiocaOFTMock;
     let tapiocaOFT1: TapiocaOFTMock;
 
+    const amount = ethers.BigNumber.from(1e5);
+
     beforeEach(async () => {
         signer = (await ethers.getSigners())[0];
 
@@ -56,11 +58,11 @@ describe('TapiocaOFT', () => {
             )) as BytesLike,
         );
 
-        tapiocaOFT0 = await utils.attachTapiocaOFT(
+        tapiocaOFT0 = (await utils.attachTapiocaOFT(
             await tapiocaWrapper.tapiocaOFTs(
                 (await tapiocaWrapper.tapiocaOFTLength()).sub(1),
             ),
-        );
+        )) as TapiocaOFTMock;
         tapiocaOFT0.setChainId(0);
 
         // Deploy TapiocaOFT1
@@ -73,12 +75,22 @@ describe('TapiocaOFT', () => {
             )) as BytesLike,
         );
 
-        tapiocaOFT1 = await utils.attachTapiocaOFT(
+        tapiocaOFT1 = (await utils.attachTapiocaOFT(
             await tapiocaWrapper.tapiocaOFTs(
                 (await tapiocaWrapper.tapiocaOFTLength()).sub(1),
             ),
-        );
+        )) as TapiocaOFTMock;
         tapiocaOFT1.setChainId(1);
+
+        // Link endpoints with addresses
+        LZEndpointMock0.setDestLzEndpoint(
+            tapiocaOFT1.address,
+            LZEndpointMock1.address,
+        );
+        LZEndpointMock1.setDestLzEndpoint(
+            tapiocaOFT0.address,
+            LZEndpointMock0.address,
+        );
     });
     const mintAndApprove = async (
         erc20Mock: ERC20Mock,
@@ -95,9 +107,7 @@ describe('TapiocaOFT', () => {
         expect(await tapiocaOFT1.decimals()).eq(18);
     });
 
-    it('wrap()', async () => {
-        const amount = ethers.BigNumber.from(1e5);
-
+    describe('wrap()', () => {
         it('Should fail if not on the same chain', async () => {
             await mintAndApprove(erc20Mock1, tapiocaOFT1, signer, amount);
             await expect(
@@ -117,8 +127,27 @@ describe('TapiocaOFT', () => {
         });
     });
 
-    it('transfer()', async () => {
-        it('Should fail if not trusted remote', async () => {
+    describe('sendFrom()', () => {
+        it('Should fail if untrusted remote', async () => {
+            // Setup
+            await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
+            await tapiocaOFT0.wrap(signer.address, amount);
+
+            // Failure
+            await expect(
+                tapiocaOFT0.sendFrom(
+                    signer.address,
+                    1,
+                    signer.address,
+                    1,
+                    signer.address,
+                    signer.address,
+                    ethers.utils.arrayify(0),
+                ),
+            ).to.be.revertedWith(
+                'LzApp: destination chain is not a trusted source',
+            );
+
             // Set trusted remotes
             await tapiocaWrapper.executeTOFT(
                 tapiocaOFT0.address,
@@ -134,6 +163,19 @@ describe('TapiocaOFT', () => {
                     tapiocaOFT0.address,
                 ]),
             );
+
+            // Success
+            await expect(
+                tapiocaOFT0.sendFrom(
+                    signer.address,
+                    1,
+                    signer.address,
+                    1,
+                    signer.address,
+                    signer.address,
+                    ethers.utils.arrayify(0),
+                ),
+            ).to.not.be.reverted;
         });
     });
 });
