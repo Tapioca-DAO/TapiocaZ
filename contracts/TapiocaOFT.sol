@@ -57,7 +57,7 @@ contract TapiocaOFT is OFT {
 
     /// @notice Wrap an ERC20 with a 1:1 ratio
     function wrap(address _toAddress, uint256 _amount) external onlyMainChain {
-        erc20.transferFrom(msg.sender, _toAddress, _amount);
+        erc20.transferFrom(msg.sender, address(this), _amount);
         _mint(_toAddress, _amount);
         emit Wrap(msg.sender, _toAddress, _amount);
     }
@@ -72,6 +72,7 @@ contract TapiocaOFT is OFT {
         emit Unwrap(msg.sender, _toAddress, _amount);
     }
 
+    // Used for mocks
     function getChainId() internal view virtual returns (uint256) {
         return block.chainid;
     }
