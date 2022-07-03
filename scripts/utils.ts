@@ -1,3 +1,4 @@
+import { BytesLike } from 'ethers';
 import { readFileSync, writeFileSync } from 'fs';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
@@ -27,7 +28,7 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
             lzEndpoint,
             erc20Address,
             mainChainID,
-        ).data;
+        ).data as BytesLike;
 
     const attachTapiocaOFT = async (address: string) =>
         await ethers.getContractAt(contractName, address);
@@ -61,12 +62,8 @@ export type TDeployment = {
     };
 };
 
-export const saveDeployment = async (
-    hre: HardhatRuntimeEnvironment,
-    contracts: TContract[],
-) => {
-    const chainId = await hre.getChainId();
-    const deployments: TDeployment = {};
+export const saveTOFTDeployment = (chainId: string, contracts: TContract[]) => {
+    const deployments: TDeployment = {} && readFromJson('deployments.json');
 
     for (const contract of contracts) {
         deployments[chainId] = {
@@ -74,5 +71,5 @@ export const saveDeployment = async (
         };
     }
 
-    saveToJson(deployments, 'deployments.json', 'w');
+    saveToJson(deployments, 'deployments.json', 'a');
 };

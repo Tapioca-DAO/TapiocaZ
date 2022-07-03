@@ -1,0 +1,9 @@
+export const OPTIMISM_CHAIN_ID = 10;
+
+export const LZ_ENDPOINT: any = {
+    '4': '0x0000000000000000000000000000000000000000',
+};
+
+export const VALID_ADDRESSES: any = {
+    '4': { '0x0000000000000000000000000000000000000000': 'dead' },
+};
