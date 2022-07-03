@@ -11,10 +11,6 @@ contract TapiocaWrapper is Owned {
 
     constructor() Owned(msg.sender) {}
 
-    function tapiocaOFTLength() public view returns (uint256) {
-        return tapiocaOFTs.length;
-    }
-
     function createTOFT(address erc20, bytes calldata bytecode)
         external
         onlyOwner
@@ -38,5 +34,13 @@ contract TapiocaWrapper is Owned {
         returns (bool success)
     {
         (success, ) = payable(toft).call{value: msg.value}(bytecode);
+    }
+
+    function tapiocaOFTLength() external view returns (uint256) {
+        return tapiocaOFTs.length;
+    }
+
+    function lastTOFT() external view returns (TapiocaOFT) {
+        return tapiocaOFTs[tapiocaOFTs.length - 1];
     }
 }
