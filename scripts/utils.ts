@@ -1,6 +1,5 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { TapiocaOFT, TapiocaOFTMock } from '../typechain';
 export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
     const { ethers } = hre;
 
