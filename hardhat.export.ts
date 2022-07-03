@@ -55,6 +55,16 @@ const config: HardhatUserConfig = {
                     : [],
             tags: ['testnet'],
         },
+        mumbai: {
+            gasMultiplier: 2,
+            url: 'https://rpc-mumbai.maticvigil.com',
+            chainId: 80001,
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
+            tags: ['testnet'],
+        },
     },
     etherscan: {
         apiKey: {
