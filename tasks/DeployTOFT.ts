@@ -23,7 +23,7 @@ export const deployTOFT = async (
 
     // Get the deploy tx
     const { Tx_deployTapiocaOFT } = useUtils(hre);
-    const lzEndpoint = LZ_ENDPOINT[chainID];
+    const lzEndpoint = LZ_ENDPOINT[chainID].address;
     const tx = await Tx_deployTapiocaOFT(
         lzEndpoint,
         args.erc20Address,
