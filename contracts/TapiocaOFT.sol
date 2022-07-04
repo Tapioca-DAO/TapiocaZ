@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import './OFT20/OFT.sol';
 
 contract TapiocaOFT is OFT {
-    ERC20 public immutable erc20; // 0x0 if not on main chain
+    ERC20 public immutable erc20;
     uint256 public immutable mainChainID;
     uint8 _decimalCache;
 

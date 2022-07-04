@@ -16,7 +16,7 @@ task(
     'Deploy a TOFT off an ERC20 address on the current chain',
     deployTOFT,
 )
-    .addOptionalParam('erc20', '(optional) The ERC20 address to wrap')
+    .addParam('erc20', 'The ERC20 address to wrap')
     .addParam('chainid', `The main chain ID ()\n${formatLZEndpoints()}`);
 
 function formatLZEndpoints() {
