@@ -10,14 +10,13 @@ export const deployTOFT = async (
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
-    args.erc20 = args.erc20
-        ? args.erc20
-        : '0x0000000000000000000000000000000000000000';
+    const zeroAddress = hre.ethers.constants.AddressZero;
+    args.erc20 = args.erc20 ? args.erc20 : zeroAddress;
 
     // Verify that the address is valid
     const chainID = await hre.getChainId();
     const erc20Name = VALID_ADDRESSES[chainID]?.[args.erc20];
-    if (erc20Name === undefined) {
+    if (args.erc20 !== zeroAddress && erc20Name === undefined) {
         throw new Error(`[-] ERC20 not whitelisted: ${args.erc20}]\n`);
     }
 
@@ -27,9 +26,12 @@ export const deployTOFT = async (
     const tx = await Tx_deployTapiocaOFT(lzEndpoint, args.erc20, args.chainid);
 
     // Get the TWrapper
-    const twrapper = (await hre.deployments.get(
+    const twrapper = await hre.ethers.getContractAt(
         'TapiocaWrapper',
-    )) as unknown as TapiocaWrapper;
+        (
+            await hre.deployments.get('TapiocaWrapper')
+        ).address,
+    );
 
     // Create the TOFT
     await (await twrapper.createTOFT(args.erc20, tx)).wait();

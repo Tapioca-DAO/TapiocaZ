@@ -1,5 +1,5 @@
 import { BytesLike } from 'ethers';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
     const { ethers } = hre;
@@ -47,8 +47,11 @@ export const saveToJson = (data: any, filename: string, flag: 'a' | 'w') => {
 };
 
 export const readFromJson = (filename: string) => {
-    const json = readFileSync(filename, 'utf8');
-    return JSON.parse(json);
+    if (existsSync(filename)) {
+        const json = readFileSync(filename, 'utf8');
+        return JSON.parse(json);
+    }
+    return {};
 };
 
 export type TContract = {
