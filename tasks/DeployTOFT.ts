@@ -5,30 +5,26 @@ import { TapiocaWrapper } from '../typechain';
 
 export const deployTOFT = async (
     args: {
-        mainChainID: number;
-        erc20Address?: string;
+        chainid: number;
+        erc20?: string;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
-    args.erc20Address = args.erc20Address
-        ? args.erc20Address
+    args.erc20 = args.erc20
+        ? args.erc20
         : '0x0000000000000000000000000000000000000000';
 
     // Verify that the address is valid
     const chainID = await hre.getChainId();
-    const erc20Name = VALID_ADDRESSES[chainID][args.erc20Address];
+    const erc20Name = VALID_ADDRESSES[chainID]?.[args.erc20];
     if (erc20Name === undefined) {
-        throw new Error(`Invalid ERC20 address: ${args.erc20Address}`);
+        throw new Error(`[-] ERC20 not whitelisted: ${args.erc20}]\n`);
     }
 
     // Get the deploy tx
     const { Tx_deployTapiocaOFT } = useUtils(hre);
     const lzEndpoint = LZ_ENDPOINT[chainID].address;
-    const tx = await Tx_deployTapiocaOFT(
-        lzEndpoint,
-        args.erc20Address,
-        args.mainChainID,
-    );
+    const tx = await Tx_deployTapiocaOFT(lzEndpoint, args.erc20, args.chainid);
 
     // Get the TWrapper
     const twrapper = (await hre.deployments.get(
@@ -36,7 +32,7 @@ export const deployTOFT = async (
     )) as unknown as TapiocaWrapper;
 
     // Create the TOFT
-    await (await twrapper.createTOFT(args.erc20Address, tx)).wait();
+    await (await twrapper.createTOFT(args.erc20, tx)).wait();
     const lastTOFT = await twrapper.lastTOFT();
 
     console.log(`Deployed ${erc20Name} TOFT at ${lastTOFT}`);
