@@ -24,16 +24,19 @@ contract TapiocaOFT is OFT {
     constructor(
         address _lzEndpoint,
         ERC20 _erc20,
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimal,
         uint8 _mainChainID
     )
         OFT(
-            string(abi.encodePacked('TapiocaWrapper-', _erc20.name())),
-            string(abi.encodePacked('TW-', _erc20.symbol())),
+            string(abi.encodePacked('TapiocaWrapper-', _name)),
+            string(abi.encodePacked('TW-', _symbol)),
             _lzEndpoint
         )
     {
         erc20 = _erc20;
-        _decimalCache = erc20.decimals();
+        _decimalCache = _decimal;
         mainChainID = _mainChainID;
 
         // Set trusted remote
