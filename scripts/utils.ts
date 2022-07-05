@@ -43,27 +43,24 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
         erc20Address: string,
         mainChainID: number,
     ) => {
-        let erc20name;
-        let erc20symbol;
-        let erc20decimal;
-        if (erc20Address === ethers.constants.AddressZero) {
-            erc20name = 'ETH';
-            erc20symbol = 'ETH';
-            erc20decimal = 18;
-        } else {
-            const network = Object.keys(config.networks!).find(
-                (e) => config.networks?.[e]?.chainId === mainChainID,
-            );
-            if (network) {
-                const networkSigner = await useNetwork(hre, network);
-                const erc20 = (
-                    await ethers.getContractAt('ERC20', erc20Address)
-                ).connect(networkSigner);
-                erc20name = await erc20.name();
-                erc20symbol = await erc20.symbol();
-                erc20decimal = await erc20.decimals();
-            }
-        }
+        const network =
+            (await hre.getChainId()) === String(mainChainID)
+                ? hre.network.name
+                : Object.keys(config.networks!).find(
+                      (e) => config.networks?.[e]?.chainId === mainChainID,
+                  );
+        if (!network)
+            throw new Error(`[-] Network not found for chain ${mainChainID}`);
+
+        const networkSigner = await useNetwork(hre, network);
+        const erc20 = (
+            await ethers.getContractAt('ERC20', erc20Address)
+        ).connect(networkSigner);
+
+        const erc20name = await erc20.name();
+        const erc20symbol = await erc20.symbol();
+        const erc20decimal = await erc20.decimals();
+
         return (
             await ethers.getContractFactory(contractName)
         ).getDeployTransaction(
@@ -103,15 +100,11 @@ export const readFromJson = (filename: string) => {
 export type TContract = {
     name: string;
     address: string;
+    erc20address: string;
 };
 
 export type TDeployment = {
-    [chain: string]: [
-        {
-            name: string;
-            address: string;
-        },
-    ];
+    [chain: string]: TContract[];
 };
 
 export const readTOFTDeployments = (): TDeployment => {
@@ -119,15 +112,12 @@ export const readTOFTDeployments = (): TDeployment => {
 };
 
 export const saveTOFTDeployment = (chainId: string, contracts: TContract[]) => {
-    const deployments: TDeployment = {} && readFromJson('deployments.json');
+    const deployments: TDeployment = {
+        ...readFromJson('deployments.json'),
+    };
 
-    for (const contract of contracts) {
-        deployments[chainId].push({
-            name: contract.name,
-            address: contract.address,
-        });
-    }
+    deployments[chainId] = [...(deployments[chainId] || []), ...contracts];
 
-    saveToJson(deployments, 'deployments.json', 'a');
+    saveToJson(deployments, 'deployments.json', 'w');
     return deployments;
 };
