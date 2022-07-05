@@ -2,6 +2,7 @@ import '@nomiclabs/hardhat-ethers';
 import { task } from 'hardhat/config';
 import { LZ_ENDPOINT } from './scripts/constants';
 import { deployTOFT } from './tasks/DeployTOFT';
+import { listDeploy } from './tasks/listDeploy';
 
 task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners();
@@ -10,6 +11,12 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
         console.log(account.address);
     }
 });
+
+task(
+    'listDeploy',
+    'List the deployment addresses of the selected network',
+    listDeploy,
+);
 
 task(
     'deployTOFT',
