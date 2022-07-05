@@ -69,6 +69,7 @@ const config: HardhatUserConfig = {
     etherscan: {
         apiKey: {
             rinkeby: process.env.RINKEBY_KEY ?? '',
+            polygonMumbai: process.env.POLYGON_MUMBAI_KEY ?? '',
         },
     },
     // gasReporter: {
