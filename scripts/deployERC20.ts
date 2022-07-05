@@ -1,9 +1,10 @@
-import hre, { ethers } from 'hardhat';
+import hre from 'hardhat';
 
 const deployERC20 = async () => {
     const test0 = await (
         await hre.ethers.getContractFactory('ERC20')
     ).deploy('erc20TEST0', 'TEST0');
+    await test0.deployed();
     console.log('\n', await hre.getChainId(), test0.address);
 };
 
