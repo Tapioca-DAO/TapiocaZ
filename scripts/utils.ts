@@ -2,6 +2,7 @@ import { BytesLike } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import config from '../hardhat.export';
+import { TapiocaOFT__factory } from '../typechain';
 
 export const useNetwork = async (
     hre: HardhatRuntimeEnvironment,
@@ -61,16 +62,20 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
         const erc20symbol = await erc20.symbol();
         const erc20decimal = await erc20.decimals();
 
-        return (
-            await ethers.getContractFactory(contractName)
-        ).getDeployTransaction(
+        const args: Parameters<TapiocaOFT__factory['deploy']> = [
             lzEndpoint,
             erc20Address,
             erc20name,
             erc20symbol,
             erc20decimal,
             mainChainID,
-        ).data as BytesLike;
+        ];
+
+        const txData = (
+            await ethers.getContractFactory(contractName)
+        ).getDeployTransaction(...args).data as BytesLike;
+
+        return { txData, args };
     };
 
     const attachTapiocaOFT = async (address: string) =>
@@ -92,7 +97,7 @@ export const saveToJson = (data: any, filename: string, flag: 'a' | 'w') => {
 export const readFromJson = (filename: string) => {
     if (existsSync(filename)) {
         const json = readFileSync(filename, 'utf8');
-        return JSON.parse(json);
+        return JSON.parse(json) ?? {};
     }
     return {};
 };

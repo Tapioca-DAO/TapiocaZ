@@ -51,11 +51,13 @@ describe('TapiocaOFT', () => {
         // Deploy TapiocaOFT0
         await tapiocaWrapper.createTOFT(
             erc20Mock0.address,
-            (await utils.Tx_deployTapiocaOFT(
-                LZEndpointMock0.address,
-                erc20Mock0.address,
-                0,
-            )) as BytesLike,
+            (
+                await utils.Tx_deployTapiocaOFT(
+                    LZEndpointMock0.address,
+                    erc20Mock0.address,
+                    0,
+                )
+            ).txData,
         );
 
         tapiocaOFT0 = (await utils.attachTapiocaOFT(
@@ -68,11 +70,13 @@ describe('TapiocaOFT', () => {
         // Deploy TapiocaOFT1
         await tapiocaWrapper.createTOFT(
             erc20Mock1.address,
-            (await utils.Tx_deployTapiocaOFT(
-                LZEndpointMock1.address,
-                erc20Mock1.address,
-                0,
-            )) as BytesLike,
+            (
+                await utils.Tx_deployTapiocaOFT(
+                    LZEndpointMock1.address,
+                    erc20Mock1.address,
+                    0,
+                )
+            ).txData,
         );
 
         tapiocaOFT1 = (await utils.attachTapiocaOFT(
