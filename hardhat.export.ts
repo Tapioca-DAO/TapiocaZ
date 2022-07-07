@@ -12,7 +12,15 @@ import 'hardhat-contract-sizer';
 
 dotenv.config();
 
-const config: HardhatUserConfig = {
+export type LzNetworkConfig = {
+    networks: {
+        [network: string]: any & {
+            lzChainId: number;
+        };
+    };
+};
+
+const config: HardhatUserConfig & LzNetworkConfig = {
     solidity: {
         compilers: [
             {
@@ -49,6 +57,7 @@ const config: HardhatUserConfig = {
                 process.env.RINKEBY ??
                 'https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
             chainId: 4,
+            lzChainId: 10001,
             accounts:
                 process.env.PRIVATE_KEY !== undefined
                     ? [process.env.PRIVATE_KEY]
@@ -59,6 +68,7 @@ const config: HardhatUserConfig = {
             gasMultiplier: 2,
             url: 'https://rpc-mumbai.maticvigil.com',
             chainId: 80001,
+            lzChainId: 10009,
             accounts:
                 process.env.PRIVATE_KEY !== undefined
                     ? [process.env.PRIVATE_KEY]
