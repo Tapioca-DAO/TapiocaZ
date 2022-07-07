@@ -1,5 +1,6 @@
-import { BytesLike } from 'ethers';
+import { BytesLike, ethers, Wallet } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import config from '../hardhat.export';
 import { TapiocaOFT__factory } from '../typechain';
@@ -43,17 +44,8 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
         lzEndpoint: string,
         erc20Address: string,
         mainChainID: number,
+        networkSigner: Wallet,
     ) => {
-        const network =
-            (await hre.getChainId()) === String(mainChainID)
-                ? hre.network.name
-                : Object.keys(config.networks!).find(
-                      (e) => config.networks?.[e]?.chainId === mainChainID,
-                  );
-        if (!network)
-            throw new Error(`[-] Network not found for chain ${mainChainID}`);
-
-        const networkSigner = await useNetwork(hre, network);
         const erc20 = (
             await ethers.getContractAt('ERC20', erc20Address)
         ).connect(networkSigner);
@@ -125,4 +117,27 @@ export const saveTOFTDeployment = (chainId: string, contracts: TContract[]) => {
 
     saveToJson(deployments, 'deployments.json', 'w');
     return deployments;
+};
+
+export const getContractNames = async (hre: HardhatRuntimeEnvironment) =>
+    (await hre.artifacts.getArtifactPaths()).map((e) =>
+        e.split('.sol')[1].replace('/', '').replace('.json', ''),
+    );
+
+export const getNetworkNameFromChainId = (chainId: string) =>
+    Object.keys(config.networks!).find(
+        (e) => String(config.networks?.[e]?.chainId) === chainId,
+    );
+
+export const getOtherChainDeployment = async (
+    hre: HardhatRuntimeEnvironment,
+    network: string,
+    contract: string,
+) => {
+    if (network === hre.network.name) {
+        return await hre.deployments.get(contract);
+    }
+    return readFromJson(
+        `deployments/${network}/${contract}.json`,
+    ) as Deployment;
 };

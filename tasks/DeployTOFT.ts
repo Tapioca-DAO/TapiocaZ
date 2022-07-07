@@ -1,8 +1,12 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { LZ_ENDPOINT, VALID_ADDRESSES } from '../scripts/constants';
 import {
+    getNetworkNameFromChainId,
+    getOtherChainDeployment,
     readTOFTDeployments,
     saveTOFTDeployment,
+    TContract,
+    useNetwork,
     useUtils,
 } from '../scripts/utils';
 
@@ -25,17 +29,28 @@ export const deployTOFT = async (
 
     // Verifies already deployed TOFT if not same chain
     const isMainChain = chainID === String(args.chainid);
+    let mainContract: TContract;
     if (!isMainChain) {
         const deployments = readTOFTDeployments();
-        const deployment = Object.values(deployments[args.chainid] ?? []).find(
+        mainContract = Object.values(deployments[args.chainid] ?? []).find(
             (e) => e.erc20address === args.erc20,
-        );
-        if (!deployment) {
+        ) as TContract;
+        if (!mainContract) {
             throw new Error(
                 `[-] TOFT is not deployed on chain ${args.chainid}`,
             );
         }
     }
+
+    // Setup network, if in main chain it's the same, if not then grab the main chain network
+    const network =
+        (await hre.getChainId()) === args.chainid
+            ? hre.network.name
+            : getNetworkNameFromChainId(args.chainid);
+    if (!network)
+        throw new Error(`[-] Network not found for chain ${args.chainid}`);
+
+    const networkSigner = await useNetwork(hre, network);
 
     // Get the deploy tx
     console.log('[+] Tx builder');
@@ -45,10 +60,11 @@ export const deployTOFT = async (
         lzEndpoint,
         args.erc20,
         Number(args.chainid),
+        networkSigner,
     );
 
-    // Get the TWrapper
-    const twrapper = await hre.ethers.getContractAt(
+    // Get the tWrapper
+    const tWrapper = await hre.ethers.getContractAt(
         'TapiocaWrapper',
         (
             await hre.deployments.get('TapiocaWrapper')
@@ -56,10 +72,10 @@ export const deployTOFT = async (
     );
     // Create the TOFT
     console.log('[+] Deploying TOFT, waiting for 12 confirmation');
-    await (await twrapper.createTOFT(args.erc20, tx.txData)).wait(12);
+    await (await tWrapper.createTOFT(args.erc20, tx.txData)).wait(12);
     const lastTOFT = await hre.ethers.getContractAt(
         'TapiocaOFT',
-        await twrapper.lastTOFT(),
+        await tWrapper.lastTOFT(),
     );
     const name = await lastTOFT.name();
     const address = lastTOFT.address;
@@ -67,6 +83,47 @@ export const deployTOFT = async (
     console.log(`[+] Deployed ${name} TOFT at ${address}`);
 
     saveTOFTDeployment(chainID, [{ name, address, erc20address: args.erc20 }]);
+
+    if (!isMainChain) {
+        console.log('[+] Setting trusted main chain => other chain');
+
+        // Set trust remote main chain => other chain
+        const mainTWrapper = await getOtherChainDeployment(
+            hre,
+            getNetworkNameFromChainId(args.chainid) ?? '',
+            'TapiocaWrapper',
+        );
+        const txMainChain = lastTOFT.interface.encodeFunctionData(
+            'setTrustedRemote',
+            [LZ_ENDPOINT[chainID].lzChainId, address],
+        );
+
+        await (
+            await (
+                await hre.ethers.getContractAt(
+                    'TapiocaWrapper',
+                    mainTWrapper.address,
+                )
+            )
+                .connect(networkSigner)
+                .executeTOFT(mainContract!.address ?? '', txMainChain, {
+                    gasLimit: 1000000,
+                })
+        ).wait();
+
+        // Set trust remote other chain => main chain
+        console.log('[+] Setting trusted other chain => main chain');
+
+        const txOtherChain = lastTOFT.interface.encodeFunctionData(
+            'setTrustedRemote',
+            [LZ_ENDPOINT[args.chainid].lzChainId, mainContract!.address],
+        );
+        await (
+            await tWrapper.executeTOFT(address, txOtherChain, {
+                gasLimit: 1000000,
+            })
+        ).wait();
+    }
 
     console.log('[+] Verifying');
     await hre.run('verify:verify', {
