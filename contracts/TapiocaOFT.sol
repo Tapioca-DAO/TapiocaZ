@@ -27,7 +27,7 @@ contract TapiocaOFT is OFT {
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
-        uint8 _mainChainID
+        uint16 _mainChainID
     )
         OFT(
             string(abi.encodePacked('TapiocaWrapper-', _name)),
