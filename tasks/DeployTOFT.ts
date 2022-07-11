@@ -97,7 +97,8 @@ export const deployTOFT = async (
         { name, address, erc20address: args.erc20 },
     ]);
 
-    if (!isMainChain) {
+    // Only applicable for testing
+    if (!isMainChain && hre.network.tags['test']) {
         console.log('[+] Setting trusted main chain => other chain');
 
         // Set trust remote main chain => other chain
