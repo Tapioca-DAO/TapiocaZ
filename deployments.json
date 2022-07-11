@@ -2,15 +2,15 @@
   "10001": [
     {
       "name": "TapiocaWrapper-erc20TEST0",
-      "address": "0x816CFE8BF19B11693831D908d38e279141579b43",
-      "erc20address": "0xF1fb5d14D23FDdC388D200B2491a7631267D759f"
+      "address": "0x49732Bb0Bf793BDA274dd7bAe594A1a2BaF86c1b",
+      "erc20address": "0x9F4213a5Bfd90F592FE6443397E9b09F7fAD24DB"
     }
   ],
   "10009": [
     {
       "name": "TapiocaWrapper-erc20TEST0",
-      "address": "0x172bA91dda1970f0D4555a026Da58bdeF11DC14d",
-      "erc20address": "0xF1fb5d14D23FDdC388D200B2491a7631267D759f"
+      "address": "0xEDc0e2EF3ef042285c110773AEA21dFdD09A4771",
+      "erc20address": "0x9F4213a5Bfd90F592FE6443397E9b09F7fAD24DB"
     }
   ]
 }
