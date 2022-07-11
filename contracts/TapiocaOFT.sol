@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import './OFT20/OFT.sol';
+import './OFT20/interfaces/ILayerZeroEndpoint.sol';
 
 contract TapiocaOFT is OFT {
     ERC20 public immutable erc20;
@@ -77,6 +78,6 @@ contract TapiocaOFT is OFT {
 
     // Used for mocks
     function getChainId() internal view virtual returns (uint256) {
-        return block.chainid;
+        return ILayerZeroEndpoint(lzEndpoint).getChainId();
     }
 }
