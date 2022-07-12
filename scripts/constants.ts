@@ -24,6 +24,6 @@ export const LZ_ENDPOINT: TLZ_Endpoint = {
 // Whitelisted addresses of an ERC20 contract, used for hh tasks
 export const VALID_ADDRESSES: any = {
     '10001': {
-        '0x9F4213a5Bfd90F592FE6443397E9b09F7fAD24DB': 'erc20TEST0',
+        '0x552663741587C3331edc9F32b10fEC2882D573f2': 'erc20TEST0',
     },
 };
