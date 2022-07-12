@@ -7,8 +7,8 @@ import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-contract-sizer';
-// import 'hardhat-gas-reporter';
-// import 'solidity-coverage';
+import 'hardhat-gas-reporter';
+import 'solidity-coverage';
 
 dotenv.config();
 
