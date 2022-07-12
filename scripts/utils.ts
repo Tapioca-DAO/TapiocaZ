@@ -133,6 +133,8 @@ export const getNetworkFromLzChainId = (lzChainId: string) =>
     Object.keys(LZ_ENDPOINT).find(
         (e) => LZ_ENDPOINT[e].lzChainId === lzChainId,
     );
+export const getChainIdFromNetwork = (name: string) =>
+    config.networks![name]?.chainId;
 
 export const getOtherChainDeployment = async (
     hre: HardhatRuntimeEnvironment,

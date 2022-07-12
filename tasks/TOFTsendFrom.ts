@@ -1,4 +1,3 @@
-import { ParamType } from 'ethers/lib/utils';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { LZ_ENDPOINT } from '../scripts/constants';
 import { readTOFTDeployments } from '../scripts/utils';
@@ -20,7 +19,11 @@ export const toftSendFrom = async (
 
     if (!toft) throw new Error(`[-] TOFT not deployed on chain ${chainId}`);
     const otherChainId = Object.keys(deployments).find((e) =>
-        deployments[e].find((o) => o.erc20address === toft?.erc20address),
+        deployments[e].find(
+            (o) =>
+                o.erc20address === toft?.erc20address &&
+                o.address !== args.toft,
+        ),
     );
     if (!otherChainId) throw new Error('[-] TOFT not deployed on other chain');
     const otherChainTOFT = deployments[otherChainId!].find(
@@ -56,6 +59,7 @@ export const toftSendFrom = async (
         'LZEndpointMock',
         LZ_ENDPOINT[chainId].address,
     );
+
     const feeEstimation = await lzEndpoint.estimateFees(
         LZ_ENDPOINT[chainId].lzChainId,
         otherChainTOFT.address,

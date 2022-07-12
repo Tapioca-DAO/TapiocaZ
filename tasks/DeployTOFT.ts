@@ -2,6 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import config from '../hardhat.export';
 import { LZ_ENDPOINT, VALID_ADDRESSES } from '../scripts/constants';
 import {
+    getChainIdFromNetwork,
     getNetworkFromLzChainId,
     getNetworkNameFromChainId,
     getOtherChainDeployment,
@@ -55,14 +56,14 @@ export const deployTOFT = async (
     }
 
     // Setup network, if curr chain is main chain, it's the same, if not then grab the main chain network
-    const network =
+    const mainNetwork =
         currentChainID === argsChainId
             ? hre.network.name
             : getNetworkNameFromChainId(argsChainId);
-    if (!network)
+    if (!mainNetwork)
         throw new Error(`[-] Network not found for chain ${args.lzChainId}`);
 
-    const networkSigner = await useNetwork(hre, network);
+    const mainNetworkSigner = await useNetwork(hre, mainNetwork);
 
     // Get the deploy tx
     console.log('[+] Tx builder');
@@ -71,7 +72,7 @@ export const deployTOFT = async (
         currentLzChain.address,
         args.erc20,
         Number(currentLzChain.lzChainId),
-        networkSigner,
+        mainNetworkSigner,
     );
 
     // Get the tWrapper
@@ -98,7 +99,7 @@ export const deployTOFT = async (
     ]);
 
     // Only applicable for testing
-    if (!isMainChain && hre.network.tags['test']) {
+    if (!isMainChain && hre.network.tags['testnet']) {
         console.log('[+] Setting trusted main chain => other chain');
 
         // Set trust remote main chain => other chain
@@ -119,7 +120,7 @@ export const deployTOFT = async (
                     mainTWrapper.address,
                 )
             )
-                .connect(networkSigner)
+                .connect(mainNetworkSigner)
                 .executeTOFT(mainContract!.address ?? '', txMainChain, {
                     gasLimit: 1000000,
                 })
@@ -130,7 +131,10 @@ export const deployTOFT = async (
 
         const txOtherChain = lastTOFT.interface.encodeFunctionData(
             'setTrustedRemote',
-            [currentLzChain.lzChainId, mainContract!.address],
+            [
+                LZ_ENDPOINT[getChainIdFromNetwork(mainNetwork)].lzChainId,
+                mainContract!.address,
+            ],
         );
         await (
             await tWrapper.executeTOFT(address, txOtherChain, {
