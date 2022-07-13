@@ -1,3 +1,4 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BytesLike, Wallet } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
@@ -45,7 +46,7 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
         lzEndpoint: string,
         erc20Address: string,
         mainChainID: number,
-        networkSigner: Wallet,
+        networkSigner: Wallet | SignerWithAddress,
     ) => {
         const erc20 = (
             await ethers.getContractAt('ERC20', erc20Address)

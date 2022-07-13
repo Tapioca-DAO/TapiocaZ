@@ -56,6 +56,7 @@ describe('TapiocaOFT', () => {
                     LZEndpointMock0.address,
                     erc20Mock0.address,
                     0,
+                    signer,
                 )
             ).txData,
         );
@@ -75,6 +76,7 @@ describe('TapiocaOFT', () => {
                     LZEndpointMock1.address,
                     erc20Mock1.address,
                     0,
+                    signer,
                 )
             ).txData,
         );
