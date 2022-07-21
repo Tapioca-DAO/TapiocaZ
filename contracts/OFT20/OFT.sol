@@ -3,12 +3,10 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import '@openzeppelin/contracts/utils/introspection/IERC165.sol';
 import './OFTCore.sol';
 import './interfaces/IOFT.sol';
 
-// override decimal() function is needed
-contract OFT is OFTCore, ERC20, IOFT {
+contract OFT is IOFT, OFTCore, ERC20 {
     constructor(
         string memory _name,
         string memory _symbol,

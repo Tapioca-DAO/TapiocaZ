@@ -2,10 +2,13 @@
 pragma solidity ^0.8.0;
 
 import './OFT20/OFT.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './OFT20/interfaces/ILayerZeroEndpoint.sol';
 
 contract TapiocaOFT is OFT {
-    ERC20 public immutable erc20;
+    using SafeERC20 for IERC20;
+
+    IERC20 public immutable erc20;
     uint256 public immutable mainChainID;
     uint8 _decimalCache;
 
@@ -24,7 +27,7 @@ contract TapiocaOFT is OFT {
 
     constructor(
         address _lzEndpoint,
-        ERC20 _erc20,
+        IERC20 _erc20,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -61,7 +64,7 @@ contract TapiocaOFT is OFT {
 
     /// @notice Wrap an ERC20 with a 1:1 ratio
     function wrap(address _toAddress, uint256 _amount) external onlyMainChain {
-        erc20.transferFrom(msg.sender, address(this), _amount);
+        erc20.safeTransferFrom(msg.sender, address(this), _amount);
         _mint(_toAddress, _amount);
         emit Wrap(msg.sender, _toAddress, _amount);
     }
@@ -72,7 +75,7 @@ contract TapiocaOFT is OFT {
         onlyMainChain
     {
         _burn(msg.sender, _amount);
-        erc20.transfer(_toAddress, _amount);
+        erc20.safeTransfer(_toAddress, _amount);
         emit Unwrap(msg.sender, _toAddress, _amount);
     }
 
