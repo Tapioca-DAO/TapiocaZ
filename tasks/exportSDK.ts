@@ -41,7 +41,7 @@ export const exportSDK__task = async ({}, hre: HardhatRuntimeEnvironment) => {
         cwd,
         filesToProcess: allFiles,
         allFiles,
-        outDir: 'tapioca-sdk/src/typechain',
+        outDir: 'tapioca-sdk/src/typechain/TapiocaZ',
         target: 'ethers-v5',
         flags: {
             alwaysGenerateOverloads: true,
