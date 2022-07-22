@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import config from '../hardhat.export';
-import { LZ_ENDPOINT, VALID_ADDRESSES } from '../scripts/constants';
+import { LZ_ENDPOINTS, VALID_ADDRESSES } from '../scripts/constants';
 import {
     getChainIdFromNetwork,
     getNetworkFromLzChainId,
@@ -30,7 +30,7 @@ export const deployTOFT = async (
     // Verify that the address is valid
     const currentChainID = await hre.getChainId();
     const argsChainId = getNetworkFromLzChainId(args.lzChainId);
-    const currentLzChain = LZ_ENDPOINT[currentChainID];
+    const currentLzChain = LZ_ENDPOINTS[currentChainID];
 
     if (!argsChainId || !currentLzChain)
         throw new Error('[-] Invalid argsChainId or currentLzChain');
@@ -132,7 +132,7 @@ export const deployTOFT = async (
         const txOtherChain = lastTOFT.interface.encodeFunctionData(
             'setTrustedRemote',
             [
-                LZ_ENDPOINT[getChainIdFromNetwork(mainNetwork)].lzChainId,
+                LZ_ENDPOINTS[getChainIdFromNetwork(mainNetwork)].lzChainId,
                 mainContract!.address,
             ],
         );

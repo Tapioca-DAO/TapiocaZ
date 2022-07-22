@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { LZ_ENDPOINT } from '../scripts/constants';
+import { LZ_ENDPOINTS } from '../scripts/constants';
 import { readTOFTDeployments } from '../scripts/utils';
 import { TapiocaOFT } from '../typechain';
 
@@ -10,7 +10,7 @@ export const toftSendFrom = async (
     const signer = (await hre.ethers.getSigners())[0];
 
     const chainId = await hre.getChainId();
-    const lzChain = LZ_ENDPOINT[chainId];
+    const lzChain = LZ_ENDPOINTS[chainId];
 
     const deployments = readTOFTDeployments();
     const toft = deployments[lzChain.lzChainId].find(
@@ -57,11 +57,11 @@ export const toftSendFrom = async (
 
     const lzEndpoint = await hre.ethers.getContractAt(
         'LZEndpointMock',
-        LZ_ENDPOINT[chainId].address,
+        LZ_ENDPOINTS[chainId].address,
     );
 
     const feeEstimation = await lzEndpoint.estimateFees(
-        LZ_ENDPOINT[chainId].lzChainId,
+        LZ_ENDPOINTS[chainId].lzChainId,
         otherChainTOFT.address,
         payload,
         false,

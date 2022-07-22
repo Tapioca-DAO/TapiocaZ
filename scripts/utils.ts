@@ -5,7 +5,7 @@ import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import config from '../hardhat.export';
 import { TapiocaOFT__factory } from '../typechain';
-import { LZ_ENDPOINT } from './constants';
+import { LZ_ENDPOINTS } from './constants';
 
 export const useNetwork = async (
     hre: HardhatRuntimeEnvironment,
@@ -131,8 +131,8 @@ export const getNetworkNameFromChainId = (chainId: string) =>
         (e) => String(config.networks?.[e]?.chainId) === chainId,
     );
 export const getNetworkFromLzChainId = (lzChainId: string) =>
-    Object.keys(LZ_ENDPOINT).find(
-        (e) => LZ_ENDPOINT[e].lzChainId === lzChainId,
+    Object.keys(LZ_ENDPOINTS).find(
+        (e) => LZ_ENDPOINTS[e].lzChainId === lzChainId,
     );
 export const getChainIdFromNetwork = (name: string) =>
     config.networks![name]?.chainId;
