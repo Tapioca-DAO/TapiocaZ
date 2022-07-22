@@ -1,0 +1,3 @@
+[submodule "tapioca-sdk"]
+	path = tapioca-sdk
+	url = https://github.com/Tapioca-DAO/tapioca-sdk.git
