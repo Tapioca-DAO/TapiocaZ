@@ -52,7 +52,7 @@ contract TapiocaOFT is OFT {
     }
 
     modifier onlyMainChain() {
-        if (mainChainID != getChainId()) {
+        if (getChainId() != mainChainID) {
             revert NotMainChain();
         }
         _;
@@ -77,6 +77,10 @@ contract TapiocaOFT is OFT {
         _burn(msg.sender, _amount);
         erc20.safeTransfer(_toAddress, _amount);
         emit Unwrap(msg.sender, _toAddress, _amount);
+    }
+
+    function isMainChain() external view returns (bool) {
+        return getChainId() == mainChainID;
     }
 
     // Used for mocks
