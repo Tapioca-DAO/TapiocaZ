@@ -1,15 +1,16 @@
 import '@nomiclabs/hardhat-ethers';
 import { task } from 'hardhat/config';
-import { LZ_ENDPOINT } from './scripts/constants';
+import { LZ_ENDPOINTS } from './scripts/constants';
 import { deployTOFT } from './tasks/DeployTOFT';
+import { exportSDK__task } from './tasks/exportSDK';
 import { listDeploy } from './tasks/listDeploy';
 import { toftSendFrom } from './tasks/TOFTsendFrom';
 import { wrap } from './tasks/wrap';
 
 function formatLZEndpoints() {
-    return Object.keys(LZ_ENDPOINT)
+    return Object.keys(LZ_ENDPOINTS)
         .map((chainId) => {
-            const { name, address, lzChainId } = LZ_ENDPOINT[chainId];
+            const { name, address, lzChainId } = LZ_ENDPOINTS[chainId];
             return `${name} (${chainId}) ${address} ${lzChainId}\n`;
         })
         .reduce((p, c) => p + c, '');
@@ -49,3 +50,9 @@ task(
 task('wrap', 'Approve and wrap an ERC20 to its TOFT', wrap)
     .addParam('toft', 'The TOFT contract')
     .addParam('amount', 'The amount of ERC20 to wrap');
+
+task(
+    'exportSDK',
+    'Generate and export the typings and/or addresses for the SDK. May deploy contracts.',
+    exportSDK__task,
+).addFlag('mainnet', 'Using the current chain ID deployments.');
