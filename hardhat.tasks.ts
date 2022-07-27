@@ -1,4 +1,5 @@
 import '@nomiclabs/hardhat-ethers';
+import { execSync } from 'node:child_process';
 import { task } from 'hardhat/config';
 import { LZ_ENDPOINTS } from './scripts/constants';
 import { deployTOFT } from './tasks/DeployTOFT';
@@ -16,15 +17,12 @@ function formatLZEndpoints() {
         .reduce((p, c) => p + c, '');
 }
 
-task(
-    'build',
-    'Compile contracts and generate Typechain files',
-    async (taskArgs, hre) => {
-        await hre.run(
-            'npx hardhat --config hardhat.export.ts compile && npx hardhat typechain',
-        );
-    },
-);
+task('build', 'Compile contracts and generate Typechain files', async () => {
+    execSync(
+        'npx hardhat compile --config hardhat.export.ts && npx hardhat typechain',
+        { stdio: 'inherit' },
+    );
+});
 
 task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners();
