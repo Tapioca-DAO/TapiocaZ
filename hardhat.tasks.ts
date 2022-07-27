@@ -16,6 +16,16 @@ function formatLZEndpoints() {
         .reduce((p, c) => p + c, '');
 }
 
+task(
+    'build',
+    'Compile contracts and generate Typechain files',
+    async (taskArgs, hre) => {
+        await hre.run(
+            'npx hardhat --config hardhat.export.ts compile && npx hardhat typechain',
+        );
+    },
+);
+
 task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
     const accounts = await hre.ethers.getSigners();
 
