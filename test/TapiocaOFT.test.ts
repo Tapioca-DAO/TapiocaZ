@@ -1,7 +1,8 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumberish, BytesLike } from 'ethers';
+import { BigNumber, BigNumberish, BytesLike } from 'ethers';
 import hre, { ethers } from 'hardhat';
+import { BN } from '../scripts/utils';
 import {
     ERC20,
     ERC20Mock,
@@ -39,6 +40,7 @@ describe('TapiocaOFT', () => {
         LZEndpointMock1 = _LZEndpointMock1;
 
         tapiocaWrapper = _tapiocaWrapper;
+        await tapiocaWrapper.setMngmtFee(25); // 0.25%
 
         erc20Mock0 = await (
             await hre.ethers.getContractFactory('ERC20Mock')
@@ -98,14 +100,25 @@ describe('TapiocaOFT', () => {
             LZEndpointMock0.address,
         );
     });
+
+    const estimateFees = async (amount: BigNumberish) =>
+        await tapiocaOFT0.estimateFees(
+            await tapiocaWrapper.mngmtFee(),
+            await tapiocaWrapper.mngmtFeeFraction(),
+            amount,
+        );
+
     const mintAndApprove = async (
         erc20Mock: ERC20Mock,
         toft: TapiocaOFTMock,
         signer: SignerWithAddress,
         amount: BigNumberish,
     ) => {
-        await erc20Mock.mint(signer.address, amount);
-        await erc20Mock.approve(toft.address, amount);
+        const fees = await estimateFees(amount);
+        const amountWithFees = BN(amount).add(fees);
+
+        await erc20Mock.mint(signer.address, amountWithFees);
+        await erc20Mock.approve(toft.address, amountWithFees);
     };
 
     it('decimals()', async () => {
@@ -123,6 +136,18 @@ describe('TapiocaOFT', () => {
             await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
             await expect(tapiocaOFT0.wrap(signer.address, amount)).to.not.be
                 .reverted;
+        });
+
+        it('Should fail if the fees are not paid', async () => {
+            await mintAndApprove(
+                erc20Mock0,
+                tapiocaOFT0,
+                signer,
+                BN(amount).sub(await estimateFees(amount)),
+            );
+            await expect(
+                tapiocaOFT0.wrap(signer.address, amount),
+            ).to.be.revertedWith('ERC20: insufficient allowance');
         });
 
         it('Should wrap and give a 1:1 ratio amount of tokens', async () => {
@@ -182,6 +207,41 @@ describe('TapiocaOFT', () => {
                     ethers.utils.arrayify(0),
                 ),
             ).to.not.be.reverted;
+        });
+    });
+
+    describe('harvestFees', () => {
+        it('Should be called only on MainChain', async () => {
+            await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
+            await tapiocaOFT0.wrap(signer.address, amount);
+
+            const fees = await estimateFees(amount);
+            expect(fees.gt(0)).to.be.true;
+
+            await expect(tapiocaOFT0.harvestFees()).to.emit(
+                tapiocaOFT0,
+                'Harvest',
+            );
+
+            await expect(tapiocaOFT1.harvestFees()).to.be.revertedWith(
+                'NotMainChain',
+            );
+        });
+
+        it('Should withdraw the fees and update the total fee balance', async () => {
+            await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
+            await tapiocaOFT0.wrap(signer.address, amount);
+
+            const feesBefore = await tapiocaOFT0.totalFees();
+
+            await tapiocaOFT0.harvestFees();
+
+            expect(await erc20Mock0.balanceOf(tapiocaWrapper.address)).eq(
+                feesBefore,
+            );
+
+            const feesAfter = await tapiocaOFT0.totalFees();
+            expect(feesAfter).eq(0);
         });
     });
 });

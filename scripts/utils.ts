@@ -1,11 +1,13 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { BytesLike, Wallet } from 'ethers';
+import { BytesLike, ethers, Wallet } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import config from '../hardhat.export';
 import { TapiocaOFT__factory } from '../typechain';
 import { LZ_ENDPOINTS } from './constants';
+
+export const BN = (n: any) => ethers.BigNumber.from(n);
 
 export const useNetwork = async (
     hre: HardhatRuntimeEnvironment,

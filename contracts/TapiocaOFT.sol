@@ -4,9 +4,14 @@ pragma solidity ^0.8.0;
 import './OFT20/OFT.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './OFT20/interfaces/ILayerZeroEndpoint.sol';
+import './TapiocaWrapper.sol';
 
+// TODO - Update to 0x0 address for second chain
 contract TapiocaOFT is OFT {
     using SafeERC20 for IERC20;
+
+    TapiocaWrapper public tapiocaWrapper;
+    uint256 public totalFees;
 
     IERC20 public immutable erc20;
     uint256 public immutable mainChainID;
@@ -19,10 +24,13 @@ contract TapiocaOFT is OFT {
     // ==========
     event Wrap(address indexed _from, address indexed _to, uint256 _amount);
     event Unwrap(address indexed _from, address indexed _to, uint256 _amount);
+    event Harvest(address indexed _caller, uint256 _amount);
 
     // ==========
     // * ERRORS *
     // ==========
+
+    // @notice Code executed not on main chain (optimism/chainID mismatch)
     error NotMainChain();
 
     constructor(
@@ -49,6 +57,8 @@ contract TapiocaOFT is OFT {
         } else {
             trustedRemoteLookup[_mainChainID] = abi.encode(address(this));
         }
+
+        tapiocaWrapper = TapiocaWrapper(msg.sender);
     }
 
     modifier onlyMainChain() {
@@ -64,9 +74,34 @@ contract TapiocaOFT is OFT {
 
     /// @notice Wrap an ERC20 with a 1:1 ratio
     function wrap(address _toAddress, uint256 _amount) external onlyMainChain {
-        erc20.safeTransferFrom(msg.sender, address(this), _amount);
+        uint256 mngmtFee = tapiocaWrapper.mngmtFee();
+
+        if (mngmtFee > 0) {
+            uint256 feeAmount = estimateFees(
+                mngmtFee,
+                tapiocaWrapper.mngmtFeeFraction(),
+                _amount
+            );
+
+            totalFees += feeAmount;
+            erc20.safeTransferFrom(
+                msg.sender,
+                address(this),
+                _amount + feeAmount
+            );
+        } else {
+            erc20.safeTransferFrom(msg.sender, address(this), _amount);
+        }
+
         _mint(_toAddress, _amount);
         emit Wrap(msg.sender, _toAddress, _amount);
+    }
+
+    // @notice Harvest the fees collected by the contract
+    function harvestFees() external onlyMainChain {
+        erc20.safeTransfer(address(tapiocaWrapper), totalFees);
+        emit Harvest(msg.sender, totalFees);
+        totalFees = 0;
     }
 
     // @notice Unwrap an ERC20 with a 1:1 ratio
@@ -77,6 +112,15 @@ contract TapiocaOFT is OFT {
         _burn(msg.sender, _amount);
         erc20.safeTransfer(_toAddress, _amount);
         emit Unwrap(msg.sender, _toAddress, _amount);
+    }
+
+    // @notice Estimate the fees for a wrap operation
+    function estimateFees(
+        uint256 _feeBps,
+        uint256 _feeFraction,
+        uint256 _amount
+    ) public pure returns (uint256) {
+        return (_amount * _feeBps) / _feeFraction;
     }
 
     function isMainChain() external view returns (bool) {

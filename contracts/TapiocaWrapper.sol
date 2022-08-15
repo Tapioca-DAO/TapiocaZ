@@ -8,6 +8,8 @@ import '@rari-capital/solmate/src/auth/Owned.sol';
 
 contract TapiocaWrapper is Owned {
     TapiocaOFT[] public tapiocaOFTs;
+    uint256 public mngmtFee;
+    uint256 public constant mngmtFeeFraction = 10000;
 
     constructor() Owned(msg.sender) {}
 
@@ -27,6 +29,8 @@ contract TapiocaWrapper is Owned {
         require(address(toft.erc20()) == erc20, 'ERC20 address mismatch');
     }
 
+    // ========== TOFT ==========
+
     function executeTOFT(address toft, bytes calldata bytecode)
         external
         payable
@@ -42,5 +46,10 @@ contract TapiocaWrapper is Owned {
 
     function lastTOFT() external view returns (TapiocaOFT) {
         return tapiocaOFTs[tapiocaOFTs.length - 1];
+    }
+
+    // ========== Management ==========
+    function setMngmtFee(uint256 _mngmtFee) external onlyOwner {
+        mngmtFee = _mngmtFee;
     }
 }
