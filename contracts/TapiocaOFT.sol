@@ -6,7 +6,6 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './OFT20/interfaces/ILayerZeroEndpoint.sol';
 import './TapiocaWrapper.sol';
 
-// TODO - Update to 0x0 address for second chain
 contract TapiocaOFT is OFT {
     using SafeERC20 for IERC20;
 
@@ -31,7 +30,7 @@ contract TapiocaOFT is OFT {
     // ==========
 
     // @notice Code executed not on main chain (optimism/chainID mismatch)
-    error NotMainChain();
+    error TOFT__NotMainChain();
 
     constructor(
         address _lzEndpoint,
@@ -63,7 +62,7 @@ contract TapiocaOFT is OFT {
 
     modifier onlyMainChain() {
         if (getChainId() != mainChainID) {
-            revert NotMainChain();
+            revert TOFT__NotMainChain();
         }
         _;
     }
