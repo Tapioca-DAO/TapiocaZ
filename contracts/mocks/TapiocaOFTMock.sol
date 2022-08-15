@@ -12,8 +12,11 @@ contract TapiocaOFTMock is TapiocaOFT {
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
-        uint8 _mainChainID
-    ) TapiocaOFT(_lzEndpoint, _erc20, _name, _symbol, _decimal, _mainChainID) {}
+        uint8 _mainChainID,
+        uint256 _chainId
+    ) TapiocaOFT(_lzEndpoint, _erc20, _name, _symbol, _decimal, _mainChainID) {
+        chainId = _chainId;
+    }
 
     function setChainId(uint256 _chainId) public {
         chainId = _chainId;

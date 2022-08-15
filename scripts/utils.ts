@@ -4,7 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import config from '../hardhat.export';
-import { TapiocaOFT__factory } from '../typechain';
+import { TapiocaOFTMock__factory, TapiocaOFT__factory } from '../typechain';
 import { LZ_ENDPOINTS } from './constants';
 
 export const BN = (n: any) => ethers.BigNumber.from(n);
@@ -49,6 +49,7 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
         erc20Address: string,
         mainChainID: number,
         networkSigner: Wallet | SignerWithAddress,
+        testnet__currentChainId?: number,
     ) => {
         const erc20 = (
             await ethers.getContractAt('ERC20', erc20Address)
@@ -58,13 +59,26 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
         const erc20symbol = await erc20.symbol();
         const erc20decimal = await erc20.decimals();
 
-        const args: Parameters<TapiocaOFT__factory['deploy']> = [
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const args: Parameters<
+            TapiocaOFT__factory['deploy'] | TapiocaOFTMock__factory['deploy']
+        > = [
             lzEndpoint,
-            erc20Address,
+            testnet__currentChainId !== undefined
+                ? testnet__currentChainId === mainChainID
+                    ? erc20Address
+                    : ethers.constants.AddressZero
+                : mainChainID === (await networkSigner.getChainId())
+                ? erc20Address
+                : ethers.constants.AddressZero,
             erc20name,
             erc20symbol,
             erc20decimal,
             mainChainID,
+            ...(testnet__currentChainId !== undefined
+                ? [testnet__currentChainId]
+                : []),
         ];
 
         const txData = (

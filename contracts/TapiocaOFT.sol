@@ -31,6 +31,8 @@ contract TapiocaOFT is OFT {
 
     // @notice Code executed not on main chain (optimism/chainID mismatch)
     error TOFT__NotMainChain();
+    // @notice ERC20 address should be 0x0 on OP chain
+    error TOFT__ERCNotZero();
 
     constructor(
         address _lzEndpoint,
@@ -55,6 +57,10 @@ contract TapiocaOFT is OFT {
             trustedRemoteLookup[OPTIMISM_CHAINID] = abi.encode(address(this));
         } else {
             trustedRemoteLookup[_mainChainID] = abi.encode(address(this));
+            // Check also for this invariant
+            if (address(_erc20) != address(0x0)) {
+                revert TOFT__ERCNotZero();
+            }
         }
 
         tapiocaWrapper = TapiocaWrapper(msg.sender);

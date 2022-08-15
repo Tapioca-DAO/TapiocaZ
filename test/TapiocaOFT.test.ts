@@ -19,11 +19,10 @@ describe('TapiocaOFT', () => {
     let LZEndpointMock1: LZEndpointMock;
     let tapiocaWrapper: TapiocaWrapper;
 
-    let erc20Mock0: ERC20Mock;
-    let erc20Mock1: ERC20Mock;
+    let erc20Mock: ERC20Mock;
 
     let tapiocaOFT0: TapiocaOFTMock;
-    let tapiocaOFT1: TapiocaOFTMock;
+    let tapiocaOFT10: TapiocaOFTMock;
 
     const amount = ethers.BigNumber.from(1e5);
 
@@ -42,23 +41,20 @@ describe('TapiocaOFT', () => {
         tapiocaWrapper = _tapiocaWrapper;
         await tapiocaWrapper.setMngmtFee(25); // 0.25%
 
-        erc20Mock0 = await (
+        erc20Mock = await (
             await hre.ethers.getContractFactory('ERC20Mock')
-        ).deploy('erc20Mock0', 'MOCK0');
-
-        erc20Mock1 = await (
-            await hre.ethers.getContractFactory('ERC20Mock')
-        ).deploy('erc20Mock1', 'MOCK1');
+        ).deploy('erc20Mock', 'MOCK');
 
         // Deploy TapiocaOFT0
         await tapiocaWrapper.createTOFT(
-            erc20Mock0.address,
+            erc20Mock.address,
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock0.address,
-                    erc20Mock0.address,
+                    erc20Mock.address,
                     0,
                     signer,
+                    0,
                 )
             ).txData,
         );
@@ -68,31 +64,30 @@ describe('TapiocaOFT', () => {
                 (await tapiocaWrapper.tapiocaOFTLength()).sub(1),
             ),
         )) as TapiocaOFTMock;
-        tapiocaOFT0.setChainId(0);
 
-        // Deploy TapiocaOFT1
+        // Deploy TapiocaOFT10
         await tapiocaWrapper.createTOFT(
-            erc20Mock1.address,
+            ethers.constants.AddressZero,
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock1.address,
-                    erc20Mock1.address,
+                    erc20Mock.address,
                     0,
                     signer,
+                    10,
                 )
             ).txData,
         );
 
-        tapiocaOFT1 = (await utils.attachTapiocaOFT(
+        tapiocaOFT10 = (await utils.attachTapiocaOFT(
             await tapiocaWrapper.tapiocaOFTs(
                 (await tapiocaWrapper.tapiocaOFTLength()).sub(1),
             ),
         )) as TapiocaOFTMock;
-        tapiocaOFT1.setChainId(1);
 
         // Link endpoints with addresses
         LZEndpointMock0.setDestLzEndpoint(
-            tapiocaOFT1.address,
+            tapiocaOFT10.address,
             LZEndpointMock1.address,
         );
         LZEndpointMock1.setDestLzEndpoint(
@@ -122,25 +117,24 @@ describe('TapiocaOFT', () => {
     };
 
     it('decimals()', async () => {
-        expect(await tapiocaOFT0.decimals()).eq(18);
-        expect(await tapiocaOFT1.decimals()).eq(18);
+        expect(await tapiocaOFT0.decimals()).eq(await erc20Mock.decimals());
+        expect(await tapiocaOFT10.decimals()).eq(await erc20Mock.decimals());
     });
 
     describe('wrap()', () => {
         it('Should fail if not on the same chain', async () => {
-            await mintAndApprove(erc20Mock1, tapiocaOFT1, signer, amount);
             await expect(
-                tapiocaOFT1.wrap(signer.address, amount),
+                tapiocaOFT10.wrap(signer.address, amount),
             ).to.be.revertedWith('NotMainChain');
 
-            await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, amount);
             await expect(tapiocaOFT0.wrap(signer.address, amount)).to.not.be
                 .reverted;
         });
 
         it('Should fail if the fees are not paid', async () => {
             await mintAndApprove(
-                erc20Mock0,
+                erc20Mock,
                 tapiocaOFT0,
                 signer,
                 BN(amount).sub(await estimateFees(amount)),
@@ -151,17 +145,17 @@ describe('TapiocaOFT', () => {
         });
 
         it('Should wrap and give a 1:1 ratio amount of tokens', async () => {
-            await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, amount);
             await tapiocaOFT0.wrap(signer.address, amount);
             expect(await tapiocaOFT0.balanceOf(signer.address)).eq(amount);
-            expect(await erc20Mock0.balanceOf(signer.address)).eq(0);
+            expect(await erc20Mock.balanceOf(signer.address)).eq(0);
         });
     });
 
     describe('sendFrom()', () => {
         it('Should fail if untrusted remote', async () => {
             // Setup
-            await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, amount);
             await tapiocaOFT0.wrap(signer.address, amount);
 
             // Failure
@@ -184,12 +178,12 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0.address,
                 tapiocaOFT0.interface.encodeFunctionData('setTrustedRemote', [
                     1,
-                    tapiocaOFT1.address,
+                    tapiocaOFT10.address,
                 ]),
             );
             await tapiocaWrapper.executeTOFT(
-                tapiocaOFT1.address,
-                tapiocaOFT1.interface.encodeFunctionData('setTrustedRemote', [
+                tapiocaOFT10.address,
+                tapiocaOFT10.interface.encodeFunctionData('setTrustedRemote', [
                     0,
                     tapiocaOFT0.address,
                 ]),
@@ -212,7 +206,7 @@ describe('TapiocaOFT', () => {
 
     describe('harvestFees', () => {
         it('Should be called only on MainChain', async () => {
-            await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, amount);
             await tapiocaOFT0.wrap(signer.address, amount);
 
             const fees = await estimateFees(amount);
@@ -223,20 +217,20 @@ describe('TapiocaOFT', () => {
                 'Harvest',
             );
 
-            await expect(tapiocaOFT1.harvestFees()).to.be.revertedWith(
+            await expect(tapiocaOFT10.harvestFees()).to.be.revertedWith(
                 'NotMainChain',
             );
         });
 
         it('Should withdraw the fees and update the total fee balance', async () => {
-            await mintAndApprove(erc20Mock0, tapiocaOFT0, signer, amount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, amount);
             await tapiocaOFT0.wrap(signer.address, amount);
 
             const feesBefore = await tapiocaOFT0.totalFees();
 
             await tapiocaOFT0.harvestFees();
 
-            expect(await erc20Mock0.balanceOf(tapiocaWrapper.address)).eq(
+            expect(await erc20Mock.balanceOf(tapiocaWrapper.address)).eq(
                 feesBefore,
             );
 
