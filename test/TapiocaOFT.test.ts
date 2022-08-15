@@ -1,10 +1,9 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
-import { BigNumber, BigNumberish, BytesLike } from 'ethers';
+import { BigNumberish } from 'ethers';
 import hre, { ethers } from 'hardhat';
 import { BN } from '../scripts/utils';
 import {
-    ERC20,
     ERC20Mock,
     LZEndpointMock,
     TapiocaOFTMock,
@@ -14,7 +13,6 @@ import { register } from './test.utils';
 
 describe('TapiocaOFT', () => {
     let signer: SignerWithAddress;
-
     let LZEndpointMock0: LZEndpointMock;
     let LZEndpointMock1: LZEndpointMock;
     let tapiocaWrapper: TapiocaWrapper;
