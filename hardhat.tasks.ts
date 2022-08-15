@@ -40,7 +40,8 @@ task(
 
 task(
     'deployTOFT',
-    'Deploy a TOFT off an ERC20 address on the current chain',
+    // eslint-disable-next-line quotes
+    "\nDeploy a TOFT contract to the specified network. It'll also deploy it to Tapioca host chain (Optimism, chainID 10).\nA document will be created in the deployments.json file.",
     deployTOFT,
 )
     .addParam('erc20', 'The ERC20 address to wrap')

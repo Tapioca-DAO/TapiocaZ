@@ -13,6 +13,11 @@ import {
     useUtils,
 } from '../scripts/utils';
 
+/**
+ *
+ * Deploy a TOFT contract to the specified network. It'll also deploy it to Tapioca host chain (Optimism, chainID 10).
+ * A document will be created in the deployments.json file.
+ */
 export const deployTOFT = async (
     args: {
         lzChainId: string;
