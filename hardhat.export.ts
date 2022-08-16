@@ -1,14 +1,10 @@
 import * as dotenv from 'dotenv';
 
 import { HardhatUserConfig } from 'hardhat/config';
-import '@nomiclabs/hardhat-waffle';
-import '@typechain/hardhat';
-import '@nomiclabs/hardhat-etherscan';
+import '@nomicfoundation/hardhat-chai-matchers';
+import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';
-import '@nomiclabs/hardhat-ethers';
 import 'hardhat-contract-sizer';
-import 'hardhat-gas-reporter';
-import 'solidity-coverage';
 
 dotenv.config();
 

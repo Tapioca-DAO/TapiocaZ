@@ -123,7 +123,7 @@ describe('TapiocaOFT', () => {
         it('Should fail if not on the same chain', async () => {
             await expect(
                 tapiocaOFT10.wrap(signer.address, amount),
-            ).to.be.revertedWith('NotMainChain');
+            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotMainChain');
 
             await mintAndApprove(erc20Mock, tapiocaOFT0, signer, amount);
             await expect(tapiocaOFT0.wrap(signer.address, amount)).to.not.be
@@ -215,9 +215,9 @@ describe('TapiocaOFT', () => {
                 'Harvest',
             );
 
-            await expect(tapiocaOFT10.harvestFees()).to.be.revertedWith(
-                'NotMainChain',
-            );
+            await expect(
+                tapiocaOFT10.harvestFees(),
+            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotMainChain');
         });
 
         it('Should withdraw the fees and update the total fee balance', async () => {

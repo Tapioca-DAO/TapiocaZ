@@ -46,6 +46,7 @@ export const exportSDK__task = async ({}, hre: HardhatRuntimeEnvironment) => {
         flags: {
             alwaysGenerateOverloads: true,
             environment: 'hardhat',
+            discriminateTypes: true,
         },
     });
 };
