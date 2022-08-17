@@ -5,6 +5,7 @@ import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
+import '@primitivefi/hardhat-dodoc';
 
 dotenv.config();
 
@@ -79,13 +80,12 @@ const config: HardhatUserConfig & LzNetworkConfig = {
         },
         customChains: [],
     },
-    // gasReporter: {
-    //     currency: 'USD',
-    //     token: 'BOBA',
-    //     coinmarketcap: process.env.COINMARKETCAP_API ?? '',
-    // },
     typechain: {
         outDir: './typechain',
+    },
+    dodoc: {
+        include: ['TapiocaWrapper', 'TapiocaOFT'],
+        exclude: ['TapiocaOFTMock'],
     },
     mocha: {
         timeout: 4000000,

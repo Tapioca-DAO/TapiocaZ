@@ -664,6 +664,13 @@
   "resolved" "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-4.5.0.tgz"
   "version" "4.5.0"
 
+"@primitivefi/hardhat-dodoc@^0.2.3":
+  "integrity" "sha512-ver9uHa79LTDTeebOKZ/eOVRL/FP1k0s0x/5Bo/8ZaDdLWFVClKqZyZYVjjW4CJqTPCt8uU9b9p71P2vzH4O9A=="
+  "resolved" "https://registry.npmjs.org/@primitivefi/hardhat-dodoc/-/hardhat-dodoc-0.2.3.tgz"
+  "version" "0.2.3"
+  dependencies:
+    "squirrelly" "^8.0.8"
+
 "@rari-capital/solmate@^6.4.0":
   "integrity" "sha512-BXWIHHbG5Zbgrxi0qVYe0Zs+bfx+XgOciVUACjuIApV0KzC0kY8XdO1higusIei/ZKCC+GUKdcdQZflxYPUTKQ=="
   "resolved" "https://registry.npmjs.org/@rari-capital/solmate/-/solmate-6.4.0.tgz"
@@ -3816,7 +3823,7 @@
     "eth-gas-reporter" "^0.2.24"
     "sha1" "^1.1.1"
 
-"hardhat@^2.0.0", "hardhat@^2.0.2", "hardhat@^2.0.4", "hardhat@^2.10.1", "hardhat@^2.6.8", "hardhat@^2.9.4", "hardhat@^2.9.9":
+"hardhat@^2.0.0", "hardhat@^2.0.2", "hardhat@^2.0.4", "hardhat@^2.10.1", "hardhat@^2.6.4", "hardhat@^2.6.8", "hardhat@^2.9.4", "hardhat@^2.9.9":
   "integrity" "sha512-0FN9TyCtn7Lt25SB2ei2G7nA2rZjP+RN6MvFOm+zYwherxLZNo6RbD8nDz88eCbhRapevmXqOiL2nM8INKsjmA=="
   "resolved" "https://registry.npmjs.org/hardhat/-/hardhat-2.10.1.tgz"
   "version" "2.10.1"
@@ -6507,6 +6514,11 @@
   "integrity" "sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw="
   "resolved" "https://registry.npmjs.org/sprintf-js/-/sprintf-js-1.0.3.tgz"
   "version" "1.0.3"
+
+"squirrelly@^8.0.8":
+  "integrity" "sha512-7dyZJ9Gw86MmH0dYLiESsjGOTj6KG8IWToTaqBuB6LwPI+hyNb6mbQaZwrfnAQ4cMDnSWMUvX/zAYDLTSWLk/w=="
+  "resolved" "https://registry.npmjs.org/squirrelly/-/squirrelly-8.0.8.tgz"
+  "version" "8.0.8"
 
 "sshpk@^1.7.0":
   "integrity" "sha512-/9HIEs1ZXGhSPE8X6Ccm7Nam1z8KcoCqPdI7ecm1N33EzAetWahvQWVqLZtaZQ+IDKX4IyA2o0gBzqIMkAagHQ=="

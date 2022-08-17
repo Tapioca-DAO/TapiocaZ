@@ -34,6 +34,7 @@
     "write-json-file": "4.3.0"
   },
   "dependencies": {
+    "@primitivefi/hardhat-dodoc": "^0.2.3",
     "load-json-file": "^7.0.1"
   }
 }
