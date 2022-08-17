@@ -65,13 +65,7 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
             TapiocaOFT__factory['deploy'] | TapiocaOFTMock__factory['deploy']
         > = [
             lzEndpoint,
-            testnet__currentChainId !== undefined
-                ? testnet__currentChainId === mainChainID
-                    ? erc20Address
-                    : ethers.constants.AddressZero
-                : mainChainID === (await networkSigner.getChainId())
-                ? erc20Address
-                : ethers.constants.AddressZero,
+            erc20Address,
             erc20name,
             erc20symbol,
             erc20decimal,

@@ -65,7 +65,7 @@ describe('TapiocaOFT', () => {
 
         // Deploy TapiocaOFT10
         await tapiocaWrapper.createTOFT(
-            ethers.constants.AddressZero,
+            erc20Mock.address,
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock1.address,
