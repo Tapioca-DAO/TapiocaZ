@@ -9,11 +9,15 @@ import './TapiocaWrapper.sol';
 contract TapiocaOFT is OFT {
     using SafeERC20 for IERC20;
 
+    /// @notice The TapiocaWrapper contract, owner of this contract.
     TapiocaWrapper public tapiocaWrapper;
+    /// @notice Total fees amassed by this contract, in `erc20`.
     uint256 public totalFees;
-
+    /// @notice The ERC20 to wrap.
     IERC20 public immutable erc20;
+    /// @notice The host chain ID of the ERC20, will be used only on OP chain.
     uint256 public immutable mainChainID;
+    /// @notice Decimal cache number of the ERC20.
     uint8 _decimalCache;
 
     uint16 constant OPTIMISM_CHAINID = 10;
@@ -29,10 +33,8 @@ contract TapiocaOFT is OFT {
     // * ERRORS *
     // ==========
 
-    // @notice Code executed not on main chain (optimism/chainID mismatch)
+    /// @notice Code executed not on main chain (optimism/chainID mismatch).
     error TOFT__NotMainChain();
-    // @notice ERC20 address should be 0x0 on OP chain
-    error TOFT__ERCNotZero();
 
     constructor(
         address _lzEndpoint,
@@ -57,15 +59,12 @@ contract TapiocaOFT is OFT {
             trustedRemoteLookup[OPTIMISM_CHAINID] = abi.encode(address(this));
         } else {
             trustedRemoteLookup[_mainChainID] = abi.encode(address(this));
-            // Check also for this invariant
-            if (address(_erc20) != address(0x0)) {
-                revert TOFT__ERCNotZero();
-            }
         }
 
         tapiocaWrapper = TapiocaWrapper(msg.sender);
     }
 
+    /// @notice Require that the caller is on the main chain.
     modifier onlyMainChain() {
         if (getChainId() != mainChainID) {
             revert TOFT__NotMainChain();
@@ -73,11 +72,15 @@ contract TapiocaOFT is OFT {
         _;
     }
 
+    /// @notice Decimal number of the ERC20
     function decimals() public view override returns (uint8) {
         return _decimalCache;
     }
 
-    /// @notice Wrap an ERC20 with a 1:1 ratio
+    /// @notice Wrap an ERC20 with a 1:1 ratio with a fee if existing.
+    /// @dev Since it can be executed only on the main chain, if an address exists on the OP chain it will not allowed to wrap.
+    /// @param _toAddress The address to wrap the ERC20 to.
+    /// @param _amount The amount of ERC20 to wrap.
     function wrap(address _toAddress, uint256 _amount) external onlyMainChain {
         uint256 mngmtFee = tapiocaWrapper.mngmtFee();
 
@@ -102,14 +105,16 @@ contract TapiocaOFT is OFT {
         emit Wrap(msg.sender, _toAddress, _amount);
     }
 
-    // @notice Harvest the fees collected by the contract
+    /// @notice Harvest the fees collected by the contract. Called only on main chain.
     function harvestFees() external onlyMainChain {
         erc20.safeTransfer(address(tapiocaWrapper), totalFees);
         emit Harvest(msg.sender, totalFees);
         totalFees = 0;
     }
 
-    // @notice Unwrap an ERC20 with a 1:1 ratio
+    /// @notice Unwrap an ERC20 with a 1:1 ratio. Called only on main chain.
+    /// @param _toAddress The address to unwrap the ERC20 to.
+    /// @param _amount The amount of ERC20 to unwrap.
     function unwrap(address _toAddress, uint256 _amount)
         external
         onlyMainChain
@@ -119,7 +124,7 @@ contract TapiocaOFT is OFT {
         emit Unwrap(msg.sender, _toAddress, _amount);
     }
 
-    // @notice Estimate the fees for a wrap operation
+    /// @notice Estimate the management fees for a wrap operation.
     function estimateFees(
         uint256 _feeBps,
         uint256 _feeFraction,
@@ -128,11 +133,13 @@ contract TapiocaOFT is OFT {
         return (_amount * _feeBps) / _feeFraction;
     }
 
+    /// @notice Check if the current chain is the main chain of the ERC20.
     function isMainChain() external view returns (bool) {
         return getChainId() == mainChainID;
     }
 
-    // Used for mocks
+    /// @notice Return the current chain ID.
+    /// @dev Useful for testing.
     function getChainId() internal view virtual returns (uint256) {
         return ILayerZeroEndpoint(lzEndpoint).getChainId();
     }
