@@ -16,6 +16,8 @@ export const wrap = async (
         await toftContract.erc20(),
     );
 
+    console.log('[+] Approving');
     await (await erc20.approve(toftContract.address, args.amount)).wait();
+    console.log('[+] Wrapping');
     await (await toftContract.wrap(signer.address, args.amount)).wait();
 };

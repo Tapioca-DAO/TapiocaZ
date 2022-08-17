@@ -7,9 +7,10 @@ import '@openzeppelin/contracts/utils/Create2.sol';
 import '@rari-capital/solmate/src/auth/Owned.sol';
 
 contract TapiocaWrapper is Owned {
-    TapiocaOFT[] public tapiocaOFTs;
     uint256 public mngmtFee;
     uint256 public constant mngmtFeeFraction = 10000;
+
+    TapiocaOFT[] public tapiocaOFTs;
 
     constructor() Owned(msg.sender) {}
 

@@ -77,12 +77,16 @@ const config: HardhatUserConfig & LzNetworkConfig = {
             rinkeby: process.env.RINKEBY_KEY ?? '',
             polygonMumbai: process.env.POLYGON_MUMBAI_KEY ?? '',
         },
+        customChains: [],
     },
     // gasReporter: {
     //     currency: 'USD',
     //     token: 'BOBA',
     //     coinmarketcap: process.env.COINMARKETCAP_API ?? '',
     // },
+    typechain: {
+        outDir: './typechain',
+    },
     mocha: {
         timeout: 4000000,
     },

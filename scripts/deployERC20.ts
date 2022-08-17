@@ -8,12 +8,14 @@ const deployERC20 = async () => {
     console.log('\n', await hre.getChainId(), test0.address);
     console.log('10e6 free mint for deployer ');
 
-    await test0.mint(
-        (
-            await hre.ethers.getSigners()
-        )[0].address,
-        hre.ethers.utils.parseEther((10e6).toString()),
-    );
+    await (
+        await test0.mint(
+            (
+                await hre.ethers.getSigners()
+            )[0].address,
+            hre.ethers.utils.parseEther((10e6).toString()),
+        )
+    ).wait();
 };
 
 deployERC20()
