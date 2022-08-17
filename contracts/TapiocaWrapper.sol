@@ -42,7 +42,11 @@ contract TapiocaWrapper is Owned {
             Create2.deploy(
                 0,
                 keccak256(
-                    abi.encodePacked(keccak256('TapiocaWrapper'), _erc20)
+                    abi.encodePacked(
+                        keccak256('TapiocaWrapper'),
+                        address(this),
+                        _erc20
+                    )
                 ),
                 _bytecode
             )
