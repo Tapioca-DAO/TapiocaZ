@@ -47,3 +47,14 @@ Wrap an `ERC20` into a `TOFT`.
 ```
 $ npx hardhat wrap --toft '...' --amount '...' --network '...'
 ```
+
+### Send a `TOFT` 
+
+Transfer a TOFT amount between chains.
+- `toft`: The address of the toft.
+- `to`: The address to send to.
+- `amount`: The amount of `ERC20` to wrap in wei.
+- `network`: The network (must be the host chain). It'll automatically pick the other chain from [deployments.json](./deployments.json).
+```
+$ npx hardhat sendFrom --toft '...' --to '...' --amount '...' --network '...'
+```
