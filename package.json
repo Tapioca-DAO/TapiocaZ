@@ -1,7 +1,14 @@
 {
   "name": "tapiocaz",
   "scripts": {
-    "deploy": "npx hardhat deploy"
+    "compile":"npx hardhat --config hardhat.export.ts compile",
+    "typechain":"npx hardhat --config hardhat.export.ts typechain",
+    "gen:sdk":"npx hardhat exportSDK --network",
+    "deploy":"npx hardhat deploy --network",
+    "list":"npx hardhat listDeploy --network",
+    "erc20:mock":"npx hardhat run ./scripts/deployERC20.ts --network",
+    "size":"npx hardhat size-contracts",
+    "test": "npx hardhat test"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",

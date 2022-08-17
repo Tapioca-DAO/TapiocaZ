@@ -62,6 +62,6 @@ task('wrap', 'Approve and wrap an ERC20 to its TOFT', wrap)
 
 task(
     'exportSDK',
-    'Generate and export the typings and/or addresses for the SDK. May deploy contracts.',
+    'Generate and export the typings and/or addresses for the SDK.',
     exportSDK__task,
-).addFlag('mainnet', 'Using the current chain ID deployments.');
+);
