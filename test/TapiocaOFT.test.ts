@@ -178,6 +178,7 @@ describe('TapiocaOFT', () => {
                     1,
                     tapiocaOFT10.address,
                 ]),
+                true,
             );
             await tapiocaWrapper.executeTOFT(
                 tapiocaOFT10.address,
@@ -185,6 +186,7 @@ describe('TapiocaOFT', () => {
                     0,
                     tapiocaOFT0.address,
                 ]),
+                true,
             );
 
             // Success

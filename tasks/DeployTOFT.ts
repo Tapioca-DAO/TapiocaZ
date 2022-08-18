@@ -126,7 +126,7 @@ export const deployTOFT = async (
                 )
             )
                 .connect(mainNetworkSigner)
-                .executeTOFT(mainContract!.address ?? '', txMainChain, {
+                .executeTOFT(mainContract!.address ?? '', txMainChain, true, {
                     gasLimit: 1000000,
                 })
         ).wait();
@@ -142,7 +142,7 @@ export const deployTOFT = async (
             ],
         );
         await (
-            await tWrapper.executeTOFT(address, txOtherChain, {
+            await tWrapper.executeTOFT(address, txOtherChain, true, {
                 gasLimit: 1000000,
             })
         ).wait();
