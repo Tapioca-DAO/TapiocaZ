@@ -11,8 +11,8 @@ import {
     TContract,
     useNetwork,
     useUtils,
+    generateSalt,
 } from '../scripts/utils';
-
 /**
  *
  * Deploy a TOFT contract to the specified network. It'll also deploy it to Tapioca host chain (Optimism, chainID 10).
@@ -89,7 +89,9 @@ export const deployTOFT = async (
     );
     // Create the TOFT
     console.log('[+] Deploying TOFT, waiting for 12 confirmation');
-    await (await tWrapper.createTOFT(args.erc20, tx.txData)).wait(12);
+    await (
+        await tWrapper.createTOFT(args.erc20, tx.txData, generateSalt())
+    ).wait(12);
     const lastTOFT = await hre.ethers.getContractAt(
         'TapiocaOFT',
         await tWrapper.lastTOFT(),

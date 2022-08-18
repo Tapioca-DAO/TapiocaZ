@@ -13,7 +13,7 @@
 ### createTOFT
 
 ```solidity
-function createTOFT(address _erc20, bytes _bytecode) external nonpayable
+function createTOFT(address _erc20, bytes _bytecode, bytes32 _salt) external nonpayable
 ```
 
 Deploy a new TOFT contract. Callable only by the owner.
@@ -26,6 +26,7 @@ Deploy a new TOFT contract. Callable only by the owner.
 |---|---|---|
 | _erc20 | address | The ERC20 to wrap. |
 | _bytecode | bytes | The executable bytecode of the TOFT contract. |
+| _salt | bytes32 | Create2 salt. |
 
 ### executeTOFT
 

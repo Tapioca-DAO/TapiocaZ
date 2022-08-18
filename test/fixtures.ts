@@ -29,6 +29,7 @@ export const setupFixture = async () => {
                 0,
             )
         ).txData,
+        hre.ethers.utils.randomBytes(32),
     );
 
     const tapiocaOFT0 = (await utils.attachTapiocaOFT(
@@ -49,6 +50,7 @@ export const setupFixture = async () => {
                 10,
             )
         ).txData,
+        hre.ethers.utils.randomBytes(32),
     );
 
     const tapiocaOFT10 = (await utils.attachTapiocaOFT(

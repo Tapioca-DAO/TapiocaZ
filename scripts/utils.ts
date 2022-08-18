@@ -8,6 +8,7 @@ import { TapiocaOFTMock__factory, TapiocaOFT__factory } from '../typechain';
 import { LZ_ENDPOINTS } from './constants';
 
 export const BN = (n: any) => ethers.BigNumber.from(n);
+export const generateSalt = () => ethers.utils.randomBytes(32);
 
 export const useNetwork = async (
     hre: HardhatRuntimeEnvironment,

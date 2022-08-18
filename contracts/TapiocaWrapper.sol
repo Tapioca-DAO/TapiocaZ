@@ -68,10 +68,12 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
     /// @notice Deploy a new TOFT contract. Callable only by the owner.
     /// @param _erc20 The ERC20 to wrap.
     /// @param _bytecode The executable bytecode of the TOFT contract.
-    function createTOFT(address _erc20, bytes calldata _bytecode)
-        external
-        onlyOwner
-    {
+    /// @param _salt Create2 salt.
+    function createTOFT(
+        address _erc20,
+        bytes calldata _bytecode,
+        bytes32 _salt
+    ) external onlyOwner {
         TapiocaOFT toft = TapiocaOFT(
             Create2.deploy(
                 0,
@@ -79,7 +81,8 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
                     abi.encodePacked(
                         keccak256('TapiocaWrapper'),
                         address(this),
-                        _erc20
+                        _erc20,
+                        _salt
                     )
                 ),
                 _bytecode
