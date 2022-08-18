@@ -1,8 +1,10 @@
 {
   "name": "tapiocaz",
   "scripts": {
+    "clean":"npx hardhat --config hardhat.export.ts clean",
     "compile":"npx hardhat --config hardhat.export.ts compile",
     "typechain":"npx hardhat --config hardhat.export.ts typechain",
+    "coverage":"npm run clean && npm run typechain && hh --config hardhat.export.ts coverage",
     "gen:sdk":"npx hardhat exportSDK --network",
     "deploy":"npx hardhat deploy --network",
     "list":"npx hardhat listDeploy --network",
