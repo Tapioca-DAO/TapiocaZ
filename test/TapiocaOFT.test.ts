@@ -184,4 +184,16 @@ describe('TapiocaOFT', () => {
             expect(feesAfter).eq(0);
         });
     });
+    describe('estimateFees()', () => {
+        it('Should compute the same output', async () => {
+            const { tapiocaOFT0 } = await loadFixture(setupFixture);
+
+            const [feeBps, feeFraction, amount] = [50, 10000, 1000];
+            const expected = (feeBps * amount) / feeFraction;
+
+            expect(
+                await tapiocaOFT0.estimateFees(feeBps, feeFraction, amount),
+            ).to.equal(expected);
+        });
+    });
 });
