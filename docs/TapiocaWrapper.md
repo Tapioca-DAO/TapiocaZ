@@ -30,7 +30,7 @@ Deploy a new TOFT contract. Callable only by the owner.
 ### executeTOFT
 
 ```solidity
-function executeTOFT(address _toft, bytes _bytecode) external payable returns (bool success)
+function executeTOFT(address _toft, bytes _bytecode, bool _revertOnFailure) external payable returns (bool success, bytes result)
 ```
 
 Execute the `_bytecode` against the `_toft`. Callable only by the owner.
@@ -43,12 +43,14 @@ Execute the `_bytecode` against the `_toft`. Callable only by the owner.
 |---|---|---|
 | _toft | address | The TOFT contract to execute against. |
 | _bytecode | bytes | The executable bytecode of the TOFT contract. |
+| _revertOnFailure | bool | Whether to revert on failure. |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| success | bool | undefined |
+| success | bool | If the execution was successful. |
+| result | bytes | The error message if the execution failed. |
 
 ### lastTOFT
 
@@ -236,15 +238,42 @@ event OwnerUpdated(address indexed user, address indexed newOwner)
 
 ## Errors
 
+### TapiocaWrapper__FailedDeploy
+
+```solidity
+error TapiocaWrapper__FailedDeploy()
+```
+
+Failed to deploy the TapiocaWrapper contract.
+
+
+
+
 ### TapiocaWrapper__MngmtFeeTooHigh
 
 ```solidity
 error TapiocaWrapper__MngmtFeeTooHigh()
 ```
 
-========= * ERRORS * =========
+The management fee is too high. Currently set to a max of 50 BPS or 0.5%.
 
 
 
+
+### TapiocaWrapper__TOFTExecutionFailed
+
+```solidity
+error TapiocaWrapper__TOFTExecutionFailed(bytes message)
+```
+
+The TapiocaOFT execution failed.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| message | bytes | undefined |
 
 
