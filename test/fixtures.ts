@@ -11,6 +11,9 @@ export const setupFixture = async () => {
     const erc20Mock = await (
         await hre.ethers.getContractFactory('ERC20Mock')
     ).deploy('erc20Mock', 'MOCK');
+    const erc20Mock1 = await (
+        await hre.ethers.getContractFactory('ERC20Mock')
+    ).deploy('erc20Mock', 'MOCK');
 
     const { LZEndpointMock0, LZEndpointMock1, tapiocaWrapper, utils } =
         await register(hre);
@@ -97,6 +100,7 @@ export const setupFixture = async () => {
         LZEndpointMock1,
         tapiocaWrapper,
         erc20Mock,
+        erc20Mock1,
         tapiocaOFT0,
         tapiocaOFT10,
         dummyAmount,
@@ -104,6 +108,7 @@ export const setupFixture = async () => {
     const functions = {
         estimateFees,
         mintAndApprove,
+        utils,
     };
 
     return { ...vars, ...functions };
