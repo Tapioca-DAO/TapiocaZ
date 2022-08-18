@@ -18,7 +18,7 @@ contract TapiocaOFTError {
     /// @param _statement The statement boolean value.
     /// @param _error The error to throw.
     function __require(bool _statement, ERROR _error) internal pure {
-        if (!_statement) {
+        if (_statement) {
             if (_error == ERROR.TOFT_NOT_MAIN_CHAIN) {
                 revert TOFT__NotMainChain();
             }

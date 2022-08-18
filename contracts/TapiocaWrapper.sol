@@ -26,7 +26,7 @@ contract TapiocaWrapperError {
     /// @param _statement The statement boolean value.
     /// @param _error The error to throw.
     function __require(bool _statement, ERROR _error) internal pure {
-        if (!_statement) {
+        if (_statement) {
             if (_error == ERROR.FAILED_DEPLOY) {
                 revert TapiocaWrapper__FailedDeploy();
             } else if (_error == ERROR.MNGMT_FEE_TOO_HIGH) {
@@ -44,7 +44,7 @@ contract TapiocaWrapperError {
         ERROR_MSG _error,
         bytes memory _message
     ) internal pure {
-        if (!_statement) {
+        if (_statement) {
             if (_error == ERROR_MSG.TOFT_EXECUTION_FAILED) {
                 revert TapiocaWrapper__TOFTExecutionFailed(_message);
             }
@@ -85,7 +85,7 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
                 _bytecode
             )
         );
-        __require(address(toft.erc20()) == _erc20, ERROR.FAILED_DEPLOY);
+        __require(address(toft.erc20()) != _erc20, ERROR.FAILED_DEPLOY);
 
         tapiocaOFTs.push(toft);
         tapiocaOFTsByErc20[_erc20] = toft;
@@ -125,7 +125,7 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
     /// @custom:invariant Forbid a management fee higher than 0.5%.
     /// @param _mngmtFee The new management fee for a wrap operation. In BPS.
     function setMngmtFee(uint256 _mngmtFee) external onlyOwner {
-        __require(_mngmtFee <= 50, ERROR.MNGMT_FEE_TOO_HIGH);
+        __require(_mngmtFee > 50, ERROR.MNGMT_FEE_TOO_HIGH);
 
         mngmtFee = _mngmtFee;
     }
