@@ -10,13 +10,13 @@ export const register = async (hre: HardhatRuntimeEnvironment) => {
         deployTapiocaWrapper,
         Tx_deployTapiocaOFT,
         attachTapiocaOFT,
-    } = useUtils(hre, true);
+    } = useUtils(hre);
 
     const utils = { Tx_deployTapiocaOFT, attachTapiocaOFT };
     return {
         signer,
-        LZEndpointMock0: await deployLZEndpointMock(0),
-        LZEndpointMock1: await deployLZEndpointMock(1),
+        LZEndpointMock_chainID_0: await deployLZEndpointMock(0),
+        LZEndpointMock_chainID_10: await deployLZEndpointMock(10),
         tapiocaWrapper: await deployTapiocaWrapper(),
         utils,
     };

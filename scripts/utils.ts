@@ -4,7 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import config from '../hardhat.export';
-import { TapiocaOFTMock__factory, TapiocaOFT__factory } from '../typechain';
+import { TapiocaOFT__factory } from '../typechain';
 import { LZ_ENDPOINTS } from './constants';
 
 export const BN = (n: any) => ethers.BigNumber.from(n);
@@ -27,7 +27,7 @@ export const useNetwork = async (
     return new hre.ethers.Wallet(pk, provider);
 };
 
-export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
+export const useUtils = (hre: HardhatRuntimeEnvironment) => {
     const { ethers } = hre;
 
     // DEPLOYMENTS
@@ -44,13 +44,11 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
         ).deployed();
 
     // UTILS
-    const contractName = isMock ? 'TapiocaOFTMock' : 'TapiocaOFT';
     const Tx_deployTapiocaOFT = async (
         lzEndpoint: string,
         erc20Address: string,
         mainChainID: number,
         networkSigner: Wallet | SignerWithAddress,
-        testnet__currentChainId?: number,
     ) => {
         const erc20 = (
             await ethers.getContractAt('ERC20', erc20Address)
@@ -62,29 +60,24 @@ export const useUtils = (hre: HardhatRuntimeEnvironment, isMock?: boolean) => {
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const args: Parameters<
-            TapiocaOFT__factory['deploy'] | TapiocaOFTMock__factory['deploy']
-        > = [
+        const args: Parameters<TapiocaOFT__factory['deploy']> = [
             lzEndpoint,
             erc20Address,
             erc20name,
             erc20symbol,
             erc20decimal,
             mainChainID,
-            ...(testnet__currentChainId !== undefined
-                ? [testnet__currentChainId]
-                : []),
         ];
 
         const txData = (
-            await ethers.getContractFactory(contractName)
+            await ethers.getContractFactory('TapiocaOFT')
         ).getDeployTransaction(...args).data as BytesLike;
 
         return { txData, args };
     };
 
     const attachTapiocaOFT = async (address: string) =>
-        await ethers.getContractAt(contractName, address);
+        await ethers.getContractAt('TapiocaOFT', address);
 
     return {
         deployLZEndpointMock,

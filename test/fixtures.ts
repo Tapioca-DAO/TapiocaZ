@@ -2,7 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumberish, ethers } from 'ethers';
 import hre from 'hardhat';
 import { BN } from '../scripts/utils';
-import { ERC20Mock, TapiocaOFTMock } from '../typechain';
+import { ERC20Mock, TapiocaOFT } from '../typechain';
 import { register } from './test.utils';
 
 export const setupFixture = async () => {
@@ -15,8 +15,12 @@ export const setupFixture = async () => {
         await hre.ethers.getContractFactory('ERC20Mock')
     ).deploy('erc20Mock', 'MOCK');
 
-    const { LZEndpointMock0, LZEndpointMock1, tapiocaWrapper, utils } =
-        await register(hre);
+    const {
+        LZEndpointMock_chainID_0,
+        LZEndpointMock_chainID_10,
+        tapiocaWrapper,
+        utils,
+    } = await register(hre);
 
     await tapiocaWrapper.setMngmtFee(25); // 0.25%
 
@@ -25,11 +29,10 @@ export const setupFixture = async () => {
         erc20Mock.address,
         (
             await utils.Tx_deployTapiocaOFT(
-                LZEndpointMock0.address,
+                LZEndpointMock_chainID_0.address,
                 erc20Mock.address,
                 0,
                 signer,
-                0,
             )
         ).txData,
         hre.ethers.utils.randomBytes(32),
@@ -39,18 +42,17 @@ export const setupFixture = async () => {
         await tapiocaWrapper.tapiocaOFTs(
             (await tapiocaWrapper.tapiocaOFTLength()).sub(1),
         ),
-    )) as TapiocaOFTMock;
+    )) as TapiocaOFT;
 
     // Deploy TapiocaOFT10
     await tapiocaWrapper.createTOFT(
         erc20Mock.address,
         (
             await utils.Tx_deployTapiocaOFT(
-                LZEndpointMock1.address,
+                LZEndpointMock_chainID_10.address,
                 erc20Mock.address,
                 0,
                 signer,
-                10,
             )
         ).txData,
         hre.ethers.utils.randomBytes(32),
@@ -60,16 +62,16 @@ export const setupFixture = async () => {
         await tapiocaWrapper.tapiocaOFTs(
             (await tapiocaWrapper.tapiocaOFTLength()).sub(1),
         ),
-    )) as TapiocaOFTMock;
+    )) as TapiocaOFT;
 
     // Link endpoints with addresses
-    LZEndpointMock0.setDestLzEndpoint(
+    LZEndpointMock_chainID_0.setDestLzEndpoint(
         tapiocaOFT10.address,
-        LZEndpointMock1.address,
+        LZEndpointMock_chainID_10.address,
     );
-    LZEndpointMock1.setDestLzEndpoint(
+    LZEndpointMock_chainID_10.setDestLzEndpoint(
         tapiocaOFT0.address,
-        LZEndpointMock0.address,
+        LZEndpointMock_chainID_0.address,
     );
 
     const dummyAmount = ethers.BigNumber.from(1e5);
@@ -83,7 +85,7 @@ export const setupFixture = async () => {
 
     const mintAndApprove = async (
         erc20Mock: ERC20Mock,
-        toft: TapiocaOFTMock,
+        toft: TapiocaOFT,
         signer: SignerWithAddress,
         amount: BigNumberish,
     ) => {
@@ -96,8 +98,8 @@ export const setupFixture = async () => {
 
     const vars = {
         signer,
-        LZEndpointMock0,
-        LZEndpointMock1,
+        LZEndpointMock_chainID_0,
+        LZEndpointMock_chainID_10,
         tapiocaWrapper,
         erc20Mock,
         erc20Mock1,
