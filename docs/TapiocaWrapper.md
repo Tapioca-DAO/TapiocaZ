@@ -261,6 +261,17 @@ The management fee is too high. Currently set to a max of 50 BPS or 0.5%.
 
 
 
+### TapiocaWrapper__NoTOFTDeployed
+
+```solidity
+error TapiocaWrapper__NoTOFTDeployed()
+```
+
+No TOFT has been deployed yet.
+
+
+
+
 ### TapiocaWrapper__TOFTExecutionFailed
 
 ```solidity

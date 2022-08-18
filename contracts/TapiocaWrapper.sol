@@ -9,7 +9,8 @@ import '@rari-capital/solmate/src/auth/Owned.sol';
 contract TapiocaWrapperError {
     enum ERROR {
         FAILED_DEPLOY,
-        MNGMT_FEE_TOO_HIGH
+        MNGMT_FEE_TOO_HIGH,
+        NO_TOFT_DEPLOYED
     }
     enum ERROR_MSG {
         TOFT_EXECUTION_FAILED
@@ -21,6 +22,8 @@ contract TapiocaWrapperError {
     error TapiocaWrapper__MngmtFeeTooHigh();
     /// @notice The TapiocaOFT execution failed.
     error TapiocaWrapper__TOFTExecutionFailed(bytes message);
+    /// @notice No TOFT has been deployed yet.
+    error TapiocaWrapper__NoTOFTDeployed();
 
     /// @notice Error management for `TapiocaWrapper`.
     /// @param _statement The statement boolean value.
@@ -31,6 +34,8 @@ contract TapiocaWrapperError {
                 revert TapiocaWrapper__FailedDeploy();
             } else if (_error == ERROR.MNGMT_FEE_TOO_HIGH) {
                 revert TapiocaWrapper__MngmtFeeTooHigh();
+            } else if (_error == ERROR.NO_TOFT_DEPLOYED) {
+                revert TapiocaWrapper__NoTOFTDeployed();
             }
         }
     }
@@ -120,6 +125,7 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
 
     /// @notice Return the latest TOFT contract deployed on the current chain.
     function lastTOFT() external view returns (TapiocaOFT) {
+        __require(tapiocaOFTs.length == 0, ERROR.NO_TOFT_DEPLOYED);
         return tapiocaOFTs[tapiocaOFTs.length - 1];
     }
 
