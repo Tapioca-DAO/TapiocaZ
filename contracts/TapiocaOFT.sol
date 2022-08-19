@@ -6,27 +6,7 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import './OFT20/interfaces/ILayerZeroEndpoint.sol';
 import './TapiocaWrapper.sol';
 
-contract TapiocaOFTError {
-    enum ERROR {
-        TOFT_NOT_MAIN_CHAIN
-    }
-
-    /// @notice Code executed not on main chain (optimism/chainID mismatch).
-    error TOFT__NotMainChain();
-
-    /// @notice Error management for `TapiocaOFT`.
-    /// @param _statement The statement boolean value.
-    /// @param _error The error to throw.
-    function __require(bool _statement, ERROR _error) internal pure {
-        if (_statement) {
-            if (_error == ERROR.TOFT_NOT_MAIN_CHAIN) {
-                revert TOFT__NotMainChain();
-            }
-        }
-    }
-}
-
-contract TapiocaOFT is OFT, TapiocaOFTError {
+contract TapiocaOFT is OFT {
     using SafeERC20 for IERC20;
 
     /// @notice The TapiocaWrapper contract, owner of this contract.
@@ -42,9 +22,16 @@ contract TapiocaOFT is OFT, TapiocaOFTError {
 
     uint16 constant OPTIMISM_CHAINID = 10;
 
-    // ==========
-    // * EVENTS *
-    // ==========
+    /// ==========================
+    /// ========== Errors ========
+    /// ==========================
+
+    /// @notice Code executed not on main chain (optimism/chainID mismatch).
+    error TOFT__NotMainChain();
+
+    /// ==========================
+    /// ========== Events ========
+    /// ==========================
     event Wrap(address indexed _from, address indexed _to, uint256 _amount);
     event Unwrap(address indexed _from, address indexed _to, uint256 _amount);
     event Harvest(uint256 _amount);
@@ -79,7 +66,9 @@ contract TapiocaOFT is OFT, TapiocaOFTError {
 
     /// @notice Require that the caller is on the main chain.
     modifier onlyMainChain() {
-        __require(getChainId() != mainChainID, ERROR.TOFT_NOT_MAIN_CHAIN);
+        if (getChainId() != mainChainID) {
+            revert TOFT__NotMainChain();
+        }
         _;
     }
 
