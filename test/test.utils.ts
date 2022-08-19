@@ -5,14 +5,9 @@ export const register = async (hre: HardhatRuntimeEnvironment) => {
     const { ethers } = hre;
     const signer = (await ethers.getSigners())[0];
 
-    const {
-        deployLZEndpointMock,
-        deployTapiocaWrapper,
-        Tx_deployTapiocaOFT,
-        attachTapiocaOFT,
-    } = useUtils(hre);
+    const { deployLZEndpointMock, deployTapiocaWrapper } = useUtils(hre);
 
-    const utils = { Tx_deployTapiocaOFT, attachTapiocaOFT };
+    const utils = useUtils(hre);
     return {
         signer,
         LZEndpointMock_chainID_0: await deployLZEndpointMock(0),

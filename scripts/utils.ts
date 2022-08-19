@@ -79,11 +79,18 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
     const attachTapiocaOFT = async (address: string) =>
         await ethers.getContractAt('TapiocaOFT', address);
 
+    const newEOA = () =>
+        new hre.ethers.Wallet(
+            hre.ethers.Wallet.createRandom().privateKey,
+            hre.ethers.provider,
+        );
+
     return {
         deployLZEndpointMock,
         deployTapiocaWrapper,
         Tx_deployTapiocaOFT,
         attachTapiocaOFT,
+        newEOA,
     };
 };
 

@@ -95,7 +95,6 @@ export const setupFixture = async () => {
         await erc20Mock.mint(signer.address, amountWithFees);
         await erc20Mock.approve(toft.address, amountWithFees);
     };
-
     const vars = {
         signer,
         LZEndpointMock_chainID_0,
