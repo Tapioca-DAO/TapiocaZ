@@ -133,7 +133,7 @@ describe('TapiocaOFT', () => {
         });
     });
 
-    describe('harvestFees', () => {
+    describe('harvestFees()', () => {
         it('Should be called only on MainChain', async () => {
             const {
                 signer,
@@ -163,7 +163,6 @@ describe('TapiocaOFT', () => {
         it('Should withdraw the fees and update the total fee balance', async () => {
             const {
                 signer,
-                tapiocaWrapper,
                 erc20Mock,
                 tapiocaOFT0,
                 mintAndApprove,
@@ -176,9 +175,7 @@ describe('TapiocaOFT', () => {
 
             await tapiocaOFT0.harvestFees();
 
-            expect(await erc20Mock.balanceOf(tapiocaWrapper.address)).eq(
-                feesBefore,
-            );
+            expect(await erc20Mock.balanceOf(signer.address)).eq(feesBefore);
 
             const feesAfter = await tapiocaOFT0.totalFees();
             expect(feesAfter).eq(0);

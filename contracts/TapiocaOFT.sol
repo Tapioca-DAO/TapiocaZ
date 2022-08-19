@@ -47,7 +47,7 @@ contract TapiocaOFT is OFT, TapiocaOFTError {
     // ==========
     event Wrap(address indexed _from, address indexed _to, uint256 _amount);
     event Unwrap(address indexed _from, address indexed _to, uint256 _amount);
-    event Harvest(address indexed _caller, uint256 _amount);
+    event Harvest(uint256 _amount);
 
     constructor(
         address _lzEndpoint,
@@ -118,8 +118,8 @@ contract TapiocaOFT is OFT, TapiocaOFTError {
 
     /// @notice Harvest the fees collected by the contract. Called only on main chain.
     function harvestFees() external onlyMainChain {
-        erc20.safeTransfer(address(tapiocaWrapper), totalFees);
-        emit Harvest(msg.sender, totalFees);
+        erc20.safeTransfer(address(tapiocaWrapper.owner()), totalFees);
+        emit Harvest(totalFees);
         totalFees = 0;
     }
 

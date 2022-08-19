@@ -803,7 +803,7 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 ### Harvest
 
 ```solidity
-event Harvest(address indexed _caller, uint256 _amount)
+event Harvest(uint256 _amount)
 ```
 
 
@@ -814,7 +814,6 @@ event Harvest(address indexed _caller, uint256 _amount)
 
 | Name | Type | Description |
 |---|---|---|
-| _caller `indexed` | address | undefined |
 | _amount  | uint256 | undefined |
 
 ### MessageFailed
