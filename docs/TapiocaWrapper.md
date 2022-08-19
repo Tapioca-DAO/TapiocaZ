@@ -36,7 +36,7 @@ function executeTOFT(address _toft, bytes _bytecode, bool _revertOnFailure) exte
 
 Execute the `_bytecode` against the `_toft`. Callable only by the owner.
 
-
+*Used to call derived OFT functions to a TOFT contract.*
 
 #### Parameters
 
@@ -52,6 +52,34 @@ Execute the `_bytecode` against the `_toft`. Callable only by the owner.
 |---|---|---|
 | success | bool | If the execution was successful. |
 | result | bytes | The error message if the execution failed. |
+
+### harvestFees
+
+```solidity
+function harvestFees() external nonpayable
+```
+
+Harvest fees from all the deployed TOFT contracts. Fees are transferred to the owner.
+
+
+
+
+### harvestableTapiocaOFTsLength
+
+```solidity
+function harvestableTapiocaOFTsLength() external view returns (uint256)
+```
+
+Return the number of harvestable TOFT contracts deployed on the current chain.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### lastTOFT
 
@@ -218,6 +246,39 @@ Map of deployed TOFT contracts by ERC20.
 
 ## Events
 
+### CreateOFT
+
+```solidity
+event CreateOFT(contract TapiocaOFT indexed _tapiocaOFT, address indexed _erc20)
+```
+
+Called when a new OFT is deployed.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _tapiocaOFT `indexed` | contract TapiocaOFT | undefined |
+| _erc20 `indexed` | address | undefined |
+
+### HarvestFees
+
+```solidity
+event HarvestFees(address indexed _caller)
+```
+
+Called when fees are harvested.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _caller `indexed` | address | undefined |
+
 ### OwnerUpdated
 
 ```solidity
@@ -234,6 +295,22 @@ event OwnerUpdated(address indexed user, address indexed newOwner)
 |---|---|---|
 | user `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
+
+### SetFees
+
+```solidity
+event SetFees(uint256 _newFee)
+```
+
+Called when fees are changed.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _newFee  | uint256 | undefined |
 
 
 
