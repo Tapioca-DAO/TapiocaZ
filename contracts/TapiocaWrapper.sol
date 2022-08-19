@@ -6,58 +6,7 @@ import './TapiocaOFT.sol';
 import '@openzeppelin/contracts/utils/Create2.sol';
 import '@rari-capital/solmate/src/auth/Owned.sol';
 
-contract TapiocaWrapperError {
-    enum ERROR {
-        FAILED_DEPLOY,
-        MNGMT_FEE_TOO_HIGH,
-        NO_TOFT_DEPLOYED
-    }
-    enum ERROR_MSG {
-        TOFT_EXECUTION_FAILED
-    }
-
-    /// @notice Failed to deploy the TapiocaWrapper contract.
-    error TapiocaWrapper__FailedDeploy();
-    /// @notice The management fee is too high. Currently set to a max of 50 BPS or 0.5%.
-    error TapiocaWrapper__MngmtFeeTooHigh();
-    /// @notice The TapiocaOFT execution failed.
-    error TapiocaWrapper__TOFTExecutionFailed(bytes message);
-    /// @notice No TOFT has been deployed yet.
-    error TapiocaWrapper__NoTOFTDeployed();
-
-    /// @notice Error management for `TapiocaWrapper`.
-    /// @param _statement The statement boolean value.
-    /// @param _error The error to throw.
-    function __require(bool _statement, ERROR _error) internal pure {
-        if (_statement) {
-            if (_error == ERROR.FAILED_DEPLOY) {
-                revert TapiocaWrapper__FailedDeploy();
-            } else if (_error == ERROR.MNGMT_FEE_TOO_HIGH) {
-                revert TapiocaWrapper__MngmtFeeTooHigh();
-            } else if (_error == ERROR.NO_TOFT_DEPLOYED) {
-                revert TapiocaWrapper__NoTOFTDeployed();
-            }
-        }
-    }
-
-    /// @notice Error management for `TapiocaWrapper`, supports error messages.
-    /// @param _statement The statement boolean value.
-    /// @param _error The error to throw.
-    /// @param _message The error message.
-    function __require(
-        bool _statement,
-        ERROR_MSG _error,
-        bytes memory _message
-    ) internal pure {
-        if (_statement) {
-            if (_error == ERROR_MSG.TOFT_EXECUTION_FAILED) {
-                revert TapiocaWrapper__TOFTExecutionFailed(_message);
-            }
-        }
-    }
-}
-
-contract TapiocaWrapper is Owned, TapiocaWrapperError {
+contract TapiocaWrapper is Owned {
     /// @notice Management fee for a wrap operation. In BPS.
     uint256 public mngmtFee;
     /// @notice Denominator for `mngmtFee`.
@@ -81,6 +30,19 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
     /// @notice Called when fees are changed.
     event SetFees(uint256 _newFee);
 
+    /// ==========================
+    /// ========== Errors ========
+    /// ==========================
+
+    /// @notice Failed to deploy the TapiocaWrapper contract.
+    error TapiocaWrapper__FailedDeploy();
+    /// @notice The management fee is too high. Currently set to a max of 50 BPS or 0.5%.
+    error TapiocaWrapper__MngmtFeeTooHigh();
+    /// @notice The TapiocaOFT execution failed.
+    error TapiocaWrapper__TOFTExecutionFailed(bytes message);
+    /// @notice No TOFT has been deployed yet.
+    error TapiocaWrapper__NoTOFTDeployed();
+
     constructor() Owned(msg.sender) {}
 
     /// ==========================
@@ -99,7 +61,9 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
 
     /// @notice Return the latest TOFT contract deployed on the current chain.
     function lastTOFT() external view returns (TapiocaOFT) {
-        __require(tapiocaOFTs.length == 0, ERROR.NO_TOFT_DEPLOYED);
+        if (tapiocaOFTs.length == 0) {
+            revert TapiocaWrapper__NoTOFTDeployed();
+        }
         return tapiocaOFTs[tapiocaOFTs.length - 1];
     }
 
@@ -130,7 +94,9 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
                 _bytecode
             )
         );
-        __require(address(toft.erc20()) != _erc20, ERROR.FAILED_DEPLOY);
+        if (address(toft.erc20()) != _erc20) {
+            revert TapiocaWrapper__FailedDeploy();
+        }
 
         tapiocaOFTs.push(toft);
         tapiocaOFTsByErc20[_erc20] = toft;
@@ -153,7 +119,10 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
     /// @custom:invariant Forbid a management fee higher than 0.5%.
     /// @param _mngmtFee The new management fee for a wrap operation. In BPS.
     function setMngmtFee(uint256 _mngmtFee) external onlyOwner {
-        __require(_mngmtFee > 50, ERROR.MNGMT_FEE_TOO_HIGH);
+        if (_mngmtFee > 50) {
+            revert TapiocaWrapper__MngmtFeeTooHigh();
+        }
+
         mngmtFee = _mngmtFee;
         emit SetFees(mngmtFee);
     }
@@ -171,8 +140,8 @@ contract TapiocaWrapper is Owned, TapiocaWrapperError {
         bool _revertOnFailure
     ) external payable onlyOwner returns (bool success, bytes memory result) {
         (success, result) = payable(_toft).call{value: msg.value}(_bytecode);
-        if (_revertOnFailure) {
-            __require(!success, ERROR_MSG.TOFT_EXECUTION_FAILED, result);
+        if (_revertOnFailure && !success) {
+            revert TapiocaWrapper__TOFTExecutionFailed(result);
         }
     }
 }

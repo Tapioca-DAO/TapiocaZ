@@ -313,6 +313,14 @@ describe('TapiocaWrapper', () => {
                 tapiocaWrapper,
                 'TapiocaWrapper__TOFTExecutionFailed',
             );
+
+            await expect(
+                tapiocaWrapper.executeTOFT(
+                    tapiocaOFT0.address,
+                    ethers.utils.randomBytes(32),
+                    false,
+                ),
+            ).to.not.be.reverted;
         });
 
         it('Should execute the change in trusted remote for a TOFT successfully ', async () => {
