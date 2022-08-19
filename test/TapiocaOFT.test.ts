@@ -16,22 +16,13 @@ describe('TapiocaOFT', () => {
 
     describe('wrap()', () => {
         it('Should fail if not on the same chain', async () => {
-            const {
-                signer,
-                erc20Mock,
-                tapiocaOFT0,
-                tapiocaOFT10,
-                mintAndApprove,
-                dummyAmount,
-            } = await loadFixture(setupFixture);
+            const { signer, tapiocaOFT10, dummyAmount } = await loadFixture(
+                setupFixture,
+            );
 
             await expect(
                 tapiocaOFT10.wrap(signer.address, dummyAmount),
             ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotMainChain');
-
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
-            await expect(tapiocaOFT0.wrap(signer.address, dummyAmount)).to.not
-                .be.reverted;
         });
 
         it('Should fail if the fees are not paid', async () => {
@@ -54,7 +45,93 @@ describe('TapiocaOFT', () => {
             ).to.be.revertedWith('ERC20: insufficient allowance');
         });
 
-        it('Should wrap and give a 1:1 ratio amount of tokens', async () => {
+        it('Should wrap and give a 1:1 ratio amount of tokens without fees', async () => {
+            const {
+                signer,
+                erc20Mock,
+                tapiocaOFT0,
+                tapiocaWrapper,
+                mintAndApprove,
+                dummyAmount,
+            } = await loadFixture(setupFixture);
+            await tapiocaWrapper.setMngmtFee(0);
+
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
+
+            const balTOFTSignerBefore = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
+            const balERC20ContractBefore = await erc20Mock.balanceOf(
+                tapiocaOFT0.address,
+            );
+
+            await tapiocaOFT0.wrap(signer.address, dummyAmount);
+
+            const balTOFTSignerAfter = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
+            const balERC20ContractAfter = await erc20Mock.balanceOf(
+                tapiocaOFT0.address,
+            );
+
+            expect(balTOFTSignerAfter).eq(balTOFTSignerBefore.add(dummyAmount));
+            expect(balERC20ContractAfter).eq(
+                balERC20ContractBefore.add(dummyAmount),
+            );
+        });
+
+        it('Should wrap and give a 1:1 ratio amount of tokens with fees', async () => {
+            const {
+                signer,
+                erc20Mock,
+                tapiocaOFT0,
+                mintAndApprove,
+                dummyAmount,
+                estimateFees,
+            } = await loadFixture(setupFixture);
+
+            const fees = await estimateFees(dummyAmount);
+            const feesBefore = await tapiocaOFT0.totalFees();
+
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
+
+            const balTOFTSignerBefore = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
+            const balERC20ContractBefore = await erc20Mock.balanceOf(
+                tapiocaOFT0.address,
+            );
+
+            await tapiocaOFT0.wrap(signer.address, dummyAmount);
+
+            const balTOFTSignerAfter = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
+            const balERC20ContractAfter = await erc20Mock.balanceOf(
+                tapiocaOFT0.address,
+            );
+
+            expect(balTOFTSignerAfter).eq(balTOFTSignerBefore.add(dummyAmount));
+            expect(balERC20ContractAfter).eq(
+                balERC20ContractBefore.add(dummyAmount.add(fees)),
+            );
+
+            const feesAfter = await tapiocaOFT0.totalFees();
+            expect(feesAfter.sub(feesBefore)).eq(fees);
+        });
+    });
+
+    describe('unwrap()', () => {
+        it('Should fail if not on the same chain', async () => {
+            const { signer, tapiocaOFT10, dummyAmount } = await loadFixture(
+                setupFixture,
+            );
+
+            await expect(
+                tapiocaOFT10.unwrap(signer.address, dummyAmount),
+            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotMainChain');
+        });
+        it('Should unwrap and give a 1:1 ratio amount of tokens', async () => {
             const {
                 signer,
                 erc20Mock,
@@ -62,10 +139,40 @@ describe('TapiocaOFT', () => {
                 mintAndApprove,
                 dummyAmount,
             } = await loadFixture(setupFixture);
+
             await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
             await tapiocaOFT0.wrap(signer.address, dummyAmount);
-            expect(await tapiocaOFT0.balanceOf(signer.address)).eq(dummyAmount);
-            expect(await erc20Mock.balanceOf(signer.address)).eq(0);
+
+            const balTOFTSignerBefore = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
+            const balERC20SignerBefore = await erc20Mock.balanceOf(
+                signer.address,
+            );
+            const balERC20ContractBefore = await erc20Mock.balanceOf(
+                tapiocaOFT0.address,
+            );
+
+            await expect(tapiocaOFT0.unwrap(signer.address, dummyAmount)).to.not
+                .be.reverted;
+
+            const balTOFTSignerAfter = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
+            const balERC20SignerAfter = await erc20Mock.balanceOf(
+                signer.address,
+            );
+            const balERC20ContractAfter = await erc20Mock.balanceOf(
+                tapiocaOFT0.address,
+            );
+
+            expect(balTOFTSignerAfter).eq(balTOFTSignerBefore.sub(dummyAmount));
+            expect(balERC20SignerAfter).eq(
+                balERC20SignerBefore.add(dummyAmount),
+            );
+            expect(balERC20ContractAfter).eq(
+                balERC20ContractBefore.sub(dummyAmount),
+            );
         });
     });
 

@@ -108,8 +108,8 @@ contract TapiocaOFT is OFT {
     /// @notice Harvest the fees collected by the contract. Called only on main chain.
     function harvestFees() external onlyMainChain {
         erc20.safeTransfer(address(tapiocaWrapper.owner()), totalFees);
-        emit Harvest(totalFees);
         totalFees = 0;
+        emit Harvest(totalFees);
     }
 
     /// @notice Unwrap an ERC20 with a 1:1 ratio. Called only on main chain.
