@@ -76,7 +76,7 @@ export const deployTOFT = async (
     const tx = await Tx_deployTapiocaOFT(
         currentLzChain.address,
         args.erc20,
-        Number(currentLzChain.lzChainId),
+        Number(args.lzChainId),
         mainNetworkSigner,
     );
 

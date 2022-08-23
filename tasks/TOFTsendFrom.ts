@@ -61,7 +61,7 @@ export const toftSendFrom = async (
     );
 
     const feeEstimation = await lzEndpoint.estimateFees(
-        LZ_ENDPOINTS[chainId].lzChainId,
+        otherChainId,
         otherChainTOFT.address,
         payload,
         false,

@@ -138,7 +138,7 @@ contract TapiocaOFT is OFT {
         return getChainId() == mainChainID;
     }
 
-    /// @notice Return the current chain ID.
+    /// @notice Return the current Layer-Zero "chain ID", not the actual `chainId` OPCODE output.
     /// @dev Useful for testing.
     function getChainId() internal view virtual returns (uint256) {
         return ILayerZeroEndpoint(lzEndpoint).getChainId();
