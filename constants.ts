@@ -1,7 +1,9 @@
-import deploymentJSON from './deployments.json';
+import { existsSync, readFileSync } from 'node:fs';
 
 export const DEPLOYMENTS_PATH = 'deployments.json';
-export const DEPLOYMENTS_FILE = deploymentJSON ?? {};
+export const DEPLOYMENTS_FILE = existsSync(DEPLOYMENTS_PATH)
+    ? JSON.parse(readFileSync(DEPLOYMENTS_PATH, 'utf8'))
+    : {};
 
 export type TMeta = {
     name: string;
