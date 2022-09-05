@@ -45,6 +45,6 @@
   "dependencies": {
     "@primitivefi/hardhat-dodoc": "^0.2.3",
     "load-json-file": "^7.0.1",
-    "tapioca-sdk": "^1.0.5"
+    "tapioca-sdk": "^1.0.6"
   }
 }

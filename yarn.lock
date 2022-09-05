@@ -7084,10 +7084,10 @@
     "string-width" "^4.2.3"
     "strip-ansi" "^6.0.1"
 
-"tapioca-sdk@^1.0.5":
-  "integrity" "sha512-Wb5y++xMhvWvdy/DGhlAb8QWZGxonVe96ZRBhfrw5IGb0Q7rhed4Yu1KWrNVZ8c7V8u/105PaJadQ5M/vmjm5w=="
-  "resolved" "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.0.5.tgz"
-  "version" "1.0.5"
+"tapioca-sdk@^1.0.6":
+  "integrity" "sha512-E/gvt0/9suZzsh7c+7hc7OCN1bpxH9MW7SBiPJ68paAWr91ENvXUNUjzkzAGoOHUoEmZello/W8uajUiKid0pA=="
+  "resolved" "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.0.6.tgz"
+  "version" "1.0.6"
   dependencies:
     "ethers" "^5.6.9"
     "lodash" "^4.17.21"
