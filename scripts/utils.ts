@@ -3,7 +3,7 @@ import { BytesLike, ethers, Wallet } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { getChainBy } from 'tapioca-sdk/dist/api/utils';
+import { API } from 'tapioca-sdk';
 import config from '../hardhat.export';
 import { TapiocaOFT__factory } from '../typechain';
 import { TContract, TDeployment } from '../constants';
@@ -127,8 +127,10 @@ export const getContractNames = async (hre: HardhatRuntimeEnvironment) =>
         e.split('.sol')[1].replace('/', '').replace('.json', ''),
     );
 
-export const handleGetChainBy = (...params: Parameters<typeof getChainBy>) => {
-    const chain = getChainBy(...params);
+export const handleGetChainBy = (
+    ...params: Parameters<typeof API.utils.getChainBy>
+) => {
+    const chain = API.utils.getChainBy(...params);
     if (!chain) {
         throw new Error(
             `[-] Chain ${String(params[1])} not supported in Tapioca-SDK`,
