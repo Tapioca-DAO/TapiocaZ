@@ -12,7 +12,8 @@ export const register = async (hre: HardhatRuntimeEnvironment) => {
         signer,
         LZEndpointMock_chainID_0: await deployLZEndpointMock(0),
         LZEndpointMock_chainID_10: await deployLZEndpointMock(10),
-        tapiocaWrapper: await deployTapiocaWrapper(),
+        tapiocaWrapper_0: await deployTapiocaWrapper(),
+        tapiocaWrapper_10: await deployTapiocaWrapper(),
         utils,
     };
 };

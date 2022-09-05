@@ -50,11 +50,11 @@ describe('TapiocaOFT', () => {
                 signer,
                 erc20Mock,
                 tapiocaOFT0,
-                tapiocaWrapper,
+                tapiocaWrapper_0,
                 mintAndApprove,
                 dummyAmount,
             } = await loadFixture(setupFixture);
-            await tapiocaWrapper.setMngmtFee(0);
+            await tapiocaWrapper_0.setMngmtFee(0);
 
             await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
 
@@ -180,7 +180,8 @@ describe('TapiocaOFT', () => {
         it('Should fail if untrusted remote', async () => {
             const {
                 signer,
-                tapiocaWrapper,
+                tapiocaWrapper_0,
+                tapiocaWrapper_10,
                 erc20Mock,
                 tapiocaOFT0,
                 tapiocaOFT10,
@@ -208,7 +209,7 @@ describe('TapiocaOFT', () => {
             );
 
             // Set trusted remotes
-            await tapiocaWrapper.executeTOFT(
+            await tapiocaWrapper_0.executeTOFT(
                 tapiocaOFT0.address,
                 tapiocaOFT0.interface.encodeFunctionData('setTrustedRemote', [
                     1,
@@ -216,7 +217,7 @@ describe('TapiocaOFT', () => {
                 ]),
                 true,
             );
-            await tapiocaWrapper.executeTOFT(
+            await tapiocaWrapper_10.executeTOFT(
                 tapiocaOFT10.address,
                 tapiocaOFT10.interface.encodeFunctionData('setTrustedRemote', [
                     0,

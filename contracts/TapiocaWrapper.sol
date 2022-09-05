@@ -34,6 +34,8 @@ contract TapiocaWrapper is Owned {
     /// ========== Errors ========
     /// ==========================
 
+    /// @notice If the TOFT is already deployed.
+    error TapiocaWrapper__AlreadyDeployed(address _erc20);
     /// @notice Failed to deploy the TapiocaWrapper contract.
     error TapiocaWrapper__FailedDeploy();
     /// @notice The management fee is too high. Currently set to a max of 50 BPS or 0.5%.
@@ -80,6 +82,10 @@ contract TapiocaWrapper is Owned {
         bytes calldata _bytecode,
         bytes32 _salt
     ) external onlyOwner {
+        if (address(tapiocaOFTsByErc20[_erc20]) != address(0x0)) {
+            revert TapiocaWrapper__AlreadyDeployed(_erc20);
+        }
+
         TapiocaOFT toft = TapiocaOFT(
             Create2.deploy(
                 0,

@@ -14,18 +14,22 @@ export const setupFixture = async () => {
     const erc20Mock1 = await (
         await hre.ethers.getContractFactory('ERC20Mock')
     ).deploy('erc20Mock', 'MOCK');
+    const erc20Mock2 = await (
+        await hre.ethers.getContractFactory('ERC20Mock')
+    ).deploy('erc20Mock', 'MOCK');
 
     const {
         LZEndpointMock_chainID_0,
         LZEndpointMock_chainID_10,
-        tapiocaWrapper,
+        tapiocaWrapper_0,
+        tapiocaWrapper_10,
         utils,
     } = await register(hre);
 
-    await tapiocaWrapper.setMngmtFee(25); // 0.25%
+    await tapiocaWrapper_0.setMngmtFee(25); // 0.25%
 
     // Deploy TapiocaOFT0
-    await tapiocaWrapper.createTOFT(
+    await tapiocaWrapper_0.createTOFT(
         erc20Mock.address,
         (
             await utils.Tx_deployTapiocaOFT(
@@ -39,13 +43,13 @@ export const setupFixture = async () => {
     );
 
     const tapiocaOFT0 = (await utils.attachTapiocaOFT(
-        await tapiocaWrapper.tapiocaOFTs(
-            (await tapiocaWrapper.tapiocaOFTLength()).sub(1),
+        await tapiocaWrapper_0.tapiocaOFTs(
+            (await tapiocaWrapper_0.tapiocaOFTLength()).sub(1),
         ),
     )) as TapiocaOFT;
 
     // Deploy TapiocaOFT10
-    await tapiocaWrapper.createTOFT(
+    await tapiocaWrapper_10.createTOFT(
         erc20Mock.address,
         (
             await utils.Tx_deployTapiocaOFT(
@@ -59,8 +63,8 @@ export const setupFixture = async () => {
     );
 
     const tapiocaOFT10 = (await utils.attachTapiocaOFT(
-        await tapiocaWrapper.tapiocaOFTs(
-            (await tapiocaWrapper.tapiocaOFTLength()).sub(1),
+        await tapiocaWrapper_10.tapiocaOFTs(
+            (await tapiocaWrapper_10.tapiocaOFTLength()).sub(1),
         ),
     )) as TapiocaOFT;
 
@@ -78,8 +82,8 @@ export const setupFixture = async () => {
 
     const estimateFees = async (amount: BigNumberish) =>
         await tapiocaOFT0.estimateFees(
-            await tapiocaWrapper.mngmtFee(),
-            await tapiocaWrapper.mngmtFeeFraction(),
+            await tapiocaWrapper_0.mngmtFee(),
+            await tapiocaWrapper_0.mngmtFeeFraction(),
             amount,
         );
 
@@ -99,9 +103,11 @@ export const setupFixture = async () => {
         signer,
         LZEndpointMock_chainID_0,
         LZEndpointMock_chainID_10,
-        tapiocaWrapper,
+        tapiocaWrapper_0,
+        tapiocaWrapper_10,
         erc20Mock,
         erc20Mock1,
+        erc20Mock2,
         tapiocaOFT0,
         tapiocaOFT10,
         dummyAmount,
