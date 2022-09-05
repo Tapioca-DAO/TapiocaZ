@@ -1,17 +1,21 @@
 import '@nomiclabs/hardhat-ethers';
 import { execSync } from 'node:child_process';
 import { task } from 'hardhat/config';
-import { LZ_ENDPOINTS } from './scripts/constants';
 import { deployTOFT } from './tasks/DeployTOFT';
 import { exportSDK__task } from './tasks/exportSDK';
 import { listDeploy } from './tasks/listDeploy';
 import { toftSendFrom } from './tasks/TOFTsendFrom';
 import { wrap } from './tasks/wrap';
+import { API } from 'tapioca-sdk';
 
 function formatLZEndpoints() {
-    return Object.keys(LZ_ENDPOINTS)
+    return API.utils
+        .getChainIDs()
         .map((chainId) => {
-            const { name, address, lzChainId } = LZ_ENDPOINTS[chainId];
+            const { name, address, lzChainId } = API.utils.getChainBy(
+                'chainId',
+                chainId,
+            )!;
             return `${name} (${chainId}) ${address} ${lzChainId}\n`;
         })
         .reduce((p, c) => p + c, '');
