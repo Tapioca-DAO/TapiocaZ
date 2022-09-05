@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { TContract, TMeta } from '../scripts/constants';
+import { TContract, TMeta } from '../constants';
 import {
     generateSalt,
     getOtherChainDeployment,

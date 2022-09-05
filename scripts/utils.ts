@@ -6,7 +6,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { getChainBy } from 'tapioca-sdk/dist/api/utils';
 import config from '../hardhat.export';
 import { TapiocaOFT__factory } from '../typechain';
-import { TContract, TDeployment } from './constants';
+import { TContract, TDeployment } from '../constants';
 
 export const BN = (n: any) => ethers.BigNumber.from(n);
 export const generateSalt = () => ethers.utils.randomBytes(32);

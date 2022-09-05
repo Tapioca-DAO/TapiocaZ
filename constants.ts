@@ -1,4 +1,4 @@
-import deploymentJSON from '../deployments.json';
+import deploymentJSON from './deployments.json';
 
 export const DEPLOYMENTS_PATH = 'deployments.json';
 export const DEPLOYMENTS_FILE = deploymentJSON;
