@@ -3,9 +3,10 @@ import { BytesLike, ethers, Wallet } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { getChainBy } from 'tapioca-sdk/dist/api/utils';
 import config from '../hardhat.export';
 import { TapiocaOFT__factory } from '../typechain';
-import { LZ_ENDPOINTS } from './constants';
+import { TContract, TDeployment } from './constants';
 
 export const BN = (n: any) => ethers.BigNumber.from(n);
 export const generateSalt = () => ethers.utils.randomBytes(32);
@@ -17,7 +18,8 @@ export const useNetwork = async (
     const pk = process.env.PRIVATE_KEY;
     if (pk === undefined) throw new Error('[-] PRIVATE_KEY not set');
     const info: any = config.networks?.[network];
-    if (!info) throw new Error(`[-] Network ${network} not found`);
+    if (!info)
+        throw new Error(`[-] Hardhat network config not found for ${network} `);
 
     const provider = new hre.ethers.providers.JsonRpcProvider(
         { url: info.url },
@@ -42,17 +44,16 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
         await (
             await (await ethers.getContractFactory('TapiocaWrapper')).deploy()
         ).deployed();
-
     // UTILS
     const Tx_deployTapiocaOFT = async (
         lzEndpoint: string,
         erc20Address: string,
-        mainChainID: number,
-        networkSigner: Wallet | SignerWithAddress,
+        hostChainID: number,
+        hostChainNetworkSigner: Wallet | SignerWithAddress,
     ) => {
         const erc20 = (
             await ethers.getContractAt('ERC20', erc20Address)
-        ).connect(networkSigner);
+        ).connect(hostChainNetworkSigner);
 
         const erc20name = await erc20.name();
         const erc20symbol = await erc20.symbol();
@@ -66,7 +67,7 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
             erc20name,
             erc20symbol,
             erc20decimal,
-            mainChainID,
+            hostChainID,
         ];
 
         const txData = (
@@ -106,17 +107,6 @@ export const readFromJson = (filename: string) => {
     }
     return {};
 };
-
-export type TContract = {
-    name: string;
-    address: string;
-    erc20address: string;
-};
-
-export type TDeployment = {
-    [chain: string]: TContract[];
-};
-
 export const readTOFTDeployments = (): TDeployment => {
     return readFromJson('deployments.json');
 };
@@ -137,16 +127,15 @@ export const getContractNames = async (hre: HardhatRuntimeEnvironment) =>
         e.split('.sol')[1].replace('/', '').replace('.json', ''),
     );
 
-export const getNetworkNameFromChainId = (chainId: string) =>
-    Object.keys(config.networks!).find(
-        (e) => String(config.networks?.[e]?.chainId) === chainId,
-    );
-export const getNetworkFromLzChainId = (lzChainId: string) =>
-    Object.keys(LZ_ENDPOINTS).find(
-        (e) => LZ_ENDPOINTS[e].lzChainId === lzChainId,
-    );
-export const getChainIdFromNetwork = (name: string) =>
-    config.networks![name]?.chainId;
+export const handleGetChainBy = (...params: Parameters<typeof getChainBy>) => {
+    const chain = getChainBy(...params);
+    if (!chain) {
+        throw new Error(
+            `[-] Chain ${String(params[1])} not supported in Tapioca-SDK`,
+        );
+    }
+    return chain;
+};
 
 export const getOtherChainDeployment = async (
     hre: HardhatRuntimeEnvironment,
@@ -156,7 +145,12 @@ export const getOtherChainDeployment = async (
     if (network === hre.network.name) {
         return await hre.deployments.get(contract);
     }
-    return readFromJson(
+    const deployment = readFromJson(
         `deployments/${network}/${contract}.json`,
     ) as Deployment;
+    if (!deployment?.address)
+        throw new Error(
+            `[-] Deployment not found for ${contract} on ${network}`,
+        );
+    return deployment;
 };
