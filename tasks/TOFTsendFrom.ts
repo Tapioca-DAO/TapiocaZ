@@ -1,48 +1,43 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { LZ_ENDPOINTS } from '../scripts/constants';
-import { readTOFTDeployments } from '../scripts/utils';
+import { getTOFTDeploymentByAddress, handleGetChainBy } from '../scripts/utils';
 import { TapiocaOFT } from '../typechain';
 
 export const toftSendFrom = async (
-    args: { toft: string; to: string; amount: string },
+    args: { toft: string; to: 'host' | 'linked'; amount: string },
     hre: HardhatRuntimeEnvironment,
 ) => {
+    if (args.to !== 'host' && args.to !== 'linked') {
+        throw new Error('[-] Invalid `to` argument');
+    }
+
+    console.log('[+] Initializing');
     const signer = (await hre.ethers.getSigners())[0];
 
-    const chainId = await hre.getChainId();
-    const lzChain = LZ_ENDPOINTS[chainId];
+    const currentChain = handleGetChainBy('chainId', await hre.getChainId());
 
-    const deployments = readTOFTDeployments();
-    const toft = deployments[lzChain.lzChainId].find(
-        (e) => e.address === args.toft,
+    const toftDeployment = getTOFTDeploymentByAddress(
+        currentChain.chainId,
+        args.toft,
     );
 
-    if (!toft) throw new Error(`[-] TOFT not deployed on chain ${chainId}`);
-    const otherChainId = Object.keys(deployments).find((e) =>
-        deployments[e].find(
-            (o) =>
-                o.erc20address === toft?.erc20address &&
-                o.address !== args.toft,
-        ),
-    );
-    if (!otherChainId) throw new Error('[-] TOFT not deployed on other chain');
-    const otherChainTOFT = deployments[otherChainId!].find(
-        (e) => e.erc20address === toft?.erc20address,
-    );
-    if (!otherChainTOFT)
-        throw new Error(
-            `[-] TOFT not not found on other chain ${otherChainId}`,
-        );
+    if (toftDeployment.meta.hostChain.id === currentChain.chainId) {
+        throw new Error('[-] TOFT can not be sent to the same current chain');
+    }
+    const dstTOFT =
+        args.to === 'host'
+            ? toftDeployment.meta.hostChain.address
+            : toftDeployment.meta.linkedChain.address;
 
     const toftContract = await hre.ethers.getContractAt(
         'TapiocaOFT',
-        toft.address,
+        toftDeployment.address,
     );
 
+    console.log('[+] Building TX');
     const sendFromParam: Parameters<TapiocaOFT['sendFrom']> = [
         signer.address,
-        otherChainId,
-        args.to,
+        toftDeployment.meta.linkedChain.id,
+        dstTOFT,
         args.amount,
         signer.address,
         signer.address,
@@ -57,12 +52,12 @@ export const toftSendFrom = async (
 
     const lzEndpoint = await hre.ethers.getContractAt(
         'LZEndpointMock',
-        LZ_ENDPOINTS[chainId].address,
+        currentChain.address,
     );
 
     const feeEstimation = await lzEndpoint.estimateFees(
-        otherChainId,
-        otherChainTOFT.address,
+        toftDeployment.meta.linkedChain.id,
+        toftDeployment.meta.linkedChain.address,
         payload,
         false,
         '0x',
@@ -70,7 +65,7 @@ export const toftSendFrom = async (
 
     await (
         await signer.sendTransaction({
-            to: toft.address,
+            to: toftContract.address,
             value: feeEstimation._nativeFee,
             data: payload,
         })
