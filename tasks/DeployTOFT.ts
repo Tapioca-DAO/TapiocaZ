@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { TContract, TMeta } from '../constants';
 import {
     generateSalt,
-    getOtherChainDeployment,
+    getDeploymentByChain,
     handleGetChainBy,
     readTOFTDeployments,
     saveTOFTDeployment,
@@ -148,7 +148,7 @@ async function setTrustedRemote(
     const tWrapper = await hre.ethers.getContractAt(
         'TapiocaWrapper',
         (
-            await getOtherChainDeployment(hre, fromChain.name, 'TapiocaWrapper')
+            await getDeploymentByChain(hre, fromChain.name, 'TapiocaWrapper')
         ).address,
     );
 

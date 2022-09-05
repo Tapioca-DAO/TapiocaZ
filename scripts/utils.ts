@@ -139,7 +139,7 @@ export const handleGetChainBy = (
     return chain;
 };
 
-export const getOtherChainDeployment = async (
+export const getDeploymentByChain = async (
     hre: HardhatRuntimeEnvironment,
     network: string,
     contract: string,
