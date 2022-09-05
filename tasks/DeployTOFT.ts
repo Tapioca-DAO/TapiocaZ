@@ -27,9 +27,20 @@ export const deployTOFT = async (
     console.log('[+] Initializing');
     const utils = useUtils(hre);
 
-    const erc20Meta: TMeta = {
-        name: '', // We'll fill this in later.
-        address: hre.ethers.utils.getAddress(args.erc20), // Normalize
+    const deploymentMetadata: TMeta = {
+        // We'll fill empty properties later.
+        erc20: {
+            name: '',
+            address: hre.ethers.utils.getAddress(args.erc20), // Normalize
+        },
+        hostChain: {
+            id: '',
+            address: '',
+        },
+        linkedChain: {
+            id: '',
+            address: '',
+        },
     };
 
     // Load up chain meta.
@@ -42,16 +53,16 @@ export const deployTOFT = async (
     // Load ERC20 meta now that we have the host chain signer and knows if we're on the host chain.
     const erc20 = await hre.ethers.getContractAt(
         'ERC20',
-        erc20Meta.address,
+        deploymentMetadata.erc20.address,
         hostChainNetworkSigner,
     );
-    erc20Meta.name = await erc20.name();
+    deploymentMetadata.erc20.name = await erc20.name();
 
     // Verifies that the TOFT contract is deployed on the host chain if we're currently not on it.
     let hostChainTOFT!: TContract;
     if (!isMainChain) {
         hostChainTOFT = readTOFTDeployments()[hostChain.chainId].find(
-            (e) => e.meta.address === erc20Meta.address,
+            (e) => e.meta.erc20.address === deploymentMetadata.erc20.address,
         ) as TContract;
         if (!hostChainTOFT) {
             throw new Error(`[-] TOFT not deployed on chain ${hostChain.name}`);
@@ -62,7 +73,7 @@ export const deployTOFT = async (
     console.log('[+] Building the deploy transaction');
     const tx = await utils.Tx_deployTapiocaOFT(
         currentChain.lzChainId,
-        erc20Meta.address,
+        deploymentMetadata.erc20.address,
         Number(hostChain.chainId),
         hostChainNetworkSigner,
     );
@@ -89,7 +100,21 @@ export const deployTOFT = async (
     const TOFTMeta: TContract = {
         name: await latestTOFT.name(),
         address: latestTOFT.address,
-        meta: erc20Meta,
+        meta: {
+            ...deploymentMetadata,
+            hostChain: {
+                id: hostChain.chainId,
+                address: isMainChain
+                    ? latestTOFT.address
+                    : hostChainTOFT.address,
+            },
+            linkedChain: {
+                id: !isMainChain ? currentChain.chainId : '',
+                address: !isMainChain
+                    ? latestTOFT.address
+                    : hostChainTOFT.address,
+            },
+        },
     };
     console.log(`[+] Deployed ${TOFTMeta.name} TOFT at ${TOFTMeta.address}`);
     saveTOFTDeployment(currentChain.chainId, [TOFTMeta]);
@@ -102,7 +127,7 @@ export const deployTOFT = async (
     });
 
     // Finally, we set the trusted remotes between the chains if we have 2 deployments.
-    if (isMainChain) {
+    if (!isMainChain) {
         // hostChain[currentChain] = true
         await setTrustedRemote(
             hre,

@@ -6,8 +6,15 @@ export const DEPLOYMENTS_FILE = existsSync(DEPLOYMENTS_PATH)
     : {};
 
 export type TMeta = {
-    name: string;
-    address: string;
+    erc20: { name: string; address: string };
+    hostChain: {
+        id: string;
+        address: string;
+    };
+    linkedChain: {
+        id: string;
+        address: string;
+    };
 };
 export type TContract = {
     name: string;
