@@ -156,3 +156,20 @@ export const getDeploymentByChain = async (
         );
     return deployment;
 };
+
+export const getTOFTDeploymentByAddress = (
+    chainID: string,
+    address: string,
+) => {
+    const toft = readTOFTDeployments()[chainID].find(
+        (e) => e.address === address,
+    );
+    if (!toft?.meta.hostChain.id) {
+        throw new Error('[-] TOFT not deployed on host chain');
+    }
+    if (!toft?.meta.linkedChain.id) {
+        throw new Error('[-] TOFT not deployed on linked chain');
+    }
+
+    return toft!;
+};
