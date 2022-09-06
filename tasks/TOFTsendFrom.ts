@@ -1,5 +1,8 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { getTOFTDeploymentByAddress, handleGetChainBy } from '../scripts/utils';
+import {
+    getTOFTDeploymentByTOFTAddress,
+    handleGetChainBy,
+} from '../scripts/utils';
 import { TapiocaOFT } from '../typechain';
 
 export const toftSendFrom = async (
@@ -15,14 +18,20 @@ export const toftSendFrom = async (
 
     const currentChain = handleGetChainBy('chainId', await hre.getChainId());
 
-    const toftDeployment = getTOFTDeploymentByAddress(
+    const toftDeployment = getTOFTDeploymentByTOFTAddress(
         currentChain.chainId,
         args.toft,
     );
 
-    if (toftDeployment.meta.hostChain.id === currentChain.chainId) {
+    if (
+        (args.to === 'host' &&
+            toftDeployment.meta.hostChain.id === currentChain.chainId) ||
+        (args.to === 'linked' &&
+            toftDeployment.meta.linkedChain.id === currentChain.chainId)
+    ) {
         throw new Error('[-] TOFT can not be sent to the same current chain');
     }
+
     const dstTOFT =
         args.to === 'host'
             ? toftDeployment.meta.hostChain.address
