@@ -316,6 +316,22 @@ Called when fees are changed.
 
 ## Errors
 
+### TapiocaWrapper__AlreadyDeployed
+
+```solidity
+error TapiocaWrapper__AlreadyDeployed(address _erc20)
+```
+
+If the TOFT is already deployed.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _erc20 | address | undefined |
+
 ### TapiocaWrapper__FailedDeploy
 
 ```solidity

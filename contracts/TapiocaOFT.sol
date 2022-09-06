@@ -16,18 +16,16 @@ contract TapiocaOFT is OFT {
     /// @notice The ERC20 to wrap.
     IERC20 public immutable erc20;
     /// @notice The host chain ID of the ERC20, will be used only on OP chain.
-    uint256 public immutable mainChainID;
+    uint256 public immutable hostChainID;
     /// @notice Decimal cache number of the ERC20.
     uint8 _decimalCache;
-
-    uint16 constant OPTIMISM_CHAINID = 10;
 
     /// ==========================
     /// ========== Errors ========
     /// ==========================
 
     /// @notice Code executed not on main chain (optimism/chainID mismatch).
-    error TOFT__NotMainChain();
+    error TOFT__NotHostChain();
 
     /// ==========================
     /// ========== Events ========
@@ -42,32 +40,25 @@ contract TapiocaOFT is OFT {
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
-        uint16 _mainChainID
+        uint16 _hostChainID
     )
         OFT(
-            string(abi.encodePacked('TapiocaWrapper-', _name)),
-            string(abi.encodePacked('TW-', _symbol)),
+            string(abi.encodePacked('TapiocaOFT-', _name)),
+            string(abi.encodePacked('TOFT-', _symbol)),
             _lzEndpoint
         )
     {
         erc20 = _erc20;
         _decimalCache = _decimal;
-        mainChainID = _mainChainID;
-
-        // Set trusted remote
-        if (getChainId() == _mainChainID) {
-            trustedRemoteLookup[OPTIMISM_CHAINID] = abi.encode(address(this));
-        } else {
-            trustedRemoteLookup[_mainChainID] = abi.encode(address(this));
-        }
+        hostChainID = _hostChainID;
 
         tapiocaWrapper = TapiocaWrapper(msg.sender);
     }
 
-    /// @notice Require that the caller is on the main chain.
-    modifier onlyMainChain() {
-        if (getChainId() != mainChainID) {
-            revert TOFT__NotMainChain();
+    /// @notice Require that the caller is on the host chain of the ERC20.
+    modifier onlyHostChain() {
+        if (getChainId() != hostChainID) {
+            revert TOFT__NotHostChain();
         }
         _;
     }
@@ -81,7 +72,7 @@ contract TapiocaOFT is OFT {
     /// @dev Since it can be executed only on the main chain, if an address exists on the OP chain it will not allowed to wrap.
     /// @param _toAddress The address to wrap the ERC20 to.
     /// @param _amount The amount of ERC20 to wrap.
-    function wrap(address _toAddress, uint256 _amount) external onlyMainChain {
+    function wrap(address _toAddress, uint256 _amount) external onlyHostChain {
         uint256 mngmtFee = tapiocaWrapper.mngmtFee();
 
         if (mngmtFee > 0) {
@@ -106,7 +97,7 @@ contract TapiocaOFT is OFT {
     }
 
     /// @notice Harvest the fees collected by the contract. Called only on main chain.
-    function harvestFees() external onlyMainChain {
+    function harvestFees() external onlyHostChain {
         erc20.safeTransfer(address(tapiocaWrapper.owner()), totalFees);
         totalFees = 0;
         emit Harvest(totalFees);
@@ -117,7 +108,7 @@ contract TapiocaOFT is OFT {
     /// @param _amount The amount of ERC20 to unwrap.
     function unwrap(address _toAddress, uint256 _amount)
         external
-        onlyMainChain
+        onlyHostChain
     {
         _burn(msg.sender, _amount);
         erc20.safeTransfer(_toAddress, _amount);
@@ -134,8 +125,8 @@ contract TapiocaOFT is OFT {
     }
 
     /// @notice Check if the current chain is the main chain of the ERC20.
-    function isMainChain() external view returns (bool) {
-        return getChainId() == mainChainID;
+    function isHostChain() external view returns (bool) {
+        return getChainId() == hostChainID;
     }
 
     /// @notice Return the current Layer-Zero "chain ID", not the actual `chainId` OPCODE output.

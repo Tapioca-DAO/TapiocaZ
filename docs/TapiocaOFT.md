@@ -280,6 +280,23 @@ Harvest the fees collected by the contract. Called only on main chain.
 
 
 
+### hostChainID
+
+```solidity
+function hostChainID() external view returns (uint256)
+```
+
+The host chain ID of the ERC20, will be used only on OP chain.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### increaseAllowance
 
 ```solidity
@@ -303,10 +320,10 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 |---|---|---|
 | _0 | bool | undefined |
 
-### isMainChain
+### isHostChain
 
 ```solidity
-function isMainChain() external view returns (bool)
+function isHostChain() external view returns (bool)
 ```
 
 Check if the current chain is the main chain of the ERC20.
@@ -378,23 +395,6 @@ function lzReceive(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _
 | _srcAddress | bytes | undefined |
 | _nonce | uint64 | undefined |
 | _payload | bytes | undefined |
-
-### mainChainID
-
-```solidity
-function mainChainID() external view returns (uint256)
-```
-
-The host chain ID of the ERC20, will be used only on OP chain.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 ### name
 
@@ -967,10 +967,10 @@ event Wrap(address indexed _from, address indexed _to, uint256 _amount)
 
 ## Errors
 
-### TOFT__NotMainChain
+### TOFT__NotHostChain
 
 ```solidity
-error TOFT__NotMainChain()
+error TOFT__NotHostChain()
 ```
 
 Code executed not on main chain (optimism/chainID mismatch).

@@ -1,5 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { readTOFTDeployments, TDeployment } from '../scripts/utils';
+import { TDeployment } from '../constants';
+import { readTOFTDeployments } from '../scripts/utils';
 
 export const getDeployments = async (
     {},
