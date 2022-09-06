@@ -107,7 +107,7 @@ contract TapiocaWrapper is Owned {
         tapiocaOFTs.push(toft);
         tapiocaOFTsByErc20[_erc20] = toft;
 
-        if (toft.isMainChain()) {
+        if (toft.isHostChain()) {
             harvestableTapiocaOFTs.push(toft);
         }
         emit CreateOFT(toft, _erc20);

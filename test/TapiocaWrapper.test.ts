@@ -118,9 +118,7 @@ describe('TapiocaWrapper', () => {
                 tapiocaOFTArrayValue,
             );
 
-            expect(await tapiocaOFT.name()).to.eq(
-                `TapiocaWrapper-${erc20Name}`,
-            );
+            expect(await tapiocaOFT.name()).to.eq(`TapiocaOFT-${erc20Name}`);
         });
     });
 

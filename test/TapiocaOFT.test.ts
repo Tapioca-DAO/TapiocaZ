@@ -22,7 +22,7 @@ describe('TapiocaOFT', () => {
 
             await expect(
                 tapiocaOFT10.wrap(signer.address, dummyAmount),
-            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotMainChain');
+            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotHostChain');
         });
 
         it('Should fail if the fees are not paid', async () => {
@@ -129,7 +129,7 @@ describe('TapiocaOFT', () => {
 
             await expect(
                 tapiocaOFT10.unwrap(signer.address, dummyAmount),
-            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotMainChain');
+            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotHostChain');
         });
         it('Should unwrap and give a 1:1 ratio amount of tokens', async () => {
             const {
@@ -265,7 +265,7 @@ describe('TapiocaOFT', () => {
 
             await expect(
                 tapiocaOFT10.harvestFees(),
-            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotMainChain');
+            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotHostChain');
         });
 
         it('Should withdraw the fees and update the total fee balance', async () => {
