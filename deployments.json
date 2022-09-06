@@ -13,24 +13,6 @@
           "address": "0xd31770706a44226afD681195859527B376D6fd4A"
         },
         "linkedChain": {
-          "id": "",
-          "address": ""
-        }
-      }
-    },
-    {
-      "name": "TapiocaOFT-erc20TEST0",
-      "address": "0xd31770706a44226afD681195859527B376D6fd4A",
-      "meta": {
-        "erc20": {
-          "name": "erc20TEST0",
-          "address": "0x0957A8b889ea11D641A33055A993FE624fc2Add5"
-        },
-        "hostChain": {
-          "id": "4",
-          "address": "0xd31770706a44226afD681195859527B376D6fd4A"
-        },
-        "linkedChain": {
           "id": "80001",
           "address": "0x8D4fCD987a178c7C764766f782b22Ae9A136FdaB"
         }
