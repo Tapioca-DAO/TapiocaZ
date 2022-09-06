@@ -14,12 +14,12 @@ import {
  * Deploy a TOFT contract to the specified network. It'll also deploy it to Tapioca host chain (Optimism, chainID 10).
  * A record will be added to the `DEPLOYMENTS_PATH` file.
  *
- * @param args.hostChainId - The host chain ID of the ERC20.
+ * @param args.hostChainName - The host chain name of the ERC20.
  * @param args.erc20 - The address of the ERC20.
  */
 export const deployTOFT = async (
     args: {
-        hostChainId: string;
+        hostChainName: string;
         erc20: string;
     },
     hre: HardhatRuntimeEnvironment,
@@ -44,7 +44,7 @@ export const deployTOFT = async (
     };
 
     // Load up chain meta.
-    const hostChain = handleGetChainBy('chainId', args.hostChainId);
+    const hostChain = handleGetChainBy('name', args.hostChainName);
     const currentChain = handleGetChainBy('chainId', await hre.getChainId());
     const hostChainNetworkSigner = await useNetwork(hre, hostChain.name);
 
@@ -72,7 +72,7 @@ export const deployTOFT = async (
     // Get the deploy tx
     console.log('[+] Building the deploy transaction');
     const tx = await utils.Tx_deployTapiocaOFT(
-        currentChain.lzChainId,
+        currentChain.address,
         deploymentMetadata.erc20.address,
         Number(hostChain.chainId),
         hostChainNetworkSigner,
@@ -110,9 +110,7 @@ export const deployTOFT = async (
             },
             linkedChain: {
                 id: !isMainChain ? currentChain.chainId : '',
-                address: !isMainChain
-                    ? latestTOFT.address
-                    : hostChainTOFT.address,
+                address: !isMainChain ? latestTOFT.address : '',
             },
         },
     };
@@ -140,10 +138,10 @@ export const deployTOFT = async (
         // otherChain[hostChain] = true
         await setTrustedRemote(
             hre,
-            hostChain.chainId,
             currentChain.chainId,
-            hostChainTOFT.address,
+            hostChain.chainId,
             latestTOFT.address,
+            hostChainTOFT.address,
         );
     }
 };

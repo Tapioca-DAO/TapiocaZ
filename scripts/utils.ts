@@ -133,7 +133,13 @@ export const handleGetChainBy = (
     const chain = API.utils.getChainBy(...params);
     if (!chain) {
         throw new Error(
-            `[-] Chain ${String(params[1])} not supported in Tapioca-SDK`,
+            `[-] Chain ${String(
+                params[1],
+            )} not supported in Tapioca-SDK\nSupported chains: ${JSON.stringify(
+                API.utils.getSupportedChains(),
+                undefined,
+                2,
+            )}\n\n`,
         );
     }
     return chain;

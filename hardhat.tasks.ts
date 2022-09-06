@@ -12,11 +12,8 @@ function formatLZEndpoints() {
     return API.utils
         .getChainIDs()
         .map((chainId) => {
-            const { name, address, lzChainId } = API.utils.getChainBy(
-                'chainId',
-                chainId,
-            )!;
-            return `${name} (${chainId}) ${address} ${lzChainId}\n`;
+            const { name } = API.utils.getChainBy('chainId', chainId)!;
+            return `${name} - (${chainId})\n`;
         })
         .reduce((p, c) => p + c, '');
 }
@@ -49,7 +46,7 @@ task(
     deployTOFT,
 )
     .addParam('erc20', 'The ERC20 address to wrap')
-    .addParam('lzChainId', `The main chain ID ()\n${formatLZEndpoints()}`);
+    .addParam('hostChainName', `The main chain ID ()\n${formatLZEndpoints()}`);
 
 task(
     'sendFrom',
@@ -57,7 +54,7 @@ task(
     toftSendFrom,
 )
     .addParam('toft', 'The TOFT contract')
-    .addParam('to', 'Where to send the tokens')
+    .addParam('to', "Where to send the tokens, can be 'host' or 'linked'")
     .addParam('amount', 'The amount of tokens to send');
 
 task('wrap', 'Approve and wrap an ERC20 to its TOFT', wrap)
