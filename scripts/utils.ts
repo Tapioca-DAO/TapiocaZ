@@ -3,10 +3,11 @@ import { BytesLike, ethers, Wallet } from 'ethers';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import _ from 'lodash';
 import { API } from 'tapioca-sdk';
+import { TContract, TDeployment } from '../constants';
 import config from '../hardhat.export';
 import { TapiocaOFT__factory } from '../typechain';
-import { TContract, TDeployment } from '../constants';
 
 export const BN = (n: any) => ethers.BigNumber.from(n);
 export const generateSalt = () => ethers.utils.randomBytes(32);
@@ -122,6 +123,19 @@ export const saveTOFTDeployment = (chainId: string, contracts: TContract[]) => {
     return deployments;
 };
 
+export const removeTOFTDeployment = (chainId: string, contract: TContract) => {
+    const deployments: TDeployment = {
+        ...readFromJson('deployments.json'),
+    };
+
+    deployments[chainId] = _.remove(deployments[chainId], (e) =>
+        _.isEqual(e, contract),
+    );
+
+    saveToJson(deployments, 'deployments.json', 'w');
+    return deployments;
+};
+
 export const getContractNames = async (hre: HardhatRuntimeEnvironment) =>
     (await hre.artifacts.getArtifactPaths()).map((e) =>
         e.split('.sol')[1].replace('/', '').replace('.json', ''),
@@ -163,7 +177,24 @@ export const getDeploymentByChain = async (
     return deployment;
 };
 
-export const getTOFTDeploymentByAddress = (
+export const getTOFTDeploymentByERC20Address = (
+    chainID: string,
+    erc20Address: string,
+) => {
+    const toft = readTOFTDeployments()[chainID].find(
+        (e) => e.meta.erc20.address === erc20Address,
+    ) as TContract;
+    if (!toft) {
+        throw new Error(
+            `[-] TOFT not deployed on chain ${
+                handleGetChainBy('chainId', chainID).name
+            }`,
+        );
+    }
+    return toft;
+};
+
+export const getTOFTDeploymentByTOFTAddress = (
     chainID: string,
     address: string,
 ) => {

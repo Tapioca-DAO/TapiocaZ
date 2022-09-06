@@ -3,8 +3,9 @@ import { TContract, TMeta } from '../constants';
 import {
     generateSalt,
     getDeploymentByChain,
+    getTOFTDeploymentByERC20Address,
     handleGetChainBy,
-    readTOFTDeployments,
+    removeTOFTDeployment,
     saveTOFTDeployment,
     useNetwork,
     useUtils,
@@ -61,12 +62,10 @@ export const deployTOFT = async (
     // Verifies that the TOFT contract is deployed on the host chain if we're currently not on it.
     let hostChainTOFT!: TContract;
     if (!isMainChain) {
-        hostChainTOFT = readTOFTDeployments()[hostChain.chainId].find(
-            (e) => e.meta.erc20.address === deploymentMetadata.erc20.address,
-        ) as TContract;
-        if (!hostChainTOFT) {
-            throw new Error(`[-] TOFT not deployed on chain ${hostChain.name}`);
-        }
+        hostChainTOFT = getTOFTDeploymentByERC20Address(
+            hostChain.chainId,
+            deploymentMetadata.erc20.address,
+        );
     }
 
     // Get the deploy tx
@@ -108,6 +107,7 @@ export const deployTOFT = async (
                     ? latestTOFT.address
                     : hostChainTOFT.address,
             },
+            // First write off the host chain TOFT deployment meta will not include the linkedChain info since it is not known yet.
             linkedChain: {
                 id: !isMainChain ? currentChain.chainId : '',
                 address: !isMainChain ? latestTOFT.address : '',
@@ -116,6 +116,17 @@ export const deployTOFT = async (
     };
     console.log(`[+] Deployed ${TOFTMeta.name} TOFT at ${TOFTMeta.address}`);
     saveTOFTDeployment(currentChain.chainId, [TOFTMeta]);
+
+    // Now that we know linked chain info, we update the host chain TOFT deployment meta.
+    if (!isMainChain) {
+        const hostDepl = getTOFTDeploymentByERC20Address(
+            TOFTMeta.meta.hostChain.id,
+            TOFTMeta.meta.erc20.address,
+        );
+        removeTOFTDeployment(hostDepl.meta.hostChain.id, hostDepl);
+        hostDepl.meta.linkedChain = TOFTMeta.meta.linkedChain;
+        saveTOFTDeployment(hostDepl.meta.hostChain.id, [hostDepl]);
+    }
 
     console.log('[+] Verifying the contract on the block explorer');
     await hre.run('verify:verify', {
