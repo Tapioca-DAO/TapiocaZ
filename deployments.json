@@ -1,0 +1,42 @@
+{
+  "4": [
+    {
+      "name": "TapiocaWrapper-erc20TEST0",
+      "address": "0xF6278aF2AEA05232554a1a8f0D5D5F67041375b3",
+      "meta": {
+        "erc20": {
+          "name": "erc20TEST0",
+          "address": "0xE003630C90db7287bEecf08Cf9B4878Ba678905B"
+        },
+        "hostChain": {
+          "id": "4",
+          "address": "0xF6278aF2AEA05232554a1a8f0D5D5F67041375b3"
+        },
+        "linkedChain": {
+          "id": "",
+          "address": ""
+        }
+      }
+    }
+  ],
+  "80001": [
+    {
+      "name": "TapiocaWrapper-erc20TEST0",
+      "address": "0xe4a5e42CCBb341c28D43BBe3975DAdc101f576d4",
+      "meta": {
+        "erc20": {
+          "name": "erc20TEST0",
+          "address": "0xE003630C90db7287bEecf08Cf9B4878Ba678905B"
+        },
+        "hostChain": {
+          "id": "4",
+          "address": "0xF6278aF2AEA05232554a1a8f0D5D5F67041375b3"
+        },
+        "linkedChain": {
+          "id": "80001",
+          "address": "0xe4a5e42CCBb341c28D43BBe3975DAdc101f576d4"
+        }
+      }
+    }
+  ]
+}
