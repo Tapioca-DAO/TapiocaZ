@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import './OFT20/OFT.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import './OFT20/interfaces/ILayerZeroEndpoint.sol';
+import 'tapioca-sdk/dist/contracts/lzApp/LzApp.sol';
+import 'tapioca-sdk/dist/contracts/token/oft/OFT.sol';
+import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroEndpoint.sol';
 import './TapiocaWrapper.sol';
 
 contract TapiocaOFT is OFT {

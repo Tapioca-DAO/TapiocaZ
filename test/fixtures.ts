@@ -29,18 +29,22 @@ export const setupFixture = async () => {
     await tapiocaWrapper_0.setMngmtFee(25); // 0.25%
 
     // Deploy TapiocaOFT0
-    await tapiocaWrapper_0.createTOFT(
-        erc20Mock.address,
-        (
-            await utils.Tx_deployTapiocaOFT(
-                LZEndpointMock_chainID_0.address,
-                erc20Mock.address,
-                0,
-                signer,
-            )
-        ).txData,
-        hre.ethers.utils.randomBytes(32),
-    );
+    {
+        const txData = await tapiocaWrapper_0.populateTransaction.createTOFT(
+            erc20Mock.address,
+            (
+                await utils.Tx_deployTapiocaOFT(
+                    LZEndpointMock_chainID_0.address,
+                    erc20Mock.address,
+                    0,
+                    signer,
+                )
+            ).txData,
+            hre.ethers.utils.randomBytes(32),
+        );
+        txData.gasLimit = await hre.ethers.provider.estimateGas(txData);
+        await signer.sendTransaction(txData);
+    }
 
     const tapiocaOFT0 = (await utils.attachTapiocaOFT(
         await tapiocaWrapper_0.tapiocaOFTs(
@@ -49,18 +53,22 @@ export const setupFixture = async () => {
     )) as TapiocaOFT;
 
     // Deploy TapiocaOFT10
-    await tapiocaWrapper_10.createTOFT(
-        erc20Mock.address,
-        (
-            await utils.Tx_deployTapiocaOFT(
-                LZEndpointMock_chainID_10.address,
-                erc20Mock.address,
-                0,
-                signer,
-            )
-        ).txData,
-        hre.ethers.utils.randomBytes(32),
-    );
+    {
+        const txData = await tapiocaWrapper_10.populateTransaction.createTOFT(
+            erc20Mock.address,
+            (
+                await utils.Tx_deployTapiocaOFT(
+                    LZEndpointMock_chainID_10.address,
+                    erc20Mock.address,
+                    0,
+                    signer,
+                )
+            ).txData,
+            hre.ethers.utils.randomBytes(32),
+        );
+        txData.gasLimit = await hre.ethers.provider.estimateGas(txData);
+        await signer.sendTransaction(txData);
+    }
 
     const tapiocaOFT10 = (await utils.attachTapiocaOFT(
         await tapiocaWrapper_10.tapiocaOFTs(

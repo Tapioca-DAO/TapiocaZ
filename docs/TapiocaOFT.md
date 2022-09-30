@@ -10,6 +10,40 @@
 
 ## Methods
 
+### NO_EXTRA_GAS
+
+```solidity
+function NO_EXTRA_GAS() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### PT_SEND
+
+```solidity
+function PT_SEND() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### allowance
 
 ```solidity
@@ -269,6 +303,28 @@ function getConfig(uint16 _version, uint16 _chainId, address, uint256 _configTyp
 |---|---|---|
 | _0 | bytes | undefined |
 
+### getTrustedRemoteAddress
+
+```solidity
+function getTrustedRemoteAddress(uint16 _remoteChainId) external view returns (bytes)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _remoteChainId | uint16 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
+
 ### harvestFees
 
 ```solidity
@@ -396,6 +452,29 @@ function lzReceive(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _
 | _nonce | uint64 | undefined |
 | _payload | bytes | undefined |
 
+### minDstGasLookup
+
+```solidity
+function minDstGasLookup(uint16, uint16) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+| _1 | uint16 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### name
 
 ```solidity
@@ -441,6 +520,23 @@ function owner() external view returns (address)
 
 
 *Returns the address of the current owner.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### precrime
+
+```solidity
+function precrime() external view returns (address)
+```
+
+
+
+
 
 
 #### Returns
@@ -520,6 +616,40 @@ function setConfig(uint16 _version, uint16 _chainId, uint256 _configType, bytes 
 | _configType | uint256 | undefined |
 | _config | bytes | undefined |
 
+### setMinDstGas
+
+```solidity
+function setMinDstGas(uint16 _dstChainId, uint16 _packetType, uint256 _minGas) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _dstChainId | uint16 | undefined |
+| _packetType | uint16 | undefined |
+| _minGas | uint256 | undefined |
+
+### setPrecrime
+
+```solidity
+function setPrecrime(address _precrime) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _precrime | address | undefined |
+
 ### setReceiveVersion
 
 ```solidity
@@ -555,7 +685,7 @@ function setSendVersion(uint16 _version) external nonpayable
 ### setTrustedRemote
 
 ```solidity
-function setTrustedRemote(uint16 _srcChainId, bytes _srcAddress) external nonpayable
+function setTrustedRemote(uint16 _srcChainId, bytes _path) external nonpayable
 ```
 
 
@@ -567,7 +697,40 @@ function setTrustedRemote(uint16 _srcChainId, bytes _srcAddress) external nonpay
 | Name | Type | Description |
 |---|---|---|
 | _srcChainId | uint16 | undefined |
-| _srcAddress | bytes | undefined |
+| _path | bytes | undefined |
+
+### setTrustedRemoteAddress
+
+```solidity
+function setTrustedRemoteAddress(uint16 _remoteChainId, bytes _remoteAddress) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _remoteChainId | uint16 | undefined |
+| _remoteAddress | bytes | undefined |
+
+### setUseCustomAdapterParams
+
+```solidity
+function setUseCustomAdapterParams(bool _useCustomAdapterParams) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _useCustomAdapterParams | bool | undefined |
 
 ### supportsInterface
 
@@ -761,6 +924,23 @@ Unwrap an ERC20 with a 1:1 ratio. Called only on main chain.
 | _toAddress | address | The address to unwrap the ERC20 to. |
 | _amount | uint256 | The amount of ERC20 to unwrap. |
 
+### useCustomAdapterParams
+
+```solidity
+function useCustomAdapterParams() external view returns (bool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### wrap
 
 ```solidity
@@ -819,7 +999,7 @@ event Harvest(uint256 _amount)
 ### MessageFailed
 
 ```solidity
-event MessageFailed(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _payload)
+event MessageFailed(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _payload, bytes _reason)
 ```
 
 
@@ -834,6 +1014,7 @@ event MessageFailed(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes 
 | _srcAddress  | bytes | undefined |
 | _nonce  | uint64 | undefined |
 | _payload  | bytes | undefined |
+| _reason  | bytes | undefined |
 
 ### OwnershipTransferred
 
@@ -855,7 +1036,7 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 ### ReceiveFromChain
 
 ```solidity
-event ReceiveFromChain(uint16 indexed _srcChainId, bytes indexed _srcAddress, address indexed _toAddress, uint256 _amount, uint64 _nonce)
+event ReceiveFromChain(uint16 indexed _srcChainId, bytes _fromAddress, address indexed _to, uint256 _amount)
 ```
 
 
@@ -867,35 +1048,14 @@ event ReceiveFromChain(uint16 indexed _srcChainId, bytes indexed _srcAddress, ad
 | Name | Type | Description |
 |---|---|---|
 | _srcChainId `indexed` | uint16 | undefined |
-| _srcAddress `indexed` | bytes | undefined |
-| _toAddress `indexed` | address | undefined |
+| _fromAddress  | bytes | undefined |
+| _to `indexed` | address | undefined |
 | _amount  | uint256 | undefined |
-| _nonce  | uint64 | undefined |
 
-### SendToChain
+### RetryMessageSuccess
 
 ```solidity
-event SendToChain(address indexed _sender, uint16 indexed _dstChainId, bytes indexed _toAddress, uint256 _amount, uint64 _nonce)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _sender `indexed` | address | undefined |
-| _dstChainId `indexed` | uint16 | undefined |
-| _toAddress `indexed` | bytes | undefined |
-| _amount  | uint256 | undefined |
-| _nonce  | uint64 | undefined |
-
-### SetTrustedRemote
-
-```solidity
-event SetTrustedRemote(uint16 _srcChainId, bytes _srcAddress)
+event RetryMessageSuccess(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes32 _payloadHash)
 ```
 
 
@@ -908,6 +1068,111 @@ event SetTrustedRemote(uint16 _srcChainId, bytes _srcAddress)
 |---|---|---|
 | _srcChainId  | uint16 | undefined |
 | _srcAddress  | bytes | undefined |
+| _nonce  | uint64 | undefined |
+| _payloadHash  | bytes32 | undefined |
+
+### SendToChain
+
+```solidity
+event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes indexed _toAddress, uint256 _amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _dstChainId `indexed` | uint16 | undefined |
+| _from `indexed` | address | undefined |
+| _toAddress `indexed` | bytes | undefined |
+| _amount  | uint256 | undefined |
+
+### SetMinDstGas
+
+```solidity
+event SetMinDstGas(uint16 _dstChainId, uint16 _type, uint256 _minDstGas)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _dstChainId  | uint16 | undefined |
+| _type  | uint16 | undefined |
+| _minDstGas  | uint256 | undefined |
+
+### SetPrecrime
+
+```solidity
+event SetPrecrime(address precrime)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| precrime  | address | undefined |
+
+### SetTrustedRemote
+
+```solidity
+event SetTrustedRemote(uint16 _remoteChainId, bytes _path)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _remoteChainId  | uint16 | undefined |
+| _path  | bytes | undefined |
+
+### SetTrustedRemoteAddress
+
+```solidity
+event SetTrustedRemoteAddress(uint16 _remoteChainId, bytes _remoteAddress)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _remoteChainId  | uint16 | undefined |
+| _remoteAddress  | bytes | undefined |
+
+### SetUseCustomAdapterParams
+
+```solidity
+event SetUseCustomAdapterParams(bool _useCustomAdapterParams)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _useCustomAdapterParams  | bool | undefined |
 
 ### Transfer
 

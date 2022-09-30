@@ -3,8 +3,8 @@
 pragma solidity ^0.8.4;
 pragma abicoder v2;
 
-import '../OFT20/interfaces/ILayerZeroReceiver.sol';
-import '../OFT20/interfaces/ILayerZeroEndpoint.sol';
+import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroReceiver.sol';
+import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroEndpoint.sol';
 
 /*
 mocking multi endpoint connection.

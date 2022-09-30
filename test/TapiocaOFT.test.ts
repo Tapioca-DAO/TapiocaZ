@@ -202,7 +202,7 @@ describe('TapiocaOFT', () => {
                     1,
                     signer.address,
                     signer.address,
-                    ethers.utils.arrayify(0),
+                    '0x',
                 ),
             ).to.be.revertedWith(
                 'LzApp: destination chain is not a trusted source',
@@ -235,7 +235,7 @@ describe('TapiocaOFT', () => {
                     1,
                     signer.address,
                     signer.address,
-                    ethers.utils.arrayify(0),
+                    '0x',
                 ),
             ).to.not.be.reverted;
         });
