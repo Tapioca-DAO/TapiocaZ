@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import 'tapioca-sdk/dist/contracts/token/oft/OFT.sol';
 import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroEndpoint.sol';
+import './interfaces/IYieldBox.sol';
 import './TapiocaWrapper.sol';
 
 //
@@ -31,6 +32,9 @@ import './TapiocaWrapper.sol';
 contract TapiocaOFT is OFT {
     using SafeERC20 for IERC20;
 
+    uint16 public constant PT_YB_SEND_STRAT = 770;
+    uint16 public constant PT_YB_RETRIEVE_STRAT = 771;
+
     /// @notice The TapiocaWrapper contract, owner of this contract.
     TapiocaWrapper public tapiocaWrapper;
     /// @notice Total fees amassed by this contract, in `erc20`.
@@ -39,6 +43,8 @@ contract TapiocaOFT is OFT {
     IERC20 public immutable erc20;
     /// @notice The host chain ID of the ERC20, will be used only on OP chain.
     uint256 public immutable hostChainID;
+    /// @notice The YieldBox address.
+    IYieldBox public immutable yieldBox;
     /// @notice If this wrapper is for an ERC20 or a native token.
     bool isNative;
     /// @notice Decimal cache number of the ERC20.
@@ -52,18 +58,23 @@ contract TapiocaOFT is OFT {
     error TOFT__NotHostChain();
     /// @notice A zero amount was found
     error TOFT_ZeroAmount();
+    /// @notice Error while depositing ETH assets to YieldBox.
+    error TOFT_YB_ETHDeposit();
 
     /// ==========================
     /// ========== Events ========
     /// ==========================
     event Wrap(address indexed _from, address indexed _to, uint256 _amount);
     event Unwrap(address indexed _from, address indexed _to, uint256 _amount);
-    event Harvest(uint256 _amount);
+    event HarvestFees(uint256 _amount);
+    event YieldBoxDeposit(uint256 _amount);
+    event YieldBoxRetrieval(uint256 _amount);
 
     constructor(
         address _lzEndpoint,
         bool _isNative,
         IERC20 _erc20,
+        IYieldBox _yieldBox,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -80,6 +91,7 @@ contract TapiocaOFT is OFT {
         }
 
         erc20 = _erc20;
+        yieldBox = _yieldBox;
         isNative = _isNative;
         _decimalCache = _decimal;
         hostChainID = _hostChainID;
@@ -169,7 +181,7 @@ contract TapiocaOFT is OFT {
     function harvestFees() external onlyHostChain {
         erc20.safeTransfer(address(tapiocaWrapper.owner()), totalFees);
         totalFees = 0;
-        emit Harvest(totalFees);
+        emit HarvestFees(totalFees);
     }
 
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
@@ -191,8 +203,73 @@ contract TapiocaOFT is OFT {
     }
 
     // ================================
+    // ========== YieldBox ============
+    // ================================
+
+    /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.
+    function _yieldBoxDeposit(
+        uint256 _assetId,
+        uint256 _amount,
+        uint256 _minShareOut
+    ) internal {
+        if (isNative) {
+            /*
+                yieldBox.depositETHAsset{value: _amount}(
+                    _assetId,
+                    address(this),
+                    _minShareOut
+                );
+            */
+            bytes memory depositETHAssetData = abi.encodeWithSelector(
+                yieldBox.depositETHAsset.selector,
+                _assetId,
+                address(this),
+                _minShareOut
+            );
+            (bool success, ) = address(yieldBox).call{value: _amount}(
+                depositETHAssetData
+            );
+            if (!success) {
+                revert TOFT_YB_ETHDeposit();
+            }
+        } else {
+            erc20.approve(address(yieldBox), _amount);
+            yieldBox.depositAsset(
+                _assetId,
+                address(this),
+                address(this),
+                _amount,
+                0,
+                _minShareOut
+            );
+        }
+
+        emit YieldBoxDeposit(_amount);
+    }
+
+    /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.
+    function _yieldBoxRetrieval(
+        uint256 _assetId,
+        uint256 _amount,
+        uint256 _share
+    ) internal {
+        yieldBox.withdraw(
+            _assetId,
+            address(this),
+            address(this),
+            _amount,
+            _share
+        );
+
+        emit YieldBoxRetrieval(_amount);
+    }
+
+    // ================================
     // ========== INTERNAL ============
     // ================================
+
+    receive() external payable {}
+
     /// @notice Estimate the management fees for a wrap operation.
     function estimateFees(
         uint256 _feeBps,
@@ -217,6 +294,78 @@ contract TapiocaOFT is OFT {
     // ==========================
     // ========== LZ ============
     // ==========================
+
+    /// @notice Should be called by the strategy on the linked chain.
+    function _ybSendStrat(
+        uint16 _srcChainId,
+        bytes memory,
+        uint64,
+        bytes memory _payload
+    ) internal virtual {
+        (
+            ,
+            bytes memory from,
+            ,
+            uint256 amount,
+            uint256 assetId,
+            uint256 minShareOut
+        ) = abi.decode(
+                _payload,
+                (uint16, bytes, bytes, uint256, uint256, uint256)
+            );
+
+        _creditTo(_srcChainId, address(this), amount);
+        _yieldBoxDeposit(assetId, amount, minShareOut);
+
+        emit ReceiveFromChain(_srcChainId, from, address(this), amount);
+    }
+
+    /// @notice Should be called by the strategy on the linked chain.
+    function _ybRetrieveStrat(
+        uint16 _srcChainId,
+        bytes memory,
+        uint64,
+        bytes memory _payload
+    ) internal virtual {
+        (
+            ,
+            bytes memory from,
+            ,
+            uint256 amount,
+            uint256 share,
+            uint256 assetId
+        ) = abi.decode(
+                _payload,
+                (uint16, bytes, bytes, uint256, uint256, uint256)
+            );
+
+        _yieldBoxRetrieval(assetId, amount, share);
+
+        _burn(address(this), amount);
+        emit ReceiveFromChain(_srcChainId, from, address(this), amount);
+    }
+
+    function _nonblockingLzReceive(
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) internal virtual override {
+        uint16 packetType;
+        assembly {
+            packetType := mload(add(_payload, 32))
+        }
+
+        if (packetType == PT_SEND) {
+            _sendAck(_srcChainId, _srcAddress, _nonce, _payload);
+        } else if (packetType == PT_YB_SEND_STRAT) {
+            _ybSendStrat(_srcChainId, _srcAddress, _nonce, _payload);
+        } else if (packetType == PT_YB_RETRIEVE_STRAT) {
+            _ybRetrieveStrat(_srcChainId, _srcAddress, _nonce, _payload);
+        } else {
+            revert('OFTCore: unknown packet type');
+        }
+    }
 
     /// @notice Check if the current chain is the host chain of the ERC20.
     function isHostChain() external view returns (bool) {
