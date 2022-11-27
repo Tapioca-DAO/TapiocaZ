@@ -31,6 +31,7 @@ import './TapiocaWrapper.sol';
 
 contract TapiocaOFT is OFT {
     using SafeERC20 for IERC20;
+    using BytesLib for bytes;
 
     uint16 public constant PT_YB_SEND_STRAT = 770;
     uint16 public constant PT_YB_RETRIEVE_STRAT = 771;
@@ -323,7 +324,7 @@ contract TapiocaOFT is OFT {
     /// @notice Should be called by the strategy on the linked chain.
     function _ybRetrieveStrat(
         uint16 _srcChainId,
-        bytes memory,
+        bytes memory _srcAddress,
         uint64,
         bytes memory _payload
     ) internal virtual {
@@ -333,15 +334,25 @@ contract TapiocaOFT is OFT {
             ,
             uint256 amount,
             uint256 share,
-            uint256 assetId
+            uint256 assetId,
+            bytes memory _adapterParams
         ) = abi.decode(
                 _payload,
-                (uint16, bytes, bytes, uint256, uint256, uint256)
+                (uint16, bytes, bytes, uint256, uint256, uint256, bytes)
             );
 
         _yieldBoxRetrieval(assetId, amount, share);
 
-        _burn(address(this), amount);
+        _send(
+            address(this),
+            _srcChainId,
+            _srcAddress,
+            amount,
+            payable(_srcAddress.toAddress(0)),
+            address(0),
+            _adapterParams
+        );
+
         emit ReceiveFromChain(_srcChainId, from, address(this), amount);
     }
 
