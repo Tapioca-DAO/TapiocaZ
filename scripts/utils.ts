@@ -48,7 +48,9 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
     // UTILS
     const Tx_deployTapiocaOFT = async (
         lzEndpoint: string,
+        isNative: boolean,
         erc20Address: string,
+        yieldBoxAddress: string,
         hostChainID: number,
         hostChainNetworkSigner: Wallet | SignerWithAddress,
     ) => {
@@ -62,9 +64,12 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+
         const args: Parameters<TapiocaOFT__factory['deploy']> = [
             lzEndpoint,
+            isNative,
             erc20Address,
+            yieldBoxAddress,
             erc20name,
             erc20symbol,
             erc20decimal,

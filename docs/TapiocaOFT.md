@@ -44,6 +44,40 @@ function PT_SEND() external view returns (uint16)
 |---|---|---|
 | _0 | uint16 | undefined |
 
+### PT_YB_RETRIEVE_STRAT
+
+```solidity
+function PT_YB_RETRIEVE_STRAT() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
+### PT_YB_SEND_STRAT
+
+```solidity
+function PT_YB_SEND_STRAT() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### allowance
 
 ```solidity
@@ -331,7 +365,7 @@ function getTrustedRemoteAddress(uint16 _remoteChainId) external view returns (b
 function harvestFees() external nonpayable
 ```
 
-Harvest the fees collected by the contract. Called only on main chain.
+Harvest the fees collected by the contract. Called only on host chain.
 
 
 
@@ -382,7 +416,7 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 function isHostChain() external view returns (bool)
 ```
 
-Check if the current chain is the main chain of the ERC20.
+Check if the current chain is the host chain of the ERC20.
 
 
 
@@ -913,7 +947,7 @@ function trustedRemoteLookup(uint16) external view returns (bytes)
 function unwrap(address _toAddress, uint256 _amount) external nonpayable
 ```
 
-Unwrap an ERC20 with a 1:1 ratio. Called only on main chain.
+Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
 
 
 
@@ -921,8 +955,8 @@ Unwrap an ERC20 with a 1:1 ratio. Called only on main chain.
 
 | Name | Type | Description |
 |---|---|---|
-| _toAddress | address | The address to unwrap the ERC20 to. |
-| _amount | uint256 | The amount of ERC20 to unwrap. |
+| _toAddress | address | The address to unwrap the tokens to. |
+| _amount | uint256 | The amount of tokens to unwrap. |
 
 ### useCustomAdapterParams
 
@@ -958,6 +992,61 @@ Wrap an ERC20 with a 1:1 ratio with a fee if existing.
 | _toAddress | address | The address to wrap the ERC20 to. |
 | _amount | uint256 | The amount of ERC20 to wrap. |
 
+### wrapNative
+
+```solidity
+function wrapNative(address _toAddress) external payable
+```
+
+Wrap a native token with a 1:1 ratio with a fee if existing.
+
+*Since it can be executed only on the host chain, if an address exists on the linked chain it will not allowed to wrap.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _toAddress | address | The address to wrap the tokens to. |
+
+### wrappedAmount
+
+```solidity
+function wrappedAmount(uint256 _amount) external view returns (uint256)
+```
+
+Return the output amount of an ERC20 token wrap operation.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### yieldBox
+
+```solidity
+function yieldBox() external view returns (contract IYieldBox)
+```
+
+The YieldBox address.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IYieldBox | undefined |
+
 
 
 ## Events
@@ -980,10 +1069,10 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 | spender `indexed` | address | undefined |
 | value  | uint256 | undefined |
 
-### Harvest
+### HarvestFees
 
 ```solidity
-event Harvest(uint256 _amount)
+event HarvestFees(uint256 _amount)
 ```
 
 
@@ -1228,9 +1317,63 @@ event Wrap(address indexed _from, address indexed _to, uint256 _amount)
 | _to `indexed` | address | undefined |
 | _amount  | uint256 | undefined |
 
+### YieldBoxDeposit
+
+```solidity
+event YieldBoxDeposit(uint256 _amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _amount  | uint256 | undefined |
+
+### YieldBoxRetrieval
+
+```solidity
+event YieldBoxRetrieval(uint256 _amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _amount  | uint256 | undefined |
+
 
 
 ## Errors
+
+### TOFT_YB_ETHDeposit
+
+```solidity
+error TOFT_YB_ETHDeposit()
+```
+
+Error while depositing ETH assets to YieldBox.
+
+
+
+
+### TOFT_ZeroAmount
+
+```solidity
+error TOFT_ZeroAmount()
+```
+
+A zero amount was found
+
+
+
 
 ### TOFT__NotHostChain
 

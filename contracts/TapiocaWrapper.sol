@@ -87,17 +87,19 @@ contract TapiocaWrapper is Owned {
         }
 
         TapiocaOFT toft = TapiocaOFT(
-            Create2.deploy(
-                0,
-                keccak256(
-                    abi.encodePacked(
-                        keccak256('TapiocaWrapper'),
-                        address(this),
-                        _erc20,
-                        _salt
-                    )
-                ),
-                _bytecode
+            payable(
+                Create2.deploy(
+                    0,
+                    keccak256(
+                        abi.encodePacked(
+                            keccak256('TapiocaWrapper'),
+                            address(this),
+                            _erc20,
+                            _salt
+                        )
+                    ),
+                    _bytecode
+                )
             )
         );
         if (address(toft.erc20()) != _erc20) {

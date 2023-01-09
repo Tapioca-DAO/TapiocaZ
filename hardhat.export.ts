@@ -1,13 +1,33 @@
 import * as dotenv from 'dotenv';
 
-import { HardhatUserConfig } from 'hardhat/config';
-import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-toolbox';
+import '@nomicfoundation/hardhat-chai-matchers';
+import { HardhatUserConfig } from 'hardhat/config';
 import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
+import SDK from 'tapioca-sdk';
 
 dotenv.config();
+
+let supportedChains: { [key: string]: HttpNetworkConfig } = SDK.API.utils
+    .getSupportedChains()
+    .reduce(
+        (sdkChains, chain) => ({
+            ...sdkChains,
+            [chain.name]: <HttpNetworkConfig>{
+                accounts:
+                    process.env.PRIVATE_KEY !== undefined
+                        ? [process.env.PRIVATE_KEY]
+                        : [],
+                live: true,
+                url: chain.rpc.replace('<api_key>', process.env.ALCHEMY_KEY),
+                gasMultiplier: chain.tags.includes('testnet') ? 2 : 1,
+                chainId: Number(chain.chainId),
+            },
+        }),
+        {},
+    );
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -42,38 +62,35 @@ const config: HardhatUserConfig = {
                       ]
                     : [],
         },
-        rinkeby: {
-            gasMultiplier: 2,
-            url:
-                process.env.RINKEBY ??
-                'https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-            chainId: 4,
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
-            tags: ['testnet'],
-        },
-        mumbai: {
-            gasMultiplier: 2,
-            url: 'https://rpc-mumbai.maticvigil.com',
-            chainId: 80001,
-            accounts:
-                process.env.PRIVATE_KEY !== undefined
-                    ? [process.env.PRIVATE_KEY]
-                    : [],
-            tags: ['testnet'],
-        },
+        //testnets
+        goerli: supportedChains['goerli'],
+        bnb_testnet: supportedChains['bnb_testnet'],
+        fuji_avalanche: supportedChains['fuji_avalanche'],
+        mumbai: supportedChains['mumbai'],
+        fantom_testnet: supportedChains['fantom_testnet'],
+        arbitrum_goerli: supportedChains['arbitrum_goerli'],
+        optimism_goerli: supportedChains['optimism_goerli'],
+        harmony_testnet: supportedChains['harmony_testnet'],
+
+        //mainnets
+        ethereum: supportedChains['ethereum'],
+        bnb: supportedChains['bnb'],
+        avalanche: supportedChains['avalanche'],
+        matic: supportedChains['polygon'],
+        arbitrum: supportedChains['arbitrum'],
+        optimism: supportedChains['optimism'],
+        fantom: supportedChains['fantom'],
+        harmony: supportedChains['harmony'],
     },
     etherscan: {
-        apiKey: {
-            rinkeby: process.env.RINKEBY_KEY ?? '',
-            polygonMumbai: process.env.POLYGON_MUMBAI_KEY ?? '',
-        },
+        apiKey: process.env.ETHERSCAN_KEY,
         customChains: [],
     },
     typechain: {
         outDir: './typechain',
+    },
+    gasReporter: {
+        enabled: false,
     },
     dodoc: {
         include: ['TapiocaWrapper', 'TapiocaOFT'],

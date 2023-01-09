@@ -6,13 +6,13 @@ import { exportSDK__task } from './tasks/exportSDK';
 import { listDeploy } from './tasks/listDeploy';
 import { toftSendFrom } from './tasks/TOFTsendFrom';
 import { wrap } from './tasks/wrap';
-import { API } from 'tapioca-sdk';
+import SDK from 'tapioca-sdk';
 
 function formatLZEndpoints() {
-    return API.utils
+    return SDK.API.utils
         .getChainIDs()
         .map((chainId) => {
-            const { name } = API.utils.getChainBy('chainId', chainId)!;
+            const { name } = SDK.API.utils.getChainBy('chainId', chainId)!;
             return `${name} - (${chainId})\n`;
         })
         .reduce((p, c) => p + c, '');

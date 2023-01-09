@@ -35,7 +35,9 @@ export const setupFixture = async () => {
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock_chainID_0.address,
+                    false,
                     erc20Mock.address,
+                    ethers.constants.AddressZero,
                     0,
                     signer,
                 )
@@ -59,7 +61,9 @@ export const setupFixture = async () => {
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock_chainID_10.address,
+                    false,
                     erc20Mock.address,
+                    ethers.constants.AddressZero,
                     0,
                     signer,
                 )
