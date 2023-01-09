@@ -260,7 +260,7 @@ describe('TapiocaOFT', () => {
 
             await expect(tapiocaOFT0.harvestFees()).to.emit(
                 tapiocaOFT0,
-                'Harvest',
+                'HarvestFees',
             );
 
             await expect(
