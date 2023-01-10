@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import 'tapioca-sdk/dist/contracts/token/oft/OFT.sol';
 import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroEndpoint.sol';
-import './interfaces/IYieldBox.sol';
 import './TapiocaWrapper.sol';
+import './BaseTOFT.sol';
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -29,12 +27,9 @@ import './TapiocaWrapper.sol';
 //         ####*  (((((((((((((((((((
 //                     ,**//*,.
 
-contract TapiocaOFT is OFT {
+contract TapiocaOFT is BaseTOFT {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
-
-    uint16 public constant PT_YB_SEND_STRAT = 770;
-    uint16 public constant PT_YB_RETRIEVE_STRAT = 771;
 
     /// @notice The TapiocaWrapper contract, owner of this contract.
     TapiocaWrapper public tapiocaWrapper;
@@ -44,10 +39,6 @@ contract TapiocaOFT is OFT {
     IERC20 public immutable erc20;
     /// @notice The host chain ID of the ERC20, will be used only on OP chain.
     uint256 public immutable hostChainID;
-    /// @notice The YieldBox address.
-    IYieldBox public immutable yieldBox;
-    /// @notice If this wrapper is for an ERC20 or a native token.
-    bool isNative;
     /// @notice Decimal cache number of the ERC20.
     uint8 _decimalCache;
 
@@ -59,8 +50,6 @@ contract TapiocaOFT is OFT {
     error TOFT__NotHostChain();
     /// @notice A zero amount was found
     error TOFT_ZeroAmount();
-    /// @notice Error while depositing ETH assets to YieldBox.
-    error TOFT_YB_ETHDeposit();
 
     /// ==========================
     /// ========== Events ========
@@ -68,8 +57,6 @@ contract TapiocaOFT is OFT {
     event Wrap(address indexed _from, address indexed _to, uint256 _amount);
     event Unwrap(address indexed _from, address indexed _to, uint256 _amount);
     event HarvestFees(uint256 _amount);
-    event YieldBoxDeposit(uint256 _amount);
-    event YieldBoxRetrieval(uint256 _amount);
 
     constructor(
         address _lzEndpoint,
@@ -86,14 +73,13 @@ contract TapiocaOFT is OFT {
             string(abi.encodePacked('TOFT-', _symbol)),
             _lzEndpoint
         )
+        BaseTOFT(_isNative, _yieldBox)
     {
         if (isNative) {
             require(address(_erc20) == address(0), 'TOFT__NotNative');
         }
 
         erc20 = _erc20;
-        yieldBox = _yieldBox;
-        isNative = _isNative;
         _decimalCache = _decimal;
         hostChainID = _hostChainID;
 
@@ -204,68 +190,6 @@ contract TapiocaOFT is OFT {
     }
 
     // ================================
-    // ========== YieldBox ============
-    // ================================
-
-    /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.
-    function _yieldBoxDeposit(
-        uint256 _assetId,
-        uint256 _amount,
-        uint256 _minShareOut
-    ) internal {
-        if (isNative) {
-            /*
-                yieldBox.depositETHAsset{value: _amount}(
-                    _assetId,
-                    address(this),
-                    _minShareOut
-                );
-            */
-            bytes memory depositETHAssetData = abi.encodeWithSelector(
-                yieldBox.depositETHAsset.selector,
-                _assetId,
-                address(this),
-                _minShareOut
-            );
-            (bool success, ) = address(yieldBox).call{value: _amount}(
-                depositETHAssetData
-            );
-            if (!success) {
-                revert TOFT_YB_ETHDeposit();
-            }
-        } else {
-            erc20.approve(address(yieldBox), _amount);
-            yieldBox.depositAsset(
-                _assetId,
-                address(this),
-                address(this),
-                _amount,
-                0,
-                _minShareOut
-            );
-        }
-
-        emit YieldBoxDeposit(_amount);
-    }
-
-    /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.
-    function _yieldBoxRetrieval(
-        uint256 _assetId,
-        uint256 _amount,
-        uint256 _share
-    ) internal {
-        yieldBox.withdraw(
-            _assetId,
-            address(this),
-            address(this),
-            _amount,
-            _share
-        );
-
-        emit YieldBoxRetrieval(_amount);
-    }
-
-    // ================================
     // ========== INTERNAL ============
     // ================================
 
@@ -296,66 +220,6 @@ contract TapiocaOFT is OFT {
     // ========== LZ ============
     // ==========================
 
-    /// @notice Should be called by the strategy on the linked chain.
-    function _ybSendStrat(
-        uint16 _srcChainId,
-        bytes memory,
-        uint64,
-        bytes memory _payload
-    ) internal virtual {
-        (
-            ,
-            bytes memory from,
-            ,
-            uint256 amount,
-            uint256 assetId,
-            uint256 minShareOut
-        ) = abi.decode(
-                _payload,
-                (uint16, bytes, bytes, uint256, uint256, uint256)
-            );
-
-        _creditTo(_srcChainId, address(this), amount);
-        _yieldBoxDeposit(assetId, amount, minShareOut);
-
-        emit ReceiveFromChain(_srcChainId, from, address(this), amount);
-    }
-
-    /// @notice Should be called by the strategy on the linked chain.
-    function _ybRetrieveStrat(
-        uint16 _srcChainId,
-        bytes memory _srcAddress,
-        uint64,
-        bytes memory _payload
-    ) internal virtual {
-        (
-            ,
-            bytes memory from,
-            ,
-            uint256 amount,
-            uint256 share,
-            uint256 assetId,
-            bytes memory _adapterParams
-        ) = abi.decode(
-                _payload,
-                (uint16, bytes, bytes, uint256, uint256, uint256, bytes)
-            );
-
-        _yieldBoxRetrieval(assetId, amount, share);
-
-        _send(
-            address(this),
-            _srcChainId,
-            _srcAddress,
-            amount,
-            payable(_srcAddress.toAddress(0)),
-            address(0),
-            _adapterParams
-        );
-
-        emit ReceiveFromChain(_srcChainId, from, address(this), amount);
-    }
-
     function _nonblockingLzReceive(
         uint16 _srcChainId,
         bytes memory _srcAddress,
@@ -370,9 +234,13 @@ contract TapiocaOFT is OFT {
         if (packetType == PT_SEND) {
             _sendAck(_srcChainId, _srcAddress, _nonce, _payload);
         } else if (packetType == PT_YB_SEND_STRAT) {
-            _ybSendStrat(_srcChainId, _srcAddress, _nonce, _payload);
+            _ybSendStrat(_srcChainId, _srcAddress, _nonce, _payload, erc20);
         } else if (packetType == PT_YB_RETRIEVE_STRAT) {
             _ybRetrieveStrat(_srcChainId, _srcAddress, _nonce, _payload);
+        } else if (packetType == PT_YB_DEPOSIT) {
+            _ybDeposit(_srcChainId, _payload, erc20);
+        } else if (packetType == PT_YB_WITHDRAW) {
+            _ybWithdraw(_srcChainId, _payload);
         } else {
             revert('OFTCore: unknown packet type');
         }

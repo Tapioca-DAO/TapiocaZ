@@ -7,6 +7,7 @@ export const DEPLOYMENTS_FILE = existsSync(DEPLOYMENTS_PATH)
 
 export type TMeta = {
     erc20: { name: string; address: string };
+    yieldBox: { name: string; address: string };
     hostChain: {
         id: string;
         address: string;

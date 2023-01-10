@@ -18,6 +18,6 @@ export const getDeployments = async (
     };
 };
 
-export const listDeploy = async ({}, hre: HardhatRuntimeEnvironment) => {
+export const listDeploy__task = async ({}, hre: HardhatRuntimeEnvironment) => {
     console.log(await getDeployments({}, hre));
 };

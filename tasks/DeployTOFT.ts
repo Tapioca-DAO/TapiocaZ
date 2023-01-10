@@ -10,18 +10,32 @@ import {
     useNetwork,
     useUtils,
 } from '../scripts/utils';
+import { constants } from '../deploy/utils';
+import { updateDeployments } from '../deploy/utils';
+
 /**
  *
  * Deploy a TOFT contract to the specified network. It'll also deploy it to Tapioca host chain (Optimism, chainID 10).
  * A record will be added to the `DEPLOYMENTS_PATH` file.
  *
- * @param args.hostChainName - The host chain name of the ERC20.
  * @param args.erc20 - The address of the ERC20.
+ * @param args.yieldBox - The address of YieldBox.
+ * @param args.salt - The salt used for CREATE2 deployment
+ * @param args.hostChainName - The host chain name of the ERC20.
  */
-export const deployTOFT = async (
+//ex: npx hardhat deployTOFT --network goerli --erc20 0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8 --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network goerli --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network goerli --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
+
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
+export const deployTOFT__task = async (
     args: {
-        hostChainName: string;
         erc20: string;
+        yieldBox: string;
+        salt: string;
+        hostChainName: string;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -33,6 +47,10 @@ export const deployTOFT = async (
         erc20: {
             name: '',
             address: hre.ethers.utils.getAddress(args.erc20), // Normalize
+        },
+        yieldBox: {
+            name: 'YieldBox',
+            address: hre.ethers.utils.getAddress(args.yieldBox),
         },
         hostChain: {
             id: '',
@@ -48,10 +66,10 @@ export const deployTOFT = async (
     const hostChain = handleGetChainBy('name', args.hostChainName);
     const currentChain = handleGetChainBy('chainId', await hre.getChainId());
     const hostChainNetworkSigner = await useNetwork(hre, hostChain.name);
-
     const isMainChain = hostChain.chainId === currentChain.chainId;
 
     // Load ERC20 meta now that we have the host chain signer and knows if we're on the host chain.
+    console.log('[+] Load ERC20');
     const erc20 = await hre.ethers.getContractAt(
         'ERC20',
         deploymentMetadata.erc20.address,
@@ -62,6 +80,7 @@ export const deployTOFT = async (
     // Verifies that the TOFT contract is deployed on the host chain if we're currently not on it.
     let hostChainTOFT!: TContract;
     if (!isMainChain) {
+        console.log('[+] Retrieving host chain tOFT');
         hostChainTOFT = getTOFTDeploymentByERC20Address(
             hostChain.chainId,
             deploymentMetadata.erc20.address,
@@ -72,7 +91,9 @@ export const deployTOFT = async (
     console.log('[+] Building the deploy transaction');
     const tx = await utils.Tx_deployTapiocaOFT(
         currentChain.address,
+        false,
         deploymentMetadata.erc20.address,
+        deploymentMetadata.yieldBox.address,
         Number(hostChain.chainId),
         hostChainNetworkSigner,
     );
@@ -88,7 +109,11 @@ export const deployTOFT = async (
     // Create the TOFT
     console.log('[+] Deploying TOFT, waiting for 12 confirmation');
     await (
-        await tWrapper.createTOFT(args.erc20, tx.txData, generateSalt())
+        await tWrapper.createTOFT(
+            args.erc20,
+            tx.txData,
+            hre.ethers.utils.formatBytes32String(args.salt),
+        )
     ).wait(12);
 
     // We save the TOFT deployment

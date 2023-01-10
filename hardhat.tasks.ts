@@ -1,9 +1,9 @@
 import '@nomiclabs/hardhat-ethers';
 import { execSync } from 'node:child_process';
 import { task } from 'hardhat/config';
-import { deployTOFT } from './tasks/DeployTOFT';
+import { deployTOFT__task } from './tasks/deployTOFT';
 import { exportSDK__task } from './tasks/exportSDK';
-import { listDeploy } from './tasks/listDeploy';
+import { listDeploy__task } from './tasks/listDeploy';
 import { toftSendFrom } from './tasks/TOFTsendFrom';
 import { wrap } from './tasks/wrap';
 import SDK from 'tapioca-sdk';
@@ -11,11 +11,11 @@ import SDK from 'tapioca-sdk';
 function formatLZEndpoints() {
     return SDK.API.utils
         .getChainIDs()
-        .map((chainId) => {
+        .map((chainId: any) => {
             const { name } = SDK.API.utils.getChainBy('chainId', chainId)!;
             return `${name} - (${chainId})\n`;
         })
-        .reduce((p, c) => p + c, '');
+        .reduce((p: any, c: any) => p + c, '');
 }
 
 task('build', 'Compile contracts and generate Typechain files', async () => {
@@ -36,16 +36,18 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
 task(
     'listDeploy',
     'List the deployment addresses of the selected network',
-    listDeploy,
+    listDeploy__task,
 );
 
 task(
     'deployTOFT',
     // eslint-disable-next-line quotes
     "\nDeploy a TOFT contract to the specified network. It'll also deploy it to Tapioca host chain (Optimism, chainID 10).\nA document will be created in the deployments.json file.",
-    deployTOFT,
+    deployTOFT__task,
 )
     .addParam('erc20', 'The ERC20 address to wrap')
+    .addParam('yieldBox', 'The YieldBox address')
+    .addParam('salt', 'The salt used CREATE2 deployment')
     .addParam('hostChainName', `The main chain ID ()\n${formatLZEndpoints()}`);
 
 task(

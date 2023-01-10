@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { TContract } from 'tapioca-sdk/dist/shared';
+import { verify, updateDeployments } from './utils';
 import SDK from 'tapioca-sdk';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -26,34 +27,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         meta: {},
     });
     await updateDeployments(contracts, chainId);
-};
-
-const verify = async (
-    hre: HardhatRuntimeEnvironment,
-    artifact: string,
-    args: any[],
-) => {
-    const { deployments } = hre;
-
-    const deployed = await deployments.get(artifact);
-    console.log(`[+] Verifying ${artifact}`);
-    try {
-        await hre.run('verify', {
-            address: deployed.address,
-            constructorArgsParams: args,
-        });
-        console.log('[+] Verified');
-    } catch (err: any) {
-        console.log(
-            `[-] failed to verify ${artifact}; error: ${err.message}\n`,
-        );
-    }
-};
-
-const updateDeployments = async (contracts: TContract[], chainId: string) => {
-    await SDK.API.utils.saveDeploymentOnDisk({
-        [chainId]: contracts,
-    });
 };
 
 export default func;
