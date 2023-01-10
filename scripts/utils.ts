@@ -4,7 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import _ from 'lodash';
-import { API } from 'tapioca-sdk';
+import SDK from 'tapioca-sdk';
 import { TContract, TDeployment } from '../constants';
 import config from '../hardhat.export';
 import { TapiocaOFT__factory } from '../typechain';
@@ -133,8 +133,9 @@ export const removeTOFTDeployment = (chainId: string, contract: TContract) => {
         ...readFromJson('deployments.json'),
     };
 
-    deployments[chainId] = _.remove(deployments[chainId], (e) =>
-        _.isEqual(e, contract),
+    deployments[chainId] = _.remove(
+        deployments[chainId],
+        (e) => e?.address?.toLowerCase() != contract?.address?.toLowerCase(),
     );
 
     saveToJson(deployments, 'deployments.json', 'w');
@@ -147,15 +148,15 @@ export const getContractNames = async (hre: HardhatRuntimeEnvironment) =>
     );
 
 export const handleGetChainBy = (
-    ...params: Parameters<typeof API.utils.getChainBy>
+    ...params: Parameters<typeof SDK.API.utils.getChainBy>
 ) => {
-    const chain = API.utils.getChainBy(...params);
+    const chain = SDK.API.utils.getChainBy(...params);
     if (!chain) {
         throw new Error(
             `[-] Chain ${String(
                 params[1],
             )} not supported in Tapioca-SDK\nSupported chains: ${JSON.stringify(
-                API.utils.getSupportedChains(),
+                SDK.API.utils.getSupportedChains(),
                 undefined,
                 2,
             )}\n\n`,
@@ -186,9 +187,12 @@ export const getTOFTDeploymentByERC20Address = (
     chainID: string,
     erc20Address: string,
 ) => {
-    const toft = readTOFTDeployments()[chainID].find(
-        (e) => e.meta.erc20.address === erc20Address,
-    ) as TContract;
+    const toft = readTOFTDeployments()[chainID].find((e) => {
+        return (
+            e?.meta?.erc20?.address?.toLowerCase() ===
+            erc20Address?.toLowerCase()
+        );
+    }) as TContract;
     if (!toft) {
         throw new Error(
             `[-] TOFT not deployed on chain ${

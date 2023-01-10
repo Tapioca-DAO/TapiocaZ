@@ -44,6 +44,23 @@ function PT_SEND() external view returns (uint16)
 |---|---|---|
 | _0 | uint16 | undefined |
 
+### PT_YB_DEPOSIT
+
+```solidity
+function PT_YB_DEPOSIT() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### PT_YB_RETRIEVE_STRAT
 
 ```solidity
@@ -65,6 +82,23 @@ function PT_YB_RETRIEVE_STRAT() external view returns (uint16)
 
 ```solidity
 function PT_YB_SEND_STRAT() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
+### PT_YB_WITHDRAW
+
+```solidity
+function PT_YB_WITHDRAW() external view returns (uint16)
 ```
 
 
@@ -1323,7 +1357,7 @@ event Wrap(address indexed _from, address indexed _to, uint256 _amount)
 event YieldBoxDeposit(uint256 _amount)
 ```
 
-
+========================== ========== Events ======== ==========================
 
 
 
@@ -1359,7 +1393,7 @@ event YieldBoxRetrieval(uint256 _amount)
 error TOFT_YB_ETHDeposit()
 ```
 
-Error while depositing ETH assets to YieldBox.
+========================== ========== Errors ======== ==========================Error while depositing ETH assets to YieldBox.
 
 
 
