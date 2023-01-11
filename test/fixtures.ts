@@ -38,7 +38,7 @@ export const setupFixture = async () => {
                     false,
                     erc20Mock.address,
                     ethers.constants.AddressZero,
-                    0,
+                    31337, //hardhat network
                     signer,
                 )
             ).txData,
@@ -64,7 +64,7 @@ export const setupFixture = async () => {
                     false,
                     erc20Mock.address,
                     ethers.constants.AddressZero,
-                    0,
+                    10,
                     signer,
                 )
             ).txData,

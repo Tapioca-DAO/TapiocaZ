@@ -188,7 +188,7 @@ describe('TapiocaWrapper', () => {
                 false,
                 erc20Mock.address,
                 ethers.constants.AddressZero,
-                0,
+                31337,
                 signer,
             );
             await tapiocaWrapper.createTOFT(
@@ -206,7 +206,7 @@ describe('TapiocaWrapper', () => {
                 false,
                 erc20Mock1.address,
                 ethers.constants.AddressZero,
-                0,
+                10,
                 signer,
             );
             await tapiocaWrapper.createTOFT(
