@@ -26,11 +26,6 @@ import './BaseTOFT.sol';
 //         ####*  (((((((((((((((((((
 //                     ,**//*,.
 
-interface IEndpoint {
-    // @notice get this Endpoint's immutable source identifier
-    function getChainId() external view returns (uint16);
-}
-
 contract TapiocaOFT is BaseTOFT {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
@@ -92,7 +87,7 @@ contract TapiocaOFT is BaseTOFT {
 
     /// @notice Require that the caller is on the host chain of the ERC20.
     modifier onlyHostChain() {
-        if (lzEndpoint.getChainId() != hostChainID) {
+        if (block.chainid != hostChainID) {
             revert TOFT__NotHostChain();
         }
         _;
@@ -252,6 +247,6 @@ contract TapiocaOFT is BaseTOFT {
 
     /// @notice Check if the current chain is the host chain of the ERC20.
     function isHostChain() external view returns (bool) {
-        return lzEndpoint.getChainId() == hostChainID;
+        return block.chainid == hostChainID;
     }
 }

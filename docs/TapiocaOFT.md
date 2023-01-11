@@ -856,28 +856,6 @@ The TapiocaWrapper contract, owner of this contract.
 |---|---|---|
 | _0 | contract TapiocaWrapper | undefined |
 
-### test
-
-```solidity
-function test(address _addr) external pure returns (bytes)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _addr | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes | undefined |
-
 ### token
 
 ```solidity

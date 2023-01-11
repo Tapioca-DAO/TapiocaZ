@@ -94,7 +94,7 @@ export const deployTOFT__task = async (
         false,
         deploymentMetadata.erc20.address,
         deploymentMetadata.yieldBox.address,
-        10021, //Number(hostChain.lzChainId), //TODO: use hostChain.lzChainId after SDK update
+        Number(hostChain.chainId),
         hostChainNetworkSigner,
     );
 
@@ -197,11 +197,15 @@ async function setTrustedRemote(
         `[+] Setting (${toChain.name}) as a trusted remote on (${fromChain.name})`,
     );
 
+    const trustedRemotePath = hre.ethers.utils.solidityPack(
+        ['address', 'address'],
+        [toTOFTAddress, fromToft],
+    );
     const encodedTX = (
         await hre.ethers.getContractFactory('TapiocaOFT')
     ).interface.encodeFunctionData('setTrustedRemote', [
         toChain.lzChainId,
-        toTOFTAddress,
+        trustedRemotePath,
     ]);
 
     const tWrapper = await hre.ethers.getContractAt(
