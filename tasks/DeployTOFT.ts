@@ -27,9 +27,9 @@ import { updateDeployments } from '../deploy/utils';
 //ex: npx hardhat deployTOFT --network goerli --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
 //ex: npx hardhat deployTOFT --network goerli --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
 
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
 //ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
 export const deployTOFT__task = async (
     args: {
         erc20: string;
@@ -94,7 +94,7 @@ export const deployTOFT__task = async (
         false,
         deploymentMetadata.erc20.address,
         deploymentMetadata.yieldBox.address,
-        Number(hostChain.chainId),
+        10021, //Number(hostChain.lzChainId), //TODO: use hostChain.lzChainId after SDK update
         hostChainNetworkSigner,
     );
 
@@ -107,14 +107,14 @@ export const deployTOFT__task = async (
     );
 
     // Create the TOFT
-    console.log('[+] Deploying TOFT, waiting for 12 confirmation');
+    console.log('[+] Deploying TOFT, waiting for 6 confirmation');
     await (
         await tWrapper.createTOFT(
             args.erc20,
             tx.txData,
             hre.ethers.utils.formatBytes32String(args.salt),
         )
-    ).wait(12);
+    ).wait(6);
 
     // We save the TOFT deployment
     const latestTOFT = await hre.ethers.getContractAt(

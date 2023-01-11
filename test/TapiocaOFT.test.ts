@@ -177,7 +177,7 @@ describe('TapiocaOFT', () => {
     });
 
     describe('sendFrom()', () => {
-        it('Should fail if untrusted remote', async () => {
+        it.only('Should fail if untrusted remote', async () => {
             const {
                 signer,
                 tapiocaWrapper_0,

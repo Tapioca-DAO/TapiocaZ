@@ -69,14 +69,8 @@ abstract contract BaseTOFT is OFT {
         bytes memory _payload,
         IERC20 _erc20
     ) internal virtual {
-        (
-            ,
-            bytes memory from,
-            ,
-            uint256 amount,
-            uint256 assetId,
-            uint256 minShareOut
-        ) = abi.decode(
+        (, , , uint256 amount, uint256 assetId, uint256 minShareOut) = abi
+            .decode(
                 _payload,
                 (uint16, bytes, bytes, uint256, uint256, uint256)
             );
@@ -91,7 +85,7 @@ abstract contract BaseTOFT is OFT {
             address(this)
         );
 
-        emit ReceiveFromChain(_srcChainId, from, address(this), amount);
+        emit ReceiveFromChain(_srcChainId, address(this), amount);
     }
 
     /// @notice Should be called by the strategy on the linked chain.
@@ -103,7 +97,7 @@ abstract contract BaseTOFT is OFT {
     ) internal virtual {
         (
             ,
-            bytes memory from,
+            ,
             ,
             uint256 amount,
             uint256 share,
@@ -132,7 +126,7 @@ abstract contract BaseTOFT is OFT {
             _adapterParams
         );
 
-        emit ReceiveFromChain(_srcChainId, from, address(this), amount);
+        emit ReceiveFromChain(_srcChainId, address(this), amount);
     }
 
     function _ybDeposit(
@@ -163,7 +157,7 @@ abstract contract BaseTOFT is OFT {
             _from //deposit on behalf of the user
         );
 
-        emit ReceiveFromChain(_srcChainId, from, _from, amount);
+        emit ReceiveFromChain(_srcChainId, _from, amount);
     }
 
     function _ybWithdraw(uint16 _srcChainId, bytes memory _payload)
@@ -196,7 +190,7 @@ abstract contract BaseTOFT is OFT {
             _adapterParams
         );
 
-        emit ReceiveFromChain(_srcChainId, from, _from, amount);
+        emit ReceiveFromChain(_srcChainId, _from, amount);
     }
 
     /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.

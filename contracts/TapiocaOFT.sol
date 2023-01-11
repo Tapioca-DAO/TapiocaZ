@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroEndpoint.sol';
 import './TapiocaWrapper.sol';
 import './BaseTOFT.sol';
 
@@ -27,6 +26,11 @@ import './BaseTOFT.sol';
 //         ####*  (((((((((((((((((((
 //                     ,**//*,.
 
+interface IEndpoint {
+    // @notice get this Endpoint's immutable source identifier
+    function getChainId() external view returns (uint16);
+}
+
 contract TapiocaOFT is BaseTOFT {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
@@ -38,7 +42,7 @@ contract TapiocaOFT is BaseTOFT {
     /// @notice The ERC20 to wrap.
     IERC20 public immutable erc20;
     /// @notice The host chain ID of the ERC20, will be used only on OP chain.
-    uint256 public immutable hostChainID;
+    uint16 public immutable hostChainID;
     /// @notice Decimal cache number of the ERC20.
     uint8 _decimalCache;
 
@@ -88,7 +92,7 @@ contract TapiocaOFT is BaseTOFT {
 
     /// @notice Require that the caller is on the host chain of the ERC20.
     modifier onlyHostChain() {
-        if (getChainId() != hostChainID) {
+        if (lzEndpoint.getChainId() != hostChainID) {
             revert TOFT__NotHostChain();
         }
         _;
@@ -248,12 +252,6 @@ contract TapiocaOFT is BaseTOFT {
 
     /// @notice Check if the current chain is the host chain of the ERC20.
     function isHostChain() external view returns (bool) {
-        return getChainId() == hostChainID;
-    }
-
-    /// @notice Return the current Layer-Zero "chain ID", not the actual `chainId` OPCODE output.
-    /// @dev Useful for testing.
-    function getChainId() internal view virtual returns (uint256) {
-        return ILayerZeroEndpoint(lzEndpoint).getChainId();
+        return lzEndpoint.getChainId() == hostChainID;
     }
 }

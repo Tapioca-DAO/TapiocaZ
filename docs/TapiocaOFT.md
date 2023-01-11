@@ -407,7 +407,7 @@ Harvest the fees collected by the contract. Called only on host chain.
 ### hostChainID
 
 ```solidity
-function hostChainID() external view returns (uint256)
+function hostChainID() external view returns (uint16)
 ```
 
 The host chain ID of the ERC20, will be used only on OP chain.
@@ -419,7 +419,7 @@ The host chain ID of the ERC20, will be used only on OP chain.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint16 | undefined |
 
 ### increaseAllowance
 
@@ -856,6 +856,45 @@ The TapiocaWrapper contract, owner of this contract.
 |---|---|---|
 | _0 | contract TapiocaWrapper | undefined |
 
+### test
+
+```solidity
+function test(address _addr) external pure returns (bytes)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _addr | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes | undefined |
+
+### token
+
+```solidity
+function token() external view returns (address)
+```
+
+
+
+*returns the address of the ERC20 token*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### totalFees
 
 ```solidity
@@ -1159,7 +1198,7 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 ### ReceiveFromChain
 
 ```solidity
-event ReceiveFromChain(uint16 indexed _srcChainId, bytes _fromAddress, address indexed _to, uint256 _amount)
+event ReceiveFromChain(uint16 indexed _srcChainId, address indexed _to, uint256 _amount)
 ```
 
 
@@ -1171,7 +1210,6 @@ event ReceiveFromChain(uint16 indexed _srcChainId, bytes _fromAddress, address i
 | Name | Type | Description |
 |---|---|---|
 | _srcChainId `indexed` | uint16 | undefined |
-| _fromAddress  | bytes | undefined |
 | _to `indexed` | address | undefined |
 | _amount  | uint256 | undefined |
 
@@ -1197,7 +1235,7 @@ event RetryMessageSuccess(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, 
 ### SendToChain
 
 ```solidity
-event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes indexed _toAddress, uint256 _amount)
+event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes _toAddress, uint256 _amount)
 ```
 
 
@@ -1210,7 +1248,7 @@ event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes index
 |---|---|---|
 | _dstChainId `indexed` | uint16 | undefined |
 | _from `indexed` | address | undefined |
-| _toAddress `indexed` | bytes | undefined |
+| _toAddress  | bytes | undefined |
 | _amount  | uint256 | undefined |
 
 ### SetMinDstGas
