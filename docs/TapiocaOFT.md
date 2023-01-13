@@ -644,7 +644,7 @@ function renounceOwnership() external nonpayable
 ### retrieveFromYB
 
 ```solidity
-function retrieveFromYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, uint256 extraGasLimit, address zroPaymentAddress, address airdropAddress, uint256 airdropAmount, bool strategyWithdrawal) external payable
+function retrieveFromYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, bool strategyWithdrawal) external payable
 ```
 
 
@@ -658,10 +658,8 @@ function retrieveFromYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, ui
 | amount | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
-| extraGasLimit | uint256 | undefined |
 | zroPaymentAddress | address | undefined |
-| airdropAddress | address | undefined |
-| airdropAmount | uint256 | undefined |
+| airdropAdapterParam | bytes | undefined |
 | strategyWithdrawal | bool | undefined |
 
 ### retryMessage
