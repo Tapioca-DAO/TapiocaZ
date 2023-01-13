@@ -101,21 +101,12 @@ abstract contract BaseTOFT is OFT {
         uint256 amount,
         uint256 assetId,
         uint16 lzDstChainId,
-        uint256 extraGasLimit,
         address zroPaymentAddress,
-        address airdropAddress,
-        uint256 airdropAmount,
+        bytes memory airdropAdapterParam,
         bool strategyWithdrawal
     ) external payable {
         bytes memory toAddress = abi.encodePacked(msg.sender);
 
-        bytes memory airdropAdapterParam = LzLib.buildAirdropAdapterParams(
-            extraGasLimit,
-            LzLib.AirdropParams({
-                airdropAmount: airdropAmount,
-                airdropAddress: bytes32(uint256(uint160(airdropAddress)) << 96) //LzLib has an issue converting address to bytes32
-            })
-        );
         bytes memory lzPayload = abi.encode(
             strategyWithdrawal ? PT_YB_RETRIEVE_STRAT : PT_YB_WITHDRAW,
             abi.encodePacked(msg.sender),

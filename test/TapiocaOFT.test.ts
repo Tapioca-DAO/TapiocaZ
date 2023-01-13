@@ -435,16 +435,23 @@ describe('TapiocaOFT', () => {
                 signer.address,
             );
 
+            const airdropAdapterParams = ethers.utils.solidityPack(
+                ['uint16', 'uint', 'uint', 'address'],
+                [
+                    2,
+                    800000,
+                    ethers.utils.parseEther('0.015'),
+                    tapiocaOFT10.address,
+                ],
+            );
             const signerBalanceBeforeRetrieve =
                 await ethers.provider.getBalance(signer.address);
             await tapiocaOFT0.retrieveFromYB(
                 toDeposit,
                 1,
                 dstChainId,
-                '800000',
                 ethers.constants.AddressZero,
-                tapiocaOFT10.address,
-                ethers.utils.parseEther('0.015'),
+                airdropAdapterParams,
                 false,
                 {
                     value: ethers.utils.parseEther('0.05'),
@@ -546,14 +553,22 @@ describe('TapiocaOFT', () => {
                 signer.address,
             );
 
+            const airdropAdapterParams = ethers.utils.solidityPack(
+                ['uint16', 'uint', 'uint', 'address'],
+                [
+                    2,
+                    800000,
+                    ethers.utils.parseEther('0.015'),
+                    tapiocaOFT10.address,
+                ],
+            );
+
             await tapiocaOFT0.retrieveFromYB(
                 toDeposit,
                 1,
                 dstChainId,
-                '800000',
                 ethers.constants.AddressZero,
-                tapiocaOFT10.address,
-                ethers.utils.parseEther('0.015'),
+                airdropAdapterParams,
                 true,
                 {
                     value: ethers.utils.parseEther('0.05'),
