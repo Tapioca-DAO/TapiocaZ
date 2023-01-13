@@ -6863,10 +6863,10 @@
     "string-width" "^4.2.3"
     "strip-ansi" "^6.0.1"
 
-"tapioca-sdk@^1.1.13":
-  "integrity" "sha512-ah95FqU14zkHJCkcNtMQfy4mXpPxOG9SAQtX8CWFZDUnNX7UOT3+G4xEtBG0TD0fy2wME+I1n8JhLArs8hVQhQ=="
-  "resolved" "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.1.13.tgz"
-  "version" "1.1.13"
+"tapioca-sdk@^1.1.14":
+  "integrity" "sha512-lqaMB9HHzmPXMQXNAvOBxGeOLj3l++5WpyhYYy1g66Ba0lkRKalQJM14Xw4gS/VLjff7kiFKftaZly00yvi6eA=="
+  "resolved" "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.1.14.tgz"
+  "version" "1.1.14"
   dependencies:
     "ethers" "^5.6.9"
     "lodash" "^4.17.21"

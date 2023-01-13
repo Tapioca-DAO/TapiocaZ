@@ -21,7 +21,7 @@ let supportedChains: { [key: string]: HttpNetworkConfig } = SDK.API.utils
                         ? [process.env.PRIVATE_KEY]
                         : [],
                 live: true,
-                url: chain.rpc.replace('<api_key>', process.env.ALCHEMY_KEY),
+                url: chain.rpc.replace('<api_key>', process.env.ALCHEMY_KEY!),
                 gasMultiplier: chain.tags.includes('testnet') ? 2 : 1,
                 chainId: Number(chain.chainId),
             },
@@ -29,7 +29,7 @@ let supportedChains: { [key: string]: HttpNetworkConfig } = SDK.API.utils
         {},
     );
 
-const config: HardhatUserConfig = {
+const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     solidity: {
         compilers: [
             {
@@ -63,7 +63,14 @@ const config: HardhatUserConfig = {
                     : [],
         },
         //testnets
-        goerli: supportedChains['goerli'],
+        goerli: {
+            url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`,
+            accounts: [process.env.PRIVATE_KEY!],
+            chainId: 5,
+            lzChainId: '10021',
+            gasMultiplier: 2,
+        },
+        // goerli: supportedChains['goerli'],
         bnb_testnet: supportedChains['bnb_testnet'],
         fuji_avalanche: supportedChains['fuji_avalanche'],
         mumbai: supportedChains['mumbai'],

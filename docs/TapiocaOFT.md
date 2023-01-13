@@ -371,6 +371,23 @@ function getConfig(uint16 _version, uint16 _chainId, address, uint256 _configTyp
 |---|---|---|
 | _0 | bytes | undefined |
 
+### getLzChainId
+
+```solidity
+function getLzChainId() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### getTrustedRemoteAddress
 
 ```solidity
@@ -407,7 +424,7 @@ Harvest the fees collected by the contract. Called only on host chain.
 ### hostChainID
 
 ```solidity
-function hostChainID() external view returns (uint256)
+function hostChainID() external view returns (uint16)
 ```
 
 The host chain ID of the ERC20, will be used only on OP chain.
@@ -419,7 +436,7 @@ The host chain ID of the ERC20, will be used only on OP chain.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint16 | undefined |
 
 ### increaseAllowance
 
@@ -624,6 +641,29 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
+### retrieveFromYB
+
+```solidity
+function retrieveFromYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, uint256 extraGasLimit, address zroPaymentAddress, address airdropAddress, uint256 airdropAmount, bool strategyWithdrawal) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| assetId | uint256 | undefined |
+| lzDstChainId | uint16 | undefined |
+| extraGasLimit | uint256 | undefined |
+| zroPaymentAddress | address | undefined |
+| airdropAddress | address | undefined |
+| airdropAmount | uint256 | undefined |
+| strategyWithdrawal | bool | undefined |
+
 ### retryMessage
 
 ```solidity
@@ -664,6 +704,28 @@ function sendFrom(address _from, uint16 _dstChainId, bytes _toAddress, uint256 _
 | _refundAddress | address payable | undefined |
 | _zroPaymentAddress | address | undefined |
 | _adapterParams | bytes | undefined |
+
+### sendToYB
+
+```solidity
+function sendToYB(uint256 amount, uint256 assetId, uint256 minShareOut, uint16 lzDstChainId, uint256 extraGasLimit, address zroPaymentAddress, bool strategyDeposit) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| assetId | uint256 | undefined |
+| minShareOut | uint256 | undefined |
+| lzDstChainId | uint16 | undefined |
+| extraGasLimit | uint256 | undefined |
+| zroPaymentAddress | address | undefined |
+| strategyDeposit | bool | undefined |
 
 ### setConfig
 
@@ -855,6 +917,23 @@ The TapiocaWrapper contract, owner of this contract.
 | Name | Type | Description |
 |---|---|---|
 | _0 | contract TapiocaWrapper | undefined |
+
+### token
+
+```solidity
+function token() external view returns (address)
+```
+
+
+
+*returns the address of the ERC20 token*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 ### totalFees
 
@@ -1159,7 +1238,7 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 ### ReceiveFromChain
 
 ```solidity
-event ReceiveFromChain(uint16 indexed _srcChainId, bytes _fromAddress, address indexed _to, uint256 _amount)
+event ReceiveFromChain(uint16 indexed _srcChainId, address indexed _to, uint256 _amount)
 ```
 
 
@@ -1171,7 +1250,6 @@ event ReceiveFromChain(uint16 indexed _srcChainId, bytes _fromAddress, address i
 | Name | Type | Description |
 |---|---|---|
 | _srcChainId `indexed` | uint16 | undefined |
-| _fromAddress  | bytes | undefined |
 | _to `indexed` | address | undefined |
 | _amount  | uint256 | undefined |
 
@@ -1197,7 +1275,7 @@ event RetryMessageSuccess(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, 
 ### SendToChain
 
 ```solidity
-event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes indexed _toAddress, uint256 _amount)
+event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes _toAddress, uint256 _amount)
 ```
 
 
@@ -1210,7 +1288,7 @@ event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes index
 |---|---|---|
 | _dstChainId `indexed` | uint16 | undefined |
 | _from `indexed` | address | undefined |
-| _toAddress `indexed` | bytes | undefined |
+| _toAddress  | bytes | undefined |
 | _amount  | uint256 | undefined |
 
 ### SetMinDstGas

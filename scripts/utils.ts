@@ -45,6 +45,11 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
         await (
             await (await ethers.getContractFactory('TapiocaWrapper')).deploy()
         ).deployed();
+
+    const deployYieldBoxMock = async () =>
+        await (
+            await (await ethers.getContractFactory('YieldBoxMock')).deploy()
+        ).deployed();
     // UTILS
     const Tx_deployTapiocaOFT = async (
         lzEndpoint: string,
@@ -93,6 +98,7 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
         );
 
     return {
+        deployYieldBoxMock,
         deployLZEndpointMock,
         deployTapiocaWrapper,
         Tx_deployTapiocaOFT,
