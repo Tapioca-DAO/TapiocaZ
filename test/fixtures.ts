@@ -23,6 +23,8 @@ export const setupFixture = async () => {
         LZEndpointMock_chainID_10,
         tapiocaWrapper_0,
         tapiocaWrapper_10,
+        YieldBox_0,
+        YieldBox_10,
         utils,
     } = await register(hre);
 
@@ -37,7 +39,7 @@ export const setupFixture = async () => {
                     LZEndpointMock_chainID_0.address,
                     false,
                     erc20Mock.address,
-                    ethers.constants.AddressZero,
+                    YieldBox_0.address,
                     31337, //hardhat network
                     signer,
                 )
@@ -63,7 +65,7 @@ export const setupFixture = async () => {
                     LZEndpointMock_chainID_10.address,
                     false,
                     erc20Mock.address,
-                    ethers.constants.AddressZero,
+                    YieldBox_10.address,
                     10,
                     signer,
                 )
@@ -123,6 +125,8 @@ export const setupFixture = async () => {
         tapiocaOFT0,
         tapiocaOFT10,
         dummyAmount,
+        YieldBox_0,
+        YieldBox_10,
     };
     const functions = {
         estimateFees,

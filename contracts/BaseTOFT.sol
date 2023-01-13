@@ -2,8 +2,11 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
 import 'tapioca-sdk/dist/contracts/token/oft/OFT.sol';
 import './interfaces/IYieldBox.sol';
+
+import 'hardhat/console.sol';
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -39,7 +42,7 @@ abstract contract BaseTOFT is OFT {
     uint16 public constant PT_YB_SEND_STRAT = 770;
     uint16 public constant PT_YB_RETRIEVE_STRAT = 771;
     uint16 public constant PT_YB_DEPOSIT = 772;
-    uint16 public constant PT_YB_WITHDRAW = 772;
+    uint16 public constant PT_YB_WITHDRAW = 773;
 
     /// ==========================
     /// ========== Errors ========
@@ -58,85 +61,97 @@ abstract contract BaseTOFT is OFT {
         isNative = _isNative;
     }
 
+    receive() external payable {}
+
+    // ==========================
+    // ========== LZ ============
+    // ==========================
+    function sendToYB(
+        uint256 amount,
+        uint256 assetId,
+        uint256 minShareOut,
+        uint16 lzDstChainId,
+        uint256 extraGasLimit,
+        address zroPaymentAddress,
+        bool strategyDeposit
+    ) external payable {
+        bytes memory toAddress = abi.encodePacked(msg.sender);
+        _debitFrom(msg.sender, lzEndpoint.getChainId(), toAddress, amount);
+        bytes memory lzPayload = abi.encode(
+            strategyDeposit ? PT_YB_SEND_STRAT : PT_YB_DEPOSIT,
+            abi.encodePacked(msg.sender),
+            toAddress,
+            amount,
+            assetId,
+            minShareOut
+        );
+        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
+            extraGasLimit
+        );
+        _lzSend(
+            lzDstChainId,
+            lzPayload,
+            payable(msg.sender),
+            zroPaymentAddress,
+            adapterParam,
+            msg.value
+        );
+        emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
+    }
+
+    function retrieveFromYB(
+        uint256 amount,
+        uint256 assetId,
+        uint16 lzDstChainId,
+        uint256 extraGasLimit,
+        address zroPaymentAddress,
+        address airdropAddress,
+        uint256 airdropAmount,
+        bool strategyWithdrawal
+    ) external payable {
+        bytes memory toAddress = abi.encodePacked(msg.sender);
+
+        bytes memory airdropAdapterParam = LzLib.buildAirdropAdapterParams(
+            extraGasLimit,
+            LzLib.AirdropParams({
+                airdropAmount: airdropAmount,
+                airdropAddress: bytes32(uint256(uint160(airdropAddress)) << 96) //LzLib has an issue converting address to bytes32
+            })
+        );
+        bytes memory lzPayload = abi.encode(
+            strategyWithdrawal ? PT_YB_RETRIEVE_STRAT : PT_YB_WITHDRAW,
+            abi.encodePacked(msg.sender),
+            toAddress,
+            amount,
+            0,
+            assetId,
+            zroPaymentAddress
+        );
+        _lzSend(
+            lzDstChainId,
+            lzPayload,
+            payable(msg.sender),
+            zroPaymentAddress,
+            airdropAdapterParam,
+            msg.value
+        );
+        emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
+    }
+
     // ================================
     // ========== YieldBox ============
     // ================================
-    /// @notice Should be called by the strategy on the linked chain.
-    function _ybSendStrat(
-        uint16 _srcChainId,
-        bytes memory,
-        uint64,
-        bytes memory _payload,
-        IERC20 _erc20
-    ) internal virtual {
-        (, , , uint256 amount, uint256 assetId, uint256 minShareOut) = abi
-            .decode(
-                _payload,
-                (uint16, bytes, bytes, uint256, uint256, uint256)
-            );
-
-        _creditTo(_srcChainId, address(this), amount);
-        _depositToYieldbox(
-            assetId,
-            amount,
-            minShareOut,
-            _erc20,
-            address(this),
-            address(this)
-        );
-
-        emit ReceiveFromChain(_srcChainId, address(this), amount);
-    }
-
-    /// @notice Should be called by the strategy on the linked chain.
-    function _ybRetrieveStrat(
-        uint16 _srcChainId,
-        bytes memory _srcAddress,
-        uint64,
-        bytes memory _payload
-    ) internal virtual {
-        (
-            ,
-            ,
-            ,
-            uint256 amount,
-            uint256 share,
-            uint256 assetId,
-            bytes memory _adapterParams
-        ) = abi.decode(
-                _payload,
-                (uint16, bytes, bytes, uint256, uint256, uint256, bytes)
-            );
-
-        _retrieveFromYieldBox(
-            assetId,
-            amount,
-            share,
-            address(this),
-            address(this)
-        );
-
-        _send(
-            address(this),
-            _srcChainId,
-            _srcAddress,
-            amount,
-            payable(_srcAddress.toAddress(0)),
-            address(0),
-            _adapterParams
-        );
-
-        emit ReceiveFromChain(_srcChainId, address(this), amount);
-    }
 
     function _ybDeposit(
         uint16 _srcChainId,
         bytes memory _payload,
-        IERC20 _erc20
+        IERC20 _erc20,
+        bool _strategyDeposit
     ) internal virtual {
         (
             ,
-            bytes memory from,
+            //package
+            bytes memory fromAddressBytes, //from
             ,
             uint256 amount,
             uint256 assetId,
@@ -146,7 +161,9 @@ abstract contract BaseTOFT is OFT {
                 (uint16, bytes, bytes, uint256, uint256, uint256)
             );
 
-        address _from = from.toAddress(0);
+        address onBehalfOf = _strategyDeposit
+            ? address(this)
+            : fromAddressBytes.toAddress(0);
         _creditTo(_srcChainId, address(this), amount);
         _depositToYieldbox(
             assetId,
@@ -154,43 +171,62 @@ abstract contract BaseTOFT is OFT {
             minShareOut,
             _erc20,
             address(this),
-            _from //deposit on behalf of the user
+            onBehalfOf
         );
 
-        emit ReceiveFromChain(_srcChainId, _from, amount);
+        emit ReceiveFromChain(_srcChainId, onBehalfOf, amount);
     }
 
-    function _ybWithdraw(uint16 _srcChainId, bytes memory _payload)
-        internal
-        virtual
-    {
+    function _ybWithdraw(
+        uint16 _srcChainId,
+        bytes memory _payload,
+        bool _strategyWithdrawal
+    ) internal virtual {
         (
             ,
             bytes memory from,
             ,
-            uint256 amount,
-            uint256 share,
-            uint256 assetId,
-            bytes memory _adapterParams
+            uint256 _amount,
+            uint256 _share,
+            uint256 _assetId,
+            address _zroPaymentAddress
         ) = abi.decode(
                 _payload,
-                (uint16, bytes, bytes, uint256, uint256, uint256, bytes)
+                (uint16, bytes, bytes, uint256, uint256, uint256, address)
             );
 
         address _from = from.toAddress(0);
-        _retrieveFromYieldBox(assetId, amount, share, _from, address(this));
-
-        _send(
-            address(this),
-            _srcChainId,
-            from,
-            amount,
-            payable(_from),
-            address(0),
-            _adapterParams
+        _retrieveFromYieldBox(
+            _assetId,
+            _amount,
+            _share,
+            _strategyWithdrawal ? address(this) : _from,
+            address(this)
         );
 
-        emit ReceiveFromChain(_srcChainId, _from, amount);
+        _debitFrom(
+            address(this),
+            lzEndpoint.getChainId(),
+            abi.encodePacked(address(this)),
+            _amount
+        );
+        bytes memory lzSendBackPayload = abi.encode(PT_SEND, from, _amount);
+        _lzSend(
+            _srcChainId,
+            lzSendBackPayload,
+            payable(this),
+            _zroPaymentAddress,
+            '',
+            address(this).balance
+        );
+        emit SendToChain(
+            _srcChainId,
+            _from,
+            abi.encodePacked(address(this)),
+            _amount
+        );
+
+        emit ReceiveFromChain(_srcChainId, _from, _amount);
     }
 
     /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.

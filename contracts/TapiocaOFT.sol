@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import './TapiocaWrapper.sol';
 import './BaseTOFT.sol';
+import 'hardhat/console.sol';
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -192,8 +193,6 @@ contract TapiocaOFT is BaseTOFT {
     // ========== INTERNAL ============
     // ================================
 
-    receive() external payable {}
-
     /// @notice Estimate the management fees for a wrap operation.
     function estimateFees(
         uint256 _feeBps,
@@ -233,13 +232,13 @@ contract TapiocaOFT is BaseTOFT {
         if (packetType == PT_SEND) {
             _sendAck(_srcChainId, _srcAddress, _nonce, _payload);
         } else if (packetType == PT_YB_SEND_STRAT) {
-            _ybSendStrat(_srcChainId, _srcAddress, _nonce, _payload, erc20);
+            _ybDeposit(_srcChainId, _payload, IERC20(address(this)), true);
         } else if (packetType == PT_YB_RETRIEVE_STRAT) {
-            _ybRetrieveStrat(_srcChainId, _srcAddress, _nonce, _payload);
+            _ybWithdraw(_srcChainId, _payload, true);
         } else if (packetType == PT_YB_DEPOSIT) {
-            _ybDeposit(_srcChainId, _payload, erc20);
+            _ybDeposit(_srcChainId, _payload, IERC20(address(this)), false);
         } else if (packetType == PT_YB_WITHDRAW) {
-            _ybWithdraw(_srcChainId, _payload);
+            _ybWithdraw(_srcChainId, _payload, false);
         } else {
             revert('OFTCore: unknown packet type');
         }
@@ -248,5 +247,9 @@ contract TapiocaOFT is BaseTOFT {
     /// @notice Check if the current chain is the host chain of the ERC20.
     function isHostChain() external view returns (bool) {
         return block.chainid == hostChainID;
+    }
+
+    function getLzChainId() external view returns (uint16) {
+        return lzEndpoint.getChainId();
     }
 }

@@ -371,6 +371,23 @@ function getConfig(uint16 _version, uint16 _chainId, address, uint256 _configTyp
 |---|---|---|
 | _0 | bytes | undefined |
 
+### getLzChainId
+
+```solidity
+function getLzChainId() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### getTrustedRemoteAddress
 
 ```solidity
@@ -624,6 +641,29 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
+### retrieveFromYB
+
+```solidity
+function retrieveFromYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, uint256 extraGasLimit, address zroPaymentAddress, address airdropAddress, uint256 airdropAmount, bool strategyWithdrawal) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| assetId | uint256 | undefined |
+| lzDstChainId | uint16 | undefined |
+| extraGasLimit | uint256 | undefined |
+| zroPaymentAddress | address | undefined |
+| airdropAddress | address | undefined |
+| airdropAmount | uint256 | undefined |
+| strategyWithdrawal | bool | undefined |
+
 ### retryMessage
 
 ```solidity
@@ -664,6 +704,28 @@ function sendFrom(address _from, uint16 _dstChainId, bytes _toAddress, uint256 _
 | _refundAddress | address payable | undefined |
 | _zroPaymentAddress | address | undefined |
 | _adapterParams | bytes | undefined |
+
+### sendToYB
+
+```solidity
+function sendToYB(uint256 amount, uint256 assetId, uint256 minShareOut, uint16 lzDstChainId, uint256 extraGasLimit, address zroPaymentAddress, bool strategyDeposit) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| assetId | uint256 | undefined |
+| minShareOut | uint256 | undefined |
+| lzDstChainId | uint16 | undefined |
+| extraGasLimit | uint256 | undefined |
+| zroPaymentAddress | address | undefined |
+| strategyDeposit | bool | undefined |
 
 ### setConfig
 
