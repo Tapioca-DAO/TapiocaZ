@@ -6,8 +6,6 @@ import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
 import 'tapioca-sdk/dist/contracts/token/oft/OFT.sol';
 import './interfaces/IYieldBox.sol';
 
-import 'hardhat/console.sol';
-
 //
 //                 .(%%%%%%%%%%%%*       *
 //             #%%%%%%%%%%%%%%%%%%%%*  ####*

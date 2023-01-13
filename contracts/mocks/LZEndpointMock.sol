@@ -7,7 +7,6 @@ import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroReceiver.sol';
 import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroEndpoint.sol';
 import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
 
-import 'hardhat/console.sol';
 
 /*
 like a real LayerZero endpoint but can be mocked, which handle message transmission, verification, and receipt.

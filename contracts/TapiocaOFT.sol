@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import './TapiocaWrapper.sol';
 import './BaseTOFT.sol';
-import 'hardhat/console.sol';
 
 //
 //                 .(%%%%%%%%%%%%*       *
