@@ -67,7 +67,6 @@ abstract contract BaseTOFT is OFT {
     function sendToYB(
         uint256 amount,
         uint256 assetId,
-        uint256 minShareOut,
         uint16 lzDstChainId,
         uint256 extraGasLimit,
         address zroPaymentAddress,
@@ -80,8 +79,7 @@ abstract contract BaseTOFT is OFT {
             abi.encodePacked(msg.sender),
             toAddress,
             amount,
-            assetId,
-            minShareOut
+            assetId
         );
         bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
             extraGasLimit
@@ -143,25 +141,14 @@ abstract contract BaseTOFT is OFT {
             bytes memory fromAddressBytes, //from
             ,
             uint256 amount,
-            uint256 assetId,
-            uint256 minShareOut
-        ) = abi.decode(
-                _payload,
-                (uint16, bytes, bytes, uint256, uint256, uint256)
-            );
+            uint256 assetId
+        ) = abi.decode(_payload, (uint16, bytes, bytes, uint256, uint256));
 
         address onBehalfOf = _strategyDeposit
             ? address(this)
             : fromAddressBytes.toAddress(0);
         _creditTo(_srcChainId, address(this), amount);
-        _depositToYieldbox(
-            assetId,
-            amount,
-            minShareOut,
-            _erc20,
-            address(this),
-            onBehalfOf
-        );
+        _depositToYieldbox(assetId, amount, _erc20, address(this), onBehalfOf);
 
         emit ReceiveFromChain(_srcChainId, onBehalfOf, amount);
     }
@@ -222,35 +209,12 @@ abstract contract BaseTOFT is OFT {
     function _depositToYieldbox(
         uint256 _assetId,
         uint256 _amount,
-        uint256 _minShareOut,
         IERC20 _erc20,
         address _from,
         address _to
     ) private {
-        if (isNative) {
-            bytes memory depositETHAssetData = abi.encodeWithSelector(
-                yieldBox.depositETHAsset.selector,
-                _assetId,
-                address(this),
-                _minShareOut
-            );
-            (bool success, ) = address(yieldBox).call{value: _amount}(
-                depositETHAssetData
-            );
-            if (!success) {
-                revert TOFT_YB_ETHDeposit();
-            }
-        } else {
-            _erc20.approve(address(yieldBox), _amount);
-            yieldBox.depositAsset(
-                _assetId,
-                _from,
-                _to,
-                _amount,
-                0,
-                _minShareOut
-            );
-        }
+        _erc20.approve(address(yieldBox), _amount);
+        yieldBox.depositAsset(_assetId, _from, _to, _amount, 0);
 
         emit YieldBoxDeposit(_amount);
     }

@@ -398,7 +398,6 @@ describe('TapiocaOFT', () => {
             await tapiocaOFT0.sendToYB(
                 toDeposit,
                 1, //asset id
-                0, //min share out
                 dstChainId, //dst chain Id
                 '800000', //extra gas limit
                 ethers.constants.AddressZero, //zro address
@@ -531,7 +530,6 @@ describe('TapiocaOFT', () => {
             await tapiocaOFT0.sendToYB(
                 toDeposit,
                 1, //asset id
-                0, //min share out
                 dstChainId, //dst chain Id
                 '800000', //extra gas limit
                 ethers.constants.AddressZero, //zro address

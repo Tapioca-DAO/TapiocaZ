@@ -23,13 +23,11 @@ import { updateDeployments } from '../deploy/utils';
  * @param args.salt - The salt used for CREATE2 deployment
  * @param args.hostChainName - The host chain name of the ERC20.
  */
-//ex: npx hardhat deployTOFT --network goerli --erc20 0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8 --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network goerli --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network goerli --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xd428690148436dA9c7422698eEe15F51C8cec871 --yield-box 0xAb1237136f2eC766Ee8F69B2C47bd8FA00a5566E --salt TESTTOFT --host-chain-name arbitrum_goerli
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0x492264f175E73DAeec680347b07948ADEbD91175 --yield-box 0xAb1237136f2eC766Ee8F69B2C47bd8FA00a5566E --salt TESTTOFT --host-chain-name arbitrum_goerli
 
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xd428690148436dA9c7422698eEe15F51C8cec871 --yield-box 0xbe23Dc1b3cE5ff4CFE6433Ff39C6879ACf683603 --salt TESTTOFT --host-chain-name arbitrum_goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x492264f175E73DAeec680347b07948ADEbD91175 --yield-box 0xbe23Dc1b3cE5ff4CFE6433Ff39C6879ACf683603 --salt TESTTOFT --host-chain-name arbitrum_goerli
 export const deployTOFT__task = async (
     args: {
         erc20: string;
@@ -216,8 +214,6 @@ async function setTrustedRemote(
     );
 
     await (
-        await tWrapper.connect(signer).executeTOFT(fromToft, encodedTX, true, {
-            gasLimit: 200_000,
-        })
+        await tWrapper.connect(signer).executeTOFT(fromToft, encodedTX, true)
     ).wait();
 }

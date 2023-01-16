@@ -1,146 +1,103 @@
 {
-    "5": [
+    "5": [],
+    "43113": [
         {
             "name": "TapiocaWrapper",
-            "address": "0x5c1fccc8ede4ed825a0da70f59452c78178cb035",
+            "address": "0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D",
             "meta": {}
         },
         {
-            "name": "TapiocaOFT-Test Token-WBTC",
-            "address": "0x2E50122Fa37d294dF52030E2F602b4c7F73cD38F",
-            "meta": {
-                "erc20": {
-                    "name": "Test Token-WBTC",
-                    "address": "0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a"
-                },
-                "yieldBox": {
-                    "name": "YieldBox",
-                    "address": "0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F"
-                },
-                "hostChain": {
-                    "id": "5",
-                    "address": "0x2E50122Fa37d294dF52030E2F602b4c7F73cD38F"
-                },
-                "linkedChain": {
-                    "id": "43113",
-                    "address": "0x61854A1B29E2EaF06906c3fEd88Ea64404E9d795"
-                }
-            }
-        },
-        {
             "name": "TapiocaOFT-Wrapped Ether",
-            "address": "0xE40CE28B4353ad276Ac9cccb87787F7dfA2984d7",
+            "address": "0xb031AA134f767819A0bF92B9BBf7f97bf042440a",
             "meta": {
                 "erc20": {
                     "name": "Wrapped Ether",
-                    "address": "0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8"
+                    "address": "0xd428690148436dA9c7422698eEe15F51C8cec871"
                 },
                 "yieldBox": {
                     "name": "YieldBox",
-                    "address": "0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F"
+                    "address": "0xbe23Dc1b3cE5ff4CFE6433Ff39C6879ACf683603"
                 },
                 "hostChain": {
-                    "id": "5",
-                    "address": "0xE40CE28B4353ad276Ac9cccb87787F7dfA2984d7"
+                    "id": "421613",
+                    "address": "0x1B4967D94fe3e4AA2F39C73ACC554F326CAc867b"
                 },
                 "linkedChain": {
                     "id": "43113",
-                    "address": "0x7212B75fEBbA5f7Bc34E00BD34437771726cc7D2"
+                    "address": "0xb031AA134f767819A0bF92B9BBf7f97bf042440a"
                 }
             }
         },
         {
             "name": "TapiocaOFT-Test Token",
-            "address": "0x8AE919C76297a20795Fa69DE5DD713248abd6EfE",
+            "address": "0x1604d1a93C5fA62f4b8e7E380921838019EDcEFD",
             "meta": {
                 "erc20": {
                     "name": "Test Token",
-                    "address": "0x7ef45faDa9f8da6ee2fd6FFD9850BF25E05D9953"
+                    "address": "0x492264f175E73DAeec680347b07948ADEbD91175"
                 },
                 "yieldBox": {
                     "name": "YieldBox",
-                    "address": "0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F"
+                    "address": "0xbe23Dc1b3cE5ff4CFE6433Ff39C6879ACf683603"
                 },
                 "hostChain": {
-                    "id": "5",
-                    "address": "0x8AE919C76297a20795Fa69DE5DD713248abd6EfE"
+                    "id": "421613",
+                    "address": "0xdad5550CD13B350a7529ca3e8e11e9E57763cCc2"
                 },
                 "linkedChain": {
                     "id": "43113",
-                    "address": "0xA58f0D7A359CCaeC25bD9bC9B5C606C7a33f287d"
+                    "address": "0x1604d1a93C5fA62f4b8e7E380921838019EDcEFD"
                 }
             }
         }
     ],
-    "43113": [
+    "421613": [
         {
             "name": "TapiocaWrapper",
-            "address": "0x1aCdc2381Df3969Cf99e8557ce360340b3bfb371",
+            "address": "0x7bC1f16f9D23a25093990EF790aeB3DD8b308F1E",
             "meta": {}
         },
         {
-            "name": "TapiocaOFT-Test Token-WBTC",
-            "address": "0x61854A1B29E2EaF06906c3fEd88Ea64404E9d795",
-            "meta": {
-                "erc20": {
-                    "name": "Test Token-WBTC",
-                    "address": "0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a"
-                },
-                "yieldBox": {
-                    "name": "YieldBox",
-                    "address": "0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9"
-                },
-                "hostChain": {
-                    "id": "5",
-                    "address": "0x2E50122Fa37d294dF52030E2F602b4c7F73cD38F"
-                },
-                "linkedChain": {
-                    "id": "43113",
-                    "address": "0x61854A1B29E2EaF06906c3fEd88Ea64404E9d795"
-                }
-            }
-        },
-        {
             "name": "TapiocaOFT-Wrapped Ether",
-            "address": "0x7212B75fEBbA5f7Bc34E00BD34437771726cc7D2",
+            "address": "0x1B4967D94fe3e4AA2F39C73ACC554F326CAc867b",
             "meta": {
                 "erc20": {
                     "name": "Wrapped Ether",
-                    "address": "0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8"
+                    "address": "0xd428690148436dA9c7422698eEe15F51C8cec871"
                 },
                 "yieldBox": {
                     "name": "YieldBox",
-                    "address": "0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9"
+                    "address": "0xAb1237136f2eC766Ee8F69B2C47bd8FA00a5566E"
                 },
                 "hostChain": {
-                    "id": "5",
-                    "address": "0xE40CE28B4353ad276Ac9cccb87787F7dfA2984d7"
+                    "id": "421613",
+                    "address": "0x1B4967D94fe3e4AA2F39C73ACC554F326CAc867b"
                 },
                 "linkedChain": {
                     "id": "43113",
-                    "address": "0x7212B75fEBbA5f7Bc34E00BD34437771726cc7D2"
+                    "address": "0xb031AA134f767819A0bF92B9BBf7f97bf042440a"
                 }
             }
         },
         {
             "name": "TapiocaOFT-Test Token",
-            "address": "0xA58f0D7A359CCaeC25bD9bC9B5C606C7a33f287d",
+            "address": "0xdad5550CD13B350a7529ca3e8e11e9E57763cCc2",
             "meta": {
                 "erc20": {
                     "name": "Test Token",
-                    "address": "0x7ef45faDa9f8da6ee2fd6FFD9850BF25E05D9953"
+                    "address": "0x492264f175E73DAeec680347b07948ADEbD91175"
                 },
                 "yieldBox": {
                     "name": "YieldBox",
-                    "address": "0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9"
+                    "address": "0xAb1237136f2eC766Ee8F69B2C47bd8FA00a5566E"
                 },
                 "hostChain": {
-                    "id": "5",
-                    "address": "0x8AE919C76297a20795Fa69DE5DD713248abd6EfE"
+                    "id": "421613",
+                    "address": "0xdad5550CD13B350a7529ca3e8e11e9E57763cCc2"
                 },
                 "linkedChain": {
                     "id": "43113",
-                    "address": "0xA58f0D7A359CCaeC25bD9bC9B5C606C7a33f287d"
+                    "address": "0x1604d1a93C5fA62f4b8e7E380921838019EDcEFD"
                 }
             }
         }
