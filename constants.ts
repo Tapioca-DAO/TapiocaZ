@@ -12,10 +12,11 @@ export type TMeta = {
         id: string;
         address: string;
     };
-    linkedChain: {
-        id: string;
-        address: string;
-    };
+    linkedChain: [{ id: string; address: string }];
+    // {
+    //     id: string;
+    //     address: string;
+    // };
 };
 export type TContract = {
     name: string;
