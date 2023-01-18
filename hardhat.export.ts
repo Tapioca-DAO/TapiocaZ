@@ -7,6 +7,7 @@ import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
+import 'hardhat-tracer';
 
 dotenv.config();
 
