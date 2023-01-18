@@ -4226,7 +4226,7 @@ https-proxy-agent@^5.0.0:
 
 husky@^8.0.3:
   version "8.0.3"
-  resolved "https://registry.npmjs.org/husky/-/husky-8.0.3.tgz#4936d7212e46d1dea28fef29bb3a108872cd9184"
+  resolved "https://registry.npmjs.org/husky/-/husky-8.0.3.tgz"
   integrity sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==
 
 iconv-lite@0.4.24, iconv-lite@^0.4.24:
@@ -6805,10 +6805,10 @@ table@^6.0.9, table@^6.8.0:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.1.14:
-  version "1.1.14"
-  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.1.14.tgz"
-  integrity sha512-lqaMB9HHzmPXMQXNAvOBxGeOLj3l++5WpyhYYy1g66Ba0lkRKalQJM14Xw4gS/VLjff7kiFKftaZly00yvi6eA==
+tapioca-sdk@^1.1.15:
+  version "1.1.15"
+  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.1.15.tgz#3a48f318bb158dcccf4550188d9849f6469cfc2d"
+  integrity sha512-+iNPsYgibmI1TLsUIpF8+3STQtZD7W2jmfLjQ0cMFyBFP2kAl841Xh07DzknbJYHL4v85F5f2gOlk476ro4qfQ==
   dependencies:
     ethers "^5.6.9"
     lodash "^4.17.21"
