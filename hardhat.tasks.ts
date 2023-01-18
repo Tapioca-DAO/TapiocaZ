@@ -6,6 +6,7 @@ import { exportSDK__task } from './tasks/exportSDK';
 import { listDeploy__task } from './tasks/listDeploy';
 import { toftSendFrom } from './tasks/TOFTsendFrom';
 import { wrap } from './tasks/wrap';
+import { setTrustedRemote__task } from './tasks/setTrustedRemote';
 import SDK from 'tapioca-sdk';
 
 function formatLZEndpoints() {
@@ -68,3 +69,12 @@ task(
     'Generate and export the typings and/or addresses for the SDK.',
     exportSDK__task,
 );
+
+task(
+    'setTrustedRemote',
+    'Calls setTrustedRemote on tOFT contract',
+    setTrustedRemote__task,
+)
+    .addParam('chain', 'LZ destination chain id for trusted remotes')
+    .addParam('dst', 'tOFT destination address')
+    .addParam('src', 'tOFT source address');
