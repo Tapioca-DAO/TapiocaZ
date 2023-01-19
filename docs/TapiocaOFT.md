@@ -424,7 +424,7 @@ Harvest the fees collected by the contract. Called only on host chain.
 ### hostChainID
 
 ```solidity
-function hostChainID() external view returns (uint16)
+function hostChainID() external view returns (uint256)
 ```
 
 The host chain ID of the ERC20, will be used only on OP chain.
@@ -436,7 +436,7 @@ The host chain ID of the ERC20, will be used only on OP chain.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint16 | undefined |
+| _0 | uint256 | undefined |
 
 ### increaseAllowance
 
@@ -706,7 +706,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes _toAddress, uint256 _
 ### sendToYB
 
 ```solidity
-function sendToYB(uint256 amount, uint256 assetId, uint256 minShareOut, uint16 lzDstChainId, uint256 extraGasLimit, address zroPaymentAddress, bool strategyDeposit) external payable
+function sendToYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, uint256 extraGasLimit, address zroPaymentAddress, bool strategyDeposit) external payable
 ```
 
 
@@ -719,7 +719,6 @@ function sendToYB(uint256 amount, uint256 assetId, uint256 minShareOut, uint16 l
 |---|---|---|
 | amount | uint256 | undefined |
 | assetId | uint256 | undefined |
-| minShareOut | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | extraGasLimit | uint256 | undefined |
 | zroPaymentAddress | address | undefined |

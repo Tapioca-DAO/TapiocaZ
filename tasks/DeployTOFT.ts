@@ -23,13 +23,18 @@ import { updateDeployments } from '../deploy/utils';
  * @param args.salt - The salt used for CREATE2 deployment
  * @param args.hostChainName - The host chain name of the ERC20.
  */
-//ex: npx hardhat deployTOFT --network goerli --erc20 0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8 --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network goerli --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network goerli --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x02c1B98DC318CB3eCe95091cC3BDA183CC56d37F --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xd428690148436dA9c7422698eEe15F51C8cec871 --yield-box 0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D --salt TESTTOFT --host-chain-name arbitrum_goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xd428690148436dA9c7422698eEe15F51C8cec871 --yield-box 0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e --salt TESTTOFT --host-chain-name arbitrum_goerli
+//ex: npx hardhat deployTOFT --network mumbai --erc20 0xd428690148436dA9c7422698eEe15F51C8cec871 --yield-box 0x3E6c224326e77F417636e10c74c7dC797B7c2bB1 --salt TESTTOFT --host-chain-name arbitrum_goerli
 
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x59e1C20eCE4912243c826CFE9e7Dda6576676bE8 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x7ef45fada9f8da6ee2fd6ffd9850bf25e05d9953 --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xE91FB4017D04547bECd79EDcaa4d8cD8C60aA31a --yield-box 0x9F737c63B04f8544A88b8Fb55Fa897252E79bED9 --salt TESTTOFT --host-chain-name goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76 --yield-box 0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e --salt TESTTOFT --host-chain-name fuji_avalanche
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76 --yield-box 0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D --salt TESTTOFT --host-chain-name fuji_avalanche
+//ex: npx hardhat deployTOFT --network mumbai --erc20 0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76 --yield-box 0x3E6c224326e77F417636e10c74c7dC797B7c2bB1 --salt TESTTOFT --host-chain-name fuji_avalanche
+
+//ex: npx hardhat deployTOFT --network mumbai --erc20 0xb110284648691B5944b8E7c7cfB140e501f77d1C --yield-box 0x3E6c224326e77F417636e10c74c7dC797B7c2bB1 --salt TESTTOFT --host-chain-name mumbai
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xb110284648691B5944b8E7c7cfB140e501f77d1C --yield-box 0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e --salt TESTTOFT --host-chain-name mumbai
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xb110284648691B5944b8E7c7cfB140e501f77d1C --yield-box 0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D --salt TESTTOFT --host-chain-name mumbai
+
 export const deployTOFT__task = async (
     args: {
         erc20: string;
@@ -133,10 +138,12 @@ export const deployTOFT__task = async (
                     : hostChainTOFT.address,
             },
             // First write off the host chain TOFT deployment meta will not include the linkedChain info since it is not known yet.
-            linkedChain: {
-                id: !isMainChain ? currentChain.chainId : '',
-                address: !isMainChain ? latestTOFT.address : '',
-            },
+            linkedChain: [
+                {
+                    id: !isMainChain ? currentChain.chainId : '',
+                    address: !isMainChain ? latestTOFT.address : '',
+                },
+            ],
         },
     };
     console.log(`[+] Deployed ${TOFTMeta.name} TOFT at ${TOFTMeta.address}`);
@@ -149,16 +156,20 @@ export const deployTOFT__task = async (
             TOFTMeta.meta.erc20.address,
         );
         removeTOFTDeployment(hostDepl.meta.hostChain.id, hostDepl);
-        hostDepl.meta.linkedChain = TOFTMeta.meta.linkedChain;
+        hostDepl.meta.linkedChain.push(TOFTMeta.meta.linkedChain[0]);
         saveTOFTDeployment(hostDepl.meta.hostChain.id, [hostDepl]);
     }
 
     console.log('[+] Verifying the contract on the block explorer');
-    await hre.run('verify:verify', {
-        address: latestTOFT.address,
-        contract: 'contracts/TapiocaOFT.sol:TapiocaOFT',
-        constructorArguments: tx.args,
-    });
+    try {
+        await hre.run('verify:verify', {
+            address: latestTOFT.address,
+            contract: 'contracts/TapiocaOFT.sol:TapiocaOFT',
+            constructorArguments: tx.args,
+        });
+    } catch {
+        console.log('Failed to verify');
+    }
 
     // Finally, we set the trusted remotes between the chains if we have 2 deployments.
     if (!isMainChain) {
@@ -216,8 +227,6 @@ async function setTrustedRemote(
     );
 
     await (
-        await tWrapper.connect(signer).executeTOFT(fromToft, encodedTX, true, {
-            gasLimit: 200_000,
-        })
+        await tWrapper.connect(signer).executeTOFT(fromToft, encodedTX, true)
     ).wait();
 }

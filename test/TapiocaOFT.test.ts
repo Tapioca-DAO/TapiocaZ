@@ -1,6 +1,6 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { ethers } from 'hardhat';
+import hre, { ethers } from 'hardhat';
 import { BN } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
@@ -398,7 +398,6 @@ describe('TapiocaOFT', () => {
             await tapiocaOFT0.sendToYB(
                 toDeposit,
                 1, //asset id
-                0, //min share out
                 dstChainId, //dst chain Id
                 '800000', //extra gas limit
                 ethers.constants.AddressZero, //zro address
@@ -531,7 +530,6 @@ describe('TapiocaOFT', () => {
             await tapiocaOFT0.sendToYB(
                 toDeposit,
                 1, //asset id
-                0, //min share out
                 dstChainId, //dst chain Id
                 '800000', //extra gas limit
                 ethers.constants.AddressZero, //zro address

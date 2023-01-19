@@ -37,7 +37,7 @@ contract TapiocaOFT is BaseTOFT {
     /// @notice The ERC20 to wrap.
     IERC20 public immutable erc20;
     /// @notice The host chain ID of the ERC20, will be used only on OP chain.
-    uint16 public immutable hostChainID;
+    uint256 public immutable hostChainID;
     /// @notice Decimal cache number of the ERC20.
     uint8 _decimalCache;
 
@@ -65,7 +65,7 @@ contract TapiocaOFT is BaseTOFT {
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
-        uint16 _hostChainID
+        uint256 _hostChainID
     )
         OFT(
             string(abi.encodePacked('TapiocaOFT-', _name)),

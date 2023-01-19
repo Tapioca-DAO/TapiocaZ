@@ -7,6 +7,7 @@ import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
+import 'hardhat-tracer';
 
 dotenv.config();
 
@@ -63,14 +64,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     : [],
         },
         //testnets
-        goerli: {
-            url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`,
-            accounts: [process.env.PRIVATE_KEY!],
-            chainId: 5,
-            lzChainId: '10021',
-            gasMultiplier: 2,
-        },
-        // goerli: supportedChains['goerli'],
+        goerli: supportedChains['goerli'],
         bnb_testnet: supportedChains['bnb_testnet'],
         fuji_avalanche: supportedChains['fuji_avalanche'],
         mumbai: supportedChains['mumbai'],

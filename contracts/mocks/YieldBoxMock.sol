@@ -16,7 +16,6 @@ contract YieldBoxMock {
         address from,
         address to,
         uint256 amount,
-        uint256,
         uint256
     ) external returns (uint256 amountOut, uint256 shareOut) {
         require(
