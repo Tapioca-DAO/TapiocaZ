@@ -13,7 +13,7 @@
 ### createTOFT
 
 ```solidity
-function createTOFT(address _erc20, bytes _bytecode, bytes32 _salt) external nonpayable
+function createTOFT(address _erc20, bytes _bytecode, bytes32 _salt, bool _linked) external nonpayable
 ```
 
 Deploy a new TOFT contract. Callable only by the owner.
@@ -27,6 +27,7 @@ Deploy a new TOFT contract. Callable only by the owner.
 | _erc20 | address | The ERC20 to wrap. |
 | _bytecode | bytes | The executable bytecode of the TOFT contract. |
 | _salt | bytes32 | Create2 salt. |
+| _linked | bool | undefined |
 
 ### executeTOFT
 
@@ -84,7 +85,7 @@ Return the number of harvestable TOFT contracts deployed on the current chain.
 ### lastTOFT
 
 ```solidity
-function lastTOFT() external view returns (contract TapiocaOFT)
+function lastTOFT() external view returns (contract ITapiocaOFT)
 ```
 
 Return the latest TOFT contract deployed on the current chain.
@@ -96,7 +97,7 @@ Return the latest TOFT contract deployed on the current chain.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract TapiocaOFT | undefined |
+| _0 | contract ITapiocaOFT | undefined |
 
 ### mngmtFee
 
@@ -201,7 +202,7 @@ Return the number of TOFT contracts deployed on the current chain.
 ### tapiocaOFTs
 
 ```solidity
-function tapiocaOFTs(uint256) external view returns (contract TapiocaOFT)
+function tapiocaOFTs(uint256) external view returns (contract ITapiocaOFT)
 ```
 
 Array of deployed TOFT contracts.
@@ -218,12 +219,12 @@ Array of deployed TOFT contracts.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract TapiocaOFT | undefined |
+| _0 | contract ITapiocaOFT | undefined |
 
 ### tapiocaOFTsByErc20
 
 ```solidity
-function tapiocaOFTsByErc20(address) external view returns (contract TapiocaOFT)
+function tapiocaOFTsByErc20(address) external view returns (contract ITapiocaOFT)
 ```
 
 Map of deployed TOFT contracts by ERC20.
@@ -240,7 +241,7 @@ Map of deployed TOFT contracts by ERC20.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract TapiocaOFT | undefined |
+| _0 | contract ITapiocaOFT | undefined |
 
 
 
@@ -249,7 +250,7 @@ Map of deployed TOFT contracts by ERC20.
 ### CreateOFT
 
 ```solidity
-event CreateOFT(contract TapiocaOFT indexed _tapiocaOFT, address indexed _erc20)
+event CreateOFT(contract ITapiocaOFT indexed _tapiocaOFT, address indexed _erc20)
 ```
 
 Called when a new OFT is deployed.
@@ -260,7 +261,7 @@ Called when a new OFT is deployed.
 
 | Name | Type | Description |
 |---|---|---|
-| _tapiocaOFT `indexed` | contract TapiocaOFT | undefined |
+| _tapiocaOFT `indexed` | contract ITapiocaOFT | undefined |
 | _erc20 `indexed` | address | undefined |
 
 ### HarvestFees

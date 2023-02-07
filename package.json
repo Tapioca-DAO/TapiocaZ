@@ -9,6 +9,8 @@
         "deploy": "npx hardhat deploy --network",
         "deploy:tapiocaWrapper": "hardhat deploy --tags TapiocaWrapper --network",
         "deploy:tapiocaOft": "hardhat deploy --tags TapiocaOFT --network",
+        "deploy:rebalancing": "hardhat deploy --tags Rebalancing --network",
+        "contracts_size": "yarn compile && NODE_ENV=hardhat hardhat size-contracts",
         "list": "npx hardhat listDeploy --network",
         "erc20:mock": "npx hardhat run ./scripts/deployERC20.ts --network",
         "size": "npx hardhat size-contracts",
@@ -62,6 +64,6 @@
         "@primitivefi/hardhat-dodoc": "^0.2.3",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
-        "tapioca-sdk": "^1.1.15"
+        "tapioca-sdk": "^1.1.19"
     }
 }

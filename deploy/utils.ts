@@ -4,6 +4,13 @@ import _ from 'lodash';
 import SDK from 'tapioca-sdk';
 import { TContract } from 'tapioca-sdk/dist/shared';
 
+export const constants = {
+    '1': {
+        routerEth: '0x150f94b44927f078737562f0fcf3c95c01cc2376',
+        router: '0x8731d54e9d02c286767d56ac03e8037c07e01e98',
+    },
+};
+
 let supportedChains: { [key: string]: any } = SDK.API.utils
     .getSupportedChains()
     .reduce(
