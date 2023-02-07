@@ -5,7 +5,7 @@ import { BN } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 //should be executed on mainnet fork
-describe('balancer', () => {
+describe('rebalancing', () => {
     describe('connectedOFTs', () => {
         it('should fail for unauthorized user', async () => {
             const { randomUser, mtapiocaOFT0, balancer } = await loadFixture(

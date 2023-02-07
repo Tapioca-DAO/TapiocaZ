@@ -28,7 +28,7 @@ import '@rari-capital/solmate/src/auth/Owned.sol';
 //                     ,**//*,.
 
 /// Transfers tokens to other layers through Stargate
-contract Balancer is Owned {
+contract Rebalancing is Owned {
     // ************ //
     // *** VARS *** //
     // ************ //
@@ -130,7 +130,7 @@ contract Balancer is Owned {
 
         canExec = connectedOFTs[_srcOft][_dstChainId].rebalanceable > 0;
         execPayload = abi.encodeCall(
-            Balancer.rebalance,
+            Rebalancing.rebalance,
             (
                 _srcOft,
                 _dstChainId,
