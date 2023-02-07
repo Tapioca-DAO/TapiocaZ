@@ -1,4 +1,4 @@
-# TapiocaOFT
+# mTapiocaOFT
 
 
 
@@ -180,6 +180,28 @@ function balanceOf(address account) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### balancers
+
+```solidity
+function balancers(address) external view returns (bool)
+```
+
+map of approved balancers
+
+*a balancer can extract the underlying*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### circulatingSupply
 
 ```solidity
@@ -196,6 +218,28 @@ function circulatingSupply() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
+
+### connectedChains
+
+```solidity
+function connectedChains(uint256) external view returns (bool)
+```
+
+allowed chains where you can unwrap your TOFT
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### decimals
 
@@ -304,6 +348,22 @@ function estimateSendFee(uint16 _dstChainId, bytes _toAddress, uint256 _amount, 
 |---|---|---|
 | nativeFee | uint256 | undefined |
 | zroFee | uint256 | undefined |
+
+### extractUnderlying
+
+```solidity
+function extractUnderlying(uint256 _amount) external nonpayable
+```
+
+extracts the underlying token/native for rebalancing
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _amount | uint256 | the amount used for rebalancing |
 
 ### failedMessages
 
@@ -1085,6 +1145,40 @@ Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
 | _toAddress | address | The address to unwrap the tokens to. |
 | _amount | uint256 | The amount of tokens to unwrap. |
 
+### updateBalancerState
+
+```solidity
+function updateBalancerState(address _balancer, bool _status) external nonpayable
+```
+
+updates a Balancer whitelist status
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _balancer | address | the operator address |
+| _status | bool | the new whitelist status |
+
+### updateConnectedChain
+
+```solidity
+function updateConnectedChain(uint256 _chain, bool _status) external nonpayable
+```
+
+updates a connected chain whitelist status
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _chain | uint256 | the block.chainid of that specific chain |
+| _status | bool | the new whitelist status |
+
 ### useCustomAdapterParams
 
 ```solidity
@@ -1196,6 +1290,42 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 | spender `indexed` | address | undefined |
 | value  | uint256 | undefined |
 
+### BalancerStatusUpdated
+
+```solidity
+event BalancerStatusUpdated(address indexed _balancer, bool _bool, bool _new)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _balancer `indexed` | address | undefined |
+| _bool  | bool | undefined |
+| _new  | bool | undefined |
+
+### ConnectedChainStatusUpdated
+
+```solidity
+event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _chain  | uint256 | undefined |
+| _old  | bool | undefined |
+| _new  | bool | undefined |
+
 ### HarvestFees
 
 ```solidity
@@ -1248,6 +1378,24 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 |---|---|---|
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
+
+### Rebalancing
+
+```solidity
+event Rebalancing(address indexed _balancer, uint256 _amount, bool _isNative)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _balancer `indexed` | address | undefined |
+| _amount  | uint256 | undefined |
+| _isNative  | bool | undefined |
 
 ### ReceiveFromChain
 
@@ -1478,6 +1626,17 @@ event YieldBoxRetrieval(uint256 _amount)
 
 
 ## Errors
+
+### TOFT_NotAllowedChain
+
+```solidity
+error TOFT_NotAllowedChain()
+```
+
+Code executed not on one of the allowed chains
+
+
+
 
 ### TOFT_YB_ETHDeposit
 

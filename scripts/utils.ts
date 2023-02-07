@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BytesLike, ethers, Wallet } from 'ethers';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, link, readFileSync, writeFileSync } from 'fs';
 import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import _ from 'lodash';
@@ -50,6 +50,7 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
         await (
             await (await ethers.getContractFactory('YieldBoxMock')).deploy()
         ).deployed();
+
     // UTILS
     const Tx_deployTapiocaOFT = async (
         lzEndpoint: string,
@@ -58,6 +59,7 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
         yieldBoxAddress: string,
         hostChainID: number,
         hostChainNetworkSigner: Wallet | SignerWithAddress,
+        linked?: boolean,
     ) => {
         const erc20 = (
             await ethers.getContractAt('ERC20', erc20Address)
@@ -82,14 +84,19 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
         ];
 
         const txData = (
-            await ethers.getContractFactory('TapiocaOFT')
+            await ethers.getContractFactory(
+                linked ? 'mTapiocaOFT' : 'TapiocaOFT',
+            )
         ).getDeployTransaction(...args).data as BytesLike;
 
         return { txData, args };
     };
 
-    const attachTapiocaOFT = async (address: string) =>
-        await ethers.getContractAt('TapiocaOFT', address);
+    const attachTapiocaOFT = async (address: string, linked?: boolean) =>
+        await ethers.getContractAt(
+            linked ? 'mTapiocaOFT' : 'TapiocaOFT',
+            address,
+        );
 
     const newEOA = () =>
         new hre.ethers.Wallet(

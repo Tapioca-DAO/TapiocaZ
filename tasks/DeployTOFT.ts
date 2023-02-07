@@ -118,6 +118,7 @@ export const deployTOFT__task = async (
             args.erc20,
             tx.txData,
             hre.ethers.utils.formatBytes32String(args.salt),
+            false,
         )
     ).wait(6);
 

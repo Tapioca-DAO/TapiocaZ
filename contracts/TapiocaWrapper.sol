@@ -2,38 +2,41 @@
 
 pragma solidity ^0.8.0;
 import './TapiocaOFT.sol';
+import './mTapiocaOFT.sol';
+import './interfaces/ITapiocaOFT.sol';
 
 import '@openzeppelin/contracts/utils/Create2.sol';
 import '@rari-capital/solmate/src/auth/Owned.sol';
 
 contract TapiocaWrapper is Owned {
+    // ************ //
+    // *** VARS *** //
+    // ************ //
     /// @notice Management fee for a wrap operation. In BPS.
     uint256 public mngmtFee;
     /// @notice Denominator for `mngmtFee`.
     uint256 public constant mngmtFeeFraction = 10000;
 
     /// @notice Array of deployed TOFT contracts.
-    TapiocaOFT[] public tapiocaOFTs;
+    ITapiocaOFT[] public tapiocaOFTs;
     /// @notice Array of harvestable TOFT fees.
-    TapiocaOFT[] private harvestableTapiocaOFTs;
+    ITapiocaOFT[] private harvestableTapiocaOFTs;
     /// @notice Map of deployed TOFT contracts by ERC20.
-    mapping(address => TapiocaOFT) public tapiocaOFTsByErc20;
+    mapping(address => ITapiocaOFT) public tapiocaOFTsByErc20;
 
-    /// ==========================
-    /// ========== Events ========
-    /// ==========================
-
+    // ************** //
+    // *** EVENTS *** //
+    // ************** //
     /// @notice Called when a new OFT is deployed.
-    event CreateOFT(TapiocaOFT indexed _tapiocaOFT, address indexed _erc20);
+    event CreateOFT(ITapiocaOFT indexed _tapiocaOFT, address indexed _erc20);
     /// @notice Called when fees are harvested.
     event HarvestFees(address indexed _caller);
     /// @notice Called when fees are changed.
     event SetFees(uint256 _newFee);
 
-    /// ==========================
-    /// ========== Errors ========
-    /// ==========================
-
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
     /// @notice If the TOFT is already deployed.
     error TapiocaWrapper__AlreadyDeployed(address _erc20);
     /// @notice Failed to deploy the TapiocaWrapper contract.
@@ -47,10 +50,9 @@ contract TapiocaWrapper is Owned {
 
     constructor() Owned(msg.sender) {}
 
-    /// ==========================
-    /// ========== TOFT ==========
-    /// ==========================
-
+    // ********************** //
+    // *** VIEW FUNCTIONS *** //
+    // ********************** //
     /// @notice Return the number of TOFT contracts deployed on the current chain.
     function tapiocaOFTLength() external view returns (uint256) {
         return tapiocaOFTs.length;
@@ -62,58 +64,16 @@ contract TapiocaWrapper is Owned {
     }
 
     /// @notice Return the latest TOFT contract deployed on the current chain.
-    function lastTOFT() external view returns (TapiocaOFT) {
+    function lastTOFT() external view returns (ITapiocaOFT) {
         if (tapiocaOFTs.length == 0) {
             revert TapiocaWrapper__NoTOFTDeployed();
         }
         return tapiocaOFTs[tapiocaOFTs.length - 1];
     }
 
-    /// ================================
-    /// ========== Management ==========
-    /// ================================
-
-    /// @notice Deploy a new TOFT contract. Callable only by the owner.
-    /// @param _erc20 The ERC20 to wrap.
-    /// @param _bytecode The executable bytecode of the TOFT contract.
-    /// @param _salt Create2 salt.
-    function createTOFT(
-        address _erc20,
-        bytes calldata _bytecode,
-        bytes32 _salt
-    ) external onlyOwner {
-        if (address(tapiocaOFTsByErc20[_erc20]) != address(0x0)) {
-            revert TapiocaWrapper__AlreadyDeployed(_erc20);
-        }
-
-        TapiocaOFT toft = TapiocaOFT(
-            payable(
-                Create2.deploy(
-                    0,
-                    keccak256(
-                        abi.encodePacked(
-                            keccak256('TapiocaWrapper'),
-                            address(this),
-                            _erc20,
-                            _salt
-                        )
-                    ),
-                    _bytecode
-                )
-            )
-        );
-        if (address(toft.erc20()) != _erc20) {
-            revert TapiocaWrapper__FailedDeploy();
-        }
-
-        tapiocaOFTs.push(toft);
-        tapiocaOFTsByErc20[_erc20] = toft;
-
-        if (toft.isHostChain()) {
-            harvestableTapiocaOFTs.push(toft);
-        }
-        emit CreateOFT(toft, _erc20);
-    }
+    // ************************ //
+    // *** PUBLIC FUNCTIONS *** //
+    // ************************ //
 
     /// @notice Harvest fees from all the deployed TOFT contracts. Fees are transferred to the owner.
     function harvestFees() external {
@@ -123,6 +83,9 @@ contract TapiocaWrapper is Owned {
         emit HarvestFees(msg.sender);
     }
 
+    // *********************** //
+    // *** OWNER FUNCTIONS *** //
+    // *********************** //
     /// @notice Set the management fee for a wrap operation.
     /// @custom:invariant Forbid a management fee higher than 0.5%.
     /// @param _mngmtFee The new management fee for a wrap operation. In BPS.
@@ -151,5 +114,85 @@ contract TapiocaWrapper is Owned {
         if (_revertOnFailure && !success) {
             revert TapiocaWrapper__TOFTExecutionFailed(result);
         }
+    }
+
+    /// @notice Deploy a new TOFT contract. Callable only by the owner.
+    /// @param _erc20 The ERC20 to wrap.
+    /// @param _bytecode The executable bytecode of the TOFT contract.
+    /// @param _salt Create2 salt.
+    function createTOFT(
+        address _erc20,
+        bytes calldata _bytecode,
+        bytes32 _salt,
+        bool _linked
+    ) external onlyOwner {
+        if (address(tapiocaOFTsByErc20[_erc20]) != address(0x0)) {
+            revert TapiocaWrapper__AlreadyDeployed(_erc20);
+        }
+
+        ITapiocaOFT iOFT = ITapiocaOFT(
+            _createTOFT(_erc20, _bytecode, _salt, _linked)
+        );
+        if (address(iOFT.erc20()) != _erc20) {
+            revert TapiocaWrapper__FailedDeploy();
+        }
+
+        tapiocaOFTs.push(iOFT);
+        tapiocaOFTsByErc20[_erc20] = iOFT;
+
+        if (iOFT.isHostChain()) {
+            harvestableTapiocaOFTs.push(iOFT);
+        }
+        emit CreateOFT(iOFT, _erc20);
+    }
+
+    // ************************* //
+    // *** PRIVATE FUNCTIONS *** //
+    // ************************* //
+    function _createTOFT(
+        address _erc20,
+        bytes calldata _bytecode,
+        bytes32 _salt,
+        bool _linked
+    ) private returns (address) {
+        address oft;
+        if (!_linked) {
+            TapiocaOFT toft = TapiocaOFT(
+                payable(
+                    Create2.deploy(
+                        0,
+                        keccak256(
+                            abi.encodePacked(
+                                keccak256('TapiocaWrapper'),
+                                address(this),
+                                _erc20,
+                                _salt
+                            )
+                        ),
+                        _bytecode
+                    )
+                )
+            );
+            oft = address(toft);
+        } else {
+            mTapiocaOFT toft = mTapiocaOFT(
+                payable(
+                    Create2.deploy(
+                        0,
+                        keccak256(
+                            abi.encodePacked(
+                                keccak256('TapiocaWrapper'),
+                                address(this),
+                                _erc20,
+                                _salt
+                            )
+                        ),
+                        _bytecode
+                    )
+                )
+            );
+            oft = address(toft);
+        }
+        return oft;
     }
 }
