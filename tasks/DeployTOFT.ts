@@ -41,6 +41,7 @@ export const deployTOFT__task = async (
         yieldBox: string;
         salt: string;
         hostChainName: string;
+        linkedTOFT: boolean;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -118,7 +119,7 @@ export const deployTOFT__task = async (
             args.erc20,
             tx.txData,
             hre.ethers.utils.formatBytes32String(args.salt),
-            false,
+            args.linkedTOFT ?? false,
         )
     ).wait(6);
 

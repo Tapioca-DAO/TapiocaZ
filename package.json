@@ -9,6 +9,7 @@
         "deploy": "npx hardhat deploy --network",
         "deploy:tapiocaWrapper": "hardhat deploy --tags TapiocaWrapper --network",
         "deploy:tapiocaOft": "hardhat deploy --tags TapiocaOFT --network",
+        "deploy:rebalancing": "hardhat deploy --tags Rebalancing --network",
         "contracts_size": "yarn compile && NODE_ENV=hardhat hardhat size-contracts",
         "list": "npx hardhat listDeploy --network",
         "erc20:mock": "npx hardhat run ./scripts/deployERC20.ts --network",
