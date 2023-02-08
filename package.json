@@ -64,6 +64,6 @@
         "@primitivefi/hardhat-dodoc": "^0.2.3",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
-        "tapioca-sdk": "^1.1.19"
+        "tapioca-sdk": "^1.1.20"
     }
 }
