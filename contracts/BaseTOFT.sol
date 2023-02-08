@@ -8,8 +8,6 @@ import './interfaces/IYieldBox.sol';
 
 import './lib/TransferLib.sol';
 
-import 'hardhat/console.sol';
-
 //
 //                 .(%%%%%%%%%%%%*       *
 //             #%%%%%%%%%%%%%%%%%%%%*  ####*
