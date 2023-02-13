@@ -5,6 +5,32 @@ import { BN } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 describe('TapiocaOFT', () => {
+    it('simulate deploy', async () => {
+        const erc20Mock = await (
+            await hre.ethers.getContractFactory('ERC20Mock')
+        ).deploy('erc20Mock', 'MOCK');
+
+        const lzEndpoint = await (
+            await (await ethers.getContractFactory('LZEndpointMock')).deploy(1)
+        ).deployed();
+
+        const yieldBox = await (
+            await (await ethers.getContractFactory('YieldBoxMock')).deploy()
+        ).deployed();
+
+        const oft = await (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).deploy(
+            lzEndpoint.address,
+            false,
+            erc20Mock.address,
+            yieldBox.address,
+            'test',
+            'tt',
+            18,
+            1,
+        );
+    });
     it('decimals()', async () => {
         const { erc20Mock, tapiocaOFT0, tapiocaOFT10 } = await loadFixture(
             setupFixture,
@@ -186,23 +212,33 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0,
                 tapiocaOFT10,
                 mintAndApprove,
-                dummyAmount,
+                bigDummyAmount,
             } = await loadFixture(setupFixture);
 
             // Setup
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
-            await tapiocaOFT0.wrap(signer.address, dummyAmount);
+            await mintAndApprove(
+                erc20Mock,
+                tapiocaOFT0,
+                signer,
+                bigDummyAmount,
+            );
+            await tapiocaOFT0.wrap(signer.address, bigDummyAmount);
 
             // Failure
             await expect(
                 tapiocaOFT0.sendFrom(
                     signer.address,
                     1,
-                    signer.address,
-                    1,
-                    signer.address,
-                    signer.address,
-                    '0x',
+                    ethers.utils.defaultAbiCoder.encode(
+                        ['address'],
+                        [signer.address],
+                    ),
+                    bigDummyAmount,
+                    {
+                        refundAddress: signer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
+                        adapterParams: '0x',
+                    },
                 ),
             ).to.be.revertedWith(
                 'LzApp: destination chain is not a trusted source',
@@ -237,11 +273,16 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0.sendFrom(
                     signer.address,
                     1,
-                    signer.address,
-                    1,
-                    signer.address,
-                    signer.address,
-                    '0x',
+                    ethers.utils.defaultAbiCoder.encode(
+                        ['address'],
+                        [signer.address],
+                    ),
+                    bigDummyAmount,
+                    {
+                        refundAddress: signer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
+                        adapterParams: '0x',
+                    },
                     {
                         value: ethers.utils.parseEther('0.02'),
                     },
@@ -321,7 +362,7 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0,
                 tapiocaOFT10,
                 mintAndApprove,
-                dummyAmount,
+                bigDummyAmount,
                 YieldBox_0,
                 YieldBox_10,
                 LZEndpointMock_chainID_0,
@@ -329,8 +370,13 @@ describe('TapiocaOFT', () => {
             } = await loadFixture(setupFixture);
 
             // Setup
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
-            await tapiocaOFT0.wrap(signer.address, dummyAmount);
+            await mintAndApprove(
+                erc20Mock,
+                tapiocaOFT0,
+                signer,
+                bigDummyAmount,
+            );
+            await tapiocaOFT0.wrap(signer.address, bigDummyAmount);
 
             // Set trusted remotes
             await tapiocaWrapper_0.executeTOFT(
@@ -361,11 +407,16 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0.sendFrom(
                     signer.address,
                     10,
-                    signer.address,
-                    1,
-                    signer.address,
-                    signer.address,
-                    '0x',
+                    ethers.utils.defaultAbiCoder.encode(
+                        ['address'],
+                        [signer.address],
+                    ),
+                    bigDummyAmount,
+                    {
+                        refundAddress: signer.address,
+                        zroPaymentAddress: ethers.constants.AddressZero,
+                        adapterParams: '0x',
+                    },
                     {
                         value: ethers.utils.parseEther('0.2'),
                     },
@@ -390,11 +441,17 @@ describe('TapiocaOFT', () => {
                 signer.address,
             );
 
+            await mintAndApprove(
+                erc20Mock,
+                tapiocaOFT0,
+                signer,
+                bigDummyAmount,
+            );
+            await tapiocaOFT0.wrap(signer.address, bigDummyAmount);
             const signerToftBalanceBeforeDeposit = await tapiocaOFT0.balanceOf(
                 signer.address,
             );
-
-            const toDeposit = ethers.BigNumber.from(1e1);
+            const toDeposit = bigDummyAmount;
             await tapiocaOFT0.sendToYB(
                 toDeposit,
                 1, //asset id
@@ -486,7 +543,7 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0,
                 tapiocaOFT10,
                 mintAndApprove,
-                dummyAmount,
+                bigDummyAmount,
                 YieldBox_0,
                 YieldBox_10,
                 LZEndpointMock_chainID_0,
@@ -494,8 +551,8 @@ describe('TapiocaOFT', () => {
             } = await loadFixture(setupFixture);
 
             // Setup
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
-            await tapiocaOFT0.wrap(signer.address, dummyAmount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, bigDummyAmount);
+            await tapiocaOFT0.wrap(signer.address, bigDummyAmount);
 
             // Set trusted remotes
             await tapiocaWrapper_0.executeTOFT(
@@ -526,7 +583,7 @@ describe('TapiocaOFT', () => {
 
             const dstChainId = await tapiocaOFT10.getLzChainId();
 
-            const toDeposit = ethers.BigNumber.from(1e1);
+            const toDeposit = bigDummyAmount;
             await tapiocaOFT0.sendToYB(
                 toDeposit,
                 1, //asset id

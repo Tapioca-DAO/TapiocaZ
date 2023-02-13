@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
-import 'tapioca-sdk/dist/contracts/token/oft/OFT.sol';
+import 'tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol';
 import './interfaces/IYieldBox.sol';
 
 import './lib/TransferLib.sol';
@@ -30,7 +30,7 @@ import './lib/TransferLib.sol';
 //         ####*  (((((((((((((((((((
 //                     ,**//*,.
 
-abstract contract BaseTOFT is OFT {
+abstract contract BaseTOFT is OFTV2 {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -96,9 +96,10 @@ abstract contract BaseTOFT is OFT {
         uint8 _decimal,
         uint256 _hostChainID
     )
-        OFT(
+        OFTV2(
             string(abi.encodePacked('TapiocaOFT-', _name)),
             string(abi.encodePacked('TOFT-', _symbol)),
+            _decimal / 2,
             _lzEndpoint
         )
     {
@@ -120,6 +121,7 @@ abstract contract BaseTOFT is OFT {
     // ********************** //
     /// @notice Decimal number of the ERC20
     function decimals() public view override returns (uint8) {
+        if (_decimalCache == 0) return 18; //temporary fix for LZ _sharedDecimals check
         return _decimalCache;
     }
 
@@ -151,11 +153,12 @@ abstract contract BaseTOFT is OFT {
         address zroPaymentAddress,
         bool strategyDeposit
     ) external payable {
-        bytes memory toAddress = abi.encodePacked(msg.sender);
+        bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
         _debitFrom(msg.sender, lzEndpoint.getChainId(), toAddress, amount);
+
         bytes memory lzPayload = abi.encode(
             strategyDeposit ? PT_YB_SEND_STRAT : PT_YB_DEPOSIT,
-            abi.encodePacked(msg.sender),
+            LzLib.addressToBytes32(msg.sender),
             toAddress,
             amount,
             assetId
@@ -182,11 +185,11 @@ abstract contract BaseTOFT is OFT {
         bytes memory airdropAdapterParam,
         bool strategyWithdrawal
     ) external payable {
-        bytes memory toAddress = abi.encodePacked(msg.sender);
+        bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
         bytes memory lzPayload = abi.encode(
             strategyWithdrawal ? PT_YB_RETRIEVE_STRAT : PT_YB_WITHDRAW,
-            abi.encodePacked(msg.sender),
+            LzLib.addressToBytes32(msg.sender),
             toAddress,
             amount,
             0,
@@ -214,14 +217,9 @@ abstract contract BaseTOFT is OFT {
         uint64 _nonce,
         bytes memory _payload
     ) internal virtual override {
-        uint16 packetType;
-        assembly {
-            packetType := mload(add(_payload, 32))
-        }
+        uint256 packetType = _payload.toUint256(0); //because we are not using encodePacked
 
-        if (packetType == PT_SEND) {
-            _sendAck(_srcChainId, _srcAddress, _nonce, _payload);
-        } else if (packetType == PT_YB_SEND_STRAT) {
+        if (packetType == PT_YB_SEND_STRAT) {
             _ybDeposit(_srcChainId, _payload, IERC20(address(this)), true);
         } else if (packetType == PT_YB_RETRIEVE_STRAT) {
             _ybWithdraw(_srcChainId, _payload, true);
@@ -230,7 +228,14 @@ abstract contract BaseTOFT is OFT {
         } else if (packetType == PT_YB_WITHDRAW) {
             _ybWithdraw(_srcChainId, _payload, false);
         } else {
-            revert('OFTCore: unknown packet type');
+            packetType = _payload.toUint8(0); //LZ uses encodePacked for payload
+            if (packetType == PT_SEND) {
+                _sendAck(_srcChainId, _srcAddress, _nonce, _payload);
+            } else if (packetType == PT_SEND_AND_CALL) {
+                _sendAndCallAck(_srcChainId, _srcAddress, _nonce, _payload);
+            } else {
+                revert('OFTCoreV2: unknown packet type');
+            }
         }
     }
 
@@ -313,16 +318,15 @@ abstract contract BaseTOFT is OFT {
     ) internal virtual {
         (
             ,
-            //package
-            bytes memory fromAddressBytes, //from
+            bytes32 fromAddressBytes, //from
             ,
             uint256 amount,
             uint256 assetId
-        ) = abi.decode(_payload, (uint16, bytes, bytes, uint256, uint256));
+        ) = abi.decode(_payload, (uint16, bytes32, bytes32, uint256, uint256));
 
         address onBehalfOf = _strategyDeposit
             ? address(this)
-            : fromAddressBytes.toAddress(0);
+            : LzLib.bytes32ToAddress(fromAddressBytes);
         _creditTo(_srcChainId, address(this), amount);
         _depositToYieldbox(assetId, amount, _erc20, address(this), onBehalfOf);
 
@@ -336,7 +340,7 @@ abstract contract BaseTOFT is OFT {
     ) internal virtual {
         (
             ,
-            bytes memory from,
+            bytes32 from,
             ,
             uint256 _amount,
             uint256 _share,
@@ -344,10 +348,10 @@ abstract contract BaseTOFT is OFT {
             address _zroPaymentAddress
         ) = abi.decode(
                 _payload,
-                (uint16, bytes, bytes, uint256, uint256, uint256, address)
+                (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
             );
 
-        address _from = from.toAddress(0);
+        address _from = LzLib.bytes32ToAddress(from);
         _retrieveFromYieldBox(
             _assetId,
             _amount,
@@ -359,10 +363,14 @@ abstract contract BaseTOFT is OFT {
         _debitFrom(
             address(this),
             lzEndpoint.getChainId(),
-            abi.encodePacked(address(this)),
+            LzLib.addressToBytes32(address(this)),
             _amount
         );
-        bytes memory lzSendBackPayload = abi.encode(PT_SEND, from, _amount);
+
+        bytes memory lzSendBackPayload = _encodeSendPayload(
+            from,
+            _ld2sd(_amount)
+        );
         _lzSend(
             _srcChainId,
             lzSendBackPayload,
@@ -374,7 +382,7 @@ abstract contract BaseTOFT is OFT {
         emit SendToChain(
             _srcChainId,
             _from,
-            abi.encodePacked(address(this)),
+            LzLib.addressToBytes32(address(this)),
             _amount
         );
 

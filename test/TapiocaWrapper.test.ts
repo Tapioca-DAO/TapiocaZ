@@ -41,14 +41,17 @@ describe('TapiocaWrapper', () => {
         });
 
         it('Should fail if the ERC20 address is not the same as the registered TapiocaWrapper one', async () => {
-            const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
+            const { tapiocaWrapper_0, LZEndpointMock_chainID_0, YieldBox_0 } =
                 await loadFixture(setupFixture);
 
-            const erc20Address = ethers.Wallet.createRandom().address;
+            const erc20Mock = await (
+                await hre.ethers.getContractFactory('ERC20Mock')
+            ).deploy('erc20Mock', 'MOCK');
+
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
                 false,
-                erc20Address,
+                erc20Mock.address,
                 ethers.constants.AddressZero,
                 'erc20name',
                 'erc20symbol',
@@ -76,13 +79,15 @@ describe('TapiocaWrapper', () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
-            const erc20Address = ethers.Wallet.createRandom().address;
+            const erc20Mock = await (
+                await hre.ethers.getContractFactory('ERC20Mock')
+            ).deploy('erc20Mock', 'MOCK');
             const erc20Name = 'erc20name';
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
                 false,
-                erc20Address,
+                erc20Mock.address,
                 ethers.constants.AddressZero,
                 erc20Name,
                 'erc20symbol',
@@ -97,7 +102,7 @@ describe('TapiocaWrapper', () => {
             const salt = generateSalt();
             await expect(
                 await tapiocaWrapper_0.createTOFT(
-                    erc20Address,
+                    erc20Mock.address,
                     txData,
                     salt,
                     false,
@@ -109,13 +114,13 @@ describe('TapiocaWrapper', () => {
                 (await tapiocaWrapper_0.tapiocaOFTLength()).sub(1),
             );
             const tapiocaOFTMapValue =
-                await tapiocaWrapper_0.tapiocaOFTsByErc20(erc20Address);
+                await tapiocaWrapper_0.tapiocaOFTsByErc20(erc20Mock.address);
             expect(tapiocaOFTArrayValue).to.not.equal(
-                erc20Address,
+                erc20Mock.address,
                 'tapiocaOFTs array should not be empty',
             );
             expect(tapiocaOFTMapValue).to.not.equal(
-                erc20Address,
+                erc20Mock.address,
                 'tapiocaOFTsByErc20 map should contains the new OFT address',
             );
             expect(tapiocaOFTArrayValue).to.eq(
@@ -136,13 +141,15 @@ describe('TapiocaWrapper', () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
-            const erc20Address = ethers.Wallet.createRandom().address;
+            const erc20Mock = await (
+                await hre.ethers.getContractFactory('ERC20Mock')
+            ).deploy('erc20Mock', 'MOCK');
             const erc20Name = 'erc20name';
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
                 false,
-                erc20Address,
+                erc20Mock.address,
                 ethers.constants.AddressZero,
                 erc20Name,
                 'erc20symbol',
@@ -157,7 +164,7 @@ describe('TapiocaWrapper', () => {
             const salt = generateSalt();
             await expect(
                 await tapiocaWrapper_0.createTOFT(
-                    erc20Address,
+                    erc20Mock.address,
                     txData,
                     salt,
                     true,
@@ -169,13 +176,13 @@ describe('TapiocaWrapper', () => {
                 (await tapiocaWrapper_0.tapiocaOFTLength()).sub(1),
             );
             const tapiocaOFTMapValue =
-                await tapiocaWrapper_0.tapiocaOFTsByErc20(erc20Address);
+                await tapiocaWrapper_0.tapiocaOFTsByErc20(erc20Mock.address);
             expect(tapiocaOFTArrayValue).to.not.equal(
-                erc20Address,
+                erc20Mock.address,
                 'tapiocaOFTs array should not be empty',
             );
             expect(tapiocaOFTMapValue).to.not.equal(
-                erc20Address,
+                erc20Mock.address,
                 'tapiocaOFTsByErc20 map should contains the new OFT address',
             );
             expect(tapiocaOFTArrayValue).to.eq(
@@ -196,13 +203,15 @@ describe('TapiocaWrapper', () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
-            let erc20Address = ethers.Wallet.createRandom().address;
+            let erc20Mock = await (
+                await hre.ethers.getContractFactory('ERC20Mock')
+            ).deploy('erc20Mock', 'MOCK');
             let erc20Name = 'erc20name';
 
             let args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
                 false,
-                erc20Address,
+                erc20Mock.address,
                 ethers.constants.AddressZero,
                 erc20Name,
                 'erc20symbol',
@@ -216,7 +225,7 @@ describe('TapiocaWrapper', () => {
 
             await expect(
                 tapiocaWrapper_0.createTOFT(
-                    erc20Address,
+                    erc20Mock.address,
                     txData,
                     generateSalt(),
                     false,
@@ -229,20 +238,22 @@ describe('TapiocaWrapper', () => {
 
             await expect(
                 tapiocaWrapper_0.createTOFT(
-                    erc20Address,
+                    erc20Mock.address,
                     mtxData,
                     generateSalt(),
                     true,
                 ),
             ).to.be.reverted;
 
-            erc20Address = ethers.Wallet.createRandom().address;
+            erc20Mock = await (
+                await hre.ethers.getContractFactory('ERC20Mock')
+            ).deploy('erc20Mock', 'MOCK');
             erc20Name = 'erc20name2';
 
             let mArgs: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
                 false,
-                erc20Address,
+                erc20Mock.address,
                 ethers.constants.AddressZero,
                 erc20Name,
                 'erc20symbol2',
@@ -255,7 +266,7 @@ describe('TapiocaWrapper', () => {
 
             await expect(
                 tapiocaWrapper_0.createTOFT(
-                    erc20Address,
+                    erc20Mock.address,
                     mtxData,
                     generateSalt(),
                     true,

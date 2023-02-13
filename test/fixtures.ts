@@ -191,6 +191,7 @@ export const setupFixture = async () => {
     );
 
     const dummyAmount = ethers.BigNumber.from(1e5);
+    const bigDummyAmount = ethers.utils.parseEther('10');
 
     const estimateFees = async (amount: BigNumberish) =>
         await tapiocaOFT0.estimateFees(
@@ -226,6 +227,7 @@ export const setupFixture = async () => {
         tapiocaOFT0,
         tapiocaOFT10,
         dummyAmount,
+        bigDummyAmount,
         YieldBox_0,
         YieldBox_10,
         mtapiocaOFT0,

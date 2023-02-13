@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.0;
 pragma abicoder v2;
 
 import 'tapioca-sdk/dist/contracts/interfaces/ILayerZeroReceiver.sol';
@@ -185,7 +185,6 @@ contract LZEndpointMock is ILayerZeroEndpoint {
             uint256 dstNativeAmt,
             address payable dstNativeAddr
         ) = LzLib.decodeAdapterParams(adapterParams);
-
         if (dstNativeAmt > 0) {
             (bool success, ) = dstNativeAddr.call{value: dstNativeAmt}('');
             if (!success) {
@@ -314,7 +313,7 @@ contract LZEndpointMock is ILayerZeroEndpoint {
         bytes memory _payload,
         bool _payInZRO,
         bytes memory _adapterParams
-    ) public view returns (uint256 nativeFee, uint256 zroFee) {
+    ) public view override returns (uint256 nativeFee, uint256 zroFee) {
         bytes memory adapterParams = _adapterParams.length > 0
             ? _adapterParams
             : defaultAdapterParams;
