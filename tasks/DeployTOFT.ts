@@ -23,17 +23,17 @@ import { updateDeployments } from '../deploy/utils';
  * @param args.salt - The salt used for CREATE2 deployment
  * @param args.hostChainName - The host chain name of the ERC20.
  */
-//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xd428690148436dA9c7422698eEe15F51C8cec871 --yield-box 0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D --salt TESTTOFT --host-chain-name arbitrum_goerli
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xd428690148436dA9c7422698eEe15F51C8cec871 --yield-box 0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e --salt TESTTOFT --host-chain-name arbitrum_goerli
-//ex: npx hardhat deployTOFT --network mumbai --erc20 0xd428690148436dA9c7422698eEe15F51C8cec871 --yield-box 0x3E6c224326e77F417636e10c74c7dC797B7c2bB1 --salt TESTTOFT --host-chain-name arbitrum_goerli
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0x7B30C951cFF9B5648A08FeC08A588e3b143a095B --yield-box 0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736 --salt TESTTOFT --host-chain-name arbitrum_goerli
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x7B30C951cFF9B5648A08FeC08A588e3b143a095B --yield-box 0x538c2189ea266069031622e70441bc73A613e9Ed --salt TESTTOFT --host-chain-name arbitrum_goerli
+//ex: npx hardhat deployTOFT --network mumbai --erc20 0x7B30C951cFF9B5648A08FeC08A588e3b143a095B --yield-box 0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F --salt TESTTOFT --host-chain-name arbitrum_goerli
 
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76 --yield-box 0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e --salt TESTTOFT --host-chain-name fuji_avalanche
-//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76 --yield-box 0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D --salt TESTTOFT --host-chain-name fuji_avalanche
-//ex: npx hardhat deployTOFT --network mumbai --erc20 0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76 --yield-box 0x3E6c224326e77F417636e10c74c7dC797B7c2bB1 --salt TESTTOFT --host-chain-name fuji_avalanche
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692 --yield-box 0x538c2189ea266069031622e70441bc73A613e9Ed --salt TESTTOFT --host-chain-name fuji_avalanche
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692 --yield-box 0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736 --salt TESTTOFT --host-chain-name fuji_avalanche
+//ex: npx hardhat deployTOFT --network mumbai --erc20 0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692 --yield-box 0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F --salt TESTTOFT --host-chain-name fuji_avalanche
 
-//ex: npx hardhat deployTOFT --network mumbai --erc20 0xb110284648691B5944b8E7c7cfB140e501f77d1C --yield-box 0x3E6c224326e77F417636e10c74c7dC797B7c2bB1 --salt TESTTOFT --host-chain-name mumbai
-//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xb110284648691B5944b8E7c7cfB140e501f77d1C --yield-box 0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e --salt TESTTOFT --host-chain-name mumbai
-//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xb110284648691B5944b8E7c7cfB140e501f77d1C --yield-box 0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D --salt TESTTOFT --host-chain-name mumbai
+//ex: npx hardhat deployTOFT --network mumbai --erc20 0xd682F81b03764D872c271BeD4020610eb48f41e3 --yield-box 0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F --salt TESTTOFT --host-chain-name mumbai
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xd682F81b03764D872c271BeD4020610eb48f41e3 --yield-box 0x538c2189ea266069031622e70441bc73A613e9Ed --salt TESTTOFT --host-chain-name mumbai
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xd682F81b03764D872c271BeD4020610eb48f41e3 --yield-box 0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736 --salt TESTTOFT --host-chain-name mumbai
 
 export const deployTOFT__task = async (
     args: {

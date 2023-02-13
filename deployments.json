@@ -2,77 +2,85 @@
   "43113": [
     {
       "name": "TapiocaWrapper",
-      "address": "0xA24eaCCd49f0dFB8Eb8629CB7E8Ee956173A4293",
+      "address": "0xF86dB0686Fb2885f0b06ab916C997e2C3E7B8f83",
       "meta": {}
     },
     {
       "name": "TapiocaOFT-Wrapped Ether",
-      "address": "0x4ee2C3e02D9c47951a6a56bE803030D70F3dbfb7",
+      "address": "0x71dDd5ec9815740529D62726Adc50EB84a3A4e1a",
       "meta": {
         "erc20": {
           "name": "Wrapped Ether",
-          "address": "0xd428690148436dA9c7422698eEe15F51C8cec871"
+          "address": "0x7B30C951cFF9B5648A08FeC08A588e3b143a095B"
         },
         "yieldBox": {
           "name": "YieldBox",
-          "address": "0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e"
+          "address": "0x538c2189ea266069031622e70441bc73A613e9Ed"
         },
         "hostChain": {
           "id": "421613",
-          "address": "0xd5d5d2fed1eCb5Dea28Fe81fB575c9C241448D71"
+          "address": "0xc0106C090153F651c5E6e12249412b9e51f8d49d"
         },
-        "linkedChain": {
-          "id": "43113",
-          "address": "0x4ee2C3e02D9c47951a6a56bE803030D70F3dbfb7"
-        }
-      }
-    },
-    {
-      "name": "TapiocaOFT-Polygon",
-      "address": "0xe82f613C2B46D3fD51bA2A6Bc04a4dB65413b2a1",
-      "meta": {
-        "erc20": {
-          "name": "Polygon",
-          "address": "0xb110284648691B5944b8E7c7cfB140e501f77d1C"
-        },
-        "yieldBox": {
-          "name": "YieldBox",
-          "address": "0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e"
-        },
-        "hostChain": {
-          "id": "80001",
-          "address": "0x18BC2Be450e04EBB72A150dfa9a268F60302215c"
-        },
-        "linkedChain": {
-          "id": "43113",
-          "address": "0xe82f613C2B46D3fD51bA2A6Bc04a4dB65413b2a1"
-        }
+        "linkedChain": [
+          {
+            "id": "43113",
+            "address": "0x71dDd5ec9815740529D62726Adc50EB84a3A4e1a"
+          }
+        ]
       }
     },
     {
       "name": "TapiocaOFT-Avalanche",
-      "address": "0x28D691380D2d8C86f6fdD2e49123C1DA9fa33b32",
+      "address": "0x05C0a8C53BED62edf009b8B870fAC065B4cc3533",
       "meta": {
         "erc20": {
           "name": "Avalanche",
-          "address": "0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76"
+          "address": "0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692"
         },
         "yieldBox": {
           "name": "YieldBox",
-          "address": "0x2CCFd66f76E73EEF0Ac76D7C03d0E367a03B7B2e"
+          "address": "0x538c2189ea266069031622e70441bc73A613e9Ed"
         },
         "hostChain": {
           "id": "43113",
-          "address": "0x28D691380D2d8C86f6fdD2e49123C1DA9fa33b32"
+          "address": "0x05C0a8C53BED62edf009b8B870fAC065B4cc3533"
         },
         "linkedChain": [
           {
+            "id": "",
+            "address": ""
+          },
+          {
             "id": "421613",
-            "address": "0xef0871E0e8C3320f5Cf8c0051EC856b9c083660f"
+            "address": "0xd37E276907e76bF25eBaDA04fB2dCe67c8BE5188"
           },
           {
             "id": "80001",
-            "address": "0x74FC744146cb0067AC34DF10c6e7bcc050439D37"
+            "address": "0x556029CB9c74B07bC34abED41eaA424159463E50"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TapiocaOFT-Polygon",
+      "address": "0x628570D3768e7424dd7Ca4671846D1b67c82E141",
+      "meta": {
+        "erc20": {
+          "name": "Polygon",
+          "address": "0xd682F81b03764D872c271BeD4020610eb48f41e3"
+        },
+        "yieldBox": {
+          "name": "YieldBox",
+          "address": "0x538c2189ea266069031622e70441bc73A613e9Ed"
+        },
+        "hostChain": {
+          "id": "80001",
+          "address": "0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c"
+        },
+        "linkedChain": [
+          {
+            "id": "43113",
+            "address": "0x628570D3768e7424dd7Ca4671846D1b67c82E141"
           }
         ]
       }
@@ -81,79 +89,85 @@
   "80001": [
     {
       "name": "TapiocaWrapper",
-      "address": "0x65B3E245a66955675561CaF17e9e39999d1d50F2",
+      "address": "0xd428690148436dA9c7422698eEe15F51C8cec871",
       "meta": {}
     },
     {
-      "name": "TapiocaOFT-Polygon",
-      "address": "0x18BC2Be450e04EBB72A150dfa9a268F60302215c",
+      "name": "TapiocaOFT-Wrapped Ether",
+      "address": "0x4172056FDC344b8Fd38bfDe590a7eDdF32cD1d55",
       "meta": {
         "erc20": {
-          "name": "Polygon",
-          "address": "0xb110284648691B5944b8E7c7cfB140e501f77d1C"
+          "name": "Wrapped Ether",
+          "address": "0x7B30C951cFF9B5648A08FeC08A588e3b143a095B"
         },
         "yieldBox": {
           "name": "YieldBox",
-          "address": "0x3E6c224326e77F417636e10c74c7dC797B7c2bB1"
+          "address": "0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F"
         },
         "hostChain": {
-          "id": "80001",
-          "address": "0x18BC2Be450e04EBB72A150dfa9a268F60302215c"
+          "id": "421613",
+          "address": "0xc0106C090153F651c5E6e12249412b9e51f8d49d"
         },
         "linkedChain": [
           {
-            "id": "421613",
-            "address": "0x48d95D182D33990910DC39868Da6FcA59182626c"
-          },
-          {
-            "id": "43113",
-            "address": "0xe82f613C2B46D3fD51bA2A6Bc04a4dB65413b2a1"
+            "id": "80001",
+            "address": "0x4172056FDC344b8Fd38bfDe590a7eDdF32cD1d55"
           }
         ]
       }
     },
     {
-      "name": "TapiocaOFT-Wrapped Ether",
-      "address": "0xAa7e77fb38C8B5df58cba3a49227dAb6ee5f18Cb",
-      "meta": {
-        "erc20": {
-          "name": "Wrapped Ether",
-          "address": "0xd428690148436dA9c7422698eEe15F51C8cec871"
-        },
-        "yieldBox": {
-          "name": "YieldBox",
-          "address": "0x3E6c224326e77F417636e10c74c7dC797B7c2bB1"
-        },
-        "hostChain": {
-          "id": "421613",
-          "address": "0xd5d5d2fed1eCb5Dea28Fe81fB575c9C241448D71"
-        },
-        "linkedChain": {
-          "id": "80001",
-          "address": "0xAa7e77fb38C8B5df58cba3a49227dAb6ee5f18Cb"
-        }
-      }
-    },
-    {
       "name": "TapiocaOFT-Avalanche",
-      "address": "0x74FC744146cb0067AC34DF10c6e7bcc050439D37",
+      "address": "0x556029CB9c74B07bC34abED41eaA424159463E50",
       "meta": {
         "erc20": {
           "name": "Avalanche",
-          "address": "0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76"
+          "address": "0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692"
         },
         "yieldBox": {
           "name": "YieldBox",
-          "address": "0x3E6c224326e77F417636e10c74c7dC797B7c2bB1"
+          "address": "0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F"
         },
         "hostChain": {
           "id": "43113",
-          "address": "0x28D691380D2d8C86f6fdD2e49123C1DA9fa33b32"
+          "address": "0x05C0a8C53BED62edf009b8B870fAC065B4cc3533"
         },
         "linkedChain": [
           {
             "id": "80001",
-            "address": "0x74FC744146cb0067AC34DF10c6e7bcc050439D37"
+            "address": "0x556029CB9c74B07bC34abED41eaA424159463E50"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TapiocaOFT-Polygon",
+      "address": "0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c",
+      "meta": {
+        "erc20": {
+          "name": "Polygon",
+          "address": "0xd682F81b03764D872c271BeD4020610eb48f41e3"
+        },
+        "yieldBox": {
+          "name": "YieldBox",
+          "address": "0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F"
+        },
+        "hostChain": {
+          "id": "80001",
+          "address": "0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c"
+        },
+        "linkedChain": [
+          {
+            "id": "",
+            "address": ""
+          },
+          {
+            "id": "43113",
+            "address": "0x628570D3768e7424dd7Ca4671846D1b67c82E141"
+          },
+          {
+            "id": "421613",
+            "address": "0xd429a8F683Aa8D43Aa3CBdDCa93956CBc44c4242"
           }
         ]
       }
@@ -162,77 +176,85 @@
   "421613": [
     {
       "name": "TapiocaWrapper",
-      "address": "0xadbB4AacDFB67C3114b89043a4817Ffeb598643d",
+      "address": "0x3Ba99E08617446b716E024919784005c8d085C5D",
       "meta": {}
     },
     {
-      "name": "TapiocaOFT-Avalanche",
-      "address": "0xef0871E0e8C3320f5Cf8c0051EC856b9c083660f",
+      "name": "TapiocaOFT-Wrapped Ether",
+      "address": "0xc0106C090153F651c5E6e12249412b9e51f8d49d",
       "meta": {
         "erc20": {
-          "name": "Avalanche",
-          "address": "0x667e8fB73Ba84599Dc1A8d7e1A0f003CF1A8Db76"
+          "name": "Wrapped Ether",
+          "address": "0x7B30C951cFF9B5648A08FeC08A588e3b143a095B"
         },
         "yieldBox": {
           "name": "YieldBox",
-          "address": "0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D"
+          "address": "0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736"
+        },
+        "hostChain": {
+          "id": "421613",
+          "address": "0xc0106C090153F651c5E6e12249412b9e51f8d49d"
+        },
+        "linkedChain": [
+          {
+            "id": "",
+            "address": ""
+          },
+          {
+            "id": "43113",
+            "address": "0x71dDd5ec9815740529D62726Adc50EB84a3A4e1a"
+          },
+          {
+            "id": "80001",
+            "address": "0x4172056FDC344b8Fd38bfDe590a7eDdF32cD1d55"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TapiocaOFT-Avalanche",
+      "address": "0xd37E276907e76bF25eBaDA04fB2dCe67c8BE5188",
+      "meta": {
+        "erc20": {
+          "name": "Avalanche",
+          "address": "0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692"
+        },
+        "yieldBox": {
+          "name": "YieldBox",
+          "address": "0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736"
         },
         "hostChain": {
           "id": "43113",
-          "address": "0x28D691380D2d8C86f6fdD2e49123C1DA9fa33b32"
+          "address": "0x05C0a8C53BED62edf009b8B870fAC065B4cc3533"
         },
-        "linkedChain": {
-          "id": "421613",
-          "address": "0xef0871E0e8C3320f5Cf8c0051EC856b9c083660f"
-        }
+        "linkedChain": [
+          {
+            "id": "421613",
+            "address": "0xd37E276907e76bF25eBaDA04fB2dCe67c8BE5188"
+          }
+        ]
       }
     },
     {
       "name": "TapiocaOFT-Polygon",
-      "address": "0x48d95D182D33990910DC39868Da6FcA59182626c",
+      "address": "0xd429a8F683Aa8D43Aa3CBdDCa93956CBc44c4242",
       "meta": {
         "erc20": {
           "name": "Polygon",
-          "address": "0xb110284648691B5944b8E7c7cfB140e501f77d1C"
+          "address": "0xd682F81b03764D872c271BeD4020610eb48f41e3"
         },
         "yieldBox": {
           "name": "YieldBox",
-          "address": "0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D"
+          "address": "0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736"
         },
         "hostChain": {
           "id": "80001",
-          "address": "0x18BC2Be450e04EBB72A150dfa9a268F60302215c"
-        },
-        "linkedChain": {
-          "id": "421613",
-          "address": "0x48d95D182D33990910DC39868Da6FcA59182626c"
-        }
-      }
-    },
-    {
-      "name": "TapiocaOFT-Wrapped Ether",
-      "address": "0xd5d5d2fed1eCb5Dea28Fe81fB575c9C241448D71",
-      "meta": {
-        "erc20": {
-          "name": "Wrapped Ether",
-          "address": "0xd428690148436dA9c7422698eEe15F51C8cec871"
-        },
-        "yieldBox": {
-          "name": "YieldBox",
-          "address": "0xFCdE8366705e8A9c1eDE4C56D716c9e7564CE50D"
-        },
-        "hostChain": {
-          "id": "421613",
-          "address": "0xd5d5d2fed1eCb5Dea28Fe81fB575c9C241448D71"
+          "address": "0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c"
         },
         "linkedChain": [
           {
-            "id": "80001",
-            "address": "0xAa7e77fb38C8B5df58cba3a49227dAb6ee5f18Cb"
-          },
-          {
-            "id": "43113",
-            "address": "0x4ee2C3e02D9c47951a6a56bE803030D70F3dbfb7"
+            "id": "421613",
+            "address": "0xd429a8F683Aa8D43Aa3CBdDCa93956CBc44c4242"
           }
         ]
       }

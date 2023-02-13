@@ -99,7 +99,7 @@ abstract contract BaseTOFT is OFTV2 {
         OFTV2(
             string(abi.encodePacked('TapiocaOFT-', _name)),
             string(abi.encodePacked('TOFT-', _symbol)),
-            IERC20Metadata(address(_erc20)).decimals() / 2,
+            _decimal / 2,
             _lzEndpoint
         )
     {
