@@ -7,6 +7,7 @@ import { listDeploy__task } from './tasks/listDeploy';
 import { toftSendFrom } from './tasks/TOFTsendFrom';
 import { wrap } from './tasks/wrap';
 import { setTrustedRemote__task } from './tasks/setTrustedRemote';
+import { configurePacketTypes__task } from './tasks/configurePacketTypes';
 import SDK from 'tapioca-sdk';
 
 function formatLZEndpoints() {
@@ -79,3 +80,10 @@ task(
     .addParam('dst', 'tOFT destination address')
     .addParam('src', 'tOFT source address');
 
+task(
+    'configurePacketTypes',
+    'Cofigures min destination gas and the usage of custom adapters',
+    configurePacketTypes__task,
+)
+    .addParam('dstLzChainId', 'LZ destination chain id for trusted remotes')
+    .addParam('src', 'tOFT address');

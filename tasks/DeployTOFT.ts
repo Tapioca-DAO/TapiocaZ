@@ -175,6 +175,7 @@ export const deployTOFT__task = async (
 
     // Finally, we set the trusted remotes between the chains if we have 2 deployments.
     if (!isMainChain) {
+        console.log('[+] Setting trusted remotes');
         // hostChain[currentChain] = true
         await setTrustedRemote(
             hre,
@@ -192,8 +193,69 @@ export const deployTOFT__task = async (
             latestTOFT.address,
             hostChainTOFT.address,
         );
+
+        console.log('[+] Configuring packets');
+        //linked => host
+        await configure(
+            hre,
+            latestTOFT.address,
+            currentChain.chainId,
+            hostChain.chainId,
+        );
+        //host => linked
+        await configure(
+            hre,
+            hostChainTOFT.address,
+            hostChain.chainId,
+            currentChain.chainId,
+        );
     }
 };
+async function configure(
+    hre: HardhatRuntimeEnvironment,
+    currentOft: string,
+    currentChainId: string,
+    toChainId: string,
+) {
+    const fromChain = handleGetChainBy('chainId', currentChainId);
+    const toChain = handleGetChainBy('chainId', toChainId);
+    const signer = await useNetwork(hre, fromChain.name);
+
+    const packetTypes = [1, 2, 770, 771, 772, 773];
+
+    const tWrapper = await hre.ethers.getContractAt(
+        'TapiocaWrapper',
+        (
+            await getDeploymentByChain(hre, fromChain.name, 'TapiocaWrapper')
+        ).address,
+    );
+
+    for (var i = 0; i < packetTypes.length; i++) {
+        let encodedTX = (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).interface.encodeFunctionData('setMinDstGas', [
+            toChain.lzChainId,
+            packetTypes[i],
+            200000,
+        ]);
+
+        await (
+            await tWrapper
+                .connect(signer)
+                .executeTOFT(currentOft, encodedTX, true)
+        ).wait();
+
+        let useAdaptersTx = (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).interface.encodeFunctionData('setUseCustomAdapterParams', [true]);
+
+        await (
+            await tWrapper
+                .connect(signer)
+                .executeTOFT(currentOft, useAdaptersTx, true)
+        ).wait();
+    }
+}
 
 async function setTrustedRemote(
     hre: HardhatRuntimeEnvironment,
