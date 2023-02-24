@@ -15,7 +15,7 @@ import writeJsonFile from 'write-json-file';
 //  npx hardhat configurePacketTypes --network mumbai --src 0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c --dst-lz-chain-id 10106
 //  npx hardhat configurePacketTypes --network mumbai --src 0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c --dst-lz-chain-id 10143
 
-//Fantom
+//Fantom 
 //  npx hardhat configurePacketTypes --network fantom_testnet --src 0x9C574C71eCabc7aEf19593A595fb9f8Aa6a78bB0 --dst-lz-chain-id 10106
 //  npx hardhat configurePacketTypes --network fuji_avalanche --src 0x33e1eFe92dBca2d45fe131ab3a1613A169696924 --dst-lz-chain-id 10112
 
@@ -23,7 +23,7 @@ export const configurePacketTypes__task = async (
     taskArgs: { src: string; dstLzChainId: string },
     hre: HardhatRuntimeEnvironment,
 ) => {
-    const packetTypes = [1, 2, 770, 771, 772, 773];
+    const packetTypes = [0, 1, 2, 770, 771, 772, 773];
 
     const tOFTContract = await hre.ethers.getContractAt(
         'TapiocaOFT',
