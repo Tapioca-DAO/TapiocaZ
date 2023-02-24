@@ -26,14 +26,22 @@ import { updateDeployments } from '../deploy/utils';
 //ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0x7B30C951cFF9B5648A08FeC08A588e3b143a095B --yield-box 0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736 --salt TESTTOFT --host-chain-name arbitrum_goerli
 //ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0x7B30C951cFF9B5648A08FeC08A588e3b143a095B --yield-box 0x538c2189ea266069031622e70441bc73A613e9Ed --salt TESTTOFT --host-chain-name arbitrum_goerli
 //ex: npx hardhat deployTOFT --network mumbai --erc20 0x7B30C951cFF9B5648A08FeC08A588e3b143a095B --yield-box 0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F --salt TESTTOFT --host-chain-name arbitrum_goerli
+//ex: npx hardhat deployTOFT --network fantom_testnet --erc20 0x7B30C951cFF9B5648A08FeC08A588e3b143a095B --yield-box 0xA24eaCCd49f0dFB8Eb8629CB7E8Ee956173A4293 --salt TESTTOFT --host-chain-name arbitrum_goerli
 
 //ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692 --yield-box 0x538c2189ea266069031622e70441bc73A613e9Ed --salt TESTTOFT --host-chain-name fuji_avalanche
 //ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692 --yield-box 0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736 --salt TESTTOFT --host-chain-name fuji_avalanche
 //ex: npx hardhat deployTOFT --network mumbai --erc20 0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692 --yield-box 0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F --salt TESTTOFT --host-chain-name fuji_avalanche
+//ex: npx hardhat deployTOFT --network fantom_testnet --erc20 0xDfb0eE3A7de3AFc394aEB63AC5761e615e8FA692 --yield-box 0xA24eaCCd49f0dFB8Eb8629CB7E8Ee956173A4293 --salt TESTTOFT --host-chain-name fuji_avalanche
 
 //ex: npx hardhat deployTOFT --network mumbai --erc20 0xd682F81b03764D872c271BeD4020610eb48f41e3 --yield-box 0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F --salt TESTTOFT --host-chain-name mumbai
 //ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xd682F81b03764D872c271BeD4020610eb48f41e3 --yield-box 0x538c2189ea266069031622e70441bc73A613e9Ed --salt TESTTOFT --host-chain-name mumbai
 //ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xd682F81b03764D872c271BeD4020610eb48f41e3 --yield-box 0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736 --salt TESTTOFT --host-chain-name mumbai
+//ex: npx hardhat deployTOFT --network fantom_testnet --erc20 0xd682F81b03764D872c271BeD4020610eb48f41e3 --yield-box 0xA24eaCCd49f0dFB8Eb8629CB7E8Ee956173A4293 --salt TESTTOFT --host-chain-name mumbai
+
+//ex: npx hardhat deployTOFT --network fantom_testnet --erc20 0xd9da4265fa5957a119c4fC8c36a36b5e50eDc33B --yield-box 0xA24eaCCd49f0dFB8Eb8629CB7E8Ee956173A4293 --salt TESTTOFT --host-chain-name fantom_testnet
+//ex: npx hardhat deployTOFT --network arbitrum_goerli --erc20 0xd9da4265fa5957a119c4fC8c36a36b5e50eDc33B --yield-box 0x93cF32C5fF98c0758b32dF9F6DB9e4f4faaCe736 --salt TESTTOFT --host-chain-name fantom_testnet
+//ex: npx hardhat deployTOFT --network fuji_avalanche --erc20 0xd9da4265fa5957a119c4fC8c36a36b5e50eDc33B --yield-box 0x538c2189ea266069031622e70441bc73A613e9Ed --salt TESTTOFT --host-chain-name fantom_testnet
+//ex: npx hardhat deployTOFT --network mumbai --erc20 0xd9da4265fa5957a119c4fC8c36a36b5e50eDc33B --yield-box 0xF0a07d15F4F6FCB919EE410B10D8ab282eD1107F --salt TESTTOFT --host-chain-name fantom_testnet
 
 export const deployTOFT__task = async (
     args: {
@@ -68,9 +76,11 @@ export const deployTOFT__task = async (
         },
     };
 
+    let currentChainId: any = await hre.getChainId();
+
     // Load up chain meta.
     const hostChain = handleGetChainBy('name', args.hostChainName);
-    const currentChain = handleGetChainBy('chainId', await hre.getChainId());
+    const currentChain = handleGetChainBy('chainId', currentChainId);
     const hostChainNetworkSigner = await useNetwork(hre, hostChain.name);
     const isMainChain = hostChain.chainId === currentChain.chainId;
 
