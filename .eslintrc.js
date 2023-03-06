@@ -15,10 +15,6 @@ module.exports = {
         'prettier/prettier': [
             'error',
             {
-                endOfLine: 'auto',
-                printWidth: 140,
-            },
-            {
                 usePrettierrc: true,
             },
         ],
