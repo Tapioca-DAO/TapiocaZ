@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import {BaseBoringBatchable} from '@boringcrypto/boring-solidity/contracts/BoringBatchable.sol';
+import '@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
 import 'tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol';
+import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
 import './interfaces/IYieldBox.sol';
-
 import './lib/TransferLib.sol';
 
 //
@@ -30,7 +31,7 @@ import './lib/TransferLib.sol';
 //         ####*  (((((((((((((((((((
 //                     ,**//*,.
 
-abstract contract BaseTOFT is OFTV2 {
+abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -102,6 +103,7 @@ abstract contract BaseTOFT is OFTV2 {
             _decimal / 2,
             _lzEndpoint
         )
+        ERC20Permit(string(abi.encodePacked('TOFT-', _name)))
     {
         if (_isNative) {
             require(address(_erc20) == address(0), 'TOFT__NotNative');
