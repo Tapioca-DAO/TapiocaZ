@@ -1,24 +1,5 @@
 {
-    "4002": {
-        "0": {
-            "name": "TapiocaOFT",
-            "address": "0xE0d65BB69921d039E388fC864608F7dD2b7CBcf5",
-            "meta": {
-                "constructorArguments": [
-                    "0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23",
-                    false,
-                    "0x8ec7f2746d9098a627134091bc9afb4629a8642d",
-                    "0xCA3604D7Df34a785D20Cbe7A0Bbd0AF54E9FeF9e",
-                    "Test",
-                    "TTT",
-                    18,
-                    "4002"
-                ]
-            }
-        }
-    },
-    "43113": [
-        {
+    "43113": [{
             "name": "TapiocaWrapper",
             "address": "0xF86dB0686Fb2885f0b06ab916C997e2C3E7B8f83",
             "meta": {}
@@ -39,12 +20,10 @@
                     "id": "421613",
                     "address": "0xc0106C090153F651c5E6e12249412b9e51f8d49d"
                 },
-                "linkedChain": [
-                    {
-                        "id": "43113",
-                        "address": "0x71dDd5ec9815740529D62726Adc50EB84a3A4e1a"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "43113",
+                    "address": "0x71dDd5ec9815740529D62726Adc50EB84a3A4e1a"
+                }]
             }
         },
         {
@@ -63,12 +42,10 @@
                     "id": "80001",
                     "address": "0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c"
                 },
-                "linkedChain": [
-                    {
-                        "id": "43113",
-                        "address": "0x628570D3768e7424dd7Ca4671846D1b67c82E141"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "43113",
+                    "address": "0x628570D3768e7424dd7Ca4671846D1b67c82E141"
+                }]
             }
         },
         {
@@ -87,12 +64,10 @@
                     "id": "0xfa2",
                     "address": "0x9C574C71eCabc7aEf19593A595fb9f8Aa6a78bB0"
                 },
-                "linkedChain": [
-                    {
-                        "id": "43113",
-                        "address": "0x33e1eFe92dBca2d45fe131ab3a1613A169696924"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "43113",
+                    "address": "0x33e1eFe92dBca2d45fe131ab3a1613A169696924"
+                }]
             }
         },
         {
@@ -111,8 +86,7 @@
                     "id": "43113",
                     "address": "0x05C0a8C53BED62edf009b8B870fAC065B4cc3533"
                 },
-                "linkedChain": [
-                    {
+                "linkedChain": [{
                         "id": "",
                         "address": ""
                     },
@@ -132,8 +106,7 @@
             }
         }
     ],
-    "80001": [
-        {
+    "80001": [{
             "name": "TapiocaWrapper",
             "address": "0xd428690148436dA9c7422698eEe15F51C8cec871",
             "meta": {}
@@ -154,12 +127,10 @@
                     "id": "421613",
                     "address": "0xc0106C090153F651c5E6e12249412b9e51f8d49d"
                 },
-                "linkedChain": [
-                    {
-                        "id": "80001",
-                        "address": "0x4172056FDC344b8Fd38bfDe590a7eDdF32cD1d55"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "80001",
+                    "address": "0x4172056FDC344b8Fd38bfDe590a7eDdF32cD1d55"
+                }]
             }
         },
         {
@@ -178,12 +149,10 @@
                     "id": "43113",
                     "address": "0x05C0a8C53BED62edf009b8B870fAC065B4cc3533"
                 },
-                "linkedChain": [
-                    {
-                        "id": "80001",
-                        "address": "0x556029CB9c74B07bC34abED41eaA424159463E50"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "80001",
+                    "address": "0x556029CB9c74B07bC34abED41eaA424159463E50"
+                }]
             }
         },
         {
@@ -202,12 +171,10 @@
                     "id": "0xfa2",
                     "address": "0x9C574C71eCabc7aEf19593A595fb9f8Aa6a78bB0"
                 },
-                "linkedChain": [
-                    {
-                        "id": "80001",
-                        "address": "0x8688820A09b5796840c4570747E7E0064B87d3DF"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "80001",
+                    "address": "0x8688820A09b5796840c4570747E7E0064B87d3DF"
+                }]
             }
         },
         {
@@ -226,8 +193,7 @@
                     "id": "80001",
                     "address": "0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c"
                 },
-                "linkedChain": [
-                    {
+                "linkedChain": [{
                         "id": "",
                         "address": ""
                     },
@@ -247,8 +213,7 @@
             }
         }
     ],
-    "421613": [
-        {
+    "421613": [{
             "name": "TapiocaWrapper",
             "address": "0x3Ba99E08617446b716E024919784005c8d085C5D",
             "meta": {}
@@ -269,12 +234,10 @@
                     "id": "43113",
                     "address": "0x05C0a8C53BED62edf009b8B870fAC065B4cc3533"
                 },
-                "linkedChain": [
-                    {
-                        "id": "421613",
-                        "address": "0xd37E276907e76bF25eBaDA04fB2dCe67c8BE5188"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "421613",
+                    "address": "0xd37E276907e76bF25eBaDA04fB2dCe67c8BE5188"
+                }]
             }
         },
         {
@@ -293,12 +256,10 @@
                     "id": "80001",
                     "address": "0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c"
                 },
-                "linkedChain": [
-                    {
-                        "id": "421613",
-                        "address": "0xd429a8F683Aa8D43Aa3CBdDCa93956CBc44c4242"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "421613",
+                    "address": "0xd429a8F683Aa8D43Aa3CBdDCa93956CBc44c4242"
+                }]
             }
         },
         {
@@ -317,12 +278,10 @@
                     "id": "0xfa2",
                     "address": "0x9C574C71eCabc7aEf19593A595fb9f8Aa6a78bB0"
                 },
-                "linkedChain": [
-                    {
-                        "id": "421613",
-                        "address": "0x4ba186b07cf3C5C4e2aB967d0Daa996dc83Ce30E"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "421613",
+                    "address": "0x4ba186b07cf3C5C4e2aB967d0Daa996dc83Ce30E"
+                }]
             }
         },
         {
@@ -341,8 +300,7 @@
                     "id": "421613",
                     "address": "0xc0106C090153F651c5E6e12249412b9e51f8d49d"
                 },
-                "linkedChain": [
-                    {
+                "linkedChain": [{
                         "id": "",
                         "address": ""
                     },
@@ -362,8 +320,7 @@
             }
         }
     ],
-    "0xfa2": [
-        {
+    "0xfa2": [{
             "name": "TapiocaWrapper",
             "address": "0x63816Ab790f615Fb37aEaCE59122DbDC32f2C6CA",
             "meta": {}
@@ -384,8 +341,7 @@
                     "id": "0xfa2",
                     "address": "0x9C574C71eCabc7aEf19593A595fb9f8Aa6a78bB0"
                 },
-                "linkedChain": [
-                    {
+                "linkedChain": [{
                         "id": "",
                         "address": ""
                     },
@@ -420,12 +376,10 @@
                     "id": "421613",
                     "address": "0xc0106C090153F651c5E6e12249412b9e51f8d49d"
                 },
-                "linkedChain": [
-                    {
-                        "id": "0xfa2",
-                        "address": "0x5Ba1CF78AAEA752BEC33c2036B1E315C881d8E49"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "0xfa2",
+                    "address": "0x5Ba1CF78AAEA752BEC33c2036B1E315C881d8E49"
+                }]
             }
         },
         {
@@ -444,12 +398,10 @@
                     "id": "43113",
                     "address": "0x05C0a8C53BED62edf009b8B870fAC065B4cc3533"
                 },
-                "linkedChain": [
-                    {
-                        "id": "0xfa2",
-                        "address": "0x177b341C0E1b36f9D4fAC0F90B1ebF3a20480834"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "0xfa2",
+                    "address": "0x177b341C0E1b36f9D4fAC0F90B1ebF3a20480834"
+                }]
             }
         },
         {
@@ -468,12 +420,10 @@
                     "id": "80001",
                     "address": "0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c"
                 },
-                "linkedChain": [
-                    {
-                        "id": "0xfa2",
-                        "address": "0x5916f519DFB4b80a3aaD07E0530b93605c35C636"
-                    }
-                ]
+                "linkedChain": [{
+                    "id": "0xfa2",
+                    "address": "0x5916f519DFB4b80a3aaD07E0530b93605c35C636"
+                }]
             }
         }
     ]

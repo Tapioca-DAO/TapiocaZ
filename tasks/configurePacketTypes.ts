@@ -2,6 +2,7 @@ import fs from 'fs';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { glob, runTypeChain } from 'typechain';
 import writeJsonFile from 'write-json-file';
+import { packetTypes } from '../scripts/utils';
 
 
 //Arbitrum:
@@ -40,8 +41,6 @@ export const configurePacketTypes__task = async (
     taskArgs: { src: string; dstLzChainId: string },
     hre: HardhatRuntimeEnvironment,
 ) => {
-    const packetTypes = [0, 1, 2, 770, 771, 772, 773];
-
     const tOFTContract = await hre.ethers.getContractAt(
         'TapiocaOFT',
         taskArgs.src,
@@ -53,8 +52,8 @@ export const configurePacketTypes__task = async (
         wrapperAddress,
     );
 
-    for (var i = 0; i < packetTypes.length; i++) {
-        let encodedTX = (
+    for (let i = 0; i < packetTypes.length; i++) {
+        const encodedTX = (
             await hre.ethers.getContractFactory('TapiocaOFT')
         ).interface.encodeFunctionData('setMinDstGas', [
             taskArgs.dstLzChainId,
@@ -66,7 +65,7 @@ export const configurePacketTypes__task = async (
             await tWrapper.executeTOFT(tOFTContract.address, encodedTX, true)
         ).wait();
 
-        let useAdaptersTx = (
+        const useAdaptersTx = (
             await hre.ethers.getContractFactory('TapiocaOFT')
         ).interface.encodeFunctionData('setUseCustomAdapterParams', [true]);
 

@@ -8,6 +8,9 @@ import { toftSendFrom } from './tasks/TOFTsendFrom';
 import { wrap } from './tasks/wrap';
 import { setTrustedRemote__task } from './tasks/setTrustedRemote';
 import { configurePacketTypes__task } from './tasks/configurePacketTypes';
+import { batchSetTrustedRemote__task } from './tasks/batchSetTrustedRemote';
+import { batchConfigureAdapterParams__task } from './tasks/batchConfigureAdapterParams';
+
 import SDK from 'tapioca-sdk';
 
 function formatLZEndpoints() {
@@ -79,6 +82,18 @@ task(
     .addParam('chain', 'LZ destination chain id for trusted remotes')
     .addParam('dst', 'tOFT destination address')
     .addParam('src', 'tOFT source address');
+
+task(
+    'batchSetTrustedRemote',
+    'Set trusted remote between all available tOFT contracts for the current chain',
+    batchSetTrustedRemote__task,
+).addParam('wrapper', 'TapiocaWrapper address');
+
+task(
+    'batchConfigureAdapterParams',
+    'Sets OFT to use adapter params and the minimum destination gas between all available tOFT contracts for the current chain',
+    batchConfigureAdapterParams__task,
+).addParam('wrapper', 'TapiocaWrapper address');
 
 task(
     'configurePacketTypes',

@@ -208,8 +208,7 @@ export const getTOFTDeploymentByERC20Address = (
     }) as TContract;
     if (!toft) {
         throw new Error(
-            `[-] TOFT not deployed on chain ${
-                handleGetChainBy('chainId', chainID).name
+            `[-] TOFT not deployed on chain ${handleGetChainBy('chainId', chainID).name
             }`,
         );
     }
