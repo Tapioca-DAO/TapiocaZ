@@ -17,9 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
     await verify(hre, 'TapiocaWrapper', []);
     const deployedAt = await deployments.get('TapiocaWrapper');
-    console.log(
-        `Done. Deployed TapiocaWrapper on ${deployedAt.address} with no arguments`,
-    );
+    console.log(`Done. Deployed TapiocaWrapper on ${deployedAt.address} with no arguments`);
     contracts.push({
         name: 'TapiocaWrapper',
         address: deployedAt.address,
