@@ -2,11 +2,12 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumberish, ethers } from 'ethers';
 import hre from 'hardhat';
 import { BN } from '../scripts/utils';
-import { ERC20Mock, TapiocaOFT, mTapiocaOFT, ITapiocaOFT } from '../typechain';
+import { ERC20Mock, TapiocaOFT, MTapiocaOFT, ITapiocaOFT } from '../typechain';
 import { register } from './test.utils';
 
 export const setupFixture = async () => {
     const signer = (await hre.ethers.getSigners())[0];
+    const users = await hre.ethers.getSigners();
     const randomUser = new ethers.Wallet(ethers.Wallet.createRandom().privateKey, hre.ethers.provider);
     await hre.ethers.provider.send('hardhat_setBalance', [
         randomUser.address,
@@ -62,7 +63,7 @@ export const setupFixture = async () => {
     const mtapiocaOFT0 = (await utils.attachTapiocaOFT(
         await tapiocaWrapper_0.tapiocaOFTs((await tapiocaWrapper_0.tapiocaOFTLength()).sub(1)),
         true,
-    )) as mTapiocaOFT;
+    )) as MTapiocaOFT;
 
     // Deploy mTapiocaOFT10
     {
@@ -88,7 +89,7 @@ export const setupFixture = async () => {
     const mtapiocaOFT10 = (await utils.attachTapiocaOFT(
         await tapiocaWrapper_10.tapiocaOFTs((await tapiocaWrapper_10.tapiocaOFTLength()).sub(1)),
         true,
-    )) as mTapiocaOFT;
+    )) as MTapiocaOFT;
 
     // Deploy TapiocaOFT0
     {
@@ -163,6 +164,7 @@ export const setupFixture = async () => {
     };
     const vars = {
         signer,
+        users,
         randomUser,
         LZEndpointMock_chainID_0,
         LZEndpointMock_chainID_10,
