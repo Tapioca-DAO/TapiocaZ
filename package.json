@@ -18,6 +18,7 @@
         "prepare": "husky install"
     },
     "devDependencies": {
+        "@boringcrypto/boring-solidity": "boringcrypto/BoringSolidity#e0ff4a7771edfa09a90694c4e0f891938cf62a43",
         "@ethersproject/abi": "^5.7.0",
         "@ethersproject/providers": "^5.7.0",
         "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
@@ -65,5 +66,6 @@
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
         "tapioca-sdk": "^1.1.31"
+
     }
 }

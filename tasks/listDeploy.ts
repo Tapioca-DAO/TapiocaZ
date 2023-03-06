@@ -2,10 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { TDeployment } from '../constants';
 import { readTOFTDeployments } from '../scripts/utils';
 
-export const getDeployments = async (
-    {},
-    hre: HardhatRuntimeEnvironment,
-): Promise<TDeployment> => {
+export const getDeployments = async ({}, hre: HardhatRuntimeEnvironment): Promise<TDeployment> => {
     const deployments = await hre.deployments.all();
     const formatted: any = {};
     for (const key of Object.keys(deployments)) {

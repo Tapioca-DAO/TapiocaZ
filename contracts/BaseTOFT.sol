@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import {BaseBoringBatchable} from '@boringcrypto/boring-solidity/contracts/BoringBatchable.sol';
+import '@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
 import 'tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol';
+import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
 import './interfaces/IYieldBox.sol';
-
 import './lib/TransferLib.sol';
 
 //
@@ -30,7 +31,7 @@ import './lib/TransferLib.sol';
 //         ####*  (((((((((((((((((((
 //                     ,**//*,.
 
-abstract contract BaseTOFT is OFTV2 {
+abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -96,12 +97,8 @@ abstract contract BaseTOFT is OFTV2 {
         uint8 _decimal,
         uint256 _hostChainID
     )
-        OFTV2(
-            string(abi.encodePacked('TapiocaOFT-', _name)),
-            string(abi.encodePacked('TOFT-', _symbol)),
-            _decimal / 2,
-            _lzEndpoint
-        )
+        OFTV2(string(abi.encodePacked('TapiocaOFT-', _name)), string(abi.encodePacked('TOFT-', _symbol)), _decimal / 2, _lzEndpoint)
+        ERC20Permit(string(abi.encodePacked('TapiocaOFT-', _name)))
     {
         if (_isNative) {
             require(address(_erc20) == address(0), 'TOFT__NotNative');
@@ -163,17 +160,8 @@ abstract contract BaseTOFT is OFTV2 {
             amount,
             assetId
         );
-        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
-            extraGasLimit
-        );
-        _lzSend(
-            lzDstChainId,
-            lzPayload,
-            payable(msg.sender),
-            zroPaymentAddress,
-            adapterParam,
-            msg.value
-        );
+        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(extraGasLimit);
+        _lzSend(lzDstChainId, lzPayload, payable(msg.sender), zroPaymentAddress, adapterParam, msg.value);
         emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
     }
 
@@ -196,14 +184,7 @@ abstract contract BaseTOFT is OFTV2 {
             assetId,
             zroPaymentAddress
         );
-        _lzSend(
-            lzDstChainId,
-            lzPayload,
-            payable(msg.sender),
-            zroPaymentAddress,
-            airdropAdapterParam,
-            msg.value
-        );
+        _lzSend(lzDstChainId, lzPayload, payable(msg.sender), zroPaymentAddress, airdropAdapterParam, msg.value);
         emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
     }
 
@@ -246,18 +227,10 @@ abstract contract BaseTOFT is OFTV2 {
         uint256 _mngmtFeeFraction
     ) internal virtual {
         if (_mngmtFee > 0) {
-            uint256 feeAmount = estimateFees(
-                _mngmtFee,
-                _mngmtFeeFraction,
-                _amount
-            );
+            uint256 feeAmount = estimateFees(_mngmtFee, _mngmtFeeFraction, _amount);
 
             totalFees += feeAmount;
-            erc20.safeTransferFrom(
-                msg.sender,
-                address(this),
-                _amount + feeAmount
-            );
+            erc20.safeTransferFrom(msg.sender, address(this), _amount + feeAmount);
         } else {
             erc20.safeTransferFrom(msg.sender, address(this), _amount);
         }
@@ -278,11 +251,7 @@ abstract contract BaseTOFT is OFTV2 {
         uint256 toMint;
 
         if (_mngmtFee > 0) {
-            uint256 feeAmount = estimateFees(
-                _mngmtFee,
-                _mngmtFeeFraction,
-                msg.value
-            );
+            uint256 feeAmount = estimateFees(_mngmtFee, _mngmtFeeFraction, msg.value);
 
             totalFees += feeAmount;
             toMint = msg.value - feeAmount;
@@ -324,9 +293,7 @@ abstract contract BaseTOFT is OFTV2 {
             uint256 assetId
         ) = abi.decode(_payload, (uint16, bytes32, bytes32, uint256, uint256));
 
-        address onBehalfOf = _strategyDeposit
-            ? address(this)
-            : LzLib.bytes32ToAddress(fromAddressBytes);
+        address onBehalfOf = _strategyDeposit ? address(this) : LzLib.bytes32ToAddress(fromAddressBytes);
         _creditTo(_srcChainId, address(this), amount);
         _depositToYieldbox(assetId, amount, _erc20, address(this), onBehalfOf);
 
@@ -338,53 +305,19 @@ abstract contract BaseTOFT is OFTV2 {
         bytes memory _payload,
         bool _strategyWithdrawal
     ) internal virtual {
-        (
-            ,
-            bytes32 from,
-            ,
-            uint256 _amount,
-            uint256 _share,
-            uint256 _assetId,
-            address _zroPaymentAddress
-        ) = abi.decode(
-                _payload,
-                (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
-            );
+        (, bytes32 from, , uint256 _amount, uint256 _share, uint256 _assetId, address _zroPaymentAddress) = abi.decode(
+            _payload,
+            (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
+        );
 
         address _from = LzLib.bytes32ToAddress(from);
-        _retrieveFromYieldBox(
-            _assetId,
-            _amount,
-            _share,
-            _strategyWithdrawal ? address(this) : _from,
-            address(this)
-        );
+        _retrieveFromYieldBox(_assetId, _amount, _share, _strategyWithdrawal ? address(this) : _from, address(this));
 
-        _debitFrom(
-            address(this),
-            lzEndpoint.getChainId(),
-            LzLib.addressToBytes32(address(this)),
-            _amount
-        );
+        _debitFrom(address(this), lzEndpoint.getChainId(), LzLib.addressToBytes32(address(this)), _amount);
 
-        bytes memory lzSendBackPayload = _encodeSendPayload(
-            from,
-            _ld2sd(_amount)
-        );
-        _lzSend(
-            _srcChainId,
-            lzSendBackPayload,
-            payable(this),
-            _zroPaymentAddress,
-            '',
-            address(this).balance
-        );
-        emit SendToChain(
-            _srcChainId,
-            _from,
-            LzLib.addressToBytes32(address(this)),
-            _amount
-        );
+        bytes memory lzSendBackPayload = _encodeSendPayload(from, _ld2sd(_amount));
+        _lzSend(_srcChainId, lzSendBackPayload, payable(this), _zroPaymentAddress, '', address(this).balance);
+        emit SendToChain(_srcChainId, _from, LzLib.addressToBytes32(address(this)), _amount);
 
         emit ReceiveFromChain(_srcChainId, _from, _amount);
     }
