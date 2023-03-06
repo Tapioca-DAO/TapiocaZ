@@ -155,7 +155,10 @@ export const getTOFTDeploymentByERC20Address = (chainID: string, erc20Address: s
         return e?.meta?.erc20?.address?.toLowerCase() === erc20Address?.toLowerCase();
     }) as TContract;
     if (!toft) {
-        throw new Error(`[-] TOFT not deployed on chain ${handleGetChainBy('chainId', chainID).name}`);
+        throw new Error(
+            `[-] TOFT not deployed on chain ${handleGetChainBy('chainId', chainID).name
+            }`,
+        );
     }
     return toft;
 };
@@ -171,6 +174,7 @@ export const getTOFTDeploymentByTOFTAddress = (chainID: string, address: string)
 
     return toft!;
 };
+
 
 export async function getERC20PermitSignature(
     wallet: Wallet | SignerWithAddress,
