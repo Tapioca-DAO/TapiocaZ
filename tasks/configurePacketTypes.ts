@@ -3,7 +3,6 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { glob, runTypeChain } from 'typechain';
 import writeJsonFile from 'write-json-file';
 
-
 //Arbitrum:
 //  npx hardhat configurePacketTypes --network arbitrum_goerli --src 0xc0106C090153F651c5E6e12249412b9e51f8d49d --dst-lz-chain-id 10106
 //  npx hardhat configurePacketTypes --network arbitrum_goerli --src 0xc0106C090153F651c5E6e12249412b9e51f8d49d --dst-lz-chain-id 10109
@@ -28,7 +27,7 @@ import writeJsonFile from 'write-json-file';
 //  npx hardhat configurePacketTypes --network mumbai --src 0x556029CB9c74B07bC34abED41eaA424159463E50 --dst-lz-chain-id 10106
 //  npx hardhat configurePacketTypes --network mumbai --src 0x8688820A09b5796840c4570747E7E0064B87d3DF --dst-lz-chain-id 10112
 
-//Fantom 
+//Fantom
 //  npx hardhat configurePacketTypes --network fantom_testnet --src 0x9C574C71eCabc7aEf19593A595fb9f8Aa6a78bB0 --dst-lz-chain-id 10106
 //  npx hardhat configurePacketTypes --network fantom_testnet --src 0x9C574C71eCabc7aEf19593A595fb9f8Aa6a78bB0 --dst-lz-chain-id 10109
 //  npx hardhat configurePacketTypes --network fantom_testnet --src 0x9C574C71eCabc7aEf19593A595fb9f8Aa6a78bB0 --dst-lz-chain-id 10143
@@ -36,47 +35,29 @@ import writeJsonFile from 'write-json-file';
 //  npx hardhat configurePacketTypes --network fantom_testnet --src 0x177b341C0E1b36f9D4fAC0F90B1ebF3a20480834 --dst-lz-chain-id 10106
 //  npx hardhat configurePacketTypes --network fantom_testnet --src 0x5916f519DFB4b80a3aaD07E0530b93605c35C636 --dst-lz-chain-id 10109
 
-export const configurePacketTypes__task = async (
-    taskArgs: { src: string; dstLzChainId: string },
-    hre: HardhatRuntimeEnvironment,
-) => {
+export const configurePacketTypes__task = async (taskArgs: { src: string; dstLzChainId: string }, hre: HardhatRuntimeEnvironment) => {
     const packetTypes = [0, 1, 2, 770, 771, 772, 773];
 
-    const tOFTContract = await hre.ethers.getContractAt(
-        'TapiocaOFT',
-        taskArgs.src,
-    );
+    const tOFTContract = await hre.ethers.getContractAt('TapiocaOFT', taskArgs.src);
 
     const wrapperAddress = await tOFTContract.tapiocaWrapper();
-    const tWrapper = await hre.ethers.getContractAt(
-        'TapiocaWrapper',
-        wrapperAddress,
-    );
+    const tWrapper = await hre.ethers.getContractAt('TapiocaWrapper', wrapperAddress);
 
-    for (var i = 0; i < packetTypes.length; i++) {
-        let encodedTX = (
-            await hre.ethers.getContractFactory('TapiocaOFT')
-        ).interface.encodeFunctionData('setMinDstGas', [
+    for (let i = 0; i < packetTypes.length; i++) {
+        const encodedTX = (await hre.ethers.getContractFactory('TapiocaOFT')).interface.encodeFunctionData('setMinDstGas', [
             taskArgs.dstLzChainId,
             packetTypes[i],
             200000,
         ]);
 
-        await (
-            await tWrapper.executeTOFT(tOFTContract.address, encodedTX, true)
-        ).wait();
+        await (await tWrapper.executeTOFT(tOFTContract.address, encodedTX, true)).wait();
 
-        let useAdaptersTx = (
-            await hre.ethers.getContractFactory('TapiocaOFT')
-        ).interface.encodeFunctionData('setUseCustomAdapterParams', [true]);
+        const useAdaptersTx = (await hre.ethers.getContractFactory('TapiocaOFT')).interface.encodeFunctionData(
+            'setUseCustomAdapterParams',
+            [true],
+        );
 
-        await (
-            await tWrapper.executeTOFT(
-                tOFTContract.address,
-                useAdaptersTx,
-                true,
-            )
-        ).wait();
+        await (await tWrapper.executeTOFT(tOFTContract.address, useAdaptersTx, true)).wait();
     }
     console.log('\nDone');
 };

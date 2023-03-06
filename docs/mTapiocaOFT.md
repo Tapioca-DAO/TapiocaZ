@@ -27,6 +27,23 @@ function DEFAULT_PAYLOAD_SIZE_LIMIT() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### DOMAIN_SEPARATOR
+
+```solidity
+function DOMAIN_SEPARATOR() external view returns (bytes32)
+```
+
+
+
+*See {IERC20Permit-DOMAIN_SEPARATOR}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### NO_EXTRA_GAS
 
 ```solidity
@@ -235,6 +252,23 @@ map of approved balancers
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
+
+### batch
+
+```solidity
+function batch(bytes[] calls, bool revertOnFail) external payable
+```
+
+Allows batched call to self (this contract).
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| calls | bytes[] | An array of inputs for each call. |
+| revertOnFail | bool | If True then reverts after a failed call and stops doing further calls. |
 
 ### callOnOFTReceived
 
@@ -783,6 +817,28 @@ function nonblockingLzReceive(uint16 _srcChainId, bytes _srcAddress, uint64 _non
 | _nonce | uint64 | undefined |
 | _payload | bytes | undefined |
 
+### nonces
+
+```solidity
+function nonces(address owner) external view returns (uint256)
+```
+
+
+
+*See {IERC20Permit-nonces}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### owner
 
 ```solidity
@@ -821,6 +877,28 @@ function payloadSizeLimitLookup(uint16) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
+
+### permit
+
+```solidity
+function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+```
+
+
+
+*See {IERC20Permit-permit}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+| value | uint256 | undefined |
+| deadline | uint256 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
 
 ### precrime
 

@@ -11,23 +11,17 @@ export const constants = {
     },
 };
 
-let supportedChains: { [key: string]: any } = SDK.API.utils
-    .getSupportedChains()
-    .reduce(
-        (sdkChains: any, chain: any) => ({
-            ...sdkChains,
-            [chain.name]: {
-                ...chain,
-            },
-        }),
-        {},
-    );
+const supportedChains: { [key: string]: any } = SDK.API.utils.getSupportedChains().reduce(
+    (sdkChains: any, chain: any) => ({
+        ...sdkChains,
+        [chain.name]: {
+            ...chain,
+        },
+    }),
+    {},
+);
 
-export const verify = async (
-    hre: HardhatRuntimeEnvironment,
-    artifact: string,
-    args: any[],
-) => {
+export const verify = async (hre: HardhatRuntimeEnvironment, artifact: string, args: any[]) => {
     const { deployments } = hre;
 
     const deployed = await deployments.get(artifact);
@@ -39,16 +33,11 @@ export const verify = async (
         });
         console.log('[+] Verified');
     } catch (err: any) {
-        console.log(
-            `[-] failed to verify ${artifact}; error: ${err.message}\n`,
-        );
+        console.log(`[-] failed to verify ${artifact}; error: ${err.message}\n`);
     }
 };
 
-export const updateDeployments = async (
-    contracts: TContract[],
-    chainId: string,
-) => {
+export const updateDeployments = async (contracts: TContract[], chainId: string) => {
     await SDK.API.utils.saveDeploymentOnDisk({
         [chainId]: contracts,
     });

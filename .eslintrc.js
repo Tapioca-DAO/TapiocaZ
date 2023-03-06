@@ -16,6 +16,7 @@ module.exports = {
             'error',
             {
                 endOfLine: 'auto',
+                printWidth: 140,
             },
             {
                 usePrettierrc: true,
