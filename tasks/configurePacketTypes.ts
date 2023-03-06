@@ -3,8 +3,6 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { glob, runTypeChain } from 'typechain';
 import writeJsonFile from 'write-json-file';
 
-
-
 //Arbitrum:
 //  npx hardhat configurePacketTypes --network arbitrum_goerli --src 0xc0106C090153F651c5E6e12249412b9e51f8d49d --dst-lz-chain-id 10106
 //  npx hardhat configurePacketTypes --network arbitrum_goerli --src 0xc0106C090153F651c5E6e12249412b9e51f8d49d --dst-lz-chain-id 10109
