@@ -8,6 +8,7 @@ import 'tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol';
 import 'tapioca-sdk/dist/contracts/libraries/LzLib.sol';
 import './interfaces/IYieldBox.sol';
 import './lib/TransferLib.sol';
+import './interfaces/ITapiocaWrapper.sol';
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -20,7 +21,7 @@ import './lib/TransferLib.sol';
 //  (#########(              #####     ##########.
 //  ##########             #####.      .##########
 //                       ,####/
-//                      #####
+//                      #####x
 //  %%%%%%%%%%        (####.           *%%%%%%%%%#
 //  .%%%%%%%%%%     *####(            .%%%%%%%%%%
 //   *%%%%%%%%%%   #####             #%%%%%%%%%%
@@ -56,6 +57,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     uint256 public hostChainID;
     /// @notice Decimal cache number of the ERC20.
     uint8 internal _decimalCache;
+
+    ITapiocaWrapper private _wrapper;
 
     // ************** //
     // *** ERRORS *** //
@@ -95,7 +98,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
-        uint256 _hostChainID
+        uint256 _hostChainID,
+        ITapiocaWrapper _tapiocaWrapper
     )
         OFTV2(string(abi.encodePacked('TapiocaOFT-', _name)), string(abi.encodePacked('TOFT-', _symbol)), _decimal / 2, _lzEndpoint)
         ERC20Permit(string(abi.encodePacked('TapiocaOFT-', _name)))
@@ -109,6 +113,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         hostChainID = _hostChainID;
         isNative = _isNative;
         yieldBox = _yieldBox;
+
+        _wrapper = _tapiocaWrapper;
     }
 
     receive() external payable {}
@@ -139,6 +145,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         return lzEndpoint.getChainId();
     }
 
+    struct SendOptions {
+        uint256 extraGasLimit;
+        address zroPaymentAddress;
+        bool strategyDeposit;
+        bool wrap;
+    }
+
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
@@ -146,22 +159,27 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         uint256 amount,
         uint256 assetId,
         uint16 lzDstChainId,
-        uint256 extraGasLimit,
-        address zroPaymentAddress,
-        bool strategyDeposit
+        SendOptions calldata options
     ) external payable {
+        if (options.wrap) {
+            if (isNative) {
+                _wrapNative(msg.sender, _wrapper.mngmtFee(), _wrapper.mngmtFeeFraction());
+            } else {
+                _wrap(msg.sender, amount, _wrapper.mngmtFee(), _wrapper.mngmtFeeFraction());
+            }
+        }
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
         _debitFrom(msg.sender, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
-            strategyDeposit ? PT_YB_SEND_STRAT : PT_YB_DEPOSIT,
+            options.strategyDeposit ? PT_YB_SEND_STRAT : PT_YB_DEPOSIT,
             LzLib.addressToBytes32(msg.sender),
             toAddress,
             amount,
             assetId
         );
-        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(extraGasLimit);
-        _lzSend(lzDstChainId, lzPayload, payable(msg.sender), zroPaymentAddress, adapterParam, msg.value);
+        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(options.extraGasLimit);
+        _lzSend(lzDstChainId, lzPayload, payable(msg.sender), options.zroPaymentAddress, adapterParam, msg.value);
         emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
     }
 
