@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract YieldBoxMock {
     mapping(address => uint256) public balances;
@@ -20,7 +20,7 @@ contract YieldBoxMock {
     ) external returns (uint256 amountOut, uint256 shareOut) {
         require(
             ERC20(assets[assetId]).transferFrom(from, address(this), amount),
-            'failed transfer'
+            "failed transfer"
         );
         balances[to] += amount;
         return (amount, amount);
@@ -33,7 +33,7 @@ contract YieldBoxMock {
         uint256 amount,
         uint256
     ) external returns (uint256 amountOut, uint256 shareOut) {
-        require(balances[from] >= amount, 'not enough');
+        require(balances[from] >= amount, "not enough");
         ERC20(assets[assetId]).transfer(to, amount);
         balances[from] -= amount;
         return (amount, amount);

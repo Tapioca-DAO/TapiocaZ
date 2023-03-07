@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 
 pragma solidity ^0.8.0;
-import './TapiocaOFT.sol';
-import './mTapiocaOFT.sol';
-import './interfaces/ITapiocaOFT.sol';
+import "./TapiocaOFT.sol";
+import "./mTapiocaOFT.sol";
+import "./interfaces/ITapiocaOFT.sol";
 
-import '@openzeppelin/contracts/utils/Create2.sol';
-import '@rari-capital/solmate/src/auth/Owned.sol';
+import "@openzeppelin/contracts/utils/Create2.sol";
+import "@rari-capital/solmate/src/auth/Owned.sol";
 
 contract TapiocaWrapper is Owned {
     // ************ //
@@ -163,7 +163,7 @@ contract TapiocaWrapper is Owned {
                         0,
                         keccak256(
                             abi.encodePacked(
-                                keccak256('TapiocaWrapper'),
+                                keccak256("TapiocaWrapper"),
                                 address(this),
                                 _erc20,
                                 _salt
@@ -181,7 +181,7 @@ contract TapiocaWrapper is Owned {
                         0,
                         keccak256(
                             abi.encodePacked(
-                                keccak256('TapiocaWrapper'),
+                                keccak256("TapiocaWrapper"),
                                 address(this),
                                 _erc20,
                                 _salt

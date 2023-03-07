@@ -22,7 +22,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
     await verify(hre, 'Rebalancing', args);
     const deployedAt = await deployments.get('Rebalancing');
-    console.log(`Done. Deployed Rebalancing on ${deployedAt.address} with args [${args}]`);
+    console.log(
+        `Done. Deployed Rebalancing on ${deployedAt.address} with args [${args}]`,
+    );
     contracts.push({
         name: 'Rebalancing',
         address: deployedAt.address,

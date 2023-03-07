@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import '../interfaces/IStargateRouter.sol';
-import './ERC20Mock.sol';
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../interfaces/IStargateRouter.sol";
+import "./ERC20Mock.sol";
 
 contract StargateRouterETHMock {
     ERC20Mock public token;
@@ -19,7 +19,7 @@ contract StargateRouterETHMock {
     ) external payable {
         require(
             msg.value > _amountLD,
-            'Stargate: msg.value must be > _amountLD'
+            "Stargate: msg.value must be > _amountLD"
         );
         IStargateRouterBase.lzTxObj memory data;
         //simulate WETH wrap
@@ -34,7 +34,7 @@ contract StargateRouterETHMock {
             _minAmountLD,
             data,
             _toAddress,
-            ''
+            ""
         );
     }
 }

@@ -11,6 +11,9 @@ export const exportSDK__task = async ({}, hre: HardhatRuntimeEnvironment) => {
         projectCaller: 'TapiocaZ',
         contractNames: ['TapiocaWrapper', 'TapiocaOFT'],
         artifactPath: hre.config.paths.artifacts,
-        _deployments: Object.keys(DEPLOYMENTS_FILE).length > 0 ? DEPLOYMENTS_FILE : undefined,
+        _deployments:
+            Object.keys(DEPLOYMENTS_FILE).length > 0
+                ? DEPLOYMENTS_FILE
+                : undefined,
     });
 };

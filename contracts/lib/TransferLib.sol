@@ -12,6 +12,6 @@ library TransferLib {
             success := call(gas(), to, amount, 0, 0, 0, 0)
         }
 
-        require(success, 'ETH_TRANSFER_FAILED');
+        require(success, "ETH_TRANSFER_FAILED");
     }
 }

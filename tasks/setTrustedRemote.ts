@@ -62,17 +62,25 @@ import writeJsonFile from 'write-json-file';
 //npx hardhat setTrustedRemote --network fantom_testnet --chain 10109 --dst 0xa1BD6C0B6b35209B3710cA6Ab306736e06C1fe9c --src 0x5916f519DFB4b80a3aaD07E0530b93605c35C636
 //npx hardhat setTrustedRemote --network fantom_testnet --chain 10106 --dst 0x628570D3768e7424dd7Ca4671846D1b67c82E141 --src 0x5916f519DFB4b80a3aaD07E0530b93605c35C636
 //npx hardhat setTrustedRemote --network fantom_testnet --chain 10143 --dst 0xd429a8F683Aa8D43Aa3CBdDCa93956CBc44c4242 --src 0x5916f519DFB4b80a3aaD07E0530b93605c35C636
-export const setTrustedRemote__task = async (taskArgs: { chain: string; dst: string; src: string }, hre: HardhatRuntimeEnvironment) => {
+export const setTrustedRemote__task = async (
+    taskArgs: { chain: string; dst: string; src: string },
+    hre: HardhatRuntimeEnvironment,
+) => {
     console.log('\nRetrieving tOFT');
-    const tOFTContract = await hre.ethers.getContractAt('TapiocaOFT', taskArgs.src);
+    const tOFTContract = await hre.ethers.getContractAt(
+        'TapiocaOFT',
+        taskArgs.src,
+    );
 
-    const path = hre.ethers.utils.solidityPack(['address', 'address'], [taskArgs.dst, taskArgs.src]);
+    const path = hre.ethers.utils.solidityPack(
+        ['address', 'address'],
+        [taskArgs.dst, taskArgs.src],
+    );
     console.log(`Setting trusted remote with path ${path}`);
 
-    const encodedTX = (await hre.ethers.getContractFactory('TapiocaOFT')).interface.encodeFunctionData('setTrustedRemote', [
-        taskArgs.chain,
-        path,
-    ]);
+    const encodedTX = (
+        await hre.ethers.getContractFactory('TapiocaOFT')
+    ).interface.encodeFunctionData('setTrustedRemote', [taskArgs.chain, path]);
 
     const tWrapper = await hre.ethers.getContractAt(
         'TapiocaWrapper',
@@ -80,7 +88,9 @@ export const setTrustedRemote__task = async (taskArgs: { chain: string; dst: str
         await tOFTContract.tapiocaWrapper(),
     );
 
-    await (await tWrapper.executeTOFT(tOFTContract.address, encodedTX, true)).wait();
+    await (
+        await tWrapper.executeTOFT(tOFTContract.address, encodedTX, true)
+    ).wait();
 
     console.log('Done');
 };

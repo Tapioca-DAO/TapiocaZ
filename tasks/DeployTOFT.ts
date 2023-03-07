@@ -86,14 +86,21 @@ export const deployTOFT__task = async (
 
     // Load ERC20 meta now that we have the host chain signer and knows if we're on the host chain.
     console.log('[+] Load ERC20');
-    const erc20 = await hre.ethers.getContractAt('ERC20', deploymentMetadata.erc20.address, hostChainNetworkSigner);
+    const erc20 = await hre.ethers.getContractAt(
+        'ERC20',
+        deploymentMetadata.erc20.address,
+        hostChainNetworkSigner,
+    );
     deploymentMetadata.erc20.name = await erc20.name();
 
     // Verifies that the TOFT contract is deployed on the host chain if we're currently not on it.
     let hostChainTOFT!: TContract;
     if (!isMainChain) {
         console.log('[+] Retrieving host chain tOFT');
-        hostChainTOFT = getTOFTDeploymentByERC20Address(hostChain.chainId, deploymentMetadata.erc20.address);
+        hostChainTOFT = getTOFTDeploymentByERC20Address(
+            hostChain.chainId,
+            deploymentMetadata.erc20.address,
+        );
     }
 
     // Get the deploy tx
@@ -108,16 +115,29 @@ export const deployTOFT__task = async (
     );
 
     // Get the tWrapper
-    const tWrapper = await hre.ethers.getContractAt('TapiocaWrapper', (await hre.deployments.get('TapiocaWrapper')).address);
+    const tWrapper = await hre.ethers.getContractAt(
+        'TapiocaWrapper',
+        (
+            await hre.deployments.get('TapiocaWrapper')
+        ).address,
+    );
 
     // Create the TOFT
     console.log('[+] Deploying TOFT, waiting for 6 confirmation');
     await (
-        await tWrapper.createTOFT(args.erc20, tx.txData, hre.ethers.utils.formatBytes32String(args.salt), args.linkedTOFT ?? false)
+        await tWrapper.createTOFT(
+            args.erc20,
+            tx.txData,
+            hre.ethers.utils.formatBytes32String(args.salt),
+            args.linkedTOFT ?? false,
+        )
     ).wait(6);
 
     // We save the TOFT deployment
-    const latestTOFT = await hre.ethers.getContractAt('TapiocaOFT', await tWrapper.lastTOFT());
+    const latestTOFT = await hre.ethers.getContractAt(
+        'TapiocaOFT',
+        await tWrapper.lastTOFT(),
+    );
     const TOFTMeta: TContract = {
         name: await latestTOFT.name(),
         address: latestTOFT.address,
@@ -125,7 +145,9 @@ export const deployTOFT__task = async (
             ...deploymentMetadata,
             hostChain: {
                 id: hostChain.chainId,
-                address: isMainChain ? latestTOFT.address : hostChainTOFT.address,
+                address: isMainChain
+                    ? latestTOFT.address
+                    : hostChainTOFT.address,
             },
             // First write off the host chain TOFT deployment meta will not include the linkedChain info since it is not known yet.
             linkedChain: [
@@ -141,7 +163,10 @@ export const deployTOFT__task = async (
 
     // Now that we know linked chain info, we update the host chain TOFT deployment meta.
     if (!isMainChain) {
-        const hostDepl = getTOFTDeploymentByERC20Address(TOFTMeta.meta.hostChain.id, TOFTMeta.meta.erc20.address);
+        const hostDepl = getTOFTDeploymentByERC20Address(
+            TOFTMeta.meta.hostChain.id,
+            TOFTMeta.meta.erc20.address,
+        );
         removeTOFTDeployment(hostDepl.meta.hostChain.id, hostDepl);
         hostDepl.meta.linkedChain.push(TOFTMeta.meta.linkedChain[0]);
         saveTOFTDeployment(hostDepl.meta.hostChain.id, [hostDepl]);
@@ -162,19 +187,46 @@ export const deployTOFT__task = async (
     if (!isMainChain) {
         console.log('[+] Setting trusted remotes');
         // hostChain[currentChain] = true
-        await setTrustedRemote(hre, hostChain.chainId, currentChain.chainId, hostChainTOFT.address, latestTOFT.address);
+        await setTrustedRemote(
+            hre,
+            hostChain.chainId,
+            currentChain.chainId,
+            hostChainTOFT.address,
+            latestTOFT.address,
+        );
 
         // otherChain[hostChain] = true
-        await setTrustedRemote(hre, currentChain.chainId, hostChain.chainId, latestTOFT.address, hostChainTOFT.address);
+        await setTrustedRemote(
+            hre,
+            currentChain.chainId,
+            hostChain.chainId,
+            latestTOFT.address,
+            hostChainTOFT.address,
+        );
 
         console.log('[+] Configuring packets');
         //linked => host
-        await configure(hre, latestTOFT.address, currentChain.chainId, hostChain.chainId);
+        await configure(
+            hre,
+            latestTOFT.address,
+            currentChain.chainId,
+            hostChain.chainId,
+        );
         //host => linked
-        await configure(hre, hostChainTOFT.address, hostChain.chainId, currentChain.chainId);
+        await configure(
+            hre,
+            hostChainTOFT.address,
+            hostChain.chainId,
+            currentChain.chainId,
+        );
     }
 };
-async function configure(hre: HardhatRuntimeEnvironment, currentOft: string, currentChainId: string, toChainId: string) {
+async function configure(
+    hre: HardhatRuntimeEnvironment,
+    currentOft: string,
+    currentChainId: string,
+    toChainId: string,
+) {
     const fromChain = handleGetChainBy('chainId', currentChainId);
     const toChain = handleGetChainBy('chainId', toChainId);
     const signer = await useNetwork(hre, fromChain.name);
@@ -189,20 +241,29 @@ async function configure(hre: HardhatRuntimeEnvironment, currentOft: string, cur
     );
 
     for (let i = 0; i < packetTypes.length; i++) {
-        const encodedTX = (await hre.ethers.getContractFactory('TapiocaOFT')).interface.encodeFunctionData('setMinDstGas', [
+        const encodedTX = (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).interface.encodeFunctionData('setMinDstGas', [
             toChain.lzChainId,
             packetTypes[i],
             200000,
         ]);
 
-        await (await tWrapper.connect(signer).executeTOFT(currentOft, encodedTX, true)).wait();
+        await (
+            await tWrapper
+                .connect(signer)
+                .executeTOFT(currentOft, encodedTX, true)
+        ).wait();
 
-        const useAdaptersTx = (await hre.ethers.getContractFactory('TapiocaOFT')).interface.encodeFunctionData(
-            'setUseCustomAdapterParams',
-            [true],
-        );
+        const useAdaptersTx = (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).interface.encodeFunctionData('setUseCustomAdapterParams', [true]);
 
-        await (await tWrapper.connect(signer).executeTOFT(currentOft, useAdaptersTx, true)).wait();
+        await (
+            await tWrapper
+                .connect(signer)
+                .executeTOFT(currentOft, useAdaptersTx, true)
+        ).wait();
     }
 }
 
@@ -217,10 +278,17 @@ async function setTrustedRemote(
     const signer = await useNetwork(hre, fromChain.name);
     const toChain = handleGetChainBy('chainId', toChainId);
 
-    console.log(`[+] Setting (${toChain.name}) as a trusted remote on (${fromChain.name})`);
+    console.log(
+        `[+] Setting (${toChain.name}) as a trusted remote on (${fromChain.name})`,
+    );
 
-    const trustedRemotePath = hre.ethers.utils.solidityPack(['address', 'address'], [toTOFTAddress, fromToft]);
-    const encodedTX = (await hre.ethers.getContractFactory('TapiocaOFT')).interface.encodeFunctionData('setTrustedRemote', [
+    const trustedRemotePath = hre.ethers.utils.solidityPack(
+        ['address', 'address'],
+        [toTOFTAddress, fromToft],
+    );
+    const encodedTX = (
+        await hre.ethers.getContractFactory('TapiocaOFT')
+    ).interface.encodeFunctionData('setTrustedRemote', [
         toChain.lzChainId,
         trustedRemotePath,
     ]);
@@ -232,5 +300,7 @@ async function setTrustedRemote(
         ).address,
     );
 
-    await (await tWrapper.connect(signer).executeTOFT(fromToft, encodedTX, true)).wait();
+    await (
+        await tWrapper.connect(signer).executeTOFT(fromToft, encodedTX, true)
+    ).wait();
 }

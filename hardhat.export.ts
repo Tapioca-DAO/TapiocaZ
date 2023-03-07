@@ -11,7 +11,7 @@ import 'hardhat-tracer';
 
 dotenv.config();
 
-let supportedChains: { [key: string]: HttpNetworkConfig } = SDK.API.utils
+const supportedChains: { [key: string]: HttpNetworkConfig } = SDK.API.utils
     .getSupportedChains()
     .reduce(
         (sdkChains, chain) => ({
