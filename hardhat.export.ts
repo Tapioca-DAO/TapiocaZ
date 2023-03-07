@@ -34,11 +34,13 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     solidity: {
         compilers: [
             {
-                version: '0.8.15',
+                version: '0.8.18',
                 settings: {
+                    viaIR: true,
                     optimizer: {
                         enabled: true,
                         runs: 200,
+
                     },
                 },
             },
