@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import '../interfaces/IStargateRouter.sol';
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../interfaces/IStargateRouter.sol";
 
 contract StargateRouterMock is IStargateRouterBase {
     IERC20 public token;
@@ -22,10 +22,10 @@ contract StargateRouterMock is IStargateRouterBase {
         bytes calldata _to,
         bytes calldata
     ) external payable override {
-        require(_amountLD > 0, 'Stargate: cannot swap 0');
+        require(_amountLD > 0, "Stargate: cannot swap 0");
         require(
             _refundAddress != address(0x0),
-            'Stargate: _refundAddress cannot be 0x0'
+            "Stargate: _refundAddress cannot be 0x0"
         );
         bytes32 converted = bytes32(_to[:32]);
         address tempAddress = address(uint160(uint256(converted)));

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import './TapiocaWrapper.sol';
-import './BaseTOFT.sol';
-import './lib/TransferLib.sol';
+import "./TapiocaWrapper.sol";
+import "./BaseTOFT.sol";
+import "./lib/TransferLib.sol";
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -154,10 +154,10 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
     /// @param _toAddress The address to unwrap the tokens to.
     /// @param _amount The amount of tokens to unwrap.
-    function unwrap(address _toAddress, uint256 _amount)
-        external
-        onlyAllowedChain
-    {
+    function unwrap(
+        address _toAddress,
+        uint256 _amount
+    ) external onlyAllowedChain {
         _unwrap(_toAddress, _amount);
     }
 
@@ -167,10 +167,10 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice updates a connected chain whitelist status
     /// @param _chain the block.chainid of that specific chain
     /// @param _status the new whitelist status
-    function updateConnectedChain(uint256 _chain, bool _status)
-        external
-        onlyOwner
-    {
+    function updateConnectedChain(
+        uint256 _chain,
+        bool _status
+    ) external onlyOwner {
         emit ConnectedChainStatusUpdated(
             _chain,
             connectedChains[_chain],
@@ -182,10 +182,10 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice updates a Balancer whitelist status
     /// @param _balancer the operator address
     /// @param _status the new whitelist status
-    function updateBalancerState(address _balancer, bool _status)
-        external
-        onlyOwner
-    {
+    function updateBalancerState(
+        address _balancer,
+        bool _status
+    ) external onlyOwner {
         emit BalancerStatusUpdated(_balancer, balancers[_balancer], _status);
         balancers[_balancer] = _status;
     }
@@ -193,8 +193,8 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice extracts the underlying token/native for rebalancing
     /// @param _amount the amount used for rebalancing
     function extractUnderlying(uint256 _amount) external {
-        require(balancers[msg.sender], 'TapiocaOFT: not authorized');
-        
+        require(balancers[msg.sender], "TapiocaOFT: not authorized");
+
         if (isNative) {
             TransferLib.safeTransferETH(msg.sender, _amount);
         } else {
