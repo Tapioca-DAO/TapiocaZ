@@ -1450,7 +1450,7 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 
 
 
-
+*Emitted when the allowance of a `spender` for an `owner` is set by a call to {approve}. `value` is the new allowance.*
 
 #### Parameters
 
@@ -1556,7 +1556,7 @@ event ReceiveFromChain(uint16 indexed _srcChainId, address indexed _to, uint256 
 
 
 
-
+*Emitted when `_amount` tokens are received from `_srcChainId` into the `_toAddress` on the local chain. `_nonce` is the inbound nonce.*
 
 #### Parameters
 
@@ -1593,7 +1593,7 @@ event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes32 ind
 
 
 
-
+*Emitted when `_amount` tokens are moved from the `_sender` to (`_dstChainId`, `_toAddress`) `_nonce` is the outbound nonce*
 
 #### Parameters
 
@@ -1696,7 +1696,7 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 
 
 
-
+*Emitted when `value` tokens are moved from one account (`from`) to another (`to`). Note that `value` may be zero.*
 
 #### Parameters
 
