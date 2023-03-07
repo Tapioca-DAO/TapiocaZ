@@ -11,19 +11,24 @@ import 'hardhat-tracer';
 
 dotenv.config();
 
-const supportedChains: { [key: string]: HttpNetworkConfig } = SDK.API.utils.getSupportedChains().reduce(
-    (sdkChains, chain) => ({
-        ...sdkChains,
-        [chain.name]: <HttpNetworkConfig>{
-            accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-            live: true,
-            url: chain.rpc.replace('<api_key>', process.env.ALCHEMY_KEY!),
-            gasMultiplier: chain.tags.includes('testnet') ? 2 : 1,
-            chainId: Number(chain.chainId),
-        },
-    }),
-    {},
-);
+const supportedChains: { [key: string]: HttpNetworkConfig } = SDK.API.utils
+    .getSupportedChains()
+    .reduce(
+        (sdkChains, chain) => ({
+            ...sdkChains,
+            [chain.name]: <HttpNetworkConfig>{
+                accounts:
+                    process.env.PRIVATE_KEY !== undefined
+                        ? [process.env.PRIVATE_KEY]
+                        : [],
+                live: true,
+                url: chain.rpc.replace('<api_key>', process.env.ALCHEMY_KEY!),
+                gasMultiplier: chain.tags.includes('testnet') ? 2 : 1,
+                chainId: Number(chain.chainId),
+            },
+        }),
+        {},
+    );
 
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     solidity: {

@@ -35,29 +35,47 @@ import writeJsonFile from 'write-json-file';
 //  npx hardhat configurePacketTypes --network fantom_testnet --src 0x177b341C0E1b36f9D4fAC0F90B1ebF3a20480834 --dst-lz-chain-id 10106
 //  npx hardhat configurePacketTypes --network fantom_testnet --src 0x5916f519DFB4b80a3aaD07E0530b93605c35C636 --dst-lz-chain-id 10109
 
-export const configurePacketTypes__task = async (taskArgs: { src: string; dstLzChainId: string }, hre: HardhatRuntimeEnvironment) => {
+export const configurePacketTypes__task = async (
+    taskArgs: { src: string; dstLzChainId: string },
+    hre: HardhatRuntimeEnvironment,
+) => {
     const packetTypes = [0, 1, 2, 770, 771, 772, 773];
 
-    const tOFTContract = await hre.ethers.getContractAt('TapiocaOFT', taskArgs.src);
+    const tOFTContract = await hre.ethers.getContractAt(
+        'TapiocaOFT',
+        taskArgs.src,
+    );
 
     const wrapperAddress = await tOFTContract.tapiocaWrapper();
-    const tWrapper = await hre.ethers.getContractAt('TapiocaWrapper', wrapperAddress);
+    const tWrapper = await hre.ethers.getContractAt(
+        'TapiocaWrapper',
+        wrapperAddress,
+    );
 
     for (let i = 0; i < packetTypes.length; i++) {
-        const encodedTX = (await hre.ethers.getContractFactory('TapiocaOFT')).interface.encodeFunctionData('setMinDstGas', [
+        const encodedTX = (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).interface.encodeFunctionData('setMinDstGas', [
             taskArgs.dstLzChainId,
             packetTypes[i],
             200000,
         ]);
 
-        await (await tWrapper.executeTOFT(tOFTContract.address, encodedTX, true)).wait();
+        await (
+            await tWrapper.executeTOFT(tOFTContract.address, encodedTX, true)
+        ).wait();
 
-        const useAdaptersTx = (await hre.ethers.getContractFactory('TapiocaOFT')).interface.encodeFunctionData(
-            'setUseCustomAdapterParams',
-            [true],
-        );
+        const useAdaptersTx = (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).interface.encodeFunctionData('setUseCustomAdapterParams', [true]);
 
-        await (await tWrapper.executeTOFT(tOFTContract.address, useAdaptersTx, true)).wait();
+        await (
+            await tWrapper.executeTOFT(
+                tOFTContract.address,
+                useAdaptersTx,
+                true,
+            )
+        ).wait();
     }
     console.log('\nDone');
 };

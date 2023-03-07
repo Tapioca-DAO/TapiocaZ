@@ -1,8 +1,14 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { getTOFTDeploymentByTOFTAddress, handleGetChainBy } from '../scripts/utils';
+import {
+    getTOFTDeploymentByTOFTAddress,
+    handleGetChainBy,
+} from '../scripts/utils';
 import { TapiocaOFT } from '../typechain';
 
-export const toftSendFrom = async (args: { toft: string; to: 'host' | 'linked'; amount: string }, hre: HardhatRuntimeEnvironment) => {
+export const toftSendFrom = async (
+    args: { toft: string; to: 'host' | 'linked'; amount: string },
+    hre: HardhatRuntimeEnvironment,
+) => {
     if (args.to !== 'host' && args.to !== 'linked') {
         throw new Error('[-] Invalid `to` argument');
     }
@@ -12,18 +18,29 @@ export const toftSendFrom = async (args: { toft: string; to: 'host' | 'linked'; 
 
     const currentChain = handleGetChainBy('chainId', await hre.getChainId());
 
-    const toftDeployment = getTOFTDeploymentByTOFTAddress(currentChain.chainId, args.toft);
+    const toftDeployment = getTOFTDeploymentByTOFTAddress(
+        currentChain.chainId,
+        args.toft,
+    );
 
     if (
-        (args.to === 'host' && toftDeployment.meta.hostChain.id === currentChain.chainId) ||
-        (args.to === 'linked' && toftDeployment.meta.linkedChain.id === currentChain.chainId)
+        (args.to === 'host' &&
+            toftDeployment.meta.hostChain.id === currentChain.chainId) ||
+        (args.to === 'linked' &&
+            toftDeployment.meta.linkedChain.id === currentChain.chainId)
     ) {
         throw new Error('[-] TOFT can not be sent to the same current chain');
     }
 
-    const dstTOFT = args.to === 'host' ? toftDeployment.meta.hostChain.address : toftDeployment.meta.linkedChain.address;
+    const dstTOFT =
+        args.to === 'host'
+            ? toftDeployment.meta.hostChain.address
+            : toftDeployment.meta.linkedChain.address;
 
-    const toftContract = await hre.ethers.getContractAt('TapiocaOFT', toftDeployment.address);
+    const toftContract = await hre.ethers.getContractAt(
+        'TapiocaOFT',
+        toftDeployment.address,
+    );
 
     console.log('[+] Building TX');
     const sendFromParam: Parameters<TapiocaOFT['sendFrom']> = [
@@ -42,7 +59,10 @@ export const toftSendFrom = async (args: { toft: string; to: 'host' | 'linked'; 
         sendFromParam,
     );
 
-    const lzEndpoint = await hre.ethers.getContractAt('LZEndpointMock', currentChain.address);
+    const lzEndpoint = await hre.ethers.getContractAt(
+        'LZEndpointMock',
+        currentChain.address,
+    );
 
     const feeEstimation = await lzEndpoint.estimateFees(
         toftDeployment.meta.linkedChain.id,

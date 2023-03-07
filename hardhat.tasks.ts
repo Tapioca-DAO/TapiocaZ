@@ -24,7 +24,10 @@ function formatLZEndpoints() {
 }
 
 task('build', 'Compile contracts and generate Typechain files', async () => {
-    execSync('npx hardhat compile --config hardhat.export.ts && npx hardhat typechain', { stdio: 'inherit' });
+    execSync(
+        'npx hardhat compile --config hardhat.export.ts && npx hardhat typechain',
+        { stdio: 'inherit' },
+    );
 });
 
 task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
@@ -35,7 +38,11 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
     }
 });
 
-task('listDeploy', 'List the deployment addresses of the selected network', listDeploy__task);
+task(
+    'listDeploy',
+    'List the deployment addresses of the selected network',
+    listDeploy__task,
+);
 
 task(
     'deployTOFT',
@@ -48,7 +55,11 @@ task(
     .addParam('salt', 'The salt used CREATE2 deployment')
     .addParam('hostChainName', `The main chain ID ()\n${formatLZEndpoints()}`);
 
-task('sendFrom', 'Execute a sendFrom transaction from the current account', toftSendFrom)
+task(
+    'sendFrom',
+    'Execute a sendFrom transaction from the current account',
+    toftSendFrom,
+)
     .addParam('toft', 'The TOFT contract')
     .addParam('to', "Where to send the tokens, can be 'host' or 'linked'")
     .addParam('amount', 'The amount of tokens to send');
@@ -57,9 +68,17 @@ task('wrap', 'Approve and wrap an ERC20 to its TOFT', wrap)
     .addParam('toft', 'The TOFT contract')
     .addParam('amount', 'The amount of ERC20 to wrap');
 
-task('exportSDK', 'Generate and export the typings and/or addresses for the SDK.', exportSDK__task);
+task(
+    'exportSDK',
+    'Generate and export the typings and/or addresses for the SDK.',
+    exportSDK__task,
+);
 
-task('setTrustedRemote', 'Calls setTrustedRemote on tOFT contract', setTrustedRemote__task)
+task(
+    'setTrustedRemote',
+    'Calls setTrustedRemote on tOFT contract',
+    setTrustedRemote__task,
+)
     .addParam('chain', 'LZ destination chain id for trusted remotes')
     .addParam('dst', 'tOFT destination address')
     .addParam('src', 'tOFT source address');
@@ -76,6 +95,10 @@ task(
     batchConfigureAdapterParams__task,
 ).addParam('wrapper', 'TapiocaWrapper address');
 
-task('configurePacketTypes', 'Cofigures min destination gas and the usage of custom adapters', configurePacketTypes__task)
+task(
+    'configurePacketTypes',
+    'Cofigures min destination gas and the usage of custom adapters',
+    configurePacketTypes__task,
+)
     .addParam('dstLzChainId', 'LZ destination chain id for trusted remotes')
     .addParam('src', 'tOFT address');
