@@ -353,6 +353,128 @@ describe('TapiocaOFT', () => {
     });
 
     describe('sendToYieldBox()', () => {
+        it('should wrap and deposit to YB on another chain', async () => {
+            const {
+                signer,
+                tapiocaWrapper_0,
+                tapiocaWrapper_10,
+                erc20Mock,
+                tapiocaOFT0,
+                tapiocaOFT10,
+                mintAndApprove,
+                bigDummyAmount,
+                YieldBox_0,
+                YieldBox_10,
+            } = await loadFixture(setupFixture);
+
+            // Setup
+            await mintAndApprove(
+                erc20Mock,
+                tapiocaOFT0,
+                signer,
+                bigDummyAmount,
+            );
+
+            // Set trusted remotes
+            await tapiocaWrapper_0.executeTOFT(
+                tapiocaOFT0.address,
+                tapiocaOFT0.interface.encodeFunctionData('setTrustedRemote', [
+                    10,
+                    ethers.utils.solidityPack(
+                        ['address', 'address'],
+                        [tapiocaOFT10.address, tapiocaOFT0.address],
+                    ),
+                ]),
+                true,
+            );
+            await tapiocaWrapper_10.executeTOFT(
+                tapiocaOFT10.address,
+                tapiocaOFT10.interface.encodeFunctionData('setTrustedRemote', [
+                    0,
+                    ethers.utils.solidityPack(
+                        ['address', 'address'],
+                        [tapiocaOFT0.address, tapiocaOFT10.address],
+                    ),
+                ]),
+                true,
+            );
+
+            // Success
+
+            await YieldBox_0.addAsset(1, tapiocaOFT0.address);
+            await YieldBox_10.addAsset(1, tapiocaOFT10.address);
+
+            const dstChainId = await tapiocaOFT10.getLzChainId();
+
+            const signerToftBalanceBeforeDeposit = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
+            expect(signerToftBalanceBeforeDeposit.eq(0)).to.be.true;
+            const toDeposit = bigDummyAmount;
+            await tapiocaOFT0.connect(signer).sendToYB(
+                toDeposit,
+                1, //asset id
+                dstChainId, //dst chain Id
+                {
+                    extraGasLimit: '800000',
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                    strategyDeposit: false,
+                    wrap: true,
+                },
+                {
+                    value: ethers.utils.parseEther('0.021'),
+                },
+            );
+
+            let ybBalance = await tapiocaOFT10.balanceOf(YieldBox_10.address);
+            expect(ybBalance.gt(0)).to.be.true;
+
+            const ybBalanceOfSigner = await YieldBox_10.balances(
+                signer.address,
+            );
+            expect(ybBalanceOfSigner.eq(toDeposit)).to.be.true;
+
+            const airdropAdapterParams = ethers.utils.solidityPack(
+                ['uint16', 'uint', 'uint', 'address'],
+                [
+                    2,
+                    800000,
+                    ethers.utils.parseEther('0.015'),
+                    tapiocaOFT10.address,
+                ],
+            );
+            const signerBalanceBeforeRetrieve =
+                await ethers.provider.getBalance(signer.address);
+            await tapiocaOFT0.retrieveFromYB(
+                toDeposit,
+                1,
+                dstChainId,
+                ethers.constants.AddressZero,
+                airdropAdapterParams,
+                false,
+                {
+                    value: ethers.utils.parseEther('0.05'),
+                },
+            );
+            ybBalance = await tapiocaOFT10.balanceOf(YieldBox_10.address);
+            expect(ybBalance.eq(0)).to.be.true;
+
+            const signerBalanceAfterRetrieve = await ethers.provider.getBalance(
+                signer.address,
+            );
+
+            expect(
+                signerBalanceAfterRetrieve
+                    .add(ethers.utils.parseEther('0.05'))
+                    .gte(signerBalanceBeforeRetrieve),
+            ).to.be.true;
+
+            const signerToftBalanceAfterWithdraw = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
+            expect(signerToftBalanceAfterWithdraw.eq(toDeposit)).to.be.true;
+        });
+
         it('should deposit to YB on another chain and then withdraw back', async () => {
             const {
                 signer,
@@ -365,8 +487,6 @@ describe('TapiocaOFT', () => {
                 bigDummyAmount,
                 YieldBox_0,
                 YieldBox_10,
-                LZEndpointMock_chainID_0,
-                LZEndpointMock_chainID_10,
             } = await loadFixture(setupFixture);
 
             // Setup
@@ -456,9 +576,12 @@ describe('TapiocaOFT', () => {
                 toDeposit,
                 1, //asset id
                 dstChainId, //dst chain Id
-                '800000', //extra gas limit
-                ethers.constants.AddressZero, //zro address
-                false,
+                {
+                    extraGasLimit: '800000',
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                    strategyDeposit: false,
+                    wrap: false,
+                },
                 {
                     value: ethers.utils.parseEther('0.021'),
                 },
@@ -593,11 +716,14 @@ describe('TapiocaOFT', () => {
                 toDeposit,
                 1, //asset id
                 dstChainId, //dst chain Id
-                '800000', //extra gas limit
-                ethers.constants.AddressZero, //zro address
-                true,
                 {
-                    value: ethers.utils.parseEther('0.021'),
+                    extraGasLimit: '800000',
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                    strategyDeposit: true,
+                    wrap: false,
+                },
+                {
+                    value: ethers.utils.parseEther('10'),
                 },
             );
 

@@ -89,6 +89,7 @@ contract Rebalancing is Owned {
     error FeeAmountNotSet();
     error PoolInfoRequired();
     error RebalanceAmountNotSet();
+    error DestinationOftNotValid();
 
     // *************************** //
     // *** MODIFIERS FUNCTIONS *** //
@@ -115,10 +116,11 @@ contract Rebalancing is Owned {
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
 
-    function checker(
-        address payable _srcOft,
-        uint16 _dstChainId
-    ) external view returns (bool canExec, bytes memory execPayload) {
+    function checker(address payable _srcOft, uint16 _dstChainId)
+        external
+        view
+        returns (bool canExec, bytes memory execPayload)
+    {
         bytes memory ercData;
         if (ITapiocaOFT(_srcOft).isNative()) {
             ercData = abi.encode(
@@ -159,6 +161,15 @@ contract Rebalancing is Owned {
         if (connectedOFTs[_srcOft][_dstChainId].rebalanceable < _amount)
             revert RebalanceAmountNotSet();
 
+        //check if OFT is still valid
+        if (
+            !_isValidOft(
+                _srcOft,
+                connectedOFTs[_srcOft][_dstChainId].dstOft,
+                _dstChainId
+            )
+        ) revert DestinationOftNotValid();
+
         //extract
         ITapiocaOFT(_srcOft).extractUnderlying(_amount);
 
@@ -184,6 +195,8 @@ contract Rebalancing is Owned {
     ) external onlyOwner {
         bool isNative = ITapiocaOFT(_srcOft).isNative();
         if (!isNative && _ercData.length == 0) revert PoolInfoRequired();
+        if (!_isValidOft(_srcOft, _dstOft, _dstChainId))
+            revert DestinationOftNotValid();
 
         (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(
             _ercData,
@@ -218,6 +231,20 @@ contract Rebalancing is Owned {
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
+
+    function _isValidOft(
+        address _srcOft,
+        address _dstOft,
+        uint16 _dstChainId
+    ) private view returns (bool) {
+        bytes memory trustedRemotePath = abi.encodePacked(_dstOft, _srcOft);
+        return
+            ITapiocaOFT(_srcOft).isTrustedRemote(
+                _dstChainId,
+                trustedRemotePath
+            );
+    }
+
     function _sendNative(
         address payable _oft,
         uint256 _amount,
@@ -273,10 +300,11 @@ contract Rebalancing is Owned {
         );
     }
 
-    function _computeMinAmount(
-        uint256 _amount,
-        uint256 _slippage
-    ) private pure returns (uint256) {
+    function _computeMinAmount(uint256 _amount, uint256 _slippage)
+        private
+        pure
+        returns (uint256)
+    {
         return _amount - ((_amount * _slippage) / SLIPPAGE_PRECISION);
     }
 

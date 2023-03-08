@@ -1013,7 +1013,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToYB
 
 ```solidity
-function sendToYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, uint256 extraGasLimit, address zroPaymentAddress, bool strategyDeposit) external payable
+function sendToYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
 ```
 
 
@@ -1027,9 +1027,7 @@ function sendToYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, uint256 
 | amount | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
-| extraGasLimit | uint256 | undefined |
-| zroPaymentAddress | address | undefined |
-| strategyDeposit | bool | undefined |
+| options | BaseTOFT.SendOptions | undefined |
 
 ### setConfig
 
@@ -1933,6 +1931,17 @@ error TOFT_NotAllowedChain()
 ```
 
 Code executed not on one of the allowed chains
+
+
+
+
+### TOFT_NotAuthorized
+
+```solidity
+error TOFT_NotAuthorized()
+```
+
+Sender not allowed to perform an action
 
 
 

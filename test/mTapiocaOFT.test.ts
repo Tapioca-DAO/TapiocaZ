@@ -17,9 +17,9 @@ describe('mTapiocaOFT', () => {
             let balancerStatus = await mtapiocaOFT0.balancers(signer.address);
             expect(balancerStatus).to.be.false;
 
-            await expect(mtapiocaOFT0.extractUnderlying(1)).to.be.revertedWith(
-                'TapiocaOFT: not authorized',
-            );
+            await expect(
+                mtapiocaOFT0.extractUnderlying(1),
+            ).to.be.revertedWithCustomError(mtapiocaOFT0, 'TOFT_NotAuthorized');
 
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',
@@ -38,7 +38,10 @@ describe('mTapiocaOFT', () => {
 
             await expect(
                 mtapiocaOFT0.extractUnderlying(1),
-            ).to.not.be.revertedWith('TapiocaOFT: not authorized');
+            ).to.not.be.revertedWithCustomError(
+                mtapiocaOFT0,
+                'TOFT_NotAuthorized',
+            );
         });
     });
 
@@ -185,7 +188,7 @@ describe('mTapiocaOFT', () => {
 
             await expect(
                 mtapiocaOFT0.extractUnderlying(dummyAmount),
-            ).to.be.revertedWith('TapiocaOFT: not authorized');
+            ).to.be.revertedWithCustomError(mtapiocaOFT0, 'TOFT_NotAuthorized');
 
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',

@@ -150,6 +150,29 @@ function isNative() external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
+### isTrustedRemote
+
+```solidity
+function isTrustedRemote(uint16 _lzChainId, bytes _path) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _lzChainId | uint16 | undefined |
+| _path | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### totalFees
 
 ```solidity
