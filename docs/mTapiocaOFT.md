@@ -1935,6 +1935,17 @@ Code executed not on one of the allowed chains
 
 
 
+### TOFT_NotAuthorized
+
+```solidity
+error TOFT_NotAuthorized()
+```
+
+Sender not allowed to perform an action
+
+
+
+
 ### TOFT_YB_ETHDeposit
 
 ```solidity

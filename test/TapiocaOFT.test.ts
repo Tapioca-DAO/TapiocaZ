@@ -368,14 +368,22 @@ describe('TapiocaOFT', () => {
             } = await loadFixture(setupFixture);
 
             // Setup
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, bigDummyAmount);
+            await mintAndApprove(
+                erc20Mock,
+                tapiocaOFT0,
+                signer,
+                bigDummyAmount,
+            );
 
             // Set trusted remotes
             await tapiocaWrapper_0.executeTOFT(
                 tapiocaOFT0.address,
                 tapiocaOFT0.interface.encodeFunctionData('setTrustedRemote', [
                     10,
-                    ethers.utils.solidityPack(['address', 'address'], [tapiocaOFT10.address, tapiocaOFT0.address]),
+                    ethers.utils.solidityPack(
+                        ['address', 'address'],
+                        [tapiocaOFT10.address, tapiocaOFT0.address],
+                    ),
                 ]),
                 true,
             );
@@ -383,7 +391,10 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT10.address,
                 tapiocaOFT10.interface.encodeFunctionData('setTrustedRemote', [
                     0,
-                    ethers.utils.solidityPack(['address', 'address'], [tapiocaOFT0.address, tapiocaOFT10.address]),
+                    ethers.utils.solidityPack(
+                        ['address', 'address'],
+                        [tapiocaOFT0.address, tapiocaOFT10.address],
+                    ),
                 ]),
                 true,
             );
@@ -395,7 +406,9 @@ describe('TapiocaOFT', () => {
 
             const dstChainId = await tapiocaOFT10.getLzChainId();
 
-            const signerToftBalanceBeforeDeposit = await tapiocaOFT0.balanceOf(signer.address);
+            const signerToftBalanceBeforeDeposit = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
             expect(signerToftBalanceBeforeDeposit.eq(0)).to.be.true;
             const toDeposit = bigDummyAmount;
             await tapiocaOFT0.connect(signer).sendToYB(
@@ -416,28 +429,50 @@ describe('TapiocaOFT', () => {
             let ybBalance = await tapiocaOFT10.balanceOf(YieldBox_10.address);
             expect(ybBalance.gt(0)).to.be.true;
 
-            const ybBalanceOfSigner = await YieldBox_10.balances(signer.address);
+            const ybBalanceOfSigner = await YieldBox_10.balances(
+                signer.address,
+            );
             expect(ybBalanceOfSigner.eq(toDeposit)).to.be.true;
-
 
             const airdropAdapterParams = ethers.utils.solidityPack(
                 ['uint16', 'uint', 'uint', 'address'],
-                [2, 800000, ethers.utils.parseEther('0.015'), tapiocaOFT10.address],
+                [
+                    2,
+                    800000,
+                    ethers.utils.parseEther('0.015'),
+                    tapiocaOFT10.address,
+                ],
             );
-            const signerBalanceBeforeRetrieve = await ethers.provider.getBalance(signer.address);
-            await tapiocaOFT0.retrieveFromYB(toDeposit, 1, dstChainId, ethers.constants.AddressZero, airdropAdapterParams, false, {
-                value: ethers.utils.parseEther('0.05'),
-            });
+            const signerBalanceBeforeRetrieve =
+                await ethers.provider.getBalance(signer.address);
+            await tapiocaOFT0.retrieveFromYB(
+                toDeposit,
+                1,
+                dstChainId,
+                ethers.constants.AddressZero,
+                airdropAdapterParams,
+                false,
+                {
+                    value: ethers.utils.parseEther('0.05'),
+                },
+            );
             ybBalance = await tapiocaOFT10.balanceOf(YieldBox_10.address);
             expect(ybBalance.eq(0)).to.be.true;
 
-            const signerBalanceAfterRetrieve = await ethers.provider.getBalance(signer.address);
+            const signerBalanceAfterRetrieve = await ethers.provider.getBalance(
+                signer.address,
+            );
 
-            expect(signerBalanceAfterRetrieve.add(ethers.utils.parseEther('0.05')).gte(signerBalanceBeforeRetrieve)).to.be.true;
+            expect(
+                signerBalanceAfterRetrieve
+                    .add(ethers.utils.parseEther('0.05'))
+                    .gte(signerBalanceBeforeRetrieve),
+            ).to.be.true;
 
-            const signerToftBalanceAfterWithdraw = await tapiocaOFT0.balanceOf(signer.address);
+            const signerToftBalanceAfterWithdraw = await tapiocaOFT0.balanceOf(
+                signer.address,
+            );
             expect(signerToftBalanceAfterWithdraw.eq(toDeposit)).to.be.true;
-
         });
 
         it('should deposit to YB on another chain and then withdraw back', async () => {
@@ -545,7 +580,7 @@ describe('TapiocaOFT', () => {
                     extraGasLimit: '800000',
                     zroPaymentAddress: ethers.constants.AddressZero,
                     strategyDeposit: false,
-                    wrap: false
+                    wrap: false,
                 },
                 {
                     value: ethers.utils.parseEther('0.021'),

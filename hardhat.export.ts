@@ -40,7 +40,6 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     optimizer: {
                         enabled: true,
                         runs: 200,
-
                     },
                 },
             },
