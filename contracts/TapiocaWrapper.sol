@@ -193,7 +193,7 @@ contract TapiocaWrapper is Owned {
                         0,
                         keccak256(
                             abi.encodePacked(
-                                keccak256("TapiocaWrapper"),
+                                keccak256(_bytecode),
                                 address(this),
                                 _erc20,
                                 _salt
@@ -211,7 +211,7 @@ contract TapiocaWrapper is Owned {
                         0,
                         keccak256(
                             abi.encodePacked(
-                                keccak256("TapiocaWrapper"),
+                                keccak256(_bytecode),
                                 address(this),
                                 _erc20,
                                 _salt
