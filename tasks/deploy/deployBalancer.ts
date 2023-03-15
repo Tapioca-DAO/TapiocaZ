@@ -1,4 +1,5 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { typechain } from 'tapioca-sdk';
 import { STARGATE_ROUTERS } from '../constants';
 
 export const deployBalancer__task = async (
@@ -33,13 +34,22 @@ export const deployBalancer__task = async (
     }
 
     const balancer = await hre.ethers.getContractFactory('Balancer');
-    const tx = await (
-        await balancer.deploy(
-            stargateObj.routerETH,
-            stargateObj.router,
-            signer.address,
-        )
-    ).deployTransaction.wait(3);
 
-    console.log('[+] Balancer deployed at', tx.contractAddress);
+    const deployerVM = new hre.SDK.DeployerVM(hre, {
+        bytecodeSizeLimit: 90_000,
+        multicall: typechain.Multicall.Multicall3__factory.connect(
+            hre.SDK.config.MULTICALL_ADDRESS,
+            hre.ethers.provider,
+        ),
+        tag,
+    });
+
+    deployerVM.add({
+        contract: balancer,
+        args: [stargateObj.routerETH, stargateObj.router, signer.address],
+        deploymentName: 'TapiocaWrapper',
+    });
+    await deployerVM.execute(3);
+    deployerVM.save();
+    await deployerVM.verify();
 };
