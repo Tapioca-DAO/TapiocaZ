@@ -8,13 +8,13 @@ import "./interfaces/ITapiocaOFT.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "@rari-capital/solmate/src/auth/Owned.sol";
 
-struct ExecutionCall {
-    address toft;
-    bytes bytecode;
-    bool revertOnFailure;
-}
-
 contract TapiocaWrapper is Owned {
+    struct ExecutionCall {
+        address toft;
+        bytes bytecode;
+        bool revertOnFailure;
+    }
+
     // ************ //
     // *** VARS *** //
     // ************ //
