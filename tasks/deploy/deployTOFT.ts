@@ -1,0 +1,342 @@
+import { BytesLike } from 'ethers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import inquirer from 'inquirer';
+import { typechain } from 'tapioca-sdk';
+import { TContract } from 'tapioca-sdk/dist/shared';
+import { v4 as uuidv4 } from 'uuid';
+
+import {
+    getDeploymentByChain,
+    handleGetChainBy,
+    useNetwork,
+    useUtils,
+} from '../../scripts/utils';
+import { TapiocaOFT, TapiocaWrapper } from '../../typechain';
+
+export interface ITOFTDeployment extends TContract {
+    meta: {
+        isToftHost: boolean;
+        isMerged: boolean;
+    };
+}
+export const deployTOFT__task = async (
+    args: {
+        isNative?: boolean;
+        isMerged?: boolean;
+    },
+    hre: HardhatRuntimeEnvironment,
+) => {
+    console.log('\n[+] Initiating TOFT deployment');
+    const tag = await hre.SDK.hardhatUtils.askForTag(hre, 'local');
+    if (!tag)
+        throw new Error(
+            '[-] No local deployment found for TapiocaWrapper & Balancer. Aborting',
+        );
+
+    checkIfExists(hre, tag, args.isMerged);
+
+    /**
+     * Load variables
+     */
+    const utils = useUtils(hre);
+
+    // TODO - Use global YieldBox address from tapioca-bar when it's ready
+    const yieldBox = await utils.deployYieldBoxMock();
+    const ercAddress = await loadERC20(hre, args.isNative);
+    const { hostChainName, isCurrentChainHost } = await getHostChainInfo(hre);
+
+    /**
+     * Deploy TOFT
+     */
+    const { tapiocaWrapper, toftDeployInfo } = await getPreDeploymentInfo(
+        hre,
+        hostChainName,
+        tag,
+        ercAddress,
+        yieldBox.address,
+        args,
+    );
+    const deployedTOFT = await initiateTOFTDeployment(
+        hre,
+        tapiocaWrapper,
+        ercAddress,
+        toftDeployInfo.txData,
+        args.isMerged,
+    );
+    await saveDeployedTOFT(hre, tag, deployedTOFT, {
+        isToftHost: isCurrentChainHost,
+        isMerged: Boolean(args.isMerged),
+    });
+
+    /**
+     * Handle after deployment setup
+     */
+};
+async function configure(
+    hre: HardhatRuntimeEnvironment,
+    currentOft: string,
+    currentChainId: string,
+    toChainId: string,
+) {
+    const fromChain = handleGetChainBy('chainId', currentChainId);
+    const toChain = handleGetChainBy('chainId', toChainId);
+    const signer = await useNetwork(hre, fromChain.name);
+
+    const packetTypes = [1, 2, 770, 771, 772, 773];
+
+    const tWrapper = await hre.ethers.getContractAt(
+        'TapiocaWrapper',
+        (
+            await getDeploymentByChain(hre, fromChain.name, 'TapiocaWrapper')
+        ).address,
+    );
+
+    for (let i = 0; i < packetTypes.length; i++) {
+        const encodedTX = (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).interface.encodeFunctionData('setMinDstGas', [
+            toChain.lzChainId,
+            packetTypes[i],
+            200000,
+        ]);
+
+        await (
+            await tWrapper
+                .connect(signer)
+                .executeTOFT(currentOft, encodedTX, true)
+        ).wait();
+
+        const useAdaptersTx = (
+            await hre.ethers.getContractFactory('TapiocaOFT')
+        ).interface.encodeFunctionData('setUseCustomAdapterParams', [true]);
+
+        await (
+            await tWrapper
+                .connect(signer)
+                .executeTOFT(currentOft, useAdaptersTx, true)
+        ).wait();
+    }
+}
+
+async function setTrustedRemote(
+    hre: HardhatRuntimeEnvironment,
+    fromChainId: string,
+    toChainId: string,
+    fromToft: string,
+    toTOFTAddress: string,
+) {
+    const fromChain = handleGetChainBy('chainId', fromChainId);
+    const signer = await useNetwork(hre, fromChain.name);
+    const toChain = handleGetChainBy('chainId', toChainId);
+
+    console.log(
+        `[+] Setting (${toChain.name}) as a trusted remote on (${fromChain.name})`,
+    );
+
+    const trustedRemotePath = hre.ethers.utils.solidityPack(
+        ['address', 'address'],
+        [toTOFTAddress, fromToft],
+    );
+    const encodedTX = (
+        await hre.ethers.getContractFactory('TapiocaOFT')
+    ).interface.encodeFunctionData('setTrustedRemote', [
+        toChain.lzChainId,
+        trustedRemotePath,
+    ]);
+
+    const tWrapper = await hre.ethers.getContractAt(
+        'TapiocaWrapper',
+        (
+            await getDeploymentByChain(hre, fromChain.name, 'TapiocaWrapper')
+        ).address,
+    );
+
+    await (
+        await tWrapper.connect(signer).executeTOFT(fromToft, encodedTX, true)
+    ).wait();
+}
+
+function buildTOFTDeployment(args: ITOFTDeployment): ITOFTDeployment {
+    return args;
+}
+
+/**
+ * Check if TapiocaWrapper and Balancer contracts exist
+ */
+async function checkIfExists(
+    hre: HardhatRuntimeEnvironment,
+    tag: string,
+    isMerged?: boolean,
+) {
+    try {
+        if (isMerged) {
+            await hre.SDK.hardhatUtils.getLocalContract(hre, 'Balancer', tag);
+        }
+        await hre.SDK.hardhatUtils.getLocalContract(hre, 'TapiocaWrapper', tag);
+    } catch (e) {
+        console.log(e, 'Please deploy the deploy it first');
+        return;
+    }
+}
+
+/**
+ * Ask the user for the ERC20 address and validate it's the correct one
+ */
+async function loadERC20(hre: HardhatRuntimeEnvironment, isNative?: boolean) {
+    let ercAddress = hre.ethers.constants.AddressZero;
+    if (!isNative) {
+        ercAddress = (
+            await inquirer.prompt({
+                type: 'input',
+                name: 'ercAddress',
+                message: 'Enter the ERC20 address',
+            })
+        ).ercAddress;
+        await validateErc20Address(hre, ercAddress);
+    }
+    return ercAddress;
+}
+
+/**
+ * Ask the user host chain name of the TOFT and check if it's the current chain
+ */
+async function getHostChainInfo(hre: HardhatRuntimeEnvironment) {
+    const { hostChainName } = await inquirer.prompt({
+        type: 'list',
+        name: 'hostChainName',
+        message: 'Select the host chain',
+        choices: hre.SDK.utils.getSupportedChains().map((e) => e.name),
+    });
+    let isCurrentChainHost = false;
+    if (hostChainName === hre.network.name) {
+        const { goOn } = await inquirer.prompt({
+            type: 'confirm',
+            name: 'goOn',
+            message:
+                'Using the current chain as host chain. Do you want to continue?',
+        });
+        if (!goOn) throw new Error('[-] Aborted');
+        isCurrentChainHost = true;
+    }
+    return { hostChainName, isCurrentChainHost };
+}
+
+/**
+ * Ask the user for the TOFT address and validate it's the correct one
+ */
+async function validateErc20Address(
+    hre: HardhatRuntimeEnvironment,
+    address: string,
+) {
+    const erc20 = await hre.ethers.getContractAt('ERC20', address);
+    const name = await erc20.name();
+    const symbol = await erc20.symbol();
+    const decimal = await erc20.decimals();
+
+    const { isValid } = await inquirer.prompt({
+        type: 'confirm',
+        name: 'isValid',
+        message: `Is this the correct ERC20?: ${name} (${symbol}) with ${decimal} decimals`,
+    });
+    if (!isValid) {
+        throw new Error('[-] Invalid ERC20');
+    }
+}
+
+/**
+ * Get pre deployment info, such as the bytecode and the chain info
+ */
+async function getPreDeploymentInfo(
+    hre: HardhatRuntimeEnvironment,
+    hostChainName: string,
+    tag: string,
+    ercAddress: string,
+    yieldBoxAddress: string,
+    args: { isMerged?: boolean; isNative?: boolean },
+) {
+    const utils = useUtils(hre);
+
+    console.log('[+] Getting TOFT creation bytecode');
+    const hostChainInfo = hre.SDK.utils
+        .getSupportedChains()
+        .find((e) => e.name === hostChainName)!;
+    const currentChainInfo = hre.SDK.utils
+        .getSupportedChains()
+        .find((e) => e.name === hre.network.name)!;
+
+    const { contract: tapiocaWrapper } =
+        await hre.SDK.hardhatUtils.getLocalContract<TapiocaWrapper>(
+            hre,
+            'TapiocaWrapper',
+            tag,
+        );
+
+    const toftDeployInfo = await utils.Tx_deployTapiocaOFT(
+        currentChainInfo.address,
+        Boolean(args.isNative),
+        ercAddress,
+        yieldBoxAddress,
+        Number(hostChainInfo.chainId),
+        await useNetwork(hre, hostChainName),
+        args.isMerged,
+    );
+
+    return { hostChainInfo, currentChainInfo, tapiocaWrapper, toftDeployInfo };
+}
+
+/**
+ * Deploy a TOFT using the TapiocaWrapper
+ */
+async function initiateTOFTDeployment(
+    hre: HardhatRuntimeEnvironment,
+    tapiocaWrapper: TapiocaWrapper,
+    ercAddress: string,
+    deployBytecode: BytesLike,
+    isMerged?: boolean,
+) {
+    const txCreateToft = await (
+        await tapiocaWrapper.createTOFT(
+            ercAddress,
+            deployBytecode,
+            hre.ethers.utils.keccak256(uuidv4()),
+            Boolean(isMerged),
+        )
+    ).wait(3);
+    const deployedToft = await hre.ethers.getContractAt(
+        'TapiocaOFT',
+        await tapiocaWrapper.lastTOFT(),
+    );
+    console.log(
+        `[+] TOFT ${await deployedToft.name()} created on hash: ${
+            txCreateToft.transactionHash
+        }`,
+    );
+
+    return deployedToft;
+}
+
+async function saveDeployedTOFT(
+    hre: HardhatRuntimeEnvironment,
+    tag: string,
+    deployedTOFT: TapiocaOFT,
+    meta: ITOFTDeployment['meta'],
+) {
+    const deployerVM = new hre.SDK.DeployerVM(hre, {
+        bytecodeSizeLimit: 90_000,
+        multicall: typechain.Multicall.Multicall3__factory.connect(
+            hre.SDK.config.MULTICALL_ADDRESS,
+            hre.ethers.provider,
+        ),
+        tag,
+    });
+
+    deployerVM.load([
+        buildTOFTDeployment({
+            name: await deployedTOFT.name(),
+            address: deployedTOFT.address,
+            meta,
+        }),
+    ]);
+    deployerVM.save();
+    await deployerVM.verify();
+}
