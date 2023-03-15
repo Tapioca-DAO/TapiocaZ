@@ -29,5 +29,8 @@ interface ITapiocaOFT {
 
     function approve(address _spender, uint256 _amount) external returns (bool);
 
-    function isTrustedRemote(uint16 _lzChainId, bytes calldata _path) external view returns (bool);
+    function isTrustedRemote(
+        uint16 _lzChainId,
+        bytes calldata _path
+    ) external view returns (bool);
 }

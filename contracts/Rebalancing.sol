@@ -116,11 +116,10 @@ contract Rebalancing is Owned {
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
 
-    function checker(address payable _srcOft, uint16 _dstChainId)
-        external
-        view
-        returns (bool canExec, bytes memory execPayload)
-    {
+    function checker(
+        address payable _srcOft,
+        uint16 _dstChainId
+    ) external view returns (bool canExec, bytes memory execPayload) {
         bytes memory ercData;
         if (ITapiocaOFT(_srcOft).isNative()) {
             ercData = abi.encode(
@@ -300,11 +299,10 @@ contract Rebalancing is Owned {
         );
     }
 
-    function _computeMinAmount(uint256 _amount, uint256 _slippage)
-        private
-        pure
-        returns (uint256)
-    {
+    function _computeMinAmount(
+        uint256 _amount,
+        uint256 _slippage
+    ) private pure returns (uint256) {
         return _amount - ((_amount * _slippage) / SLIPPAGE_PRECISION);
     }
 

@@ -136,11 +136,10 @@ contract mTapiocaOFT is BaseTOFT {
     /// @dev Since it can be executed only on the main chain, if an address exists on the OP chain it will not allowed to wrap.
     /// @param _toAddress The address to wrap the ERC20 to.
     /// @param _amount The amount of ERC20 to wrap.
-    function wrap(address _toAddress, uint256 _amount)
-        external
-        onlyHostChain
-        notRebalancerRole
-    {
+    function wrap(
+        address _toAddress,
+        uint256 _amount
+    ) external onlyHostChain notRebalancerRole {
         _wrap(
             _toAddress,
             _amount,
@@ -152,12 +151,9 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice Wrap a native token with a 1:1 ratio with a fee if existing.
     /// @dev Since it can be executed only on the host chain, if an address exists on the linked chain it will not allowed to wrap.
     /// @param _toAddress The address to wrap the tokens to.
-    function wrapNative(address _toAddress)
-        external
-        payable
-        onlyHostChain
-        notRebalancerRole
-    {
+    function wrapNative(
+        address _toAddress
+    ) external payable onlyHostChain notRebalancerRole {
         _wrapNative(
             _toAddress,
             tapiocaWrapper.mngmtFee(),
@@ -173,11 +169,10 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
     /// @param _toAddress The address to unwrap the tokens to.
     /// @param _amount The amount of tokens to unwrap.
-    function unwrap(address _toAddress, uint256 _amount)
-        external
-        onlyAllowedChain
-        notRebalancerRole
-    {
+    function unwrap(
+        address _toAddress,
+        uint256 _amount
+    ) external onlyAllowedChain notRebalancerRole {
         _unwrap(_toAddress, _amount);
     }
 
@@ -187,10 +182,10 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice updates a connected chain whitelist status
     /// @param _chain the block.chainid of that specific chain
     /// @param _status the new whitelist status
-    function updateConnectedChain(uint256 _chain, bool _status)
-        external
-        onlyOwner
-    {
+    function updateConnectedChain(
+        uint256 _chain,
+        bool _status
+    ) external onlyOwner {
         emit ConnectedChainStatusUpdated(
             _chain,
             connectedChains[_chain],
@@ -202,10 +197,10 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice updates a Balancer whitelist status
     /// @param _balancer the operator address
     /// @param _status the new whitelist status
-    function updateBalancerState(address _balancer, bool _status)
-        external
-        onlyOwner
-    {
+    function updateBalancerState(
+        address _balancer,
+        bool _status
+    ) external onlyOwner {
         emit BalancerStatusUpdated(_balancer, balancers[_balancer], _status);
         balancers[_balancer] = _status;
     }
