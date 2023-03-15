@@ -374,10 +374,11 @@ describe('TapiocaWrapper', () => {
 
     describe('lastTOFT()', () => {
         it('Should fail if no TOFT has been created yet', async () => {
+            const { signer } = await loadFixture(setupFixture);
             const tapiocaWrapper = await (
                 await (
                     await hre.ethers.getContractFactory('TapiocaWrapper')
-                ).deploy()
+                ).deploy(signer.address)
             ).deployed();
 
             await expect(

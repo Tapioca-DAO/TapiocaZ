@@ -54,7 +54,7 @@ contract TapiocaWrapper is Owned {
     /// @notice No TOFT has been deployed yet.
     error TapiocaWrapper__NoTOFTDeployed();
 
-    constructor() Owned(msg.sender) {}
+    constructor(address _owner) Owned(_owner) {}
 
     // ********************** //
     // *** VIEW FUNCTIONS *** //

@@ -105,7 +105,11 @@ contract Balancer is Owned {
         _;
     }
 
-    constructor(address _routerETH, address _router) Owned(msg.sender) {
+    constructor(
+        address _routerETH,
+        address _router,
+        address _owner
+    ) Owned(_owner) {
         if (_router == address(0)) revert RouterNotValid();
         if (_routerETH == address(0)) revert RouterNotValid();
         routerETH = IStargateRouter(_routerETH);
