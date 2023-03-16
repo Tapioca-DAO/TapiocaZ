@@ -1,6 +1,5 @@
 import '@nomiclabs/hardhat-ethers';
 import { task } from 'hardhat/config';
-import { exportSDK__task } from './tasks/exportSDK';
 import { wrap } from './tasks/wrap';
 
 import { deployBalancer__task } from './tasks/deploy/deployBalancer';
@@ -25,9 +24,3 @@ task('deployTOFT', 'Deploy a TOFT', deployTOFT__task)
 task('wrap', 'Approve and wrap an ERC20 to its TOFT', wrap)
     .addParam('toft', 'The TOFT contract')
     .addParam('amount', 'The amount of ERC20 to wrap');
-
-task(
-    'exportSDK',
-    'Generate and export the typings and/or addresses for the SDK.',
-    exportSDK__task,
-).addOptionalParam('tag', 'The tag of the deployment.');
