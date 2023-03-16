@@ -79,7 +79,10 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         ...supportedChains,
     },
     etherscan: {
-        apiKey: process.env.ETHERSCAN_KEY,
+        apiKey: {
+            goerli: process.env.BLOCKSCAN_KEY ?? '',
+            arbitrumGoerli: process.env.ARBITRUM_GOERLI_KEY ?? '',
+        },
         customChains: [],
     },
     typechain: {
