@@ -2,12 +2,13 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { typechain } from 'tapioca-sdk';
 
 export const deployTapiocaWrapper__task = async (
-    taskArgs: { overwrite?: boolean; tag?: string },
+    taskArgs: { overwrite?: boolean },
     hre: HardhatRuntimeEnvironment,
 ) => {
     console.log('[+] Deploying TapiocaWrapper...');
+    const tag = await hre.SDK.hardhatUtils.askForTag(hre, 'local');
 
-    const { overwrite, tag } = taskArgs;
+    const { overwrite } = taskArgs;
 
     const signer = (await hre.ethers.getSigners())[0];
     const chainId = String(hre.network.config.chainId);

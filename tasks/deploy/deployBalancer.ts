@@ -3,12 +3,14 @@ import { typechain } from 'tapioca-sdk';
 import { STARGATE_ROUTERS } from '../constants';
 
 export const deployBalancer__task = async (
-    taskArgs: { overwrite?: boolean; tag?: string },
+    taskArgs: { overwrite?: boolean },
     hre: HardhatRuntimeEnvironment,
 ) => {
     console.log('[+] Deploying Balancer...');
 
-    const { overwrite, tag } = taskArgs;
+    const { overwrite } = taskArgs;
+
+    const tag = await hre.SDK.hardhatUtils.askForTag(hre, 'local');
 
     const signer = (await hre.ethers.getSigners())[0];
     const chainId = String(hre.network.config.chainId);
