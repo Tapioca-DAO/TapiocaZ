@@ -42,11 +42,11 @@ export const deployTOFT__task = async (
     const { hostChainName, isCurrentChainHost, hostChainContractInfo } =
         await getHostChainInfo(hre, ercAddress, tag);
 
-    if (!args.isNative) {
+    if (!isCurrentChainHost && !args.isNative) {
         await validateErc20Address(
             hre,
             hostChainName,
-            hostChainContractInfo.address,
+            hostChainContractInfo!.address,
         );
     }
 
@@ -84,13 +84,7 @@ export const deployTOFT__task = async (
         '[+] When finished with all the TOFT deployment, use the following command to configure it:',
     );
     console.log(
-        '\t- batchSetAdapterParam: To set the minDstGas for the supported packet types',
-    );
-    console.log(
-        '\t- batchSetTrustedRemote: To set the minDstGas for the supported packet types',
-    );
-    console.log(
-        '[+] Use the hardhat batchSetTrustedRemote --help to get help!\n',
+        '\t- setLZConfig: To set the trustedRemote & minDstGas for the supported packet types',
     );
 };
 
@@ -110,10 +104,17 @@ async function checkIfExists(
         if (isMerged) {
             await hre.SDK.hardhatUtils.getLocalContract(hre, 'Balancer', tag);
         }
+    } catch (e) {
+        throw new Error(
+            '[-] Make sure Balancer is deployed on the current chain\n',
+        );
+    }
+    try {
         await hre.SDK.hardhatUtils.getLocalContract(hre, 'TapiocaWrapper', tag);
     } catch (e) {
-        console.log(e, 'Please deploy the deploy it first');
-        return;
+        throw new Error(
+            '[-] Make sure TapiocaWrapper is deployed on the current chain\n',
+        );
     }
 }
 
@@ -172,7 +173,7 @@ async function getHostChainInfo(
         .loadLocalDeployment(tag, hostChainId)
         .filter((e) => e.meta.isToftHost)
         .find((e) => e.meta.args.includes(ercAddress));
-    if (!hostChainContractInfo) {
+    if (!isCurrentChainHost && !hostChainContractInfo) {
         throw new Error(
             `[-] No TapiocaOFT contract found for ${ercAddress} on ${hostChainName}`,
         );
