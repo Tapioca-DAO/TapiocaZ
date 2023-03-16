@@ -28,7 +28,7 @@ import "@rari-capital/solmate/src/auth/Owned.sol";
 //                     ,**//*,.
 
 /// Transfers tokens to other layers through Stargate
-contract Rebalancing is Owned {
+contract Balancer is Owned {
     // ************ //
     // *** VARS *** //
     // ************ //
@@ -105,7 +105,11 @@ contract Rebalancing is Owned {
         _;
     }
 
-    constructor(address _routerETH, address _router) Owned(msg.sender) {
+    constructor(
+        address _routerETH,
+        address _router,
+        address _owner
+    ) Owned(_owner) {
         if (_router == address(0)) revert RouterNotValid();
         if (_routerETH == address(0)) revert RouterNotValid();
         routerETH = IStargateRouter(_routerETH);
@@ -116,11 +120,10 @@ contract Rebalancing is Owned {
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
 
-    function checker(address payable _srcOft, uint16 _dstChainId)
-        external
-        view
-        returns (bool canExec, bytes memory execPayload)
-    {
+    function checker(
+        address payable _srcOft,
+        uint16 _dstChainId
+    ) external view returns (bool canExec, bytes memory execPayload) {
         bytes memory ercData;
         if (ITapiocaOFT(_srcOft).isNative()) {
             ercData = abi.encode(
@@ -131,7 +134,7 @@ contract Rebalancing is Owned {
 
         canExec = connectedOFTs[_srcOft][_dstChainId].rebalanceable > 0;
         execPayload = abi.encodeCall(
-            Rebalancing.rebalance,
+            Balancer.rebalance,
             (
                 _srcOft,
                 _dstChainId,
@@ -300,11 +303,10 @@ contract Rebalancing is Owned {
         );
     }
 
-    function _computeMinAmount(uint256 _amount, uint256 _slippage)
-        private
-        pure
-        returns (uint256)
-    {
+    function _computeMinAmount(
+        uint256 _amount,
+        uint256 _slippage
+    ) private pure returns (uint256) {
         return _amount - ((_amount * _slippage) / SLIPPAGE_PRECISION);
     }
 

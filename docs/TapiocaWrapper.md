@@ -29,6 +29,29 @@ Deploy a new TOFT contract. Callable only by the owner.
 | _salt | bytes32 | Create2 salt. |
 | _linked | bool | undefined |
 
+### executeCalls
+
+```solidity
+function executeCalls(TapiocaWrapper.ExecutionCall[] _call) external payable returns (bool success, bytes[] results)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _call | TapiocaWrapper.ExecutionCall[] | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| success | bool | undefined |
+| results | bytes[] | undefined |
+
 ### executeTOFT
 
 ```solidity

@@ -43,10 +43,11 @@ export const setupFixture = async () => {
     ).deploy(stargateRouterMock.address, mErc20Mock.address);
 
     const balancer = await (
-        await hre.ethers.getContractFactory('Rebalancing')
+        await hre.ethers.getContractFactory('Balancer')
     ).deploy(
         stargateRouterETHMock.address, //routerETH 0x150f94b44927f078737562f0fcf3c95c01cc2376
         stargateRouterMock.address, //router 0x8731d54e9d02c286767d56ac03e8037c07e01e98
+        signer.address,
     );
 
     const {

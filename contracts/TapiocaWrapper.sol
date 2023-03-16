@@ -9,6 +9,12 @@ import "@openzeppelin/contracts/utils/Create2.sol";
 import "@rari-capital/solmate/src/auth/Owned.sol";
 
 contract TapiocaWrapper is Owned {
+    struct ExecutionCall {
+        address toft;
+        bytes bytecode;
+        bool revertOnFailure;
+    }
+
     // ************ //
     // *** VARS *** //
     // ************ //
@@ -48,7 +54,7 @@ contract TapiocaWrapper is Owned {
     /// @notice No TOFT has been deployed yet.
     error TapiocaWrapper__NoTOFTDeployed();
 
-    constructor() Owned(msg.sender) {}
+    constructor(address _owner) Owned(_owner) {}
 
     // ********************** //
     // *** VIEW FUNCTIONS *** //
@@ -116,6 +122,30 @@ contract TapiocaWrapper is Owned {
         }
     }
 
+    /// @notice Execute the `_bytecode` against the `_toft`. Callable only by the owner.
+    /// @dev Used to call derived OFT functions to a TOFT contract.
+    /// @param _call The array calls to do.
+    /// @return success If the execution was successful.
+    /// @return results The message of the execution, could be an error message.
+    function executeCalls(
+        ExecutionCall[] calldata _call
+    )
+        external
+        payable
+        onlyOwner
+        returns (bool success, bytes[] memory results)
+    {
+        results = new bytes[](_call.length);
+        for (uint256 i = 0; i < _call.length; i++) {
+            (success, results[i]) = payable(_call[i].toft).call{
+                value: msg.value
+            }(_call[i].bytecode);
+            if (_call[i].revertOnFailure && !success) {
+                revert TapiocaWrapper__TOFTExecutionFailed(results[i]);
+            }
+        }
+    }
+
     /// @notice Deploy a new TOFT contract. Callable only by the owner.
     /// @param _erc20 The ERC20 to wrap.
     /// @param _bytecode The executable bytecode of the TOFT contract.
@@ -163,7 +193,7 @@ contract TapiocaWrapper is Owned {
                         0,
                         keccak256(
                             abi.encodePacked(
-                                keccak256("TapiocaWrapper"),
+                                keccak256(_bytecode),
                                 address(this),
                                 _erc20,
                                 _salt
@@ -181,7 +211,7 @@ contract TapiocaWrapper is Owned {
                         0,
                         keccak256(
                             abi.encodePacked(
-                                keccak256("TapiocaWrapper"),
+                                keccak256(_bytecode),
                                 address(this),
                                 _erc20,
                                 _salt

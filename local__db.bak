@@ -1,0 +1,91 @@
+{
+    "default": {
+        "5": [
+            {
+                "name": "Balancer",
+                "address": "0x246Fd08E9738cC0bBBC2DDC2cF88920DCaCb1AB3",
+                "meta": {
+                    "args": [
+                        "0xdb19Ad528F4649692B92586828346beF9e4a3532",
+                        "0x7612aE2a34E5A363E137De748801FB4c86499152",
+                        "0xEAF9f533871B07B151883908B4Fb6eeF4b51A95F"
+                    ],
+                    "salt": "0x7a45f8bb12659157e217ce5d9dc30bbaab1580b95f7b037501c81f2ff6dbd28a",
+                    "create2": true
+                }
+            },
+            {
+                "address": "0x7c0190CFF067a5Ef88343D69E4a57D4e776971C1",
+                "name": "TapiocaDeployer",
+                "meta": {}
+            },
+            {
+                "name": "TapiocaWrapper",
+                "address": "0xdF6da55f633Dd8188e60442750e527e22Cc4A7cb",
+                "meta": {
+                    "args": [
+                        "0xEAF9f533871B07B151883908B4Fb6eeF4b51A95F"
+                    ],
+                    "salt": "0x3e9330302a60ebde6a2ecffdab8687d16de9b2841f85913fea0f062bb398a990",
+                    "create2": true
+                }
+            }
+        ],
+        "421613": [
+            {
+                "name": "TapiocaOFT-ERCMock",
+                "address": "0xf556028e0725289f107136c2B59f0Af21A725Da3",
+                "meta": {
+                    "isToftHost": true,
+                    "isMerged": false,
+                    "args": [
+                        "0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab",
+                        false,
+                        "0x486Cb821D1C28af55997E4A6665B4e9B74E7F570",
+                        "0x40cCBa18e0b44B5fda8E56b789D85246EfdDA730",
+                        "ERCMock",
+                        "ERCM",
+                        18,
+                        421613
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaWrapper",
+                "address": "0xd7Ff5a1e51ADD4281dF5f2063700BBF0fC402b04",
+                "meta": {
+                    "args": [
+                        "0xEAF9f533871B07B151883908B4Fb6eeF4b51A95F"
+                    ],
+                    "salt": "0x763cbb19cec0af69dadec99c26234e4e836cb434160051945cc3fe5ca55df102",
+                    "create2": true
+                }
+            },
+            {
+                "address": "0x084cFbF257feC77DF29eC4a60dC86Dc66e462467",
+                "name": "TapiocaDeployer",
+                "meta": {}
+            },
+            {
+                "name": "Balancer",
+                "address": "0x5bFF2520DC217c3A88d1BB17a0B7603cfDd2FeBf",
+                "meta": {
+                    "args": [
+                        "0x7612aE2a34E5A363E137De748801FB4c86499152",
+                        "0xb850873f4c993Ac2405A1AdD71F6ca5D4d4d6b4f",
+                        "0xEAF9f533871B07B151883908B4Fb6eeF4b51A95F"
+                    ],
+                    "salt": "0xc468d38c8e37e60862c61b01f5e564af625c9586e4bf749bb4b3c743fbc1d5d1",
+                    "create2": true
+                }
+            },
+            {
+                "name": "ERCMock",
+                "address": "0x486Cb821D1C28af55997E4A6665B4e9B74E7F570",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            }
+        ]
+    }
+}

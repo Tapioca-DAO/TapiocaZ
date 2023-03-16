@@ -5,7 +5,7 @@ import { BN } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 //should be executed on mainnet fork
-describe('rebalancing', () => {
+describe('Balancer', () => {
     describe('connectedOFTs', () => {
         it('should fail for unauthorized user', async () => {
             const { randomUser, mtapiocaOFT0, balancer } = await loadFixture(
@@ -44,7 +44,8 @@ describe('rebalancing', () => {
         });
 
         it('should be able to add connected chains', async () => {
-            const { mtapiocaOFT0, balancer, tapiocaWrapper_0 } = await loadFixture(setupFixture);
+            const { mtapiocaOFT0, balancer, tapiocaWrapper_0 } =
+                await loadFixture(setupFixture);
 
             const path = hre.ethers.utils.solidityPack(
                 ['address', 'address'],
@@ -228,7 +229,6 @@ describe('rebalancing', () => {
             );
             await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
-
             let checkData = await balancer.checker(mtapiocaOFT0.address, 1);
             expect(checkData.canExec).to.be.false;
 
@@ -276,7 +276,6 @@ describe('rebalancing', () => {
                 await mtapiocaOFT0.tapiocaWrapper(),
             );
             await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
-
 
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',
@@ -391,7 +390,6 @@ describe('rebalancing', () => {
             );
             await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
-
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',
                 [balancer.address, true],
@@ -460,7 +458,6 @@ describe('rebalancing', () => {
             const checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1);
             expect(checkerInfo.canExec).to.be.true;
 
-
             path = hre.ethers.utils.solidityPack(
                 ['address', 'address'],
                 [mtapiocaOFT0.address, mtapiocaOFT0.address],
@@ -482,7 +479,6 @@ describe('rebalancing', () => {
                     },
                 ),
             ).to.be.revertedWithCustomError(balancer, 'DestinationOftNotValid');
-
         });
     });
 });

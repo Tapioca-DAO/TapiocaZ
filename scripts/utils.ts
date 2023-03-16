@@ -44,7 +44,9 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
 
     const deployTapiocaWrapper = async () =>
         await (
-            await (await ethers.getContractFactory('TapiocaWrapper')).deploy()
+            await (
+                await ethers.getContractFactory('TapiocaWrapper')
+            ).deploy((await ethers.getSigners())[0].address)
         ).deployed();
 
     const deployYieldBoxMock = async () =>

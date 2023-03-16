@@ -13,20 +13,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const routerEth = '0x150f94b44927f078737562f0fcf3c95c01cc2376';
     const router = '0x8731d54e9d02c286767d56ac03e8037c07e01e98';
 
-    console.log('\n Deploying Rebalacing...');
+    console.log('\n Deploying Balancer...');
     const args = [constants[chainId].routerETH, constants[chainId].router];
-    await deploy('Rebalancing', {
+    await deploy('Balancer', {
         from: deployer,
         log: true,
         args,
     });
-    await verify(hre, 'Rebalancing', args);
-    const deployedAt = await deployments.get('Rebalancing');
+    await verify(hre, 'Balancer', args);
+    const deployedAt = await deployments.get('Balancer');
     console.log(
-        `Done. Deployed Rebalancing on ${deployedAt.address} with args [${args}]`,
+        `Done. Deployed Balancer on ${deployedAt.address} with args [${args}]`,
     );
     contracts.push({
-        name: 'Rebalancing',
+        name: 'Balancer',
         address: deployedAt.address,
         meta: {},
     });
@@ -34,4 +34,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['Rebalancing'];
+func.tags = ['Balancer'];
