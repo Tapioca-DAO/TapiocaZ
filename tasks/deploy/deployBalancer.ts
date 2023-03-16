@@ -41,7 +41,7 @@ export const deployBalancer__task = async (
         bytecodeSizeLimit: 90_000,
         multicall: typechain.Multicall.Multicall3__factory.connect(
             hre.SDK.config.MULTICALL_ADDRESS,
-            hre.ethers.provider,
+            (await hre.ethers.getSigners())[0],
         ),
         tag,
     });
