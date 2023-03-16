@@ -1,4 +1,4 @@
-import { BytesLike } from 'ethers';
+import { BytesLike, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import inquirer from 'inquirer';
 import { typechain } from 'tapioca-sdk';
@@ -39,7 +39,16 @@ export const deployTOFT__task = async (
     // TODO - Use global YieldBox address from tapioca-bar when it's ready
     const yieldBox = await utils.deployYieldBoxMock();
     const ercAddress = await loadERC20(hre, args.isNative);
-    const { hostChainName, isCurrentChainHost } = await getHostChainInfo(hre);
+    const { hostChainName, isCurrentChainHost, hostChainContractInfo } =
+        await getHostChainInfo(hre, ercAddress, tag);
+
+    if (!args.isNative) {
+        await validateErc20Address(
+            hre,
+            hostChainName,
+            hostChainContractInfo.address,
+        );
+    }
 
     /**
      * Deploy TOFT
@@ -115,7 +124,6 @@ async function loadERC20(hre: HardhatRuntimeEnvironment, isNative?: boolean) {
                 message: 'Enter the ERC20 address',
             })
         ).ercAddress;
-        await validateErc20Address(hre, ercAddress);
     }
     return ercAddress;
 }
@@ -123,7 +131,11 @@ async function loadERC20(hre: HardhatRuntimeEnvironment, isNative?: boolean) {
 /**
  * Ask the user host chain name of the TOFT and check if it's the current chain
  */
-async function getHostChainInfo(hre: HardhatRuntimeEnvironment) {
+async function getHostChainInfo(
+    hre: HardhatRuntimeEnvironment,
+    ercAddress: string,
+    tag: string,
+) {
     const { hostChainName } = await inquirer.prompt({
         type: 'list',
         name: 'hostChainName',
@@ -141,7 +153,30 @@ async function getHostChainInfo(hre: HardhatRuntimeEnvironment) {
         if (!goOn) throw new Error('[-] Aborted');
         isCurrentChainHost = true;
     }
-    return { hostChainName, isCurrentChainHost };
+
+    // Get Host Chain ID
+    const hostChainId = hre.SDK.utils.getChainBy(
+        'name',
+        hostChainName,
+    )?.chainId;
+    if (!hostChainId) throw new Error('[-] Invalid host chain name');
+
+    // Get Host Chain TapiocaOFT contract
+    const hostChainContractInfo = hre.SDK.db
+        .loadLocalDeployment(tag, hostChainId)
+        .filter((e) => e.meta.isToftHost)
+        .find((e) => e.meta.args.includes(ercAddress));
+    if (!hostChainContractInfo) {
+        throw new Error(
+            `[-] No TapiocaOFT contract found for ${ercAddress} on ${hostChainName}`,
+        );
+    }
+
+    return {
+        hostChainName,
+        hostChainContractInfo,
+        isCurrentChainHost,
+    };
 }
 
 /**
@@ -149,9 +184,11 @@ async function getHostChainInfo(hre: HardhatRuntimeEnvironment) {
  */
 async function validateErc20Address(
     hre: HardhatRuntimeEnvironment,
+    hostChainName: string,
     address: string,
 ) {
-    const erc20 = await hre.ethers.getContractAt('ERC20', address);
+    const network = await useNetwork(hre, hostChainName);
+    const erc20 = await hre.ethers.getContractAt('ERC20', address, network);
     const name = await erc20.name();
     const symbol = await erc20.symbol();
     const decimal = await erc20.decimals();
