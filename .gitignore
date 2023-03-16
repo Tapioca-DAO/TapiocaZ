@@ -8,3 +8,6 @@ tapioca-sdk
 #Hardhat files
 cache
 artifacts
+
+#Others
+.DS_Store
