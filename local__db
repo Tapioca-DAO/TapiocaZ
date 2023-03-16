@@ -2,6 +2,24 @@
     "default": {
         "5": [
             {
+                "name": "TapiocaOFT-ERCMock",
+                "address": "0x9123CE74a2117d0d533EA4Be636512eDFcf476dd",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "args": [
+                        "0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23",
+                        false,
+                        "0x486Cb821D1C28af55997E4A6665B4e9B74E7F570",
+                        "0xA6CDBaEA65Bc29afEaA98ca6C88b70a203456cE9",
+                        "ERCMock",
+                        "ERCM",
+                        18,
+                        421613
+                    ]
+                }
+            },
+            {
                 "name": "Balancer",
                 "address": "0x246Fd08E9738cC0bBBC2DDC2cF88920DCaCb1AB3",
                 "meta": {
