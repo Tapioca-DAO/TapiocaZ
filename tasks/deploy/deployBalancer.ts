@@ -49,7 +49,7 @@ export const deployBalancer__task = async (
     deployerVM.add({
         contract: balancer,
         args: [stargateObj.routerETH, stargateObj.router, signer.address],
-        deploymentName: 'TapiocaWrapper',
+        deploymentName: 'Balancer',
     });
     await deployerVM.execute(3);
     deployerVM.save();
