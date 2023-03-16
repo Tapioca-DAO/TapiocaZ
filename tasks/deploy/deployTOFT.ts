@@ -10,6 +10,7 @@ import { TapiocaOFT, TapiocaWrapper } from '../../typechain';
 
 export interface ITOFTDeployment extends TContract {
     meta: {
+        args: any[];
         isToftHost: boolean;
         isMerged: boolean;
     };
@@ -61,6 +62,7 @@ export const deployTOFT__task = async (
     await saveDeployedTOFT(hre, tag, deployedTOFT, {
         isToftHost: isCurrentChainHost,
         isMerged: Boolean(args.isMerged),
+        args: toftDeployInfo.args,
     });
 
     console.log(
@@ -215,11 +217,12 @@ async function initiateTOFTDeployment(
     deployBytecode: BytesLike,
     isMerged?: boolean,
 ) {
+    console.log('[+] Deploying TOFT');
     const txCreateToft = await (
         await tapiocaWrapper.createTOFT(
             ercAddress,
             deployBytecode,
-            hre.ethers.utils.keccak256(uuidv4()),
+            hre.ethers.utils.solidityKeccak256(['string'], [uuidv4()]),
             Boolean(isMerged),
         )
     ).wait(3);
