@@ -5,12 +5,7 @@ import { typechain } from 'tapioca-sdk';
 import { TContract } from 'tapioca-sdk/dist/shared';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-    getDeploymentByChain,
-    handleGetChainBy,
-    useNetwork,
-    useUtils,
-} from '../../scripts/utils';
+import { useNetwork, useUtils } from '../../scripts/utils';
 import { TapiocaOFT, TapiocaWrapper } from '../../typechain';
 
 export interface ITOFTDeployment extends TContract {
@@ -68,93 +63,19 @@ export const deployTOFT__task = async (
         isMerged: Boolean(args.isMerged),
     });
 
-    /**
-     * Handle after deployment setup
-     */
-};
-async function configure(
-    hre: HardhatRuntimeEnvironment,
-    currentOft: string,
-    currentChainId: string,
-    toChainId: string,
-) {
-    const fromChain = handleGetChainBy('chainId', currentChainId);
-    const toChain = handleGetChainBy('chainId', toChainId);
-    const signer = await useNetwork(hre, fromChain.name);
-
-    const packetTypes = [1, 2, 770, 771, 772, 773];
-
-    const tWrapper = await hre.ethers.getContractAt(
-        'TapiocaWrapper',
-        (
-            await getDeploymentByChain(hre, fromChain.name, 'TapiocaWrapper')
-        ).address,
-    );
-
-    for (let i = 0; i < packetTypes.length; i++) {
-        const encodedTX = (
-            await hre.ethers.getContractFactory('TapiocaOFT')
-        ).interface.encodeFunctionData('setMinDstGas', [
-            toChain.lzChainId,
-            packetTypes[i],
-            200000,
-        ]);
-
-        await (
-            await tWrapper
-                .connect(signer)
-                .executeTOFT(currentOft, encodedTX, true)
-        ).wait();
-
-        const useAdaptersTx = (
-            await hre.ethers.getContractFactory('TapiocaOFT')
-        ).interface.encodeFunctionData('setUseCustomAdapterParams', [true]);
-
-        await (
-            await tWrapper
-                .connect(signer)
-                .executeTOFT(currentOft, useAdaptersTx, true)
-        ).wait();
-    }
-}
-
-async function setTrustedRemote(
-    hre: HardhatRuntimeEnvironment,
-    fromChainId: string,
-    toChainId: string,
-    fromToft: string,
-    toTOFTAddress: string,
-) {
-    const fromChain = handleGetChainBy('chainId', fromChainId);
-    const signer = await useNetwork(hre, fromChain.name);
-    const toChain = handleGetChainBy('chainId', toChainId);
-
     console.log(
-        `[+] Setting (${toChain.name}) as a trusted remote on (${fromChain.name})`,
+        '[+] TOFT deployed successfully. When finished with all the TOFT deployment, use the following command to configure it:',
     );
-
-    const trustedRemotePath = hre.ethers.utils.solidityPack(
-        ['address', 'address'],
-        [toTOFTAddress, fromToft],
+    console.log(
+        '\t- batchSetAdapterParam: To set the minDstGas for the supported packet types',
     );
-    const encodedTX = (
-        await hre.ethers.getContractFactory('TapiocaOFT')
-    ).interface.encodeFunctionData('setTrustedRemote', [
-        toChain.lzChainId,
-        trustedRemotePath,
-    ]);
-
-    const tWrapper = await hre.ethers.getContractAt(
-        'TapiocaWrapper',
-        (
-            await getDeploymentByChain(hre, fromChain.name, 'TapiocaWrapper')
-        ).address,
+    console.log(
+        '\t- batchSetTrustedRemote: To set the minDstGas for the supported packet types',
     );
-
-    await (
-        await tWrapper.connect(signer).executeTOFT(fromToft, encodedTX, true)
-    ).wait();
-}
+    console.log(
+        '[+] Use the hardhat batchSetTrustedRemote --help to get help!\n',
+    );
+};
 
 function buildTOFTDeployment(args: ITOFTDeployment): ITOFTDeployment {
     return args;

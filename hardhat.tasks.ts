@@ -1,54 +1,26 @@
 import '@nomiclabs/hardhat-ethers';
 import { task } from 'hardhat/config';
-import { execSync } from 'node:child_process';
-import { deployTOFT__task } from './tasks/deployTOFT';
 import { exportSDK__task } from './tasks/exportSDK';
-import { listDeploy__task } from './tasks/listDeploy';
 import { wrap } from './tasks/wrap';
 
-import SDK from 'tapioca-sdk';
-
-function formatLZEndpoints() {
-    return SDK.API.utils
-        .getChainIDs()
-        .map((chainId: any) => {
-            const { name } = SDK.API.utils.getChainBy('chainId', chainId)!;
-            return `${name} - (${chainId})\n`;
-        })
-        .reduce((p: any, c: any) => p + c, '');
-}
-
-task('build', 'Compile contracts and generate Typechain files', async () => {
-    execSync(
-        'npx hardhat compile --config hardhat.export.ts && npx hardhat typechain',
-        { stdio: 'inherit' },
-    );
-});
-
-task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
-    const accounts = await hre.ethers.getSigners();
-
-    for (const account of accounts) {
-        console.log(account.address);
-    }
-});
+import { deployBalancer__task } from './tasks/deploy/deployBalancer';
+import { deployTapiocaWrapper__task } from './tasks/deploy/deployTapiocaWrapper';
+import { deployTOFT__task } from './tasks/deploy/deployTOFT';
+task(
+    'deployTapiocaWrapper',
+    'Deploy the TapiocaWrapper',
+    deployTapiocaWrapper__task,
+).addFlag('overwrite', 'If the deployment should be overwritten');
 
 task(
-    'listDeploy',
-    'List the deployment addresses of the selected network',
-    listDeploy__task,
+    'deployBalancer',
+    'Deploy a mTOFT Balancer contract',
+    deployBalancer__task,
 );
 
-task(
-    'deployTOFT',
-    // eslint-disable-next-line quotes
-    "\nDeploy a TOFT contract to the specified network. It'll also deploy it to Tapioca host chain (Optimism, chainID 10).\nA document will be created in the deployments.json file.",
-    deployTOFT__task,
-)
-    .addParam('erc20', 'The ERC20 address to wrap')
-    .addParam('yieldBox', 'The YieldBox address')
-    .addParam('salt', 'The salt used CREATE2 deployment')
-    .addParam('hostChainName', `The main chain ID ()\n${formatLZEndpoints()}`);
+task('deployTOFT', 'Deploy a TOFT', deployTOFT__task)
+    .addFlag('isNative', 'If the TOFT should support the gas token')
+    .addFlag('isMerged', 'If the TOFT should be a rebalanceable mTOFT');
 
 task('wrap', 'Approve and wrap an ERC20 to its TOFT', wrap)
     .addParam('toft', 'The TOFT contract')
