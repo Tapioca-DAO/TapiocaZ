@@ -1,4 +1,24 @@
-import { EChainID } from 'tapioca-sdk/dist/api/config';
+// TODO fixme use the SDK EChainID
+enum EChainID {
+    // Mainnets
+    MAINNET = '1',
+    BSC = '56',
+    AVALANCHE = '43114',
+    POLYGON = '137',
+    FANTOM = '250',
+    ARBITRUM = '42161',
+    OPTIMISM = '10',
+    HARMONY = '1666600000',
+    // Testnets
+    GOERLI = '5',
+    BSC_TESTNET = '97',
+    FUJI_AVALANCHE = '43113',
+    MUMBAI_POLYGON = '80001',
+    FANTOM_TESTNET = '4002',
+    ARBITRUM_GOERLI = '421613',
+    OPTIMISM_GOERLI = '420',
+    HARMONY_TESTNET = '1666700000',
+}
 
 // TODO - add all chains (Eth, Arb, OP, and their testnets), double check the values
 export const STARGATE_ROUTERS: {
