@@ -2,19 +2,39 @@
     "default": {
         "421613": [
             {
-                "address": "0xae9B1005259cD5AF5f44A89BBd2658a8455a152c",
-                "name": "TapiocaDeployer",
-                "meta": {}
-            },
-            {
                 "name": "TapiocaWrapper",
-                "address": "0xDF14d408820CaADa64a8e47321640c21267D8EA0",
+                "address": "0xd7Ff5a1e51ADD4281dF5f2063700BBF0fC402b04",
                 "meta": {
                     "args": [
                         "0xEAF9f533871B07B151883908B4Fb6eeF4b51A95F"
                     ],
-                    "salt": "0x33dff7fb950cf2ba84b494ea1038b49de00f8796d3f8cf033f2f05c107b654aa",
+                    "salt": "0x763cbb19cec0af69dadec99c26234e4e836cb434160051945cc3fe5ca55df102",
                     "create2": true
+                }
+            },
+            {
+                "address": "0x084cFbF257feC77DF29eC4a60dC86Dc66e462467",
+                "name": "TapiocaDeployer",
+                "meta": {}
+            },
+            {
+                "name": "Balancer",
+                "address": "0x5bFF2520DC217c3A88d1BB17a0B7603cfDd2FeBf",
+                "meta": {
+                    "args": [
+                        "0x7612aE2a34E5A363E137De748801FB4c86499152",
+                        "0xb850873f4c993Ac2405A1AdD71F6ca5D4d4d6b4f",
+                        "0xEAF9f533871B07B151883908B4Fb6eeF4b51A95F"
+                    ],
+                    "salt": "0xc468d38c8e37e60862c61b01f5e564af625c9586e4bf749bb4b3c743fbc1d5d1",
+                    "create2": true
+                }
+            },
+            {
+                "name": "ERCMock",
+                "address": "0x486Cb821D1C28af55997E4A6665B4e9B74E7F570",
+                "meta": {
+                    "isERC20Mock": true
                 }
             }
         ]
