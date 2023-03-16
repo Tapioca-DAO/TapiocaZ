@@ -1,0 +1,24 @@
+{
+    "default": {
+        "421613": [
+            {
+                "name": "TapiocaWrapper",
+                "address": "0x760F7f9Bb700bA2DaB162a325477042c18A76862",
+                "meta": {
+                    "args": [
+                        "0x7612aE2a34E5A363E137De748801FB4c86499152",
+                        "0xb850873f4c993Ac2405A1AdD71F6ca5D4d4d6b4f",
+                        "0xEAF9f533871B07B151883908B4Fb6eeF4b51A95F"
+                    ],
+                    "salt": "0x15dd2f895a0b957f144efcf8a0f74219990871e3dd65e0e60cbc951308b24ccf",
+                    "create2": true
+                }
+            },
+            {
+                "address": "0xae9B1005259cD5AF5f44A89BBd2658a8455a152c",
+                "name": "TapiocaDeployer",
+                "meta": {}
+            }
+        ]
+    }
+}
