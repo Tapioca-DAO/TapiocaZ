@@ -74,8 +74,14 @@ export const deployTOFT__task = async (
         args: toftDeployInfo.args,
     });
 
+    console.log('[+] TOFT deployed successfully.');
+    if (isCurrentChainHost) {
+        console.log(
+            '[+] You can execute this task again on other networks to link them.',
+        );
+    }
     console.log(
-        '[+] TOFT deployed successfully. When finished with all the TOFT deployment, use the following command to configure it:',
+        '[+] When finished with all the TOFT deployment, use the following command to configure it:',
     );
     console.log(
         '\t- batchSetAdapterParam: To set the minDstGas for the supported packet types',

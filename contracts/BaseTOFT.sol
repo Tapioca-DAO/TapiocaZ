@@ -103,7 +103,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     )
         OFTV2(
             string(abi.encodePacked("TapiocaOFT-", _name)),
-            string(abi.encodePacked("TOFT-", _symbol)),
+            string(abi.encodePacked("t", _symbol)),
             _decimal / 2,
             _lzEndpoint
         )
