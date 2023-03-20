@@ -2,6 +2,13 @@
     "default": {
         "5": [
             {
+                "name": "MATIC",
+                "address": "0x29Dc6E3Fc5b96a8a6C9bA0eB2515cbff49D87701",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            },
+            {
                 "name": "TapiocaOFT-GLP",
                 "address": "0xfC11C29E9655b8f07CA8ee841FfC8FF5cA564baA",
                 "meta": {
@@ -67,7 +74,23 @@
                 }
             }
         ],
+        "420": [
+            {
+                "name": "FTM",
+                "address": "0x19de553a8CfFCFF8CB49E236C1a499F9CF083b97",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            }
+        ],
         "43113": [
+            {
+                "name": "AVAX",
+                "address": "0xD273F9a42242F43bA0F1D27f006a727952F0f7ed",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            },
             {
                 "name": "TapiocaOFT-GLP",
                 "address": "0x76a30D74c60015B7CBE4523d239b4d2E549243b0",

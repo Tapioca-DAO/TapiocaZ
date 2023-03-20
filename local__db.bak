@@ -67,7 +67,41 @@
                 }
             }
         ],
+        "420": [
+            {
+                "name": "FTM",
+                "address": "0x19de553a8CfFCFF8CB49E236C1a499F9CF083b97",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            }
+        ],
         "43113": [
+            {
+                "name": "AVAX",
+                "address": "0xD273F9a42242F43bA0F1D27f006a727952F0f7ed",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            },
+            {
+                "name": "TapiocaOFT-GLP",
+                "address": "0x76a30D74c60015B7CBE4523d239b4d2E549243b0",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "args": [
+                        "0x93f54D755A063cE7bB9e6Ac47Eccc8e33411d706",
+                        false,
+                        "0x82D897e121212A22E14B768656Ce1859C11697d0",
+                        "0x3D38200d198183ef4B7Ba483b9EE932551d747D1",
+                        "GLP",
+                        "GLP",
+                        18,
+                        421613
+                    ]
+                }
+            },
             {
                 "name": "TapiocaWrapper",
                 "address": "0xA598010eCD1f1b2c06A521b139943EF2cC8e04Fd",
@@ -83,6 +117,15 @@
                 "name": "TapiocaDeployer",
                 "address": "0xC41A2B66E7B598f907Ed948733AC75462d81b66e",
                 "meta": {}
+            }
+        ],
+        "80001": [
+            {
+                "name": "MATIC",
+                "address": "0x5ecE0aCB1E11ac81B3fb2a7DC9EA2Dc52EFa5152",
+                "meta": {
+                    "isERC20Mock": true
+                }
             }
         ],
         "421613": [
