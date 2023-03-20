@@ -13,6 +13,7 @@ export interface ITOFTDeployment extends TContract {
         args: any[];
         isToftHost: boolean;
         isMerged: boolean;
+        isToft: boolean;
     };
 }
 export const deployTOFT__task = async (
@@ -71,6 +72,7 @@ export const deployTOFT__task = async (
     await saveDeployedTOFT(hre, tag, deployedTOFT, {
         isToftHost: isCurrentChainHost,
         isMerged: Boolean(args.isMerged),
+        isToft: true,
         args: toftDeployInfo.args,
     });
 
