@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useNetwork, useUtils } from '../../scripts/utils';
 import { TapiocaOFT, TapiocaWrapper } from '../../typechain';
+import { loadVM } from '../utils';
 
 export interface ITOFTDeployment extends TContract {
     meta: {
@@ -289,14 +290,7 @@ async function saveDeployedTOFT(
     deployedTOFT: TapiocaOFT,
     meta: ITOFTDeployment['meta'],
 ) {
-    const deployerVM = new hre.SDK.DeployerVM(hre, {
-        bytecodeSizeLimit: 90_000,
-        multicall: typechain.Multicall.Multicall3__factory.connect(
-            hre.SDK.config.MULTICALL_ADDRESS,
-            (await hre.ethers.getSigners())[0],
-        ),
-        tag,
-    });
+    const deployerVM = await loadVM(hre, tag);
 
     deployerVM.load([
         buildTOFTDeployment({
