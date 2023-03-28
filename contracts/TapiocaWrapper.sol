@@ -6,9 +6,9 @@ import "./mTapiocaOFT.sol";
 import "./interfaces/ITapiocaOFT.sol";
 
 import "@openzeppelin/contracts/utils/Create2.sol";
-import "@rari-capital/solmate/src/auth/Owned.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TapiocaWrapper is Owned {
+contract TapiocaWrapper is Ownable {
     struct ExecutionCall {
         address toft;
         bytes bytecode;
@@ -54,7 +54,9 @@ contract TapiocaWrapper is Owned {
     /// @notice No TOFT has been deployed yet.
     error TapiocaWrapper__NoTOFTDeployed();
 
-    constructor(address _owner) Owned(_owner) {}
+    constructor(address _owner) {
+        _transferOwnership(_owner);
+    }
 
     // ********************** //
     // *** VIEW FUNCTIONS *** //

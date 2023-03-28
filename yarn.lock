@@ -5612,10 +5612,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.3.68:
-  version "1.3.68"
-  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.3.68.tgz#f629a79fde4d45506ecdef44f611c2f4938f840d"
-  integrity sha512-hYrgWKcSu8+e1WiSEF0sgzNy8PFxcRK9GKAA8SyPkhYx/eYdR0se/s6nmSqz9lIDBBQTV3hJGcYfpXu2hCIWRA==
+tapioca-sdk@^1.3.74:
+  version "1.3.74"
+  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.3.74.tgz#7c893e5c56a10489a7d493606cf373a4b6060ed2"
+  integrity sha512-ZJg9vWKqbkb1tmm212THtx3I7CWKt5Nyjw6m0MQKai3DB08lpma1go2VDurIr5BT+WQOLkSJYdXzX1unxUf70g==
   dependencies:
     ethers "^5.6.9"
     inquirer "^8.2.5"
