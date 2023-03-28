@@ -5,13 +5,18 @@ module.exports = {
         mocha: true,
         node: true,
     },
-    plugins: ['@typescript-eslint', 'prettier'],
-    extends: ['plugin:@typescript-eslint/recommended', 'prettier'],
+    extends: [
+        'plugin:@typescript-eslint/recommended',
+        'plugin:prettier/recommended',
+    ],
     parser: '@typescript-eslint/parser',
+    plugins: ['@typescript-eslint', 'prettier'],
+    root: true,
     parserOptions: {
         ecmaVersion: 12,
     },
     rules: {
+        '@typescript-eslint/no-explicit-any': ['off'],
         'prettier/prettier': [
             'error',
             {
@@ -31,7 +36,6 @@ module.exports = {
         'key-spacing': ['error', { afterColon: true }],
         'no-multi-spaces': ['error'],
         'no-multiple-empty-lines': ['error', { max: 2 }],
-        '@typescript-eslint/no-non-null-assertion': 'off',
-        quotes: 'off',
+        '@typescript-eslint/ban-ts-comment': 'off',
     },
 };

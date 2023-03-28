@@ -4,6 +4,7 @@ coverage
 coverage.json
 typechain
 tapioca-sdk
+package-lock.json
 
 #Hardhat files
 cache
