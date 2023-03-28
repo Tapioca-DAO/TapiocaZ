@@ -40,7 +40,7 @@ describe('TapiocaWrapper', () => {
         });
 
         it('Should fail if the ERC20 address is not the same as the registered TapiocaWrapper one', async () => {
-            const { tapiocaWrapper_0, LZEndpointMock_chainID_0, YieldBox_0 } =
+            const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
             const erc20Mock = await (

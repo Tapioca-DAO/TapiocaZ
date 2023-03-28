@@ -4,14 +4,14 @@ import {
     time,
 } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import hre, { ethers } from 'hardhat';
+import { ethers } from 'hardhat';
 import { BN, getERC20PermitSignature } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 describe('mTapiocaOFT', () => {
     describe('extractUnderlying()', () => {
         it('should fail for unknown balance', async () => {
-            const { signer, mtapiocaOFT0, dummyAmount, tapiocaWrapper_0 } =
+            const { signer, mtapiocaOFT0, tapiocaWrapper_0 } =
                 await loadFixture(setupFixture);
 
             let balancerStatus = await mtapiocaOFT0.balancers(signer.address);
@@ -72,7 +72,6 @@ describe('mTapiocaOFT', () => {
                 signer,
                 mErc20Mock,
                 mtapiocaOFT0,
-                tapiocaWrapper_0,
                 mintAndApprove,
                 dummyAmount,
             } = await loadFixture(setupFixture);

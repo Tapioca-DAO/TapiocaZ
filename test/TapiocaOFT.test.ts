@@ -17,7 +17,7 @@ describe('TapiocaOFT', () => {
             await (await ethers.getContractFactory('YieldBoxMock')).deploy()
         ).deployed();
 
-        const oft = await (
+        await (
             await hre.ethers.getContractFactory('TapiocaOFT')
         ).deploy(
             lzEndpoint.address,
@@ -55,7 +55,6 @@ describe('TapiocaOFT', () => {
                 signer,
                 erc20Mock,
                 tapiocaOFT0,
-                tapiocaWrapper_0,
                 mintAndApprove,
                 dummyAmount,
             } = await loadFixture(setupFixture);
@@ -546,8 +545,6 @@ describe('TapiocaOFT', () => {
                 bigDummyAmount,
                 YieldBox_0,
                 YieldBox_10,
-                LZEndpointMock_chainID_0,
-                LZEndpointMock_chainID_10,
             } = await loadFixture(setupFixture);
 
             // Setup
