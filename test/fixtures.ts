@@ -1,8 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumberish, ethers } from 'ethers';
 import hre from 'hardhat';
-import { BN } from '../scripts/utils';
-import { ERC20Mock, TapiocaOFT, MTapiocaOFT, ITapiocaOFT } from '../typechain';
+import { BaseTOFT, ERC20Mock, MTapiocaOFT, TapiocaOFT } from '../typechain';
 import { register } from './test.utils';
 
 export const setupFixture = async () => {
@@ -59,8 +58,6 @@ export const setupFixture = async () => {
         YieldBox_10,
         utils,
     } = await register(hre);
-
-    await tapiocaWrapper_0.setMngmtFee(25); // 0.25%
 
     //Deploy mTapiocaOFT0
     {
@@ -195,24 +192,14 @@ export const setupFixture = async () => {
     const dummyAmount = ethers.BigNumber.from(1e5);
     const bigDummyAmount = ethers.utils.parseEther('10');
 
-    const estimateFees = async (amount: BigNumberish) =>
-        await tapiocaOFT0.estimateFees(
-            await tapiocaWrapper_0.mngmtFee(),
-            await tapiocaWrapper_0.mngmtFeeFraction(),
-            amount,
-        );
-
     const mintAndApprove = async (
         erc20Mock: ERC20Mock,
-        toft: ITapiocaOFT,
+        toft: BaseTOFT,
         signer: SignerWithAddress,
         amount: BigNumberish,
     ) => {
-        const fees = await estimateFees(amount);
-        const amountWithFees = BN(amount).add(fees);
-
-        await erc20Mock.mint(signer.address, amountWithFees);
-        await erc20Mock.approve(toft.address, amountWithFees);
+        await erc20Mock.mint(signer.address, amount);
+        await erc20Mock.approve(toft.address, amount);
     };
     const vars = {
         signer,
@@ -240,7 +227,6 @@ export const setupFixture = async () => {
         stargateRouterETHMock,
     };
     const functions = {
-        estimateFees,
         mintAndApprove,
         utils,
     };

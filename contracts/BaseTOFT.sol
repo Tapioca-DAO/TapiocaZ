@@ -49,8 +49,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     uint16 public constant PT_YB_DEPOSIT = 772;
     uint16 public constant PT_YB_WITHDRAW = 773;
 
-    /// @notice Total fees amassed by this contract, in `erc20`.
-    uint256 public totalFees;
     /// @notice The ERC20 to wrap.
     IERC20 public erc20;
     /// @notice The host chain ID of the ERC20
@@ -77,7 +75,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     event YieldBoxRetrieval(uint256 _amount);
     event Wrap(address indexed _from, address indexed _to, uint256 _amount);
     event Unwrap(address indexed _from, address indexed _to, uint256 _amount);
-    event HarvestFees(uint256 _amount);
 
     // ******************//
     // *** MODIFIERS *** //
@@ -133,14 +130,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         return _decimalCache;
     }
 
-    function estimateFees(
-        uint256 _feeBps,
-        uint256 _feeFraction,
-        uint256 _amount
-    ) public pure returns (uint256) {
-        return (_amount * _feeBps) / _feeFraction;
-    }
-
     /// @notice Check if the current chain is the host chain of the ERC20.
     function isHostChain() external view returns (bool) {
         return block.chainid == hostChainID;
@@ -168,18 +157,9 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     ) external payable {
         if (options.wrap) {
             if (isNative) {
-                _wrapNative(
-                    msg.sender,
-                    _wrapper.mngmtFee(),
-                    _wrapper.mngmtFeeFraction()
-                );
+                _wrapNative(msg.sender);
             } else {
-                _wrap(
-                    msg.sender,
-                    amount,
-                    _wrapper.mngmtFee(),
-                    _wrapper.mngmtFeeFraction()
-                );
+                _wrap(msg.sender, amount);
             }
         }
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
@@ -270,63 +250,19 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         }
     }
 
-    function _wrap(
-        address _toAddress,
-        uint256 _amount,
-        uint256 _mngmtFee,
-        uint256 _mngmtFeeFraction
-    ) internal virtual {
-        if (_mngmtFee > 0) {
-            uint256 feeAmount = estimateFees(
-                _mngmtFee,
-                _mngmtFeeFraction,
-                _amount
-            );
-
-            totalFees += feeAmount;
-            erc20.safeTransferFrom(
-                msg.sender,
-                address(this),
-                _amount + feeAmount
-            );
-        } else {
-            erc20.safeTransferFrom(msg.sender, address(this), _amount);
-        }
-
+    function _wrap(address _toAddress, uint256 _amount) internal virtual {
+        erc20.safeTransferFrom(msg.sender, address(this), _amount);
         _mint(_toAddress, _amount);
         emit Wrap(msg.sender, _toAddress, _amount);
     }
 
-    function _wrapNative(
-        address _toAddress,
-        uint256 _mngmtFee,
-        uint256 _mngmtFeeFraction
-    ) internal virtual {
+    function _wrapNative(address _toAddress) internal virtual {
         if (msg.value == 0) {
             revert TOFT_ZeroAmount();
         }
 
-        uint256 toMint;
-
-        if (_mngmtFee > 0) {
-            uint256 feeAmount = estimateFees(
-                _mngmtFee,
-                _mngmtFeeFraction,
-                msg.value
-            );
-
-            totalFees += feeAmount;
-            toMint = msg.value - feeAmount;
-        }
-
-        _mint(_toAddress, toMint);
-        emit Wrap(msg.sender, _toAddress, toMint);
-    }
-
-    function _harvestFees(address to) internal virtual {
-        erc20.safeTransfer(to, totalFees);
-        totalFees = 0;
-        emit HarvestFees(totalFees);
+        _mint(_toAddress, msg.value);
+        emit Wrap(msg.sender, _toAddress, msg.value);
     }
 
     function _unwrap(address _toAddress, uint256 _amount) internal virtual {

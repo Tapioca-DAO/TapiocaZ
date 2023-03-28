@@ -1,7 +1,6 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import hre, { ethers } from 'hardhat';
-import { BN } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 //should be executed on mainnet fork
