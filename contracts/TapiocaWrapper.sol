@@ -18,11 +18,6 @@ contract TapiocaWrapper is Ownable {
     // ************ //
     // *** VARS *** //
     // ************ //
-    /// @notice Management fee for a wrap operation. In BPS.
-    uint256 public mngmtFee;
-    /// @notice Denominator for `mngmtFee`.
-    uint256 public constant mngmtFeeFraction = 10000;
-
     /// @notice Array of deployed TOFT contracts.
     ITapiocaOFT[] public tapiocaOFTs;
     /// @notice Array of harvestable TOFT fees.
@@ -94,17 +89,6 @@ contract TapiocaWrapper is Ownable {
     // *********************** //
     // *** OWNER FUNCTIONS *** //
     // *********************** //
-    /// @notice Set the management fee for a wrap operation.
-    /// @custom:invariant Forbid a management fee higher than 0.5%.
-    /// @param _mngmtFee The new management fee for a wrap operation. In BPS.
-    function setMngmtFee(uint256 _mngmtFee) external onlyOwner {
-        if (_mngmtFee > 50) {
-            revert TapiocaWrapper__MngmtFeeTooHigh();
-        }
-
-        mngmtFee = _mngmtFee;
-        emit SetFees(mngmtFee);
-    }
 
     /// @notice Execute the `_bytecode` against the `_toft`. Callable only by the owner.
     /// @dev Used to call derived OFT functions to a TOFT contract.

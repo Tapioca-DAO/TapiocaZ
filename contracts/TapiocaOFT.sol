@@ -58,20 +58,6 @@ contract TapiocaOFT is BaseTOFT {
         tapiocaWrapper = TapiocaWrapper(msg.sender);
     }
 
-    // ********************** //
-    // *** VIEW FUNCTIONS *** //
-    // ********************** //
-    /// @notice Return the output amount of an ERC20 token wrap operation.
-    function wrappedAmount(uint256 _amount) public view returns (uint256) {
-        return
-            _amount -
-            estimateFees(
-                tapiocaWrapper.mngmtFee(),
-                tapiocaWrapper.mngmtFeeFraction(),
-                _amount
-            );
-    }
-
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
@@ -80,28 +66,14 @@ contract TapiocaOFT is BaseTOFT {
     /// @param _toAddress The address to wrap the ERC20 to.
     /// @param _amount The amount of ERC20 to wrap.
     function wrap(address _toAddress, uint256 _amount) external onlyHostChain {
-        _wrap(
-            _toAddress,
-            _amount,
-            tapiocaWrapper.mngmtFee(),
-            tapiocaWrapper.mngmtFeeFraction()
-        );
+        _wrap(_toAddress, _amount);
     }
 
     /// @notice Wrap a native token with a 1:1 ratio with a fee if existing.
     /// @dev Since it can be executed only on the host chain, if an address exists on the linked chain it will not allowed to wrap.
     /// @param _toAddress The address to wrap the tokens to.
     function wrapNative(address _toAddress) external payable onlyHostChain {
-        _wrapNative(
-            _toAddress,
-            tapiocaWrapper.mngmtFee(),
-            tapiocaWrapper.mngmtFeeFraction()
-        );
-    }
-
-    /// @notice Harvest the fees collected by the contract. Called only on host chain.
-    function harvestFees() external onlyHostChain {
-        _harvestFees(address(tapiocaWrapper.owner()));
+        _wrapNative(_toAddress);
     }
 
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
