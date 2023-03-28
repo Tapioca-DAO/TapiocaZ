@@ -122,40 +122,6 @@ Return the latest TOFT contract deployed on the current chain.
 |---|---|---|
 | _0 | contract ITapiocaOFT | undefined |
 
-### mngmtFee
-
-```solidity
-function mngmtFee() external view returns (uint256)
-```
-
-Management fee for a wrap operation. In BPS.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### mngmtFeeFraction
-
-```solidity
-function mngmtFeeFraction() external view returns (uint256)
-```
-
-Denominator for `mngmtFee`.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### owner
 
 ```solidity
@@ -183,22 +149,6 @@ function renounceOwnership() external nonpayable
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
-
-### setMngmtFee
-
-```solidity
-function setMngmtFee(uint256 _mngmtFee) external nonpayable
-```
-
-Set the management fee for a wrap operation.
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _mngmtFee | uint256 | The new management fee for a wrap operation. In BPS. |
 
 ### tapiocaOFTLength
 

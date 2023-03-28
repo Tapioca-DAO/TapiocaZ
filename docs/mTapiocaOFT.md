@@ -413,30 +413,6 @@ The ERC20 to wrap.
 |---|---|---|
 | _0 | contract IERC20 | undefined |
 
-### estimateFees
-
-```solidity
-function estimateFees(uint256 _feeBps, uint256 _feeFraction, uint256 _amount) external pure returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _feeBps | uint256 | undefined |
-| _feeFraction | uint256 | undefined |
-| _amount | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### estimateSendAndCallFee
 
 ```solidity
@@ -613,17 +589,6 @@ function getTrustedRemoteAddress(uint16 _remoteChainId) external view returns (b
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes | undefined |
-
-### harvestFees
-
-```solidity
-function harvestFees() external nonpayable
-```
-
-Harvest the fees collected by the contract. Called only on host chain.
-
-
-
 
 ### hostChainID
 
@@ -1271,23 +1236,6 @@ function token() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### totalFees
-
-```solidity
-function totalFees() external view returns (uint256)
-```
-
-Total fees amassed by this contract, in `erc20`.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### totalSupply
 
 ```solidity
@@ -1491,28 +1439,6 @@ Wrap a native token with a 1:1 ratio with a fee if existing.
 |---|---|---|
 | _toAddress | address | The address to wrap the tokens to. |
 
-### wrappedAmount
-
-```solidity
-function wrappedAmount(uint256 _amount) external view returns (uint256)
-```
-
-Return the output amount of an ERC20 token wrap operation.
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _amount | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### yieldBox
 
 ```solidity
@@ -1606,22 +1532,6 @@ event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new)
 | _chain  | uint256 | undefined |
 | _old  | bool | undefined |
 | _new  | bool | undefined |
-
-### HarvestFees
-
-```solidity
-event HarvestFees(uint256 _amount)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _amount  | uint256 | undefined |
 
 ### MessageFailed
 
