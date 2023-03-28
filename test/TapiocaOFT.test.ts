@@ -1,7 +1,6 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import hre, { ethers } from 'hardhat';
-import { BN } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 describe('TapiocaOFT', () => {
@@ -51,26 +50,6 @@ describe('TapiocaOFT', () => {
             ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotHostChain');
         });
 
-        it('Should fail if the fees are not paid', async () => {
-            const {
-                signer,
-                erc20Mock,
-                tapiocaOFT0,
-                mintAndApprove,
-                estimateFees,
-                dummyAmount,
-            } = await loadFixture(setupFixture);
-            await mintAndApprove(
-                erc20Mock,
-                tapiocaOFT0,
-                signer,
-                BN(dummyAmount).sub(await estimateFees(dummyAmount)),
-            );
-            await expect(
-                tapiocaOFT0.wrap(signer.address, dummyAmount),
-            ).to.be.revertedWith('ERC20: insufficient allowance');
-        });
-
         it('Should wrap and give a 1:1 ratio amount of tokens without fees', async () => {
             const {
                 signer,
@@ -80,7 +59,6 @@ describe('TapiocaOFT', () => {
                 mintAndApprove,
                 dummyAmount,
             } = await loadFixture(setupFixture);
-            await tapiocaWrapper_0.setMngmtFee(0);
 
             await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
 
@@ -104,46 +82,6 @@ describe('TapiocaOFT', () => {
             expect(balERC20ContractAfter).eq(
                 balERC20ContractBefore.add(dummyAmount),
             );
-        });
-
-        it('Should wrap and give a 1:1 ratio amount of tokens with fees', async () => {
-            const {
-                signer,
-                erc20Mock,
-                tapiocaOFT0,
-                mintAndApprove,
-                dummyAmount,
-                estimateFees,
-            } = await loadFixture(setupFixture);
-
-            const fees = await estimateFees(dummyAmount);
-            const feesBefore = await tapiocaOFT0.totalFees();
-
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
-
-            const balTOFTSignerBefore = await tapiocaOFT0.balanceOf(
-                signer.address,
-            );
-            const balERC20ContractBefore = await erc20Mock.balanceOf(
-                tapiocaOFT0.address,
-            );
-
-            await tapiocaOFT0.wrap(signer.address, dummyAmount);
-
-            const balTOFTSignerAfter = await tapiocaOFT0.balanceOf(
-                signer.address,
-            );
-            const balERC20ContractAfter = await erc20Mock.balanceOf(
-                tapiocaOFT0.address,
-            );
-
-            expect(balTOFTSignerAfter).eq(balTOFTSignerBefore.add(dummyAmount));
-            expect(balERC20ContractAfter).eq(
-                balERC20ContractBefore.add(dummyAmount.add(fees)),
-            );
-
-            const feesAfter = await tapiocaOFT0.totalFees();
-            expect(feesAfter.sub(feesBefore)).eq(fees);
         });
     });
 
@@ -288,67 +226,6 @@ describe('TapiocaOFT', () => {
                     },
                 ),
             ).to.not.be.reverted;
-        });
-    });
-
-    describe('harvestFees()', () => {
-        it('Should be called only on MainChain', async () => {
-            const {
-                signer,
-                erc20Mock,
-                tapiocaOFT0,
-                tapiocaOFT10,
-                mintAndApprove,
-                estimateFees,
-                dummyAmount,
-            } = await loadFixture(setupFixture);
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
-            await tapiocaOFT0.wrap(signer.address, dummyAmount);
-
-            const fees = await estimateFees(dummyAmount);
-            expect(fees.gt(0)).to.be.true;
-
-            await expect(tapiocaOFT0.harvestFees()).to.emit(
-                tapiocaOFT0,
-                'HarvestFees',
-            );
-
-            await expect(
-                tapiocaOFT10.harvestFees(),
-            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotHostChain');
-        });
-
-        it('Should withdraw the fees and update the total fee balance', async () => {
-            const {
-                signer,
-                erc20Mock,
-                tapiocaOFT0,
-                mintAndApprove,
-                dummyAmount,
-            } = await loadFixture(setupFixture);
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
-            await tapiocaOFT0.wrap(signer.address, dummyAmount);
-
-            const feesBefore = await tapiocaOFT0.totalFees();
-
-            await tapiocaOFT0.harvestFees();
-
-            expect(await erc20Mock.balanceOf(signer.address)).eq(feesBefore);
-
-            const feesAfter = await tapiocaOFT0.totalFees();
-            expect(feesAfter).eq(0);
-        });
-    });
-    describe('estimateFees()', () => {
-        it('Should compute the same output', async () => {
-            const { tapiocaOFT0 } = await loadFixture(setupFixture);
-
-            const [feeBps, feeFraction, amount] = [50, 10000, 1000];
-            const expected = (feeBps * amount) / feeFraction;
-
-            expect(
-                await tapiocaOFT0.estimateFees(feeBps, feeFraction, amount),
-            ).to.equal(expected);
         });
     });
 

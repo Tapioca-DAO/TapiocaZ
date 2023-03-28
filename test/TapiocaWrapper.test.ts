@@ -4,11 +4,10 @@ import {
 } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { BytesLike } from 'ethers';
-import { ethers } from 'hardhat';
+import hre, { ethers } from 'hardhat';
 import { generateSalt, useUtils } from '../scripts/utils';
-import { setupFixture } from './fixtures';
-import hre from 'hardhat';
 import { TapiocaOFT__factory } from '../typechain';
+import { setupFixture } from './fixtures';
 
 describe('TapiocaWrapper', () => {
     describe('constructor()', () => {
@@ -275,18 +274,6 @@ describe('TapiocaWrapper', () => {
         });
     });
 
-    describe('harvestFees()', () => {
-        it('Should harvest fees', async () => {
-            const { signer, tapiocaWrapper_0 } = await loadFixture(
-                setupFixture,
-            );
-
-            await expect(tapiocaWrapper_0.harvestFees())
-                .to.emit(tapiocaWrapper_0, 'HarvestFees')
-                .withArgs(signer.address);
-        });
-    });
-
     describe('tapiocaOFTLength()', () => {
         it('Should return the length of the `tapiocaOFTs` array', async () => {
             const { signer, erc20Mock, LZEndpointMock_chainID_0 } =
@@ -511,38 +498,6 @@ describe('TapiocaWrapper', () => {
             expect(await tapiocaOFT0.trustedRemoteLookup(chainID)).to.eq(
                 address,
             );
-        });
-    });
-    describe('setMngmtFee()', () => {
-        it('Should be only owner', async () => {
-            const {
-                tapiocaWrapper_0,
-                utils: { newEOA },
-            } = await loadFixture(setupFixture);
-            const eoa = newEOA();
-            setBalance(eoa.address, ethers.utils.parseEther('100000'));
-
-            await expect(
-                tapiocaWrapper_0.connect(eoa).setMngmtFee(1),
-            ).to.be.revertedWith('Ownable: caller is not the owner');
-        });
-
-        it('Should not be greater than 0.5%', async () => {
-            const { tapiocaWrapper_0 } = await loadFixture(setupFixture);
-
-            await expect(
-                tapiocaWrapper_0.setMngmtFee(51),
-            ).to.be.revertedWithCustomError(
-                tapiocaWrapper_0,
-                'TapiocaWrapper__MngmtFeeTooHigh',
-            );
-        });
-
-        it('Should change correctly the management fee', async () => {
-            const { tapiocaWrapper_0 } = await loadFixture(setupFixture);
-
-            await tapiocaWrapper_0.setMngmtFee(50);
-            expect(await tapiocaWrapper_0.mngmtFee()).to.eq(50);
         });
     });
 });

@@ -54,7 +54,6 @@ describe('mTapiocaOFT', () => {
                 dummyAmount,
                 mErc20Mock,
                 mintAndApprove,
-                estimateFees,
             } = await loadFixture(setupFixture);
 
             await mintAndApprove(
@@ -68,26 +67,6 @@ describe('mTapiocaOFT', () => {
             ).to.be.revertedWithCustomError(mtapiocaOFT0, 'TOFT__NotHostChain');
         });
 
-        it('Should fail if the fees are not paid', async () => {
-            const {
-                signer,
-                mErc20Mock,
-                mtapiocaOFT0,
-                mintAndApprove,
-                estimateFees,
-                dummyAmount,
-            } = await loadFixture(setupFixture);
-            await mintAndApprove(
-                mErc20Mock,
-                mtapiocaOFT0,
-                signer,
-                BN(dummyAmount).sub(await estimateFees(dummyAmount)),
-            );
-            await expect(
-                mtapiocaOFT0.wrap(signer.address, dummyAmount),
-            ).to.be.revertedWith('ERC20: insufficient allowance');
-        });
-
         it('Should wrap and give a 1:1 ratio amount of tokens without fees', async () => {
             const {
                 signer,
@@ -97,7 +76,6 @@ describe('mTapiocaOFT', () => {
                 mintAndApprove,
                 dummyAmount,
             } = await loadFixture(setupFixture);
-            await tapiocaWrapper_0.setMngmtFee(0);
 
             await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount);
 
@@ -123,46 +101,6 @@ describe('mTapiocaOFT', () => {
             );
         });
 
-        it('Should wrap and give a 1:1 ratio amount of tokens with fees', async () => {
-            const {
-                signer,
-                mErc20Mock,
-                mtapiocaOFT0,
-                mintAndApprove,
-                dummyAmount,
-                estimateFees,
-            } = await loadFixture(setupFixture);
-
-            const fees = await estimateFees(dummyAmount);
-            const feesBefore = await mtapiocaOFT0.totalFees();
-
-            await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount);
-
-            const balTOFTSignerBefore = await mtapiocaOFT0.balanceOf(
-                signer.address,
-            );
-            const balERC20ContractBefore = await mErc20Mock.balanceOf(
-                mtapiocaOFT0.address,
-            );
-
-            await mtapiocaOFT0.wrap(signer.address, dummyAmount);
-
-            const balTOFTSignerAfter = await mtapiocaOFT0.balanceOf(
-                signer.address,
-            );
-            const balERC20ContractAfter = await mErc20Mock.balanceOf(
-                mtapiocaOFT0.address,
-            );
-
-            expect(balTOFTSignerAfter).eq(balTOFTSignerBefore.add(dummyAmount));
-            expect(balERC20ContractAfter).eq(
-                balERC20ContractBefore.add(dummyAmount.add(fees)),
-            );
-
-            const feesAfter = await mtapiocaOFT0.totalFees();
-            expect(feesAfter.sub(feesBefore)).eq(fees);
-        });
-
         it('Should be able to extract tokens', async () => {
             const {
                 signer,
@@ -171,11 +109,7 @@ describe('mTapiocaOFT', () => {
                 tapiocaWrapper_0,
                 mintAndApprove,
                 dummyAmount,
-                estimateFees,
             } = await loadFixture(setupFixture);
-
-            const fees = await estimateFees(dummyAmount);
-            const feesBefore = await mtapiocaOFT0.totalFees();
 
             await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount);
 
