@@ -90,6 +90,15 @@
                 "meta": {}
             }
         ],
+        "420": [
+            {
+                "name": "FTM",
+                "address": "0x19de553a8CfFCFF8CB49E236C1a499F9CF083b97",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            }
+        ],
         "43113": [
             {
                 "name": "TapiocaOFT-Avalanche",
@@ -250,6 +259,15 @@
                 "name": "TapiocaDeployer",
                 "address": "0x993afaC45200Dc406144937a83816085d7cDD861",
                 "meta": {}
+            }
+        ],
+        "80001": [
+            {
+                "name": "MATIC",
+                "address": "0x5ecE0aCB1E11ac81B3fb2a7DC9EA2Dc52EFa5152",
+                "meta": {
+                    "isERC20Mock": true
+                }
             }
         ],
         "421613": [
