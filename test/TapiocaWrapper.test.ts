@@ -524,7 +524,7 @@ describe('TapiocaWrapper', () => {
 
             await expect(
                 tapiocaWrapper_0.connect(eoa).setMngmtFee(1),
-            ).to.be.revertedWith('UNAUTHORIZED');
+            ).to.be.revertedWith('Ownable: caller is not the owner');
         });
 
         it('Should not be greater than 0.5%', async () => {
