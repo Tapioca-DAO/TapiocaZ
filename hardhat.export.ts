@@ -85,6 +85,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
             avalancheFujiTestnet: process.env.AVALANCHE_FUJI_KEY ?? '',
             bscTestnet: process.env.BSC_KEY ?? '',
             polygonMumbai: process.env.POLYGON_MUMBAI ?? '',
+            ftmTestnet: process.env.FTM_TESTNET ?? '',
         },
         customChains: [],
     },
