@@ -378,6 +378,15 @@
                 "meta": {}
             }
         ],
+        "80001": [
+            {
+                "name": "MATIC",
+                "address": "0x5ecE0aCB1E11ac81B3fb2a7DC9EA2Dc52EFa5152",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            }
+        ],
         "421613": [
             {
                 "name": "TapiocaOFT-Fantom",
