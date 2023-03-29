@@ -92,6 +92,39 @@
         ],
         "43113": [
             {
+                "name": "TapiocaOFT-TESTT",
+                "address": "0x30D3932C63cd7DB81A7FB340AB54A77cA70026Be",
+                "meta": {
+                    "isToftHost": true,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0x93f54D755A063cE7bB9e6Ac47Eccc8e33411d706",
+                        false,
+                        "0x78e7b562177637E5D99fCcA0248B5eBD417EA678",
+                        "0x0cD4cc5bcC4A27C6b36433b8AEABDACA55363788",
+                        "TESTT",
+                        "TEEST",
+                        18,
+                        43113
+                    ]
+                }
+            },
+            {
+                "name": "TESTT",
+                "address": "0x78e7b562177637E5D99fCcA0248B5eBD417EA678",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            },
+            {
+                "name": "TOFT-TEST",
+                "address": "0xAb0327619A61a7bf4c8039889f44C6b3e51E26c7",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            },
+            {
                 "name": "TapiocaOFT-Polygon",
                 "address": "0xCc299cCbC0e7E125BEd829E8B5a662fBdDB48c47",
                 "meta": {

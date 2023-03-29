@@ -90,16 +90,39 @@
                 "meta": {}
             }
         ],
-        "420": [
+        "43113": [
             {
-                "name": "FTM",
-                "address": "0x19de553a8CfFCFF8CB49E236C1a499F9CF083b97",
+                "name": "TESTT",
+                "address": "0x78e7b562177637E5D99fCcA0248B5eBD417EA678",
                 "meta": {
                     "isERC20Mock": true
                 }
-            }
-        ],
-        "43113": [
+            },
+            {
+                "name": "TOFT-TEST",
+                "address": "0xAb0327619A61a7bf4c8039889f44C6b3e51E26c7",
+                "meta": {
+                    "isERC20Mock": true
+                }
+            },
+            {
+                "name": "TapiocaOFT-Polygon",
+                "address": "0xCc299cCbC0e7E125BEd829E8B5a662fBdDB48c47",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "args": [
+                        "0x93f54D755A063cE7bB9e6Ac47Eccc8e33411d706",
+                        false,
+                        "0xeE2FC11C64B9A254d1D336771d1e7F18bfB11861",
+                        "0xC149363B885e32E5d657797Fd75039f880395aF4",
+                        "Polygon",
+                        "MATIC",
+                        18,
+                        80001
+                    ]
+                }
+            },
             {
                 "name": "TapiocaOFT-Avalanche",
                 "address": "0x01b38Cade18cc6f1F408acBf2Db4d6d1951463F5",
@@ -259,15 +282,6 @@
                 "name": "TapiocaDeployer",
                 "address": "0x993afaC45200Dc406144937a83816085d7cDD861",
                 "meta": {}
-            }
-        ],
-        "80001": [
-            {
-                "name": "MATIC",
-                "address": "0x5ecE0aCB1E11ac81B3fb2a7DC9EA2Dc52EFa5152",
-                "meta": {
-                    "isERC20Mock": true
-                }
             }
         ],
         "421613": [

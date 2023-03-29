@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { useNetwork, useUtils } from '../../scripts/utils';
 import { TapiocaOFT, TapiocaWrapper } from '../../typechain';
 import { loadVM } from '../utils';
+import SDK from 'tapioca-sdk';
+import { filter } from 'lodash';
 
 export interface ITOFTDeployment extends TContract {
     meta: {
@@ -21,6 +23,7 @@ export const deployTOFT__task = async (
     args: {
         isNative?: boolean;
         isMerged?: boolean;
+        throughMultisig?: boolean;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -33,13 +36,20 @@ export const deployTOFT__task = async (
 
     checkIfExists(hre, tag, args.isMerged);
 
-    /**
-     * Load variables
-     */
-    const utils = useUtils(hre);
+    const project = hre.SDK.config.TAPIOCA_PROJECTS[2];
+    const subrepo = hre.SDK.db.SUBREPO_GLOBAL_DB_PATH;
 
-    // TODO - Use global YieldBox address from tapioca-bar when it's ready
-    const yieldBox = await utils.deployYieldBoxMock();
+    const chainInfo = hre.SDK.utils.getChainBy(
+        'chainId',
+        await hre.getChainId(),
+    );
+    const yieldBox = await hre.SDK.db
+        .loadGlobalDeployment(tag, project, chainInfo.chainId)
+        .find((e) => e.name === 'YieldBox');
+    if (!yieldBox) {
+        throw '[-] YieldBox not found';
+    }
+
     const ercAddress = await loadERC20(hre, args.isNative);
     const { hostChainName, isCurrentChainHost, hostChainContractInfo } =
         await getHostChainInfo(hre, ercAddress, tag);
@@ -65,9 +75,11 @@ export const deployTOFT__task = async (
     );
     const deployedTOFT = await initiateTOFTDeployment(
         hre,
+        tag,
         tapiocaWrapper,
         ercAddress,
         toftDeployInfo.txData,
+        args.throughMultisig,
         args.isMerged,
     );
     await saveDeployedTOFT(hre, tag, deployedTOFT, {
@@ -227,9 +239,11 @@ async function getPreDeploymentInfo(
     const utils = useUtils(hre);
 
     console.log('[+] Getting TOFT creation bytecode');
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const hostChainInfo = hre.SDK.utils
         .getSupportedChains()
         .find((e) => e.name === hostChainName)!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const currentChainInfo = hre.SDK.utils
         .getSupportedChains()
         .find((e) => e.name === hre.network.name)!;
@@ -259,29 +273,47 @@ async function getPreDeploymentInfo(
  */
 async function initiateTOFTDeployment(
     hre: HardhatRuntimeEnvironment,
+    tag: string,
     tapiocaWrapper: TapiocaWrapper,
     ercAddress: string,
     deployBytecode: BytesLike,
+    throughMultisig?: boolean,
     isMerged?: boolean,
 ) {
     console.log('[+] Deploying TOFT');
-    const txCreateToft = await (
-        await tapiocaWrapper.createTOFT(
-            ercAddress,
-            deployBytecode,
-            hre.ethers.utils.solidityKeccak256(['string'], [uuidv4()]),
-            Boolean(isMerged),
-        )
-    ).wait(3);
+    if (throughMultisig) {
+        const calldata = tapiocaWrapper.interface.encodeFunctionData(
+            'createTOFT',
+            [
+                ercAddress,
+                deployBytecode,
+                hre.ethers.utils.solidityKeccak256(['string'], [uuidv4()]),
+                Boolean(isMerged),
+            ],
+        );
+
+        const deployerVM = await loadVM(hre, tag);
+
+        await deployerVM.submitTransactionThroughMultisig(
+            tapiocaWrapper.address,
+            // eslint-disable-next-line prettier/prettier
+            calldata);
+    } else {
+        await (
+            await tapiocaWrapper.createTOFT(
+                ercAddress,
+                deployBytecode,
+                hre.ethers.utils.solidityKeccak256(['string'], [uuidv4()]),
+                Boolean(isMerged),
+            )
+        ).wait(3);
+    }
+
     const deployedToft = await hre.ethers.getContractAt(
         'TapiocaOFT',
         await tapiocaWrapper.lastTOFT(),
     );
-    console.log(
-        `[+] TOFT ${await deployedToft.name()} created on hash: ${
-            txCreateToft.transactionHash
-        }`,
-    );
+    console.log(`[+] TOFT ${await deployedToft.name()} created`);
 
     return deployedToft;
 }
