@@ -36,7 +36,7 @@ export const deployTapiocaWrapper__task = async (
     const deployerVM = await loadVM(hre, tag);
 
     const _owner = taskArgs.transferOwnership
-        ? await deployerVM.getMultisig(signer.address).address //TODO: remove param after CU-85zru6ag7 implementation
+        ? await deployerVM.getMultisig().address
         : signer.address;
 
     deployerVM.add({
