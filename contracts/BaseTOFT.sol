@@ -159,7 +159,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             if (isNative) {
                 _wrapNative(msg.sender);
             } else {
-                _wrap(msg.sender, amount);
+                _wrap(msg.sender, msg.sender, amount);
             }
         }
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
@@ -250,10 +250,14 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         }
     }
 
-    function _wrap(address _toAddress, uint256 _amount) internal virtual {
-        erc20.safeTransferFrom(msg.sender, address(this), _amount);
+    function _wrap(
+        address _fromAddress,
+        address _toAddress,
+        uint256 _amount
+    ) internal virtual {
+        erc20.safeTransferFrom(_fromAddress, address(this), _amount);
         _mint(_toAddress, _amount);
-        emit Wrap(msg.sender, _toAddress, _amount);
+        emit Wrap(_fromAddress, _toAddress, _amount);
     }
 
     function _wrapNative(address _toAddress) internal virtual {
