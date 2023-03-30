@@ -150,6 +150,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
     function sendToYB(
+        address _from,
+        address _to,
         uint256 amount,
         uint256 assetId,
         uint16 lzDstChainId,
@@ -157,17 +159,17 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     ) external payable {
         if (options.wrap) {
             if (isNative) {
-                _wrapNative(msg.sender);
+                _wrapNative(_to);
             } else {
-                _wrap(msg.sender, msg.sender, amount);
+                _wrap(_from, _to, amount);
             }
         }
-        bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
-        _debitFrom(msg.sender, lzEndpoint.getChainId(), toAddress, amount);
+        bytes32 toAddress = LzLib.addressToBytes32(_to);
+        _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
             options.strategyDeposit ? PT_YB_SEND_STRAT : PT_YB_DEPOSIT,
-            LzLib.addressToBytes32(msg.sender),
+            LzLib.addressToBytes32(_from),
             toAddress,
             amount,
             assetId
@@ -179,13 +181,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         _lzSend(
             lzDstChainId,
             lzPayload,
-            payable(msg.sender),
+            payable(_from),
             options.zroPaymentAddress,
             adapterParam,
             msg.value
         );
 
-        emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
+        emit SendToChain(lzDstChainId, _from, toAddress, amount);
     }
 
     function retrieveFromYB(
