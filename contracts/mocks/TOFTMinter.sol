@@ -7,15 +7,19 @@ interface IERC20WithDecimal is IERC20 {
     function decimals() external view returns (uint8);
 }
 
+interface ILegacyOFT is ITapiocaOFT {
+    function wrap(address _toAddress, uint256 _amount) external;
+}
+
 contract TOFTMinter is Ownable {
-    ITapiocaOFT public OFT;
+    ILegacyOFT public OFT;
     IERC20WithDecimal public token;
 
     mapping(address => uint256) public mintedAt;
     uint256 public mintWindow = 24 hours;
     uint256 public mintLimit;
 
-    constructor(ITapiocaOFT _oft) {
+    constructor(ILegacyOFT _oft) {
         OFT = _oft;
         token = IERC20WithDecimal(address(_oft.erc20()));
 
@@ -39,9 +43,13 @@ contract TOFTMinter is Ownable {
         _mint(_to, _amount);
     }
 
+    function transferToken(address _to, uint256 _amount) external onlyOwner {
+        token.transfer(_to, _amount);
+    }
+
     function _mint(address _to, uint256 _amount) internal {
         token.approve(address(OFT), _amount);
-        OFT.wrap(address(this), _to, _amount);
+        OFT.wrap(_to, _amount);
     }
 
     function updateMintLimit(uint256 _newVal) external onlyOwner {
