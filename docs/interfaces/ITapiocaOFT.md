@@ -210,7 +210,7 @@ function unwrap(address _toAddress, uint256 _amount) external nonpayable
 ### wrap
 
 ```solidity
-function wrap(address _toAddress, uint256 _amount) external nonpayable
+function wrap(address _fromAddress, address _toAddress, uint256 _amount) external nonpayable
 ```
 
 
@@ -221,6 +221,7 @@ function wrap(address _toAddress, uint256 _amount) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
+| _fromAddress | address | undefined |
 | _toAddress | address | undefined |
 | _amount | uint256 | undefined |
 
