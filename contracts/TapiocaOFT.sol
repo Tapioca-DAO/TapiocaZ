@@ -65,8 +65,12 @@ contract TapiocaOFT is BaseTOFT {
     /// @dev Since it can be executed only on the main chain, if an address exists on the OP chain it will not allowed to wrap.
     /// @param _toAddress The address to wrap the ERC20 to.
     /// @param _amount The amount of ERC20 to wrap.
-    function wrap(address _toAddress, uint256 _amount) external onlyHostChain {
-        _wrap(_toAddress, _amount);
+    function wrap(
+        address _fromAddress,
+        address _toAddress,
+        uint256 _amount
+    ) external onlyHostChain {
+        _wrap(_fromAddress, _toAddress, _amount);
     }
 
     /// @notice Wrap a native token with a 1:1 ratio with a fee if existing.
