@@ -63,7 +63,7 @@ describe('mTapiocaOFT', () => {
                 BN(dummyAmount),
             );
             await expect(
-                mtapiocaOFT10.wrap(signer.address, dummyAmount),
+                mtapiocaOFT10.wrap(signer.address, signer.address, dummyAmount),
             ).to.be.revertedWithCustomError(mtapiocaOFT0, 'TOFT__NotHostChain');
         });
 
@@ -85,7 +85,11 @@ describe('mTapiocaOFT', () => {
                 mtapiocaOFT0.address,
             );
 
-            await mtapiocaOFT0.wrap(signer.address, dummyAmount);
+            await mtapiocaOFT0.wrap(
+                signer.address,
+                signer.address,
+                dummyAmount,
+            );
 
             const balTOFTSignerAfter = await mtapiocaOFT0.balanceOf(
                 signer.address,
@@ -112,7 +116,11 @@ describe('mTapiocaOFT', () => {
 
             await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount);
 
-            await mtapiocaOFT0.wrap(signer.address, dummyAmount);
+            await mtapiocaOFT0.wrap(
+                signer.address,
+                signer.address,
+                dummyAmount,
+            );
 
             const signerBalanceBefore = await mErc20Mock.balanceOf(
                 signer.address,
@@ -192,7 +200,11 @@ describe('mTapiocaOFT', () => {
             } = await loadFixture(setupFixture);
 
             await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount);
-            await mtapiocaOFT0.wrap(signer.address, dummyAmount);
+            await mtapiocaOFT0.wrap(
+                signer.address,
+                signer.address,
+                dummyAmount,
+            );
 
             const balTOFTSignerBefore = await mtapiocaOFT0.balanceOf(
                 signer.address,
@@ -244,7 +256,11 @@ describe('mTapiocaOFT', () => {
             signer,
             (1e18).toString(),
         );
-        await mtapiocaOFT0.wrap(signer.address, (1e18).toString());
+        await mtapiocaOFT0.wrap(
+            signer.address,
+            signer.address,
+            (1e18).toString(),
+        );
 
         const deadline =
             (await ethers.provider.getBlock('latest')).timestamp + 10_000;

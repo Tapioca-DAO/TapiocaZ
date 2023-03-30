@@ -46,11 +46,11 @@ describe('TapiocaOFT', () => {
             );
 
             await expect(
-                tapiocaOFT10.wrap(signer.address, dummyAmount),
+                tapiocaOFT10.wrap(signer.address, signer.address, dummyAmount),
             ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotHostChain');
         });
 
-        it('Should wrap and give a 1:1 ratio amount of tokens without fees', async () => {
+        it('Should wrap and give a 1:1 ratio amount of tokens', async () => {
             const {
                 signer,
                 erc20Mock,
@@ -68,7 +68,7 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0.address,
             );
 
-            await tapiocaOFT0.wrap(signer.address, dummyAmount);
+            await tapiocaOFT0.wrap(signer.address, signer.address, dummyAmount);
 
             const balTOFTSignerAfter = await tapiocaOFT0.balanceOf(
                 signer.address,
@@ -104,7 +104,7 @@ describe('TapiocaOFT', () => {
             } = await loadFixture(setupFixture);
 
             await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
-            await tapiocaOFT0.wrap(signer.address, dummyAmount);
+            await tapiocaOFT0.wrap(signer.address, signer.address, dummyAmount);
 
             const balTOFTSignerBefore = await tapiocaOFT0.balanceOf(
                 signer.address,
@@ -159,7 +159,11 @@ describe('TapiocaOFT', () => {
                 signer,
                 bigDummyAmount,
             );
-            await tapiocaOFT0.wrap(signer.address, bigDummyAmount);
+            await tapiocaOFT0.wrap(
+                signer.address,
+                signer.address,
+                bigDummyAmount,
+            );
 
             // Failure
             await expect(
@@ -288,6 +292,8 @@ describe('TapiocaOFT', () => {
             expect(signerToftBalanceBeforeDeposit.eq(0)).to.be.true;
             const toDeposit = bigDummyAmount;
             await tapiocaOFT0.connect(signer).sendToYB(
+                signer.address,
+                signer.address,
                 toDeposit,
                 1, //asset id
                 dstChainId, //dst chain Id
@@ -372,7 +378,11 @@ describe('TapiocaOFT', () => {
                 signer,
                 bigDummyAmount,
             );
-            await tapiocaOFT0.wrap(signer.address, bigDummyAmount);
+            await tapiocaOFT0.wrap(
+                signer.address,
+                signer.address,
+                bigDummyAmount,
+            );
 
             // Set trusted remotes
             await tapiocaWrapper_0.executeTOFT(
@@ -443,12 +453,18 @@ describe('TapiocaOFT', () => {
                 signer,
                 bigDummyAmount,
             );
-            await tapiocaOFT0.wrap(signer.address, bigDummyAmount);
+            await tapiocaOFT0.wrap(
+                signer.address,
+                signer.address,
+                bigDummyAmount,
+            );
             const signerToftBalanceBeforeDeposit = await tapiocaOFT0.balanceOf(
                 signer.address,
             );
             const toDeposit = bigDummyAmount;
             await tapiocaOFT0.sendToYB(
+                signer.address,
+                signer.address,
                 toDeposit,
                 1, //asset id
                 dstChainId, //dst chain Id
@@ -554,7 +570,11 @@ describe('TapiocaOFT', () => {
                 signer,
                 bigDummyAmount,
             );
-            await tapiocaOFT0.wrap(signer.address, bigDummyAmount);
+            await tapiocaOFT0.wrap(
+                signer.address,
+                signer.address,
+                bigDummyAmount,
+            );
 
             // Set trusted remotes
             await tapiocaWrapper_0.executeTOFT(
@@ -587,6 +607,8 @@ describe('TapiocaOFT', () => {
 
             const toDeposit = bigDummyAmount;
             await tapiocaOFT0.sendToYB(
+                signer.address,
+                signer.address,
                 toDeposit,
                 1, //asset id
                 dstChainId, //dst chain Id
