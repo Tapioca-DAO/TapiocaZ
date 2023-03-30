@@ -11,7 +11,11 @@ interface ITapiocaOFT {
 
     function wrappedAmount(uint256 _amount) external view returns (uint256);
 
-    function wrap(address _toAddress, uint256 _amount) external;
+    function wrap(
+        address _fromAddress,
+        address _toAddress,
+        uint256 _amount
+    ) external;
 
     function wrapNative(address _toAddress) external payable;
 
