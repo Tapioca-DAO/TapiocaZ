@@ -978,7 +978,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToYB
 
 ```solidity
-function sendToYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
+function sendToYB(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
 ```
 
 
@@ -989,6 +989,8 @@ function sendToYB(uint256 amount, uint256 assetId, uint16 lzDstChainId, BaseTOFT
 
 | Name | Type | Description |
 |---|---|---|
+| _from | address | undefined |
+| _to | address | undefined |
 | amount | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
@@ -1409,7 +1411,7 @@ function useCustomAdapterParams() external view returns (bool)
 ### wrap
 
 ```solidity
-function wrap(address _toAddress, uint256 _amount) external nonpayable
+function wrap(address _fromAddress, address _toAddress, uint256 _amount) external nonpayable
 ```
 
 Wrap an ERC20 with a 1:1 ratio with a fee if existing.
@@ -1420,6 +1422,7 @@ Wrap an ERC20 with a 1:1 ratio with a fee if existing.
 
 | Name | Type | Description |
 |---|---|---|
+| _fromAddress | address | undefined |
 | _toAddress | address | The address to wrap the ERC20 to. |
 | _amount | uint256 | The amount of ERC20 to wrap. |
 
