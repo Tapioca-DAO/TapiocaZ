@@ -115,6 +115,35 @@
         ],
         "4002": [
             {
+                "name": "TOFTMinter_TapiocaOFT-Fantom",
+                "address": "0x7d91FCA53809e393eCa64a09785330bc28DF0639",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0xaede040172AB30E90c672f31118a25B7e02d023d"
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaOFT-WETHMock",
+                "address": "0x3Dc9821465E8816835943a92A1EDdAf4Be9dCBd7",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0x7dcAD72640F835B0FA36EFD3D6d3ec902C7E5acf",
+                        false,
+                        "0xffcE5008898ddF90F03FabDeF43C8C388e132fE1",
+                        "0x927C44D4BA27974A2d8B7e5B1F14899c4A77f05B",
+                        "WETHMock",
+                        "WETHM",
+                        18,
+                        5
+                    ]
+                }
+            },
+            {
                 "name": "TapiocaOFT-Arbitrum",
                 "address": "0x936a6653428D1bb5838CC7D7e673Eb346Cde281d",
                 "meta": {
@@ -208,6 +237,16 @@
             }
         ],
         "43113": [
+            {
+                "name": "TOFTMinter_TapiocaOFT-Avalanche",
+                "address": "0x38D0f2b009CaceC44403e57Ee1A4c9F533a5E74A",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0x6155cC62dDB989A388836Ff54cf8c84cd354Be48"
+                    ]
+                }
+            },
             {
                 "name": "TapiocaOFT-WETHMock",
                 "address": "0xb45dca5B5AfaBf850983a13140913353e545E6e2",
@@ -322,6 +361,16 @@
         ],
         "80001": [
             {
+                "name": "TOFTMinter_TapiocaOFT-Polygon",
+                "address": "0x78a8208ddfB58e8cc81967616F15e83b687E755B",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0x6324630bF6A84683a31879bb27Ce78b488526f77"
+                    ]
+                }
+            },
+            {
                 "name": "TapiocaOFT-WETHMock",
                 "address": "0x65b7792551a5C63f36c68055D52A5d10F826018a",
                 "meta": {
@@ -434,6 +483,16 @@
             }
         ],
         "421613": [
+            {
+                "name": "TOFTMinter_TapiocaOFT-Arbitrum",
+                "address": "0xEec6eE76dA881267f1029BB87dd81CCE25CC9f8e",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0x03db221aD44d00B1ed79d0fF2b9EE4Aab0dcf418"
+                    ]
+                }
+            },
             {
                 "name": "TapiocaOFT-WETHMock",
                 "address": "0xDf20265679ca58812fE85340B88C6b4403D1790C",
