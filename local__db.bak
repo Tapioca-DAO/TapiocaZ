@@ -485,7 +485,7 @@
         "421613": [
             {
                 "name": "TOFTMinter_TapiocaOFT-Arbitrum",
-                "address": "0xEec6eE76dA881267f1029BB87dd81CCE25CC9f8e",
+                "address": "0x34cbE5670f30a4FAdd4D75D679b95E8B15A80770",
                 "meta": {
                     "isTOFTMinter": true,
                     "args": [

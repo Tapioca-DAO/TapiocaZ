@@ -2,6 +2,16 @@
     "default": {
         "5": [
             {
+                "name": "TOFTMinter_TapiocaOFT-WETHMock",
+                "address": "0x51f4713Cba80Fa0A7A3f74cDDA6c36F4677C4aAB",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0xCB6Dd122e086dbB6e69FC4AEce44D23D932e0C25"
+                    ]
+                }
+            },
+            {
                 "name": "TapiocaOFT-WETHMock",
                 "address": "0xCB6Dd122e086dbB6e69FC4AEce44D23D932e0C25",
                 "meta": {
