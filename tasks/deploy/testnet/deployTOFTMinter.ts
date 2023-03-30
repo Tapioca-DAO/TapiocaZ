@@ -80,7 +80,7 @@ export const deployTOFTMinter__task = async (
                 console.log('\t\t+Verifying TOFTMinter');
                 await hre.run('verify:verify', {
                     address: toftMinter.address,
-                    constructorArguments: OFT.address,
+                    constructorArguments: [OFT.address],
                     noCompile: true,
                 });
             }

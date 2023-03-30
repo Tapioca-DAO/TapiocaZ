@@ -116,7 +116,7 @@
         "4002": [
             {
                 "name": "TOFTMinter_TapiocaOFT-Fantom",
-                "address": "0xe61E821730BA0c12eF3e1F3CAeC15EFB85435fb4",
+                "address": "0x7d91FCA53809e393eCa64a09785330bc28DF0639",
                 "meta": {
                     "isTOFTMinter": true,
                     "args": [
@@ -239,7 +239,7 @@
         "43113": [
             {
                 "name": "TOFTMinter_TapiocaOFT-Avalanche",
-                "address": "0xB8cb5B5407232651DF5ef67331F45A3313f222A7",
+                "address": "0x38D0f2b009CaceC44403e57Ee1A4c9F533a5E74A",
                 "meta": {
                     "isTOFTMinter": true,
                     "args": [
@@ -362,7 +362,7 @@
         "80001": [
             {
                 "name": "TOFTMinter_TapiocaOFT-Polygon",
-                "address": "0xE12676519831894dd2A50ed1947d00ba2da90CAD",
+                "address": "0x78a8208ddfB58e8cc81967616F15e83b687E755B",
                 "meta": {
                     "isTOFTMinter": true,
                     "args": [
@@ -485,9 +485,12 @@
         "421613": [
             {
                 "name": "TOFTMinter_TapiocaOFT-Arbitrum",
-                "address": "0xC97Ddc2414d8D1C0A868f4066b9326955eC74a2a",
+                "address": "0xEec6eE76dA881267f1029BB87dd81CCE25CC9f8e",
                 "meta": {
-                    "isTOFTMinter": true
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0x03db221aD44d00B1ed79d0fF2b9EE4Aab0dcf418"
+                    ]
                 }
             },
             {
