@@ -115,6 +115,16 @@
         ],
         "4002": [
             {
+                "name": "TOFTMinter_TapiocaOFT-Fantom",
+                "address": "0xe61E821730BA0c12eF3e1F3CAeC15EFB85435fb4",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0xaede040172AB30E90c672f31118a25B7e02d023d"
+                    ]
+                }
+            },
+            {
                 "name": "TapiocaOFT-WETHMock",
                 "address": "0x3Dc9821465E8816835943a92A1EDdAf4Be9dCBd7",
                 "meta": {
@@ -227,6 +237,16 @@
             }
         ],
         "43113": [
+            {
+                "name": "TOFTMinter_TapiocaOFT-Avalanche",
+                "address": "0xB8cb5B5407232651DF5ef67331F45A3313f222A7",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0x6155cC62dDB989A388836Ff54cf8c84cd354Be48"
+                    ]
+                }
+            },
             {
                 "name": "TapiocaOFT-WETHMock",
                 "address": "0xb45dca5B5AfaBf850983a13140913353e545E6e2",
@@ -341,6 +361,16 @@
         ],
         "80001": [
             {
+                "name": "TOFTMinter_TapiocaOFT-Polygon",
+                "address": "0xE12676519831894dd2A50ed1947d00ba2da90CAD",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0x6324630bF6A84683a31879bb27Ce78b488526f77"
+                    ]
+                }
+            },
+            {
                 "name": "TapiocaOFT-WETHMock",
                 "address": "0x65b7792551a5C63f36c68055D52A5d10F826018a",
                 "meta": {
@@ -453,6 +483,16 @@
             }
         ],
         "421613": [
+            {
+                "name": "TOFTMinter_TapiocaOFT-Arbitrum",
+                "address": "0xEec6eE76dA881267f1029BB87dd81CCE25CC9f8e",
+                "meta": {
+                    "isTOFTMinter": true,
+                    "args": [
+                        "0x03db221aD44d00B1ed79d0fF2b9EE4Aab0dcf418"
+                    ]
+                }
+            },
             {
                 "name": "TapiocaOFT-WETHMock",
                 "address": "0xDf20265679ca58812fE85340B88C6b4403D1790C",
