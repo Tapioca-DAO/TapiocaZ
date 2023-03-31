@@ -129,6 +129,40 @@ function PT_YB_RETRIEVE_STRAT() external view returns (uint16)
 |---|---|---|
 | _0 | uint16 | undefined |
 
+### PT_YB_SEND_SGL_BORROW
+
+```solidity
+function PT_YB_SEND_SGL_BORROW() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
+### PT_YB_SEND_SGL_LEND
+
+```solidity
+function PT_YB_SEND_SGL_LEND() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### PT_YB_SEND_STRAT
 
 ```solidity
@@ -996,6 +1030,51 @@ function sendToYB(address _from, address _to, uint256 amount, uint256 assetId, u
 | lzDstChainId | uint16 | undefined |
 | options | BaseTOFT.SendOptions | undefined |
 
+### sendToYBAndBorrow
+
+```solidity
+function sendToYBAndBorrow(address _from, address _to, uint256 amount, uint256 borrowAmount, address _marketHelper, address _market, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _from | address | undefined |
+| _to | address | undefined |
+| amount | uint256 | undefined |
+| borrowAmount | uint256 | undefined |
+| _marketHelper | address | undefined |
+| _market | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| options | BaseTOFT.SendOptions | undefined |
+
+### sendToYBAndLend
+
+```solidity
+function sendToYBAndLend(address _from, address _to, uint256 amount, address _marketHelper, address _market, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _from | address | undefined |
+| _to | address | undefined |
+| amount | uint256 | undefined |
+| _marketHelper | address | undefined |
+| _market | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| options | BaseTOFT.SendOptions | undefined |
+
 ### setConfig
 
 ```solidity
@@ -1499,6 +1578,23 @@ event BalancerStatusUpdated(address indexed _balancer, bool _bool, bool _new)
 | _bool  | bool | undefined |
 | _new  | bool | undefined |
 
+### Borrow
+
+```solidity
+event Borrow(address indexed _from, uint256 _amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _from `indexed` | address | undefined |
+| _amount  | uint256 | undefined |
+
 ### CallOFTReceivedSuccess
 
 ```solidity
@@ -1535,6 +1631,23 @@ event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new)
 | _chain  | uint256 | undefined |
 | _old  | bool | undefined |
 | _new  | bool | undefined |
+
+### Lend
+
+```solidity
+event Lend(address indexed _from, uint256 _amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _from `indexed` | address | undefined |
+| _amount  | uint256 | undefined |
 
 ### MessageFailed
 
