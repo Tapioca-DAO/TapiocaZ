@@ -51,6 +51,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     uint16 public constant PT_YB_WITHDRAW = 773;
     uint16 public constant PT_YB_SEND_SGL_LEND = 774;
     uint16 public constant PT_YB_SEND_SGL_BORROW = 775;
+    uint16 public constant PT_SEND_APPROVAL = 790;
 
     /// @notice The ERC20 to wrap.
     IERC20 public erc20;
@@ -74,6 +75,12 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // ************** //
     // *** EVENTS *** //
     // ************** //
+    event SendApproval(
+        address _target,
+        address _owner,
+        address _spender,
+        uint256 _amount
+    );
     event YieldBoxDeposit(uint256 _amount);
     event YieldBoxRetrieval(uint256 _amount);
     event Lend(address indexed _from, uint256 _amount);
@@ -151,9 +158,52 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bool wrap;
     }
 
+    struct IApproval {
+        IERC20Permit target;
+        address owner;
+        address spender;
+        uint256 value;
+        uint256 deadline;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
+
+    function sendApproval(
+        uint16 lzDstChainId,
+        IApproval calldata approval,
+        SendOptions calldata options
+    ) external payable {
+        bytes memory lzPayload = abi.encodePacked(
+            PT_SEND_APPROVAL,
+            LzLib.addressToBytes32(msg.sender),
+            approval.target,
+            approval.owner,
+            approval.spender,
+            approval.value,
+            approval.deadline,
+            approval.v,
+            approval.r,
+            approval.s
+        );
+
+        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
+            options.extraGasLimit
+        );
+        _lzSend(
+            lzDstChainId,
+            lzPayload,
+            payable(msg.sender),
+            options.zroPaymentAddress,
+            adapterParam,
+            msg.value
+        );
+    }
+
     function sendToYB(
         address _from,
         address _to,
@@ -172,7 +222,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
-        bytes memory lzPayload = abi.encode(
+        bytes memory lzPayload = abi.encodePacked(
             options.strategyDeposit ? PT_YB_SEND_STRAT : PT_YB_DEPOSIT,
             LzLib.addressToBytes32(_from),
             toAddress,
@@ -214,7 +264,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
-        bytes memory lzPayload = abi.encode(
+        bytes memory lzPayload = abi.encodePacked(
             PT_YB_SEND_SGL_LEND,
             LzLib.addressToBytes32(_from),
             toAddress,
@@ -258,7 +308,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
-        bytes memory lzPayload = abi.encode(
+        bytes memory lzPayload = abi.encodePacked(
             PT_YB_SEND_SGL_BORROW,
             LzLib.addressToBytes32(_from),
             toAddress,
@@ -337,6 +387,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             _lend(_srcChainId, _payload);
         } else if (packetType == PT_YB_SEND_SGL_BORROW) {
             _borrow(_srcChainId, _payload);
+        } else if (packetType == PT_SEND_APPROVAL) {
+            _callApproval(_payload);
         } else {
             packetType = _payload.toUint8(0); //LZ uses encodePacked for payload
             if (packetType == PT_SEND) {
@@ -532,6 +584,41 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         );
 
         emit Borrow(_from, amount);
+    }
+
+    function _callApproval(bytes memory _payload) internal virtual {
+        (
+            ,
+            ,
+            ,
+            IERC20Permit target,
+            address _owner,
+            address spender,
+            uint256 value,
+            uint256 deadline,
+            uint8 v,
+            bytes32 r,
+            bytes32 s
+        ) = abi.decode(
+                _payload,
+                (
+                    uint16,
+                    bytes32,
+                    bytes32,
+                    IERC20Permit,
+                    address,
+                    address,
+                    uint256,
+                    uint,
+                    uint8,
+                    bytes32,
+                    bytes32
+                )
+            );
+
+        target.permit(_owner, spender, value, deadline, v, r, s);
+
+        emit SendApproval(address(target), _owner, spender, value);
     }
 
     /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.

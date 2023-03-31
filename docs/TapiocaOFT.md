@@ -95,6 +95,23 @@ function PT_SEND_AND_CALL() external view returns (uint8)
 |---|---|---|
 | _0 | uint8 | undefined |
 
+### PT_SEND_APPROVAL
+
+```solidity
+function PT_SEND_APPROVAL() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
 ### PT_YB_DEPOSIT
 
 ```solidity
@@ -929,6 +946,24 @@ function sendAndCall(address _from, uint16 _dstChainId, bytes32 _toAddress, uint
 | _dstGasForCall | uint64 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
 
+### sendApproval
+
+```solidity
+function sendApproval(uint16 lzDstChainId, BaseTOFT.IApproval approval, BaseTOFT.SendOptions options) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| lzDstChainId | uint16 | undefined |
+| approval | BaseTOFT.IApproval | undefined |
+| options | BaseTOFT.SendOptions | undefined |
+
 ### sendFrom
 
 ```solidity
@@ -1608,6 +1643,25 @@ event RetryMessageSuccess(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, 
 | _srcAddress  | bytes | undefined |
 | _nonce  | uint64 | undefined |
 | _payloadHash  | bytes32 | undefined |
+
+### SendApproval
+
+```solidity
+event SendApproval(address _target, address _owner, address _spender, uint256 _amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _target  | address | undefined |
+| _owner  | address | undefined |
+| _spender  | address | undefined |
+| _amount  | uint256 | undefined |
 
 ### SendToChain
 
