@@ -1,6 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import hre, { ethers } from 'hardhat';
+import { BN, getERC20PermitSignature } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 describe('TapiocaOFT', () => {
@@ -666,6 +667,108 @@ describe('TapiocaOFT', () => {
             expect(signerToftBalanceBeforeWithdraw.add(toDeposit)).to.eq(
                 signerToftBalanceAfterWithdraw,
             );
+        });
+    });
+    describe('permit', () => {
+        it('should forward permit', async () => {
+            const {
+                signer,
+                tapiocaWrapper_0,
+                tapiocaWrapper_10,
+                erc20Mock,
+                tapiocaOFT0,
+                tapiocaOFT10,
+                mintAndApprove,
+                bigDummyAmount,
+            } = await loadFixture(setupFixture);
+
+            // ------------------- OFT Setup -------------------
+            await mintAndApprove(
+                erc20Mock,
+                tapiocaOFT0,
+                signer,
+                bigDummyAmount,
+            );
+            await tapiocaOFT0.wrap(
+                signer.address,
+                signer.address,
+                bigDummyAmount,
+            );
+
+            // Set trusted remotes
+            await tapiocaWrapper_0.executeTOFT(
+                tapiocaOFT0.address,
+                tapiocaOFT0.interface.encodeFunctionData('setTrustedRemote', [
+                    10,
+                    ethers.utils.solidityPack(
+                        ['address', 'address'],
+                        [tapiocaOFT10.address, tapiocaOFT0.address],
+                    ),
+                ]),
+                true,
+            );
+            await tapiocaWrapper_10.executeTOFT(
+                tapiocaOFT10.address,
+                tapiocaOFT10.interface.encodeFunctionData('setTrustedRemote', [
+                    0,
+                    ethers.utils.solidityPack(
+                        ['address', 'address'],
+                        [tapiocaOFT0.address, tapiocaOFT10.address],
+                    ),
+                ]),
+                true,
+            );
+
+            // ------------------- ERC20 Setup -------------------
+            const erc20 = await (
+                await ethers.getContractFactory('ERC20Mock')
+            ).deploy('Test', 'TST');
+            await erc20.mint(signer.address, bigDummyAmount);
+
+            const eoa1 = (await ethers.getSigners())[0];
+            const deadline = BN(
+                (await ethers.provider.getBlock('latest')).timestamp + 10_000,
+            );
+            const { r, s, v } = await getERC20PermitSignature(
+                signer,
+                erc20,
+                eoa1.address,
+                bigDummyAmount,
+                deadline,
+            );
+
+            // ------------------- TEST -------------------
+            await expect(
+                erc20
+                    .connect(eoa1)
+                    .transferFrom(signer.address, eoa1.address, bigDummyAmount),
+            ).to.be.revertedWith('ERC20: insufficient allowance');
+
+            await tapiocaOFT0.connect(eoa1).sendApproval(
+                10,
+                {
+                    target: erc20.address,
+                    owner: signer.address,
+                    spender: eoa1.address,
+                    value: bigDummyAmount,
+                    deadline,
+                    r,
+                    s,
+                    v,
+                },
+                {
+                    extraGasLimit: 200_000,
+                    strategyDeposit: false,
+                    wrap: false,
+                    zroPaymentAddress: ethers.constants.AddressZero,
+                },
+                { value: ethers.utils.parseEther('2') },
+            );
+            await expect(
+                erc20
+                    .connect(eoa1)
+                    .transferFrom(signer.address, eoa1.address, bigDummyAmount),
+            ).to.not.be.reverted;
         });
     });
 });

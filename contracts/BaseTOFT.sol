@@ -159,7 +159,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     }
 
     struct IApproval {
-        IERC20Permit target;
+        address target;
         address owner;
         address spender;
         uint256 value;
@@ -178,12 +178,12 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         IApproval calldata approval,
         SendOptions calldata options
     ) external payable {
-        bytes memory lzPayload = abi.encodePacked(
+        bytes memory lzPayload = abi.encode(
             PT_SEND_APPROVAL,
             LzLib.addressToBytes32(msg.sender),
-            approval.target,
-            approval.owner,
-            approval.spender,
+            LzLib.addressToBytes32(approval.target),
+            LzLib.addressToBytes32(approval.owner),
+            LzLib.addressToBytes32(approval.spender),
             approval.value,
             approval.deadline,
             approval.v,
@@ -222,7 +222,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
-        bytes memory lzPayload = abi.encodePacked(
+        bytes memory lzPayload = abi.encode(
             options.strategyDeposit ? PT_YB_SEND_STRAT : PT_YB_DEPOSIT,
             LzLib.addressToBytes32(_from),
             toAddress,
@@ -264,13 +264,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
-        bytes memory lzPayload = abi.encodePacked(
+        bytes memory lzPayload = abi.encode(
             PT_YB_SEND_SGL_LEND,
             LzLib.addressToBytes32(_from),
             toAddress,
             amount,
-            _marketHelper,
-            _market
+            LzLib.addressToBytes32(_marketHelper),
+            LzLib.addressToBytes32(_market)
         );
 
         bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
@@ -308,14 +308,14 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
-        bytes memory lzPayload = abi.encodePacked(
+        bytes memory lzPayload = abi.encode(
             PT_YB_SEND_SGL_BORROW,
             LzLib.addressToBytes32(_from),
             toAddress,
             amount,
             borrowAmount,
-            _marketHelper,
-            _market
+            LzLib.addressToBytes32(_marketHelper),
+            LzLib.addressToBytes32(_market)
         );
 
         bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
@@ -521,12 +521,15 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             bytes32 fromAddressBytes, //from
             ,
             uint256 amount,
-            address marketHelper,
-            address market
+            bytes32 marketHelperBytes,
+            bytes32 marketBytes
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint256, address, address)
+                (uint16, bytes32, bytes32, uint256, bytes32, bytes32)
             );
+        address marketHelper = LzLib.bytes32ToAddress(marketHelperBytes);
+        address market = LzLib.bytes32ToAddress(marketBytes);
+
         address _from = LzLib.bytes32ToAddress(fromAddressBytes);
         _creditTo(_srcChainId, address(this), amount);
 
@@ -556,12 +559,15 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             ,
             uint256 amount,
             uint256 borrowAmount,
-            address marketHelper,
-            address market
+            bytes32 marketHelperBytes,
+            bytes32 marketBytes
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint256, uint256, address, address)
+                (uint16, bytes32, bytes32, uint256, uint256, bytes32, bytes32)
             );
+        address marketHelper = LzLib.bytes32ToAddress(marketHelperBytes);
+        address market = LzLib.bytes32ToAddress(marketBytes);
+
         address _from = LzLib.bytes32ToAddress(fromAddressBytes);
         _creditTo(_srcChainId, address(this), amount);
 
@@ -590,10 +596,9 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         (
             ,
             ,
-            ,
-            IERC20Permit target,
-            address _owner,
-            address spender,
+            bytes32 targetBytes,
+            bytes32 ownerBytes,
+            bytes32 spenderBytes,
             uint256 value,
             uint256 deadline,
             uint8 v,
@@ -605,18 +610,20 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
                     uint16,
                     bytes32,
                     bytes32,
-                    IERC20Permit,
-                    address,
-                    address,
+                    bytes32,
+                    bytes32,
                     uint256,
-                    uint,
+                    uint256,
                     uint8,
                     bytes32,
                     bytes32
                 )
             );
 
-        target.permit(_owner, spender, value, deadline, v, r, s);
+        address target = LzLib.bytes32ToAddress(targetBytes);
+        address _owner = LzLib.bytes32ToAddress(ownerBytes);
+        address spender = LzLib.bytes32ToAddress(spenderBytes);
+        IERC20Permit(target).permit(_owner, spender, value, deadline, v, r, s);
 
         emit SendApproval(address(target), _owner, spender, value);
     }
