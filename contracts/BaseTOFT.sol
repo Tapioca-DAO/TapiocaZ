@@ -535,7 +535,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
 
         // Use market helper to deposit and add asset to market
         approve(address(marketHelper), amount);
-        IMarketHelper(marketHelper).depositAndAddAsset(
+        IMarketHelper(marketHelper).depositAndAddAsset{value: msg.value}(
             market,
             _from,
             amount,
@@ -579,15 +579,9 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             "0x00"
         );
         approve(address(marketHelper), amount);
-        IMarketHelper(marketHelper).depositAddCollateralAndBorrow(
-            market,
-            _from,
-            amount,
-            borrowAmount,
-            true,
-            true,
-            withdrawData
-        );
+        IMarketHelper(marketHelper).depositAddCollateralAndBorrow{
+            value: msg.value
+        }(market, _from, amount, borrowAmount, true, true, withdrawData);
 
         emit Borrow(_from, amount);
     }
