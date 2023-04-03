@@ -51,7 +51,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     viaIR: true,
                     optimizer: {
                         enabled: true,
-                        runs: 200,
+                        runs: 500,
                     },
                 },
             },
@@ -64,7 +64,6 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     networks: {
         hardhat: {
             hardfork: 'merge',
-            allowUnlimitedContractSize: true,
             gas: 10_000_000,
             accounts:
                 process.env.PRIVATE_KEY !== undefined
