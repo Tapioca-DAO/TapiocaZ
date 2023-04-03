@@ -6,6 +6,7 @@ import { deployBalancer__task } from './tasks/deploy/deployBalancer';
 import { deployTapiocaWrapper__task } from './tasks/deploy/deployTapiocaWrapper';
 import { deployTOFT__task } from './tasks/deploy/deployTOFT';
 import { deployTOFTMinter__task } from './tasks/deploy/testnet/deployTOFTMinter';
+import inquirer from 'inquirer';
 task(
     'deployTapiocaWrapper',
     'Deploy the TapiocaWrapper',
