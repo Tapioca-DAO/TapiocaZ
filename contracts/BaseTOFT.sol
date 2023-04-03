@@ -252,6 +252,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         address _marketHelper,
         address _market,
         uint16 lzDstChainId,
+        uint256 withdrawLzFeeAmount,
         SendOptions calldata options
     ) external payable {
         if (options.wrap) {
@@ -273,9 +274,15 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             LzLib.addressToBytes32(_market)
         );
 
-        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
+        LzLib.AirdropParams memory airdropParam = LzLib.AirdropParams(
+            withdrawLzFeeAmount,
+            bytes32(abi.encodePacked(_marketHelper))
+        );
+        bytes memory adapterParam = LzLib.buildAdapterParams(
+            airdropParam,
             options.extraGasLimit
         );
+
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -296,6 +303,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         address _marketHelper,
         address _market,
         uint16 lzDstChainId,
+        uint256 withdrawLzFeeAmount,
         SendOptions calldata options
     ) external payable {
         if (options.wrap) {
@@ -318,9 +326,15 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             LzLib.addressToBytes32(_market)
         );
 
-        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
+        LzLib.AirdropParams memory airdropParam = LzLib.AirdropParams(
+            withdrawLzFeeAmount,
+            bytes32(abi.encodePacked(_marketHelper))
+        );
+        bytes memory adapterParam = LzLib.buildAdapterParams(
+            airdropParam,
             options.extraGasLimit
         );
+
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -535,7 +549,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
 
         // Use market helper to deposit and add asset to market
         approve(address(marketHelper), amount);
-        IMarketHelper(marketHelper).depositAndAddAsset{value: msg.value}(
+        IMarketHelper(marketHelper).depositAndAddAsset(
             market,
             _from,
             amount,
