@@ -252,7 +252,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         address _marketHelper,
         address _market,
         uint16 lzDstChainId,
-        uint256 withdrawLzFeeAmount,
         SendOptions calldata options
     ) external payable {
         if (options.wrap) {
@@ -274,12 +273,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             LzLib.addressToBytes32(_market)
         );
 
-        LzLib.AirdropParams memory airdropParam = LzLib.AirdropParams(
-            withdrawLzFeeAmount,
-            bytes32(abi.encodePacked(_marketHelper))
-        );
-        bytes memory adapterParam = LzLib.buildAdapterParams(
-            airdropParam,
+        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
             options.extraGasLimit
         );
 
