@@ -673,7 +673,7 @@ describe('TapiocaOFT', () => {
         });
     });
 
-    describe.only('permit', () => {
+    describe('permit', () => {
         it('should forward permit', async () => {
             const {
                 signer,
