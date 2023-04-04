@@ -46,6 +46,45 @@ describe('mTapiocaOFT', () => {
     });
 
     describe('wrap()', () => {
+        it('Should fail if not approved', async () => {
+            const {
+                signer,
+                randomUser,
+                mtapiocaOFT0,
+                dummyAmount,
+                mErc20Mock,
+                mintAndApprove,
+            } = await loadFixture(setupFixture);
+            await mintAndApprove(
+                mErc20Mock,
+                mtapiocaOFT0,
+                signer,
+                BN(dummyAmount),
+            );
+
+            // Check failure with no allowance
+            await expect(
+                mtapiocaOFT0
+                    .connect(randomUser)
+                    .wrap(signer.address, randomUser.address, dummyAmount),
+            ).to.be.revertedWith('TOFT: Not allowed');
+
+            // Approve and check allowance
+            await mtapiocaOFT0.approve(randomUser.address, dummyAmount);
+            expect(
+                await mtapiocaOFT0.allowance(
+                    signer.address,
+                    randomUser.address,
+                ),
+            ).to.be.equal(dummyAmount);
+
+            // Check success after allowance
+            await expect(
+                mtapiocaOFT0
+                    .connect(randomUser)
+                    .wrap(signer.address, signer.address, dummyAmount),
+            ).to.not.be.reverted;
+        });
         it('Should fail if not on the same chain', async () => {
             const {
                 signer,
@@ -67,7 +106,7 @@ describe('mTapiocaOFT', () => {
             ).to.be.revertedWithCustomError(mtapiocaOFT0, 'TOFT__NotHostChain');
         });
 
-        it('Should wrap and give a 1:1 ratio amount of tokens without fees', async () => {
+        it('Should wrap and give a 1:1 ratio amount of tokens', async () => {
             const {
                 signer,
                 mErc20Mock,
@@ -240,15 +279,8 @@ describe('mTapiocaOFT', () => {
     });
 
     it('Should be able to use permit', async () => {
-        const {
-            signer,
-            randomUser,
-            users,
-            mtapiocaOFT0,
-            mintAndApprove,
-            mErc20Mock,
-        } = await loadFixture(setupFixture);
-        const [usurper] = users;
+        const { signer, randomUser, mtapiocaOFT0, mintAndApprove, mErc20Mock } =
+            await loadFixture(setupFixture);
 
         await mintAndApprove(
             mErc20Mock,
@@ -256,6 +288,7 @@ describe('mTapiocaOFT', () => {
             signer,
             (1e18).toString(),
         );
+
         await mtapiocaOFT0.wrap(
             signer.address,
             signer.address,
@@ -333,7 +366,7 @@ describe('mTapiocaOFT', () => {
         await expect(
             mtapiocaOFT0.permit(
                 signer.address,
-                usurper.address,
+                signer.address, // Wrong address
                 (1e18).toString(),
                 deadline,
                 v2,

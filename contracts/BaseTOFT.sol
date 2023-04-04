@@ -99,6 +99,20 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         _;
     }
 
+    modifier allowed(
+        address _owner,
+        address _spender,
+        uint256 _amount
+    ) {
+        if (_owner != _spender) {
+            require(
+                allowance(_owner, _spender) >= _amount,
+                "TOFT: Not allowed"
+            );
+        }
+        _;
+    }
+
     constructor(
         address _lzEndpoint,
         bool _isNative,
@@ -413,7 +427,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         address _fromAddress,
         address _toAddress,
         uint256 _amount
-    ) internal virtual {
+    ) internal virtual allowed(_fromAddress, msg.sender, _amount) {
         erc20.safeTransferFrom(_fromAddress, address(this), _amount);
         _mint(_toAddress, _amount);
         emit Wrap(_fromAddress, _toAddress, _amount);

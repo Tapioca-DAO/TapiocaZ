@@ -6,7 +6,6 @@ import { register } from './test.utils';
 
 export const setupFixture = async () => {
     const signer = (await hre.ethers.getSigners())[0];
-    const users = await hre.ethers.getSigners();
     const randomUser = new ethers.Wallet(
         ethers.Wallet.createRandom().privateKey,
         hre.ethers.provider,
@@ -203,7 +202,6 @@ export const setupFixture = async () => {
     };
     const vars = {
         signer,
-        users,
         randomUser,
         LZEndpointMock_chainID_0,
         LZEndpointMock_chainID_10,
