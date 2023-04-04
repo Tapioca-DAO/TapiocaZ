@@ -356,6 +356,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     }
 
     function retrieveFromYB(
+        address _from,
         uint256 amount,
         uint256 assetId,
         uint16 lzDstChainId,
@@ -367,7 +368,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
 
         bytes memory lzPayload = abi.encode(
             strategyWithdrawal ? PT_YB_RETRIEVE_STRAT : PT_YB_WITHDRAW,
-            LzLib.addressToBytes32(msg.sender),
+            LzLib.addressToBytes32(_from),
             toAddress,
             amount,
             0,
