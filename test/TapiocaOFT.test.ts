@@ -329,6 +329,7 @@ describe('TapiocaOFT', () => {
             const signerBalanceBeforeRetrieve =
                 await ethers.provider.getBalance(signer.address);
             await tapiocaOFT0.retrieveFromYB(
+                signer.address,
                 toDeposit,
                 1,
                 dstChainId,
@@ -519,6 +520,7 @@ describe('TapiocaOFT', () => {
             const signerBalanceBeforeRetrieve =
                 await ethers.provider.getBalance(signer.address);
             await tapiocaOFT0.retrieveFromYB(
+                signer.address,
                 toDeposit,
                 1,
                 dstChainId,
@@ -647,6 +649,7 @@ describe('TapiocaOFT', () => {
             );
 
             await tapiocaOFT0.retrieveFromYB(
+                signer.address,
                 toDeposit,
                 1,
                 dstChainId,
