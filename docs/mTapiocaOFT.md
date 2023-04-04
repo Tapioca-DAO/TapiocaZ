@@ -95,23 +95,6 @@ function PT_SEND_AND_CALL() external view returns (uint8)
 |---|---|---|
 | _0 | uint8 | undefined |
 
-### PT_SEND_APPROVAL
-
-```solidity
-function PT_SEND_APPROVAL() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### PT_YB_DEPOSIT
 
 ```solidity
@@ -150,23 +133,6 @@ function PT_YB_RETRIEVE_STRAT() external view returns (uint16)
 
 ```solidity
 function PT_YB_SEND_SGL_BORROW() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-### PT_YB_SEND_SGL_LEND
-
-```solidity
-function PT_YB_SEND_SGL_LEND() external view returns (uint16)
 ```
 
 
@@ -1007,24 +973,6 @@ function sendAndCall(address _from, uint16 _dstChainId, bytes32 _toAddress, uint
 | _dstGasForCall | uint64 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
 
-### sendApproval
-
-```solidity
-function sendApproval(uint16 lzDstChainId, BaseTOFT.IApproval approval, BaseTOFT.SendOptions options) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| lzDstChainId | uint16 | undefined |
-| approval | BaseTOFT.IApproval | undefined |
-| options | BaseTOFT.SendOptions | undefined |
-
 ### sendFrom
 
 ```solidity
@@ -1088,28 +1036,6 @@ function sendToYBAndBorrow(address _from, address _to, uint256 amount, uint256 b
 | _market | address | undefined |
 | lzDstChainId | uint16 | undefined |
 | withdrawLzFeeAmount | uint256 | undefined |
-| options | BaseTOFT.SendOptions | undefined |
-
-### sendToYBAndLend
-
-```solidity
-function sendToYBAndLend(address _from, address _to, uint256 amount, address _marketHelper, address _market, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _from | address | undefined |
-| _to | address | undefined |
-| amount | uint256 | undefined |
-| _marketHelper | address | undefined |
-| _market | address | undefined |
-| lzDstChainId | uint16 | undefined |
 | options | BaseTOFT.SendOptions | undefined |
 
 ### setConfig
@@ -1668,23 +1594,6 @@ event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new)
 | _chain  | uint256 | undefined |
 | _old  | bool | undefined |
 | _new  | bool | undefined |
-
-### Lend
-
-```solidity
-event Lend(address indexed _from, uint256 _amount)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _from `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
 
 ### MessageFailed
 
