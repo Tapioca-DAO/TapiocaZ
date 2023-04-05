@@ -750,6 +750,7 @@ describe('TapiocaOFT', () => {
 
             await tapiocaOFT0.connect(eoa1).sendApproval(
                 10,
+                false,
                 {
                     target: erc20.address,
                     owner: signer.address,

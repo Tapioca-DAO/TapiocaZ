@@ -993,7 +993,7 @@ function sendAndCall(address _from, uint16 _dstChainId, bytes32 _toAddress, uint
 ### sendApproval
 
 ```solidity
-function sendApproval(uint16 lzDstChainId, BaseTOFT.IApproval approval, BaseTOFT.SendOptions options) external payable
+function sendApproval(uint16 lzDstChainId, bool permitBorrow, BaseTOFT.IApproval approval, BaseTOFT.SendOptions options) external payable
 ```
 
 
@@ -1005,6 +1005,7 @@ function sendApproval(uint16 lzDstChainId, BaseTOFT.IApproval approval, BaseTOFT
 | Name | Type | Description |
 |---|---|---|
 | lzDstChainId | uint16 | undefined |
+| permitBorrow | bool | undefined |
 | approval | BaseTOFT.IApproval | undefined |
 | options | BaseTOFT.SendOptions | undefined |
 
