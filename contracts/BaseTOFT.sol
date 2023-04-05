@@ -10,6 +10,7 @@ import "./interfaces/IYieldBox.sol";
 import "./lib/TransferLib.sol";
 import "./interfaces/ITapiocaWrapper.sol";
 import "./interfaces/IMarketHelper.sol";
+import "./interfaces/IPermitBorrow.sol";
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -186,6 +187,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
 
     function sendApproval(
         uint16 lzDstChainId,
+        bool permitBorrow,
         IApproval calldata approval,
         SendOptions calldata options
     ) external payable {
@@ -199,7 +201,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             approval.deadline,
             approval.v,
             approval.r,
-            approval.s
+            approval.s,
+            permitBorrow
         );
 
         bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
@@ -537,7 +540,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             uint256 deadline,
             uint8 v,
             bytes32 r,
-            bytes32 s
+            bytes32 s,
+            bool permitBorrow
         ) = abi.decode(
                 _payload,
                 (
@@ -550,15 +554,35 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
                     uint256,
                     uint8,
                     bytes32,
-                    bytes32
+                    bytes32,
+                    bool
                 )
             );
 
         address target = LzLib.bytes32ToAddress(targetBytes);
         address _owner = LzLib.bytes32ToAddress(ownerBytes);
         address spender = LzLib.bytes32ToAddress(spenderBytes);
-        IERC20Permit(target).permit(_owner, spender, value, deadline, v, r, s);
-
+        if (permitBorrow) {
+            IPermitBorrow(target).permitBorrow(
+                _owner,
+                spender,
+                value,
+                deadline,
+                v,
+                r,
+                s
+            );
+        } else {
+            IERC20Permit(target).permit(
+                _owner,
+                spender,
+                value,
+                deadline,
+                v,
+                r,
+                s
+            );
+        }
         emit SendApproval(address(target), _owner, spender, value);
     }
 
