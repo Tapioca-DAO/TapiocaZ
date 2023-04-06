@@ -487,7 +487,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
                 (
                     uint16,
                     address,
-                    address,
+                    bytes32,
                     IBorrowParams,
                     IWithdrawParams,
                     IApproval[]
