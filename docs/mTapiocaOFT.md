@@ -1053,7 +1053,7 @@ function sendToYB(address _from, address _to, uint256 amount, uint256 assetId, u
 ### sendToYBAndBorrow
 
 ```solidity
-function sendToYBAndBorrow(address _from, address _to, uint256 amount, uint256 borrowAmount, address _marketHelper, address _market, uint16 lzDstChainId, uint256 withdrawLzFeeAmount, BaseTOFT.SendOptions options) external payable
+function sendToYBAndBorrow(address _from, address _to, uint256 amount, uint256 borrowAmount, address _marketHelper, address _market, uint16 lzDstChainId, uint256 withdrawLzFeeAmount, bool withdrawOnOtherChain, uint16 withdrawLzChainId, bytes withdrawAdapterParams, BaseTOFT.SendOptions options) external payable
 ```
 
 
@@ -1072,6 +1072,9 @@ function sendToYBAndBorrow(address _from, address _to, uint256 amount, uint256 b
 | _market | address | undefined |
 | lzDstChainId | uint16 | undefined |
 | withdrawLzFeeAmount | uint256 | undefined |
+| withdrawOnOtherChain | bool | undefined |
+| withdrawLzChainId | uint16 | undefined |
+| withdrawAdapterParams | bytes | undefined |
 | options | BaseTOFT.SendOptions | undefined |
 
 ### setConfig
