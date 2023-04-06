@@ -268,6 +268,9 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         address _market,
         uint16 lzDstChainId,
         uint256 withdrawLzFeeAmount,
+        bool withdrawOnOtherChain,
+        uint16 withdrawLzChainId,
+        bytes calldata withdrawAdapterParams,
         SendOptions calldata options
     ) external payable {
         if (options.wrap) {
@@ -287,7 +290,10 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             amount,
             borrowAmount,
             LzLib.addressToBytes32(_marketHelper),
-            LzLib.addressToBytes32(_market)
+            LzLib.addressToBytes32(_market),
+            withdrawOnOtherChain,
+            withdrawLzChainId,
+            withdrawAdapterParams
         );
 
         LzLib.AirdropParams memory airdropParam = LzLib.AirdropParams(
@@ -503,10 +509,24 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             uint256 amount,
             uint256 borrowAmount,
             bytes32 marketHelperBytes,
-            bytes32 marketBytes
+            bytes32 marketBytes,
+            bool onOtherChain,
+            uint16 toChainId,
+            bytes memory adapterParams
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint256, uint256, bytes32, bytes32)
+                (
+                    uint16,
+                    bytes32,
+                    bytes32,
+                    uint256,
+                    uint256,
+                    bytes32,
+                    bytes32,
+                    bool,
+                    uint16,
+                    bytes
+                )
             );
         address marketHelper = LzLib.bytes32ToAddress(marketHelperBytes);
         address market = LzLib.bytes32ToAddress(marketBytes);
@@ -516,10 +536,10 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         bytes memory withdrawData = abi.encode(
-            true,
-            _srcChainId,
+            onOtherChain,
+            toChainId,
             _from,
-            "0x00"
+            adapterParams
         );
         approve(address(marketHelper), amount);
         IMarketHelper(marketHelper).depositAddCollateralAndBorrow{
