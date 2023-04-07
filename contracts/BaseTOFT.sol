@@ -242,6 +242,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         address _from,
         address _to,
         uint16 lzDstChainId,
+        bytes calldata airdropAdapterParams,
         IBorrowParams calldata borrowParams,
         IWithdrawParams calldata withdrawParams,
         SendOptions calldata options,
@@ -271,21 +272,12 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             approvals
         );
 
-        LzLib.AirdropParams memory airdropParam = LzLib.AirdropParams(
-            withdrawParams.withdrawLzFeeAmount,
-            bytes32(abi.encodePacked(borrowParams.marketHelper))
-        );
-        bytes memory adapterParam = LzLib.buildAdapterParams(
-            airdropParam,
-            options.extraGasLimit
-        );
-
         _lzSend(
             lzDstChainId,
             lzPayload,
             payable(_from),
             options.zroPaymentAddress,
-            adapterParam,
+            airdropAdapterParams,
             msg.value
         );
 
