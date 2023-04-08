@@ -7,6 +7,7 @@ interface IMarketHelper {
     /// @param _user the address to deposit from and withdraw to
     /// @param _collateralAmount the collateral amount to add
     /// @param _borrowAmount the amount to borrow
+    /// @param extractFromSender extracts tokens either from _user or from msg.sender
     /// @param deposit_ if true, deposits to YieldBox from `msg.sender`
     /// @param withdraw_ if true, withdraws from YieldBox to `msg.sender`
     /// @param _withdrawData custom withdraw data; ignore if you need to withdraw on the same chain
@@ -15,6 +16,7 @@ interface IMarketHelper {
         address _user,
         uint256 _collateralAmount,
         uint256 _borrowAmount,
+        bool extractFromSender,
         bool deposit_,
         bool withdraw_,
         bytes calldata _withdrawData
@@ -28,6 +30,7 @@ interface IMarketHelper {
         address singularity,
         address _user,
         uint256 _amount,
-        bool deposit_
+        bool deposit_,
+        bool extractFromSender
     ) external;
 }

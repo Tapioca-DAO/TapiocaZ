@@ -170,6 +170,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bool wrap;
     }
     struct IApproval {
+        bool allowFailure;
         address target;
         bool permitBorrow;
         address owner;
@@ -508,6 +509,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             borrowParams.borrowAmount,
             true,
             true,
+            true,
             withdrawData
         );
 
@@ -517,25 +519,37 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     function _callApproval(IApproval[] memory approvals) internal virtual {
         for (uint256 i = 0; i < approvals.length; ) {
             if (approvals[i].permitBorrow) {
-                IPermitBorrow(approvals[i].target).permitBorrow(
-                    approvals[i].owner,
-                    approvals[i].spender,
-                    approvals[i].value,
-                    approvals[i].deadline,
-                    approvals[i].v,
-                    approvals[i].r,
-                    approvals[i].s
-                );
+                try
+                    IPermitBorrow(approvals[i].target).permitBorrow(
+                        approvals[i].owner,
+                        approvals[i].spender,
+                        approvals[i].value,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
             } else {
-                IERC20Permit(approvals[i].target).permit(
-                    approvals[i].owner,
-                    approvals[i].spender,
-                    approvals[i].value,
-                    approvals[i].deadline,
-                    approvals[i].v,
-                    approvals[i].r,
-                    approvals[i].s
-                );
+                try
+                    IERC20Permit(approvals[i].target).permit(
+                        approvals[i].owner,
+                        approvals[i].spender,
+                        approvals[i].value,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
             }
 
             unchecked {
