@@ -1,8 +1,17 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { BigNumberish, ethers } from 'ethers';
 import hre from 'hardhat';
-import { BaseTOFT, ERC20Mock, MTapiocaOFT, TapiocaOFT } from '../typechain';
+import { BaseTOFT, MTapiocaOFT, TapiocaOFT } from '../typechain';
+
 import { register } from './test.utils';
+import { time } from '@nomicfoundation/hardhat-network-helpers';
+
+import {
+    ERC20Mock__factory,
+    ERC20Mock,
+    StargateRouterMock__factory,
+    StargateRouterETHMock__factory,
+} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 
 export const setupFixture = async () => {
     const signer = (await hre.ethers.getSigners())[0];
@@ -15,30 +24,62 @@ export const setupFixture = async () => {
         ethers.utils.hexStripZeros(ethers.utils.parseEther(String(10))._hex),
     ]);
 
-    const erc20Mock = await (
-        await hre.ethers.getContractFactory('ERC20Mock')
-    ).deploy('erc20Mock', 'MOCK');
-    const erc20Mock1 = await (
-        await hre.ethers.getContractFactory('ERC20Mock')
-    ).deploy('erc20Mock', 'MOCK');
-    const erc20Mock2 = await (
-        await hre.ethers.getContractFactory('ERC20Mock')
-    ).deploy('erc20Mock', 'MOCK');
+    const ERC20Mock = new ERC20Mock__factory(signer);
+    const erc20Mock = await ERC20Mock.deploy(
+        'erc20Mock',
+        'MOCK',
+        0,
+        18,
+        signer.address,
+    );
+    await erc20Mock.updateMintLimit(ethers.constants.MaxUint256);
 
-    const mErc20Mock = await (
-        await hre.ethers.getContractFactory('ERC20Mock')
-    ).deploy('erc20Mock', 'MOCK');
-    const mErc20Mock2 = await (
-        await hre.ethers.getContractFactory('ERC20Mock')
-    ).deploy('erc20Mock', 'MOCK');
+    const erc20Mock1 = await ERC20Mock.deploy(
+        'erc20Mock',
+        'MOCK',
+        0,
+        18,
+        signer.address,
+    );
+    await erc20Mock1.updateMintLimit(ethers.constants.MaxUint256);
 
-    const stargateRouterMock = await (
-        await hre.ethers.getContractFactory('StargateRouterMock')
-    ).deploy(mErc20Mock.address);
+    const erc20Mock2 = await ERC20Mock.deploy(
+        'erc20Mock',
+        'MOCK',
+        0,
+        18,
+        signer.address,
+    );
+    await erc20Mock2.updateMintLimit(ethers.constants.MaxUint256);
 
-    const stargateRouterETHMock = await (
-        await hre.ethers.getContractFactory('StargateRouterETHMock')
-    ).deploy(stargateRouterMock.address, mErc20Mock.address);
+    const mErc20Mock = await ERC20Mock.deploy(
+        'erc20Mock',
+        'MOCK',
+        0,
+        18,
+        signer.address,
+    );
+    await mErc20Mock.updateMintLimit(ethers.constants.MaxUint256);
+
+    const mErc20Mock2 = await ERC20Mock.deploy(
+        'erc20Mock',
+        'MOCK',
+        0,
+        18,
+        signer.address,
+    );
+    await mErc20Mock2.updateMintLimit(ethers.constants.MaxUint256);
+
+    const StargateRouterMock = new StargateRouterMock__factory(signer);
+    const stargateRouterMock = await StargateRouterMock.deploy(
+        mErc20Mock.address,
+    );
+
+    const StargateRouterETHMock = new StargateRouterETHMock__factory(signer);
+    const stargateRouterETHMock = await StargateRouterETHMock.deploy(
+        stargateRouterMock.address,
+        mErc20Mock.address,
+    );
 
     const balancer = await (
         await hre.ethers.getContractFactory('Balancer')
@@ -169,21 +210,21 @@ export const setupFixture = async () => {
     )) as TapiocaOFT;
 
     // Link endpoints with addresses
-    LZEndpointMock_chainID_0.setDestLzEndpoint(
+    await LZEndpointMock_chainID_0.setDestLzEndpoint(
         tapiocaOFT10.address,
         LZEndpointMock_chainID_10.address,
     );
-    LZEndpointMock_chainID_10.setDestLzEndpoint(
+    await LZEndpointMock_chainID_10.setDestLzEndpoint(
         tapiocaOFT0.address,
         LZEndpointMock_chainID_0.address,
     );
 
     // Link endpoints with addresses
-    LZEndpointMock_chainID_0.setDestLzEndpoint(
+    await LZEndpointMock_chainID_0.setDestLzEndpoint(
         mtapiocaOFT10.address,
         LZEndpointMock_chainID_10.address,
     );
-    LZEndpointMock_chainID_10.setDestLzEndpoint(
+    await LZEndpointMock_chainID_10.setDestLzEndpoint(
         mtapiocaOFT0.address,
         LZEndpointMock_chainID_0.address,
     );
@@ -197,7 +238,8 @@ export const setupFixture = async () => {
         signer: SignerWithAddress,
         amount: BigNumberish,
     ) => {
-        await erc20Mock.mint(signer.address, amount);
+        await time.increase(86401);
+        await erc20Mock.freeMint(amount);
         await erc20Mock.approve(toft.address, amount);
     };
     const vars = {

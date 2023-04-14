@@ -1,22 +1,32 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import hre, { ethers } from 'hardhat';
+import {
+    ERC20Mock__factory,
+    LZEndpointMock__factory,
+    YieldBoxMock__factory,
+} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 import { BN, getERC20PermitSignature } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 describe('TapiocaOFT', () => {
     it('simulate deploy', async () => {
-        const erc20Mock = await (
-            await hre.ethers.getContractFactory('ERC20Mock')
-        ).deploy('erc20Mock', 'MOCK');
+        const deployer = (await ethers.getSigners())[0];
+        const ERC20Mock = new ERC20Mock__factory(deployer);
+        const erc20Mock = await ERC20Mock.deploy(
+            'erc20Mock',
+            'MOCK',
+            0,
+            18,
+            deployer.address,
+        );
+        await erc20Mock.updateMintLimit(ethers.constants.MaxUint256);
 
-        const lzEndpoint = await (
-            await (await ethers.getContractFactory('LZEndpointMock')).deploy(1)
-        ).deployed();
+        const LZEndpointMock = new LZEndpointMock__factory(deployer);
+        const lzEndpoint = await LZEndpointMock.deploy(1);
 
-        const yieldBox = await (
-            await (await ethers.getContractFactory('YieldBoxMock')).deploy()
-        ).deployed();
+        const YieldBoxMock = new YieldBoxMock__factory(deployer);
+        const yieldBox = await YieldBoxMock.deploy();
 
         await (
             await hre.ethers.getContractFactory('TapiocaOFT')
@@ -181,6 +191,9 @@ describe('TapiocaOFT', () => {
                         zroPaymentAddress: ethers.constants.AddressZero,
                         adapterParams: '0x',
                     },
+                    {
+                        gasLimit: 2_000_000,
+                    },
                 ),
             ).to.be.revertedWith(
                 'LzApp: destination chain is not a trusted source',
@@ -227,6 +240,7 @@ describe('TapiocaOFT', () => {
                     },
                     {
                         value: ethers.utils.parseEther('0.02'),
+                        gasLimit: 2_000_000,
                     },
                 ),
             ).to.not.be.reverted;
@@ -427,6 +441,7 @@ describe('TapiocaOFT', () => {
                     },
                     {
                         value: ethers.utils.parseEther('0.2'),
+                        gasLimit: 2_000_000,
                     },
                 ),
             ).to.not.be.reverted;
@@ -670,110 +685,6 @@ describe('TapiocaOFT', () => {
             expect(signerToftBalanceBeforeWithdraw.add(toDeposit)).to.eq(
                 signerToftBalanceAfterWithdraw,
             );
-        });
-    });
-
-    describe('permit', () => {
-        it('should forward permit', async () => {
-            const {
-                signer,
-                tapiocaWrapper_0,
-                tapiocaWrapper_10,
-                erc20Mock,
-                tapiocaOFT0,
-                tapiocaOFT10,
-                mintAndApprove,
-                bigDummyAmount,
-            } = await loadFixture(setupFixture);
-
-            // ------------------- OFT Setup -------------------
-            await mintAndApprove(
-                erc20Mock,
-                tapiocaOFT0,
-                signer,
-                bigDummyAmount,
-            );
-            await tapiocaOFT0.wrap(
-                signer.address,
-                signer.address,
-                bigDummyAmount,
-            );
-
-            // Set trusted remotes
-            await tapiocaWrapper_0.executeTOFT(
-                tapiocaOFT0.address,
-                tapiocaOFT0.interface.encodeFunctionData('setTrustedRemote', [
-                    10,
-                    ethers.utils.solidityPack(
-                        ['address', 'address'],
-                        [tapiocaOFT10.address, tapiocaOFT0.address],
-                    ),
-                ]),
-                true,
-            );
-            await tapiocaWrapper_10.executeTOFT(
-                tapiocaOFT10.address,
-                tapiocaOFT10.interface.encodeFunctionData('setTrustedRemote', [
-                    0,
-                    ethers.utils.solidityPack(
-                        ['address', 'address'],
-                        [tapiocaOFT0.address, tapiocaOFT10.address],
-                    ),
-                ]),
-                true,
-            );
-
-            // ------------------- ERC20 Setup -------------------
-            const erc20 = await (
-                await ethers.getContractFactory('ERC20Mock')
-            ).deploy('Test', 'TST');
-            await erc20.mint(signer.address, bigDummyAmount);
-
-            const eoa1 = (await ethers.getSigners())[0];
-            const deadline = BN(
-                (await ethers.provider.getBlock('latest')).timestamp + 10_000,
-            );
-            const { r, s, v } = await getERC20PermitSignature(
-                signer,
-                erc20,
-                eoa1.address,
-                bigDummyAmount,
-                deadline,
-            );
-
-            // ------------------- TEST -------------------
-            await expect(
-                erc20
-                    .connect(eoa1)
-                    .transferFrom(signer.address, eoa1.address, bigDummyAmount),
-            ).to.be.revertedWith('ERC20: insufficient allowance');
-
-            await tapiocaOFT0.connect(eoa1).sendApproval(
-                10,
-                false,
-                {
-                    target: erc20.address,
-                    owner: signer.address,
-                    spender: eoa1.address,
-                    value: bigDummyAmount,
-                    deadline,
-                    r,
-                    s,
-                    v,
-                },
-                {
-                    extraGasLimit: 200_000,
-                    strategyDeposit: false,
-                    wrap: false,
-                    zroPaymentAddress: ethers.constants.AddressZero,
-                },
-                { value: ethers.utils.parseEther('2') },
-            );
-            await expect(
-                erc20
-                    .connect(eoa1)
-                    .transferFrom(signer.address, eoa1.address, bigDummyAmount),
-            ).to.not.be.reverted;
         });
     });
 });

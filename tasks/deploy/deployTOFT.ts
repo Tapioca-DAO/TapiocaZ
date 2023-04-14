@@ -236,7 +236,8 @@ async function getPreDeploymentInfo(
     yieldBoxAddress: string,
     args: { isMerged?: boolean; isNative?: boolean },
 ) {
-    const utils = useUtils(hre);
+    const signer = (await hre.ethers.getSigners())[0];
+    const utils = useUtils(hre, signer);
 
     console.log('[+] Getting TOFT creation bytecode');
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

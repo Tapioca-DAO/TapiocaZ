@@ -5,6 +5,7 @@ import {
 import { expect } from 'chai';
 import { BytesLike } from 'ethers';
 import hre, { ethers } from 'hardhat';
+import { ERC20Mock__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 import { generateSalt, useUtils } from '../scripts/utils';
 import { TapiocaOFT__factory } from '../typechain';
 import { setupFixture } from './fixtures';
@@ -43,9 +44,16 @@ describe('TapiocaWrapper', () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
-            const erc20Mock = await (
-                await hre.ethers.getContractFactory('ERC20Mock')
-            ).deploy('erc20Mock', 'MOCK');
+            const deployer = (await ethers.getSigners())[0];
+            const ERC20Mock = new ERC20Mock__factory(deployer);
+            const erc20Mock = await ERC20Mock.deploy(
+                'erc20Mock',
+                'MOCK',
+                0,
+                18,
+                deployer.address,
+            );
+            await erc20Mock.updateMintLimit(ethers.constants.MaxUint256);
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
@@ -78,9 +86,16 @@ describe('TapiocaWrapper', () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
-            const erc20Mock = await (
-                await hre.ethers.getContractFactory('ERC20Mock')
-            ).deploy('erc20Mock', 'MOCK');
+            const deployer = (await ethers.getSigners())[0];
+            const ERC20Mock = new ERC20Mock__factory(deployer);
+            const erc20Mock = await ERC20Mock.deploy(
+                'erc20Mock',
+                'MOCK',
+                0,
+                18,
+                deployer.address,
+            );
+            await erc20Mock.updateMintLimit(ethers.constants.MaxUint256);
             const erc20Name = 'erc20name';
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
@@ -140,9 +155,16 @@ describe('TapiocaWrapper', () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
-            const erc20Mock = await (
-                await hre.ethers.getContractFactory('ERC20Mock')
-            ).deploy('erc20Mock', 'MOCK');
+            const deployer = (await ethers.getSigners())[0];
+            const ERC20Mock = new ERC20Mock__factory(deployer);
+            const erc20Mock = await ERC20Mock.deploy(
+                'erc20Mock',
+                'MOCK',
+                0,
+                18,
+                deployer.address,
+            );
+            await erc20Mock.updateMintLimit(ethers.constants.MaxUint256);
             const erc20Name = 'erc20name';
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
@@ -202,9 +224,16 @@ describe('TapiocaWrapper', () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
-            let erc20Mock = await (
-                await hre.ethers.getContractFactory('ERC20Mock')
-            ).deploy('erc20Mock', 'MOCK');
+            const deployer = (await ethers.getSigners())[0];
+            const ERC20Mock = new ERC20Mock__factory(deployer);
+            let erc20Mock = await ERC20Mock.deploy(
+                'erc20Mock',
+                'MOCK',
+                0,
+                18,
+                deployer.address,
+            );
+            await erc20Mock.updateMintLimit(ethers.constants.MaxUint256);
             let erc20Name = 'erc20name';
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
@@ -244,9 +273,14 @@ describe('TapiocaWrapper', () => {
                 ),
             ).to.be.reverted;
 
-            erc20Mock = await (
-                await hre.ethers.getContractFactory('ERC20Mock')
-            ).deploy('erc20Mock', 'MOCK');
+            erc20Mock = await ERC20Mock.deploy(
+                'erc20Mock',
+                'MOCK',
+                0,
+                18,
+                deployer.address,
+            );
+            await erc20Mock.updateMintLimit(ethers.constants.MaxUint256);
             erc20Name = 'erc20name2';
 
             const mArgs: Parameters<TapiocaOFT__factory['deploy']> = [
@@ -278,7 +312,10 @@ describe('TapiocaWrapper', () => {
         it('Should return the length of the `tapiocaOFTs` array', async () => {
             const { signer, erc20Mock, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
-            const { Tx_deployTapiocaOFT, deployTapiocaWrapper } = useUtils(hre);
+            const { Tx_deployTapiocaOFT, deployTapiocaWrapper } = useUtils(
+                hre,
+                signer,
+            );
 
             const tapiocaWrapper = await deployTapiocaWrapper();
 
@@ -311,7 +348,10 @@ describe('TapiocaWrapper', () => {
                 LZEndpointMock_chainID_0,
                 LZEndpointMock_chainID_10,
             } = await loadFixture(setupFixture);
-            const { Tx_deployTapiocaOFT, deployTapiocaWrapper } = useUtils(hre);
+            const { Tx_deployTapiocaOFT, deployTapiocaWrapper } = useUtils(
+                hre,
+                signer,
+            );
 
             const tapiocaWrapper = await deployTapiocaWrapper();
 
