@@ -2,6 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import hre, { ethers } from 'hardhat';
 import { setupFixture } from './fixtures';
+import { time } from '@nomicfoundation/hardhat-network-helpers';
 
 //should be executed on mainnet fork
 describe('Balancer', () => {
@@ -171,7 +172,8 @@ describe('Balancer', () => {
             ).to.not.be.reverted;
 
             const amount = ethers.utils.parseEther('1');
-            await mErc20Mock.mint(signer.address, amount);
+            await time.increase(86401);
+            await mErc20Mock.freeMint(amount);
             await mErc20Mock.transfer(mtapiocaOFT0.address, amount);
 
             const balance = await mErc20Mock.balanceOf(mtapiocaOFT0.address);
@@ -312,7 +314,8 @@ describe('Balancer', () => {
                 ),
             ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
 
-            await mErc20Mock.mint(signer.address, amount.add(1));
+            await time.increase(86401);
+            await mErc20Mock.freeMint(amount.add(1));
             await mErc20Mock.transfer(mtapiocaOFT0.address, amount.add(1));
 
             const balance = await mErc20Mock.balanceOf(mtapiocaOFT0.address);
@@ -425,7 +428,8 @@ describe('Balancer', () => {
                 ),
             ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
 
-            await mErc20Mock.mint(signer.address, amount.add(1));
+            await time.increase(86401);
+            await mErc20Mock.freeMint(amount.add(1));
             await mErc20Mock.transfer(mtapiocaOFT0.address, amount.add(1));
 
             const balance = await mErc20Mock.balanceOf(mtapiocaOFT0.address);

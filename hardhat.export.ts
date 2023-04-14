@@ -64,6 +64,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     networks: {
         hardhat: {
             hardfork: 'merge',
+            allowUnlimitedContractSize: true,
             gas: 10_000_000,
             accounts:
                 process.env.PRIVATE_KEY !== undefined
