@@ -58,7 +58,7 @@ function balanceOf(address _holder) external view returns (uint256)
 ### erc20
 
 ```solidity
-function erc20() external view returns (contract IERC20)
+function erc20() external view returns (address)
 ```
 
 
@@ -70,7 +70,7 @@ function erc20() external view returns (contract IERC20)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IERC20 | undefined |
+| _0 | address | undefined |
 
 ### extractUnderlying
 
@@ -87,6 +87,23 @@ function extractUnderlying(uint256 _amount) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | _amount | uint256 | undefined |
+
+### getLzChainId
+
+```solidity
+function getLzChainId() external view returns (uint16)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
 
 ### harvestFees
 
@@ -153,7 +170,7 @@ function isNative() external view returns (bool)
 ### isTrustedRemote
 
 ```solidity
-function isTrustedRemote(uint16 _lzChainId, bytes _path) external view returns (bool)
+function isTrustedRemote(uint16 lzChainId, bytes path) external view returns (bool)
 ```
 
 
@@ -164,14 +181,80 @@ function isTrustedRemote(uint16 _lzChainId, bytes _path) external view returns (
 
 | Name | Type | Description |
 |---|---|---|
-| _lzChainId | uint16 | undefined |
-| _path | bytes | undefined |
+| lzChainId | uint16 | undefined |
+| path | bytes | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
+
+### retrieveFromYB
+
+```solidity
+function retrieveFromYB(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, bool strategyWithdrawal) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _from | address | undefined |
+| amount | uint256 | undefined |
+| assetId | uint256 | undefined |
+| lzDstChainId | uint16 | undefined |
+| zroPaymentAddress | address | undefined |
+| airdropAdapterParam | bytes | undefined |
+| strategyWithdrawal | bool | undefined |
+
+### sendToYB
+
+```solidity
+function sendToYB(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.SendOptions options) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _from | address | undefined |
+| _to | address | undefined |
+| amount | uint256 | undefined |
+| assetId | uint256 | undefined |
+| lzDstChainId | uint16 | undefined |
+| options | ITapiocaOFT.SendOptions | undefined |
+
+### sendToYBAndBorrow
+
+```solidity
+function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.SendOptions options, ITapiocaOFT.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _from | address | undefined |
+| _to | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| airdropAdapterParams | bytes | undefined |
+| borrowParams | ITapiocaOFT.IBorrowParams | undefined |
+| withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
+| options | ITapiocaOFT.SendOptions | undefined |
+| approvals | ITapiocaOFT.IApproval[] | undefined |
 
 ### totalFees
 
@@ -210,7 +293,7 @@ function unwrap(address _toAddress, uint256 _amount) external nonpayable
 ### wrap
 
 ```solidity
-function wrap(address _fromAddress, address _toAddress, uint256 _amount) external nonpayable
+function wrap(address fromAddress, address toAddress, uint256 amount) external nonpayable
 ```
 
 
@@ -221,9 +304,9 @@ function wrap(address _fromAddress, address _toAddress, uint256 _amount) externa
 
 | Name | Type | Description |
 |---|---|---|
-| _fromAddress | address | undefined |
-| _toAddress | address | undefined |
-| _amount | uint256 | undefined |
+| fromAddress | address | undefined |
+| toAddress | address | undefined |
+| amount | uint256 | undefined |
 
 ### wrapNative
 

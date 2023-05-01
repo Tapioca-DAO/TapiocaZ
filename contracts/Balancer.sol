@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./interfaces/ITapiocaOFT.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "./interfaces/IStargateRouter.sol";
 import "@rari-capital/solmate/src/auth/Owned.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -272,8 +273,8 @@ contract Balancer is Owned {
         uint256 _slippage,
         bytes memory _data
     ) private {
-        if (ITapiocaOFT(_oft).erc20().balanceOf(address(this)) < _amount)
-            revert ExceedsBalance();
+        IERC20Metadata erc20 = IERC20Metadata(ITapiocaOFT(_oft).erc20());
+        if (erc20.balanceOf(address(this)) < _amount) revert ExceedsBalance();
 
         (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(
             _data,
@@ -289,7 +290,7 @@ contract Balancer is Owned {
                 )
             });
 
-        ITapiocaOFT(_oft).erc20().approve(address(router), _amount);
+        erc20.approve(address(router), _amount);
         router.swap(
             _dstChainId,
             _srcPoolId,
