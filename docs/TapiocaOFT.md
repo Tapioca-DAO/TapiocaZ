@@ -95,23 +95,6 @@ function PT_SEND_AND_CALL() external view returns (uint8)
 |---|---|---|
 | _0 | uint8 | undefined |
 
-### PT_YB_DEPOSIT
-
-```solidity
-function PT_YB_DEPOSIT() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### PT_YB_RETRIEVE_STRAT
 
 ```solidity
@@ -150,23 +133,6 @@ function PT_YB_SEND_SGL_BORROW() external view returns (uint16)
 
 ```solidity
 function PT_YB_SEND_STRAT() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-### PT_YB_WITHDRAW
-
-```solidity
-function PT_YB_WITHDRAW() external view returns (uint16)
 ```
 
 
@@ -850,10 +816,10 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
-### retrieveFromYB
+### retrieveFromStrategy
 
 ```solidity
-function retrieveFromYB(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, bool strategyWithdrawal) external payable
+function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
 
@@ -870,7 +836,6 @@ function retrieveFromYB(address _from, uint256 amount, uint256 assetId, uint16 l
 | lzDstChainId | uint16 | undefined |
 | zroPaymentAddress | address | undefined |
 | airdropAdapterParam | bytes | undefined |
-| strategyWithdrawal | bool | undefined |
 
 ### retryMessage
 
@@ -933,10 +898,10 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 | _amount | uint256 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
 
-### sendToYB
+### sendToStrategy
 
 ```solidity
-function sendToYB(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
+function sendToStrategy(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
 ```
 
 
@@ -1765,17 +1730,6 @@ event YieldBoxRetrieval(uint256 _amount)
 
 
 ## Errors
-
-### TOFT_YB_ETHDeposit
-
-```solidity
-error TOFT_YB_ETHDeposit()
-```
-
-Error while depositing ETH assets to YieldBox.
-
-
-
 
 ### TOFT_ZeroAmount
 
