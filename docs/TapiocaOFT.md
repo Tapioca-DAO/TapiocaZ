@@ -1357,7 +1357,7 @@ Wrap a native token with a 1:1 ratio with a fee if existing.
 ### yieldBox
 
 ```solidity
-function yieldBox() external view returns (contract IYieldBox)
+function yieldBox() external view returns (contract IYieldBoxBase)
 ```
 
 The YieldBox address.
@@ -1369,7 +1369,7 @@ The YieldBox address.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IYieldBox | undefined |
+| _0 | contract IYieldBoxBase | undefined |
 
 
 

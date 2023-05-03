@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol";
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
-import "./interfaces/IYieldBox.sol";
-import "./interfaces/ITapiocaWrapper.sol";
-import "./interfaces/IMarketHelper.sol";
-import "./interfaces/IPermitBorrow.sol";
+import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaWrapper.sol";
+import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
+import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -41,7 +41,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // *** VARS *** //
     // ************ //
     /// @notice The YieldBox address.
-    IYieldBox public yieldBox;
+    IYieldBoxBase public yieldBox;
     /// @notice If this wrapper is for an ERC20 or a native token.
     bool public isNative;
 
@@ -69,16 +69,22 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // ************** //
     // *** EVENTS *** //
     // ************** //
+    /// @notice event emitted when approvals are sent
     event SendApproval(
         address _target,
         address _owner,
         address _spender,
         uint256 _amount
     );
+    /// @notice event emitted when a YieldBox deposit is done
     event YieldBoxDeposit(uint256 _amount);
+    /// @notice event emitted when YieldBox funds are removed
     event YieldBoxRetrieval(uint256 _amount);
+    /// @notice event emitted when a borrow operation is performed
     event Borrow(address indexed _from, uint256 _amount);
+    /// @notice event emitted when a wrap operation is performed
     event Wrap(address indexed _from, address indexed _to, uint256 _amount);
+    /// @notice event emitted when an unwrap operation is performed
     event Unwrap(address indexed _from, address indexed _to, uint256 _amount);
 
     // ******************//
@@ -106,11 +112,20 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         _;
     }
 
+    /// @notice creates a new BaseTOFT contract
+    /// @param _lzEndpoint LayerZero endpoint address
+    /// @param _isNative true if the underlying ERC20 is actually the chain's native coin
+    /// @param _yieldBox the YieldBox address
+    /// @param _name the TOFT name
+    /// @param _symbol the TOFT symbol
+    /// @param _decimal the TOFT decimal
+    /// @param _hostChainID the TOFT host chain LayerZero id
+    /// @param _tapiocaWrapper the ITapiocaWrapper address
     constructor(
         address _lzEndpoint,
         bool _isNative,
         IERC20 _erc20,
-        IYieldBox _yieldBox,
+        IYieldBoxBase _yieldBox,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -143,7 +158,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // ********************** //
     // *** VIEW FUNCTIONS *** //
     // ********************** //
-    /// @notice Decimal number of the ERC20
+    /// @notice decimal number of the ERC20
     function decimals() public view override returns (uint8) {
         if (_decimalCache == 0) return 18; //temporary fix for LZ _sharedDecimals check
         return _decimalCache;
@@ -154,6 +169,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         return block.chainid == hostChainID;
     }
 
+    /// @notice returns current LayerZero chain id
     function getLzChainId() external view returns (uint16) {
         return lzEndpoint.getChainId();
     }
@@ -191,7 +207,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
-
+    /// @notice sends TOFT to a specific strategy available on another layer
+    /// @param _from the sender address
+    /// @param _to the receiver address
+    /// @param amount the transferred amount
+    /// @param assetId the destination YieldBox asset id
+    /// @param lzDstChainId the destination LayerZero id
+    /// @param options the operation data
     function sendToStrategy(
         address _from,
         address _to,
@@ -233,6 +255,15 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         emit SendToChain(lzDstChainId, _from, toAddress, amount);
     }
 
+    /// @notice sends TOFT to a specific chain and performs a borrow operation
+    /// @param _from the sender address
+    /// @param _to the receiver address
+    /// @param lzDstChainId the destination LayerZero id
+    /// @param airdropAdapterParams the LayerZero aidrop adapter params
+    /// @param borrowParams the borrow operation data
+    /// @param withdrawParams the withdraw operation data
+    /// @param options the cross chain send operation data
+    /// @param approvals the cross chain approval operation data
     function sendToYBAndBorrow(
         address _from,
         address _to,
@@ -279,6 +310,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         emit SendToChain(lzDstChainId, _from, toAddress, borrowParams.amount);
     }
 
+    /// @notice extracts TOFT from a specific strategy available on another layer
+    /// @param _from the sender address
+    /// @param amount the transferred amount
+    /// @param assetId the destination YieldBox asset id
+    /// @param lzDstChainId the destination LayerZero id
+    /// @param zroPaymentAddress LayerZero ZRO payment address
+    /// @param airdropAdapterParam the LayerZero aidrop adapter params
     function retrieveFromStrategy(
         address _from,
         uint256 amount,
@@ -460,7 +498,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             withdrawParams.withdrawAdapterParams
         );
         approve(address(borrowParams.marketHelper), borrowParams.amount);
-        IMarketHelper(borrowParams.marketHelper).depositAddCollateralAndBorrow{
+        IMagnetar(borrowParams.marketHelper).depositAddCollateralAndBorrow{
             value: msg.value
         }(
             borrowParams.market,
