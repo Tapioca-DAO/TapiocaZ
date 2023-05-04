@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol";
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 import "./interfaces/IYieldBox.sol";
-import "./lib/TransferLib.sol";
 import "./interfaces/ITapiocaWrapper.sol";
 import "./interfaces/IMarketHelper.sol";
 import "./interfaces/IPermitBorrow.sol";
@@ -48,8 +47,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
 
     uint16 public constant PT_YB_SEND_STRAT = 770;
     uint16 public constant PT_YB_RETRIEVE_STRAT = 771;
-    uint16 public constant PT_YB_DEPOSIT = 772;
-    uint16 public constant PT_YB_WITHDRAW = 773;
     uint16 public constant PT_YB_SEND_SGL_BORROW = 775;
 
     /// @notice The ERC20 to wrap.
@@ -64,8 +61,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // ************** //
     // *** ERRORS *** //
     // ************** //
-    /// @notice Error while depositing ETH assets to YieldBox.
-    error TOFT_YB_ETHDeposit();
     /// @notice Code executed not on main chain.
     error TOFT__NotHostChain();
     /// @notice A zero amount was found
@@ -166,7 +161,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     struct SendOptions {
         uint256 extraGasLimit;
         address zroPaymentAddress;
-        bool strategyDeposit;
         bool wrap;
     }
     struct IApproval {
@@ -198,7 +192,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
 
-    function sendToYB(
+    function sendToStrategy(
         address _from,
         address _to,
         uint256 amount,
@@ -217,7 +211,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
-            options.strategyDeposit ? PT_YB_SEND_STRAT : PT_YB_DEPOSIT,
+            PT_YB_SEND_STRAT,
             LzLib.addressToBytes32(_from),
             toAddress,
             amount,
@@ -285,19 +279,18 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         emit SendToChain(lzDstChainId, _from, toAddress, borrowParams.amount);
     }
 
-    function retrieveFromYB(
+    function retrieveFromStrategy(
         address _from,
         uint256 amount,
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        bytes memory airdropAdapterParam,
-        bool strategyWithdrawal
+        bytes memory airdropAdapterParam
     ) external payable {
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
         bytes memory lzPayload = abi.encode(
-            strategyWithdrawal ? PT_YB_RETRIEVE_STRAT : PT_YB_WITHDRAW,
+            PT_YB_RETRIEVE_STRAT,
             LzLib.addressToBytes32(_from),
             toAddress,
             amount,
@@ -319,37 +312,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
-    /// @notice Estimate the management fees for a wrap operation.
-    function _nonblockingLzReceive(
-        uint16 _srcChainId,
-        bytes memory _srcAddress,
-        uint64 _nonce,
-        bytes memory _payload
-    ) internal virtual override {
-        uint256 packetType = _payload.toUint256(0); //because we are not using encodePacked
-
-        if (packetType == PT_YB_SEND_STRAT) {
-            _ybDeposit(_srcChainId, _payload, IERC20(address(this)), true);
-        } else if (packetType == PT_YB_RETRIEVE_STRAT) {
-            _ybWithdraw(_srcChainId, _payload, true);
-        } else if (packetType == PT_YB_DEPOSIT) {
-            _ybDeposit(_srcChainId, _payload, IERC20(address(this)), false);
-        } else if (packetType == PT_YB_WITHDRAW) {
-            _ybWithdraw(_srcChainId, _payload, false);
-        } else if (packetType == PT_YB_SEND_SGL_BORROW) {
-            _borrow(_srcChainId, _payload);
-        } else {
-            packetType = _payload.toUint8(0); //LZ uses encodePacked for payload
-            if (packetType == PT_SEND) {
-                _sendAck(_srcChainId, _srcAddress, _nonce, _payload);
-            } else if (packetType == PT_SEND_AND_CALL) {
-                _sendAndCallAck(_srcChainId, _srcAddress, _nonce, _payload);
-            } else {
-                revert("OFTCoreV2: unknown packet type");
-            }
-        }
-    }
-
     function _wrap(
         address _fromAddress,
         address _toAddress,
@@ -373,7 +335,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         _burn(msg.sender, _amount);
 
         if (isNative) {
-            TransferLib.safeTransferETH(_toAddress, _amount);
+            _safeTransferETH(_toAddress, _amount);
         } else {
             erc20.safeTransfer(_toAddress, _amount);
         }
@@ -381,33 +343,31 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         emit Unwrap(msg.sender, _toAddress, _amount);
     }
 
-    function _ybDeposit(
+    function _strategyDeposit(
         uint16 _srcChainId,
         bytes memory _payload,
-        IERC20 _erc20,
-        bool _strategyDeposit
+        IERC20 _erc20
     ) internal virtual {
         (
             ,
-            bytes32 fromAddressBytes, //from
             ,
+            ,
+            //from
             uint256 amount,
             uint256 assetId
         ) = abi.decode(_payload, (uint16, bytes32, bytes32, uint256, uint256));
 
-        address onBehalfOf = _strategyDeposit
-            ? address(this)
-            : LzLib.bytes32ToAddress(fromAddressBytes);
+        address onBehalfOf = address(this);
+
         _creditTo(_srcChainId, address(this), amount);
         _depositToYieldbox(assetId, amount, _erc20, address(this), onBehalfOf);
 
         emit ReceiveFromChain(_srcChainId, onBehalfOf, amount);
     }
 
-    function _ybWithdraw(
+    function _strategyWithdraw(
         uint16 _srcChainId,
-        bytes memory _payload,
-        bool _strategyWithdrawal
+        bytes memory _payload
     ) internal virtual {
         (
             ,
@@ -427,7 +387,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             _assetId,
             _amount,
             _share,
-            _strategyWithdrawal ? address(this) : _from,
+            address(this),
             address(this)
         );
 
@@ -583,5 +543,42 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         yieldBox.withdraw(_assetId, _from, _to, _amount, _share);
 
         emit YieldBoxRetrieval(_amount);
+    }
+
+    function _safeTransferETH(address to, uint256 amount) internal {
+        bool success;
+
+        assembly {
+            // Transfer the ETH and store if it succeeded or not.
+            success := call(gas(), to, amount, 0, 0, 0, 0)
+        }
+
+        require(success, "ETH_TRANSFER_FAILED");
+    }
+
+    function _nonblockingLzReceive(
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) internal virtual override {
+        uint256 packetType = _payload.toUint256(0);
+
+        if (packetType == PT_YB_SEND_STRAT) {
+            _strategyDeposit(_srcChainId, _payload, IERC20(address(this)));
+        } else if (packetType == PT_YB_RETRIEVE_STRAT) {
+            _strategyWithdraw(_srcChainId, _payload);
+        } else if (packetType == PT_YB_SEND_SGL_BORROW) {
+            _borrow(_srcChainId, _payload);
+        } else {
+            packetType = _payload.toUint8(0);
+            if (packetType == PT_SEND) {
+                _sendAck(_srcChainId, _srcAddress, _nonce, _payload);
+            } else if (packetType == PT_SEND_AND_CALL) {
+                _sendAndCallAck(_srcChainId, _srcAddress, _nonce, _payload);
+            } else {
+                revert("OFTCoreV2: unknown packet type");
+            }
+        }
     }
 }

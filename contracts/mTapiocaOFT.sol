@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./BaseTOFT.sol";
-import "./lib/TransferLib.sol";
 import "./TapiocaWrapper.sol";
 
 //
@@ -184,7 +183,7 @@ contract mTapiocaOFT is BaseTOFT {
         if (!balancers[msg.sender]) revert TOFT_NotAuthorized();
 
         if (isNative) {
-            TransferLib.safeTransferETH(msg.sender, _amount);
+            _safeTransferETH(msg.sender, _amount);
         } else {
             erc20.safeTransfer(msg.sender, _amount);
         }
