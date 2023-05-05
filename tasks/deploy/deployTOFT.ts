@@ -1,7 +1,6 @@
-import { BytesLike, ethers } from 'ethers';
+import { BytesLike } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import inquirer from 'inquirer';
-import { typechain } from 'tapioca-sdk';
 import { TContract } from 'tapioca-sdk/dist/shared';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,7 +8,6 @@ import { useNetwork, useUtils } from '../../scripts/utils';
 import { TapiocaOFT, TapiocaWrapper } from '../../typechain';
 import { loadVM } from '../utils';
 import SDK from 'tapioca-sdk';
-import { filter } from 'lodash';
 
 export interface ITOFTDeployment extends TContract {
     meta: {
@@ -338,5 +336,17 @@ async function saveDeployedTOFT(
         }),
     ]);
     deployerVM.save();
-    await deployerVM.verify();
+
+    const { wantToVerify } = await inquirer.prompt({
+        type: 'confirm',
+        name: 'wantToVerify',
+        message: 'Do you want to verify the contracts?',
+    });
+    if (wantToVerify) {
+        try {
+            await deployerVM.verify();
+        } catch {
+            console.log('[-] Verification failed');
+        }
+    }
 }

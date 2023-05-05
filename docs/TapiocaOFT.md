@@ -301,7 +301,7 @@ function creditedPackets(uint16, bytes, uint64) external view returns (bool)
 function decimals() external view returns (uint8)
 ```
 
-Decimal number of the ERC20
+decimal number of the ERC20
 
 
 
@@ -480,7 +480,7 @@ function getConfig(uint16 _version, uint16 _chainId, address, uint256 _configTyp
 function getLzChainId() external view returns (uint16)
 ```
 
-
+returns current LayerZero chain id
 
 
 
@@ -822,7 +822,7 @@ function renounceOwnership() external nonpayable
 function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
-
+extracts TOFT from a specific strategy available on another layer
 
 
 
@@ -830,12 +830,12 @@ function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, ui
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| amount | uint256 | undefined |
-| assetId | uint256 | undefined |
-| lzDstChainId | uint16 | undefined |
-| zroPaymentAddress | address | undefined |
-| airdropAdapterParam | bytes | undefined |
+| _from | address | the sender address |
+| amount | uint256 | the transferred amount |
+| assetId | uint256 | the destination YieldBox asset id |
+| lzDstChainId | uint16 | the destination LayerZero id |
+| zroPaymentAddress | address | LayerZero ZRO payment address |
+| airdropAdapterParam | bytes | the LayerZero aidrop adapter params |
 
 ### retryMessage
 
@@ -1399,7 +1399,7 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 event Borrow(address indexed _from, uint256 _amount)
 ```
 
-
+event emitted when a borrow operation is performed
 
 
 
@@ -1525,7 +1525,7 @@ event RetryMessageSuccess(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, 
 event SendApproval(address _target, address _owner, address _spender, uint256 _amount)
 ```
 
-
+event emitted when approvals are sent
 
 
 
@@ -1665,7 +1665,7 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 event Unwrap(address indexed _from, address indexed _to, uint256 _amount)
 ```
 
-
+event emitted when an unwrap operation is performed
 
 
 
@@ -1683,7 +1683,7 @@ event Unwrap(address indexed _from, address indexed _to, uint256 _amount)
 event Wrap(address indexed _from, address indexed _to, uint256 _amount)
 ```
 
-
+event emitted when a wrap operation is performed
 
 
 
@@ -1701,7 +1701,7 @@ event Wrap(address indexed _from, address indexed _to, uint256 _amount)
 event YieldBoxDeposit(uint256 _amount)
 ```
 
-
+event emitted when a YieldBox deposit is done
 
 
 
@@ -1717,7 +1717,7 @@ event YieldBoxDeposit(uint256 _amount)
 event YieldBoxRetrieval(uint256 _amount)
 ```
 
-
+event emitted when YieldBox funds are removed
 
 
 
