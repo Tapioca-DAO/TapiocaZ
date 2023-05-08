@@ -55,12 +55,15 @@ contract mTapiocaOFT is BaseTOFT {
     // ************** //
     // *** EVENTS *** //
     // ************** //
+    /// @notice event emitted when a connected chain is reigstered or unregistered
     event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new);
+    /// @notice event emitted when balancer status is updated
     event BalancerStatusUpdated(
         address indexed _balancer,
         bool _bool,
         bool _new
     );
+    /// @notice event emitted when rebalancing is performed
     event Rebalancing(
         address indexed _balancer,
         uint256 _amount,
@@ -70,7 +73,6 @@ contract mTapiocaOFT is BaseTOFT {
     // ******************//
     // *** MODIFIERS *** //
     // ***************** //
-
     /// @notice Require that the caller is on the host chain of the ERC20.
     modifier onlyAllowedChain() {
         if (!connectedChains[block.chainid]) {
@@ -85,11 +87,20 @@ contract mTapiocaOFT is BaseTOFT {
         _;
     }
 
+    /// @notice creates a new mTapiocaOFT
+    /// @param _lzEndpoint LayerZero endpoint address
+    /// @param _isNative true if the underlying ERC20 is actually the chain's native coin
+    /// @param _erc20 true the underlying ERC20 address
+    /// @param _yieldBox the YieldBox address
+    /// @param _name the TOFT name
+    /// @param _symbol the TOFT symbol
+    /// @param _decimal the TOFT decimal
+    /// @param _hostChainID the TOFT host chain LayerZero id
     constructor(
         address _lzEndpoint,
         bool _isNative,
         IERC20 _erc20,
-        IYieldBox _yieldBox,
+        IYieldBoxBase _yieldBox,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
