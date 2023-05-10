@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { typechain } from 'tapioca-sdk';
 import { loadVM } from '../utils';
+import inquirer from 'inquirer';
 
 //TODO: remove transferOwnership param after CU-85zrubh6u implementation
 export const deployTapiocaWrapper__task = async (
@@ -46,5 +46,17 @@ export const deployTapiocaWrapper__task = async (
     });
     await deployerVM.execute(3);
     deployerVM.save();
-    await deployerVM.verify();
+
+    const { wantToVerify } = await inquirer.prompt({
+        type: 'confirm',
+        name: 'wantToVerify',
+        message: 'Do you want to verify the contracts?',
+    });
+    if (wantToVerify) {
+        try {
+            await deployerVM.verify();
+        } catch {
+            console.log('[-] Verification failed');
+        }
+    }
 };

@@ -1,5 +1,4 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { typechain } from 'tapioca-sdk';
 import { STARGATE_ROUTERS } from '../constants';
 import { loadVM } from '../utils';
 
