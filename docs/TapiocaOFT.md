@@ -95,23 +95,6 @@ function PT_SEND_AND_CALL() external view returns (uint8)
 |---|---|---|
 | _0 | uint8 | undefined |
 
-### PT_YB_DEPOSIT
-
-```solidity
-function PT_YB_DEPOSIT() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### PT_YB_RETRIEVE_STRAT
 
 ```solidity
@@ -150,23 +133,6 @@ function PT_YB_SEND_SGL_BORROW() external view returns (uint16)
 
 ```solidity
 function PT_YB_SEND_STRAT() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-### PT_YB_WITHDRAW
-
-```solidity
-function PT_YB_WITHDRAW() external view returns (uint16)
 ```
 
 
@@ -335,7 +301,7 @@ function creditedPackets(uint16, bytes, uint64) external view returns (bool)
 function decimals() external view returns (uint8)
 ```
 
-Decimal number of the ERC20
+decimal number of the ERC20
 
 
 
@@ -514,7 +480,7 @@ function getConfig(uint16 _version, uint16 _chainId, address, uint256 _configTyp
 function getLzChainId() external view returns (uint16)
 ```
 
-
+returns current LayerZero chain id
 
 
 
@@ -850,13 +816,13 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
-### retrieveFromYB
+### retrieveFromStrategy
 
 ```solidity
-function retrieveFromYB(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, bool strategyWithdrawal) external payable
+function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
-
+extracts TOFT from a specific strategy available on another layer
 
 
 
@@ -864,13 +830,12 @@ function retrieveFromYB(address _from, uint256 amount, uint256 assetId, uint16 l
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| amount | uint256 | undefined |
-| assetId | uint256 | undefined |
-| lzDstChainId | uint16 | undefined |
-| zroPaymentAddress | address | undefined |
-| airdropAdapterParam | bytes | undefined |
-| strategyWithdrawal | bool | undefined |
+| _from | address | the sender address |
+| amount | uint256 | the transferred amount |
+| assetId | uint256 | the destination YieldBox asset id |
+| lzDstChainId | uint16 | the destination LayerZero id |
+| zroPaymentAddress | address | LayerZero ZRO payment address |
+| airdropAdapterParam | bytes | the LayerZero aidrop adapter params |
 
 ### retryMessage
 
@@ -933,10 +898,10 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 | _amount | uint256 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
 
-### sendToYB
+### sendToStrategy
 
 ```solidity
-function sendToYB(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
+function sendToStrategy(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
 ```
 
 
@@ -1392,7 +1357,7 @@ Wrap a native token with a 1:1 ratio with a fee if existing.
 ### yieldBox
 
 ```solidity
-function yieldBox() external view returns (contract IYieldBox)
+function yieldBox() external view returns (contract IYieldBoxBase)
 ```
 
 The YieldBox address.
@@ -1404,7 +1369,7 @@ The YieldBox address.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IYieldBox | undefined |
+| _0 | contract IYieldBoxBase | undefined |
 
 
 
@@ -1434,7 +1399,7 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 event Borrow(address indexed _from, uint256 _amount)
 ```
 
-
+event emitted when a borrow operation is performed
 
 
 
@@ -1560,7 +1525,7 @@ event RetryMessageSuccess(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, 
 event SendApproval(address _target, address _owner, address _spender, uint256 _amount)
 ```
 
-
+event emitted when approvals are sent
 
 
 
@@ -1700,7 +1665,7 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 event Unwrap(address indexed _from, address indexed _to, uint256 _amount)
 ```
 
-
+event emitted when an unwrap operation is performed
 
 
 
@@ -1718,7 +1683,7 @@ event Unwrap(address indexed _from, address indexed _to, uint256 _amount)
 event Wrap(address indexed _from, address indexed _to, uint256 _amount)
 ```
 
-
+event emitted when a wrap operation is performed
 
 
 
@@ -1736,7 +1701,7 @@ event Wrap(address indexed _from, address indexed _to, uint256 _amount)
 event YieldBoxDeposit(uint256 _amount)
 ```
 
-
+event emitted when a YieldBox deposit is done
 
 
 
@@ -1752,7 +1717,7 @@ event YieldBoxDeposit(uint256 _amount)
 event YieldBoxRetrieval(uint256 _amount)
 ```
 
-
+event emitted when YieldBox funds are removed
 
 
 
@@ -1765,17 +1730,6 @@ event YieldBoxRetrieval(uint256 _amount)
 
 
 ## Errors
-
-### TOFT_YB_ETHDeposit
-
-```solidity
-error TOFT_YB_ETHDeposit()
-```
-
-Error while depositing ETH assets to YieldBox.
-
-
-
 
 ### TOFT_ZeroAmount
 

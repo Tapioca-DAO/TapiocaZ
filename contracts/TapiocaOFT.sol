@@ -33,11 +33,20 @@ contract TapiocaOFT is BaseTOFT {
     /// @notice The TapiocaWrapper contract, owner of this contract.
     TapiocaWrapper public tapiocaWrapper;
 
+    /// @notice creates a new TapiocaOFT
+    /// @param _lzEndpoint LayerZero endpoint address
+    /// @param _isNative true if the underlying ERC20 is actually the chain's native coin
+    /// @param _erc20 true the underlying ERC20 address
+    /// @param _yieldBox the YieldBox address
+    /// @param _name the TOFT name
+    /// @param _symbol the TOFT symbol
+    /// @param _decimal the TOFT decimal
+    /// @param _hostChainID the TOFT host chain LayerZero id
     constructor(
         address _lzEndpoint,
         bool _isNative,
         IERC20 _erc20,
-        IYieldBox _yieldBox,
+        IYieldBoxBase _yieldBox,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,

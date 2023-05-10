@@ -7,6 +7,10 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import _ from 'lodash';
 import SDK from 'tapioca-sdk';
 import { TContract, TDeployment } from '../constants';
+import {
+    LZEndpointMock__factory,
+    YieldBoxMock__factory,
+} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 import config from '../hardhat.export';
 import { ERC20Permit, TapiocaOFT__factory } from '../typechain';
 
@@ -31,16 +35,17 @@ export const useNetwork = async (
     return new hre.ethers.Wallet(pk, provider);
 };
 
-export const useUtils = (hre: HardhatRuntimeEnvironment) => {
+export const useUtils = (
+    hre: HardhatRuntimeEnvironment,
+    signer: SignerWithAddress,
+) => {
     const { ethers } = hre;
 
     // DEPLOYMENTS
-    const deployLZEndpointMock = async (chainId: number) =>
-        await (
-            await (
-                await ethers.getContractFactory('LZEndpointMock')
-            ).deploy(chainId)
-        ).deployed();
+    const deployLZEndpointMock = async (chainId: number) => {
+        const LZEndpointMock = new LZEndpointMock__factory(signer);
+        return await LZEndpointMock.deploy(chainId);
+    };
 
     const deployTapiocaWrapper = async () =>
         await (
@@ -49,10 +54,10 @@ export const useUtils = (hre: HardhatRuntimeEnvironment) => {
             ).deploy((await ethers.getSigners())[0].address)
         ).deployed();
 
-    const deployYieldBoxMock = async () =>
-        await (
-            await (await ethers.getContractFactory('YieldBoxMock')).deploy()
-        ).deployed();
+    const deployYieldBoxMock = async () => {
+        const YieldBoxMock = new YieldBoxMock__factory(signer);
+        return await YieldBoxMock.deploy();
+    };
 
     // UTILS
     const Tx_deployTapiocaOFT = async (

@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 import "./TapiocaOFT.sol";
 import "./mTapiocaOFT.sol";
-import "./interfaces/ITapiocaOFT.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./interfaces/ITapiocaOFT.sol";
-import "./interfaces/IStargateRouter.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
+import "tapioca-periph/contracts/interfaces/IStargateRouter.sol";
 import "@rari-capital/solmate/src/auth/Owned.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -52,7 +53,9 @@ contract Balancer is Owned {
         uint256 rebalanceable;
     }
 
+    /// @notice StargetETH router address
     IStargateRouter immutable routerETH;
+    /// @notice Stargate router address
     IStargateRouter immutable router;
 
     uint256 private constant SLIPPAGE_PRECISION = 1e5;
@@ -60,11 +63,14 @@ contract Balancer is Owned {
     // ************************ //
     // *** EVENTS FUNCTIONS *** //
     // ************************ //
+    /// @notice event emitted when mTapiocaOFT is initialized
     event ConnectedChainUpdated(
         address indexed _srcOft,
         uint16 _dstChainId,
         address indexed _dstOft
     );
+    /// @notice event emitted when a rebalance operation is performed
+    /// @dev rebalancing means sending an amount of the underlying token to one of the connected chains
     event Rebalanced(
         address indexed _srcOft,
         uint16 _dstChainId,
@@ -72,6 +78,7 @@ contract Balancer is Owned {
         uint256 _amount,
         bool _isNative
     );
+    /// @notice event emitted when max rebalanceable amount is updated
     event RebalanceAmountUpdated(
         address _srcOft,
         uint16 _dstChainId,
@@ -82,10 +89,15 @@ contract Balancer is Owned {
     // ************************ //
     // *** ERRORS FUNCTIONS *** //
     // ************************ //
+    /// @notice error thrown when IStargetRouter address is not valid
     error RouterNotValid();
+    /// @notice error thrown when value exceeds balance
     error ExceedsBalance();
+    /// @notice error thrown when chain destination is not valid
     error DestinationNotValid();
+    /// @notice error thrown when dex slippage is not valid
     error SlippageNotValid();
+    /// @notice error thrown when fee amount is not set
     error FeeAmountNotSet();
     error PoolInfoRequired();
     error RebalanceAmountNotSet();
@@ -148,6 +160,13 @@ contract Balancer is Owned {
     // *********************** //
     // *** OWNER FUNCTIONS *** //
     // *********************** //
+    /// @notice performs a rebalance operation
+    /// @dev callable only by the owner
+    /// @param _srcOft the source TOFT address
+    /// @param _dstChainId the destination LayerZero id
+    /// @param _slippage the destination LayerZero id
+    /// @param _amount the rebalanced amount
+    /// @param _ercData custom send data
     function rebalance(
         address payable _srcOft,
         uint16 _dstChainId,
@@ -190,6 +209,11 @@ contract Balancer is Owned {
         emit Rebalanced(_srcOft, _dstChainId, _slippage, _amount, _isNative);
     }
 
+    /// @notice registeres mTapiocaOFT for rebalancing
+    /// @param _srcOft the source TOFT address
+    /// @param _dstChainId the destination LayerZero id
+    /// @param _dstOft the destination TOFT address
+    /// @param _ercData custom send data
     function initConnectedOFT(
         address _srcOft,
         uint16 _dstChainId,
@@ -217,6 +241,10 @@ contract Balancer is Owned {
         emit ConnectedChainUpdated(_srcOft, _dstChainId, _dstOft);
     }
 
+    /// @notice assings more rebalanceable amount for TOFT
+    /// @param _srcOft the source TOFT address
+    /// @param _dstChainId the destination LayerZero id
+    /// @param _amount the rebalanced amount
     function addRebalanceAmount(
         address _srcOft,
         uint16 _dstChainId,
@@ -234,7 +262,6 @@ contract Balancer is Owned {
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
-
     function _isValidOft(
         address _srcOft,
         address _dstOft,
@@ -272,8 +299,8 @@ contract Balancer is Owned {
         uint256 _slippage,
         bytes memory _data
     ) private {
-        if (ITapiocaOFT(_oft).erc20().balanceOf(address(this)) < _amount)
-            revert ExceedsBalance();
+        IERC20Metadata erc20 = IERC20Metadata(ITapiocaOFT(_oft).erc20());
+        if (erc20.balanceOf(address(this)) < _amount) revert ExceedsBalance();
 
         (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(
             _data,
@@ -289,7 +316,7 @@ contract Balancer is Owned {
                 )
             });
 
-        ITapiocaOFT(_oft).erc20().approve(address(router), _amount);
+        erc20.approve(address(router), _amount);
         router.swap(
             _dstChainId,
             _srcPoolId,
