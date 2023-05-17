@@ -1,6 +1,6 @@
 import '@nomiclabs/hardhat-ethers';
 import { task } from 'hardhat/config';
-import { wrap } from './tasks/wrap';
+import { wrap } from './tasks/exec/wrap';
 
 import { deployBalancer__task } from './tasks/deploy/deployBalancer';
 import { deployTapiocaWrapper__task } from './tasks/deploy/deployTapiocaWrapper';

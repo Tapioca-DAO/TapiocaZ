@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { readTOFTDeployments } from '../scripts/utils';
+import { readTOFTDeployments } from '../../scripts/utils';
 
 export const wrap = async (
     args: { toft: string; amount: string },
