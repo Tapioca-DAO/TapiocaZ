@@ -1,20 +1,208 @@
 {
     "default": {
-        "421613": [
+        "43113": [
+            {
+                "name": "TapiocaOFT-WETHMock",
+                "address": "0x93AF82924e48019036d5C82C768B92150C15677B",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0x93f54D755A063cE7bB9e6Ac47Eccc8e33411d706",
+                        false,
+                        "0x5957aC1384bfa85b2d35C0B1B2401325082DbE63",
+                        "0xba128B0E747c978AF61D08Be31BC7d4a60Ae5654",
+                        "WETHMock",
+                        "WETHM",
+                        18,
+                        421613
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaOFT-AVAXMock",
+                "address": "0xb0F3d9c52e5359e8fF7Fe09ec30813B89A515373",
+                "meta": {
+                    "isToftHost": true,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0x93f54D755A063cE7bB9e6Ac47Eccc8e33411d706",
+                        false,
+                        "0x4db2d42794753e4594eF2530D9D039aF9d0db415",
+                        "0xba128B0E747c978AF61D08Be31BC7d4a60Ae5654",
+                        "AVAXMock",
+                        "AVAXM",
+                        18,
+                        43113
+                    ]
+                }
+            },
             {
                 "name": "TapiocaWrapper",
-                "address": "0xd2e59D783b660CFbAACA17696f5D9b9c2Ae9C688",
+                "address": "0xAf7eeaFB4B6E48b87eb4102f69581BF45AB9484c",
                 "meta": {
                     "args": [
                         "0x40282d3Cf4890D9806BC1853e97a59C93D813653"
                     ],
-                    "salt": "0x2db9003993af9426b795d496c73615f32e888075ea8ba99888be7463ea3f43bd",
+                    "salt": "0x2a68e9be855bece8b68097a72f4835f9f88c64caed1f6cfe701e21720a95c0aa",
                     "create2": true
                 }
             },
             {
                 "name": "TapiocaDeployer",
-                "address": "0x6b0fa4feb4EA7790778e7c4AB97A51C9B4dE8d4c",
+                "address": "0x80Fc636C248f2229306E18E8B2C2f56f1Fbc195c",
+                "meta": {}
+            }
+        ],
+        "80001": [
+            {
+                "name": "TapiocaOFT-AVAXMock",
+                "address": "0x813983a69b1f651E2d994B79B74a8e1a74E9F3d8",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0xf69186dfBa60DdB133E91E9A4B5673624293d8F8",
+                        false,
+                        "0x4db2d42794753e4594eF2530D9D039aF9d0db415",
+                        "0x5B1898822873c5231FC1b7AE06C6d7e16CBfc552",
+                        "AVAXMock",
+                        "AVAXM",
+                        18,
+                        43113
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaOFT-WETHMock",
+                "address": "0xfA5e98A11bF345bB4fa22da7A652959dd6821584",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0xf69186dfBa60DdB133E91E9A4B5673624293d8F8",
+                        false,
+                        "0x5957aC1384bfa85b2d35C0B1B2401325082DbE63",
+                        "0x5B1898822873c5231FC1b7AE06C6d7e16CBfc552",
+                        "WETHMock",
+                        "WETHM",
+                        18,
+                        421613
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaOFT-MATICMock",
+                "address": "0x1b069Da5778d2E0C2482aECA4391c5B926c5Da95",
+                "meta": {
+                    "isToftHost": true,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0xf69186dfBa60DdB133E91E9A4B5673624293d8F8",
+                        false,
+                        "0x6C01ef49Eb4155CD6F1B86c2Bc386AF799dDa939",
+                        "0x5B1898822873c5231FC1b7AE06C6d7e16CBfc552",
+                        "MATICMock",
+                        "MATICM",
+                        18,
+                        80001
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaWrapper",
+                "address": "0x3e5C2487EAb999fBe99cbb72195aD56c574b7932",
+                "meta": {
+                    "args": [
+                        "0x40282d3Cf4890D9806BC1853e97a59C93D813653"
+                    ],
+                    "salt": "0xea896c842eefb6053e0e222053816ecd634dcdf43f23f6143423785fb14427ee",
+                    "create2": true
+                }
+            },
+            {
+                "name": "TapiocaDeployer",
+                "address": "0x74569cE280bB1D4604B3e69Ca20596c5b83064ba",
+                "meta": {}
+            }
+        ],
+        "421613": [
+            {
+                "name": "TapiocaOFT-MATICMock",
+                "address": "0x1201B81Dd25c734200c3974fD8e55Cc0dc332A4c",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab",
+                        false,
+                        "0x6C01ef49Eb4155CD6F1B86c2Bc386AF799dDa939",
+                        "0x0C07406CD6C651e387bA379945AE38558688573d",
+                        "MATICMock",
+                        "MATICM",
+                        18,
+                        80001
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaOFT-AVAXMock",
+                "address": "0x202151D4cb8a8667114E2cED11764139819B55af",
+                "meta": {
+                    "isToftHost": false,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab",
+                        false,
+                        "0x4db2d42794753e4594eF2530D9D039aF9d0db415",
+                        "0x0C07406CD6C651e387bA379945AE38558688573d",
+                        "AVAXMock",
+                        "AVAXM",
+                        18,
+                        43113
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaOFT-WETHMock",
+                "address": "0x0188F0480980bdA8Af23B3EfedD58B395F7aAE7e",
+                "meta": {
+                    "isToftHost": true,
+                    "isMerged": false,
+                    "isToft": true,
+                    "args": [
+                        "0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab",
+                        false,
+                        "0x5957aC1384bfa85b2d35C0B1B2401325082DbE63",
+                        "0x0C07406CD6C651e387bA379945AE38558688573d",
+                        "WETHMock",
+                        "WETHM",
+                        18,
+                        421613
+                    ]
+                }
+            },
+            {
+                "name": "TapiocaWrapper",
+                "address": "0x951f4105aA8759d9B494d5121430ccC3c74BdaeE",
+                "meta": {
+                    "args": [
+                        "0x40282d3Cf4890D9806BC1853e97a59C93D813653"
+                    ],
+                    "salt": "0xd0f8f588052549b3fbe6d624ed51b3def6befbcd1114eb49786d3c48fbb977e1",
+                    "create2": true
+                }
+            },
+            {
+                "name": "TapiocaDeployer",
+                "address": "0x3aEcdb0B7000cd04531098E72804Fae19a4e60c1",
                 "meta": {}
             }
         ]
