@@ -24,6 +24,7 @@ task('deployTOFT', 'Deploy a TOFT', deployTOFT__task)
         'throughMultisig',
         'If true, deploy through the Multisig contract',
     )
+    .addOptionalParam('overrideOptions', 'Override options')
     .addFlag('isNative', 'If the TOFT should support the gas token')
     .addFlag('isMerged', 'If the TOFT should be a rebalanceable mTOFT');
 

@@ -22,6 +22,7 @@ export const deployTOFT__task = async (
         isNative?: boolean;
         isMerged?: boolean;
         throughMultisig?: boolean;
+        overrideOptions?: boolean;
     },
     hre: HardhatRuntimeEnvironment,
 ) => {
@@ -79,6 +80,7 @@ export const deployTOFT__task = async (
         toftDeployInfo.txData,
         args.throughMultisig,
         args.isMerged,
+        args.overrideOptions,
     );
     await saveDeployedTOFT(hre, tag, deployedTOFT, {
         isToftHost: isCurrentChainHost,
@@ -278,6 +280,7 @@ async function initiateTOFTDeployment(
     deployBytecode: BytesLike,
     throughMultisig?: boolean,
     isMerged?: boolean,
+    overrideOptions?: boolean,
 ) {
     console.log('[+] Deploying TOFT');
     if (throughMultisig) {
@@ -304,7 +307,9 @@ async function initiateTOFTDeployment(
                 deployBytecode,
                 hre.ethers.utils.solidityKeccak256(['string'], [uuidv4()]),
                 Boolean(isMerged),
-                hre.SDK.utils.getOverrideOptions(await hre.getChainId()),
+                overrideOptions
+                    ? hre.SDK.utils.getOverrideOptions(await hre.getChainId())
+                    : {},
             )
         ).wait(3);
     }
