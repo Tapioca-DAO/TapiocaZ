@@ -67,7 +67,7 @@ describe('mTapiocaOFT', () => {
                 mtapiocaOFT0
                     .connect(randomUser)
                     .wrap(signer.address, randomUser.address, dummyAmount),
-            ).to.be.revertedWith('TOFT: Not allowed');
+            ).to.be.revertedWith('TOFT: not allowed');
 
             // Approve and check allowance
             await mtapiocaOFT0.approve(randomUser.address, dummyAmount);
