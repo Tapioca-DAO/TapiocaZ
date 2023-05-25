@@ -106,7 +106,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         if (_owner != _spender) {
             require(
                 allowance(_owner, _spender) >= _amount,
-                "TOFT: Not allowed"
+                "TOFT: not allowed"
             );
         }
         _;
@@ -141,7 +141,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         ERC20Permit(string(abi.encodePacked("TapiocaOFT-", _name)))
     {
         if (_isNative) {
-            require(address(_erc20) == address(0), "TOFT__NotNative");
+            require(address(_erc20) == address(0), "TOFT: not native");
         }
 
         erc20 = _erc20;
@@ -218,10 +218,12 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         address _from,
         address _to,
         uint256 amount,
+        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         SendOptions calldata options
     ) external payable {
+        require(amount > 0, "TOFT: amount not valid");
         if (options.wrap) {
             if (isNative) {
                 _wrapNative(_to);
@@ -237,6 +239,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             LzLib.addressToBytes32(_from),
             toAddress,
             amount,
+            share,
             assetId
         );
 
@@ -320,11 +323,14 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     function retrieveFromStrategy(
         address _from,
         uint256 amount,
+        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
     ) external payable {
+        require(amount > 0, "TOFT: amount not valid");
+
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
         bytes memory lzPayload = abi.encode(
@@ -332,7 +338,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             LzLib.addressToBytes32(_from),
             toAddress,
             amount,
-            0,
+            share,
             assetId,
             zroPaymentAddress
         );
@@ -386,19 +392,23 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bytes memory _payload,
         IERC20 _erc20
     ) internal virtual {
-        (
-            ,
-            ,
-            ,
-            //from
-            uint256 amount,
-            uint256 assetId
-        ) = abi.decode(_payload, (uint16, bytes32, bytes32, uint256, uint256));
+        (, , bytes32 from, uint256 amount, uint256 share, uint256 assetId) = abi
+            .decode(
+                _payload,
+                (uint16, bytes32, bytes32, uint256, uint256, uint256)
+            );
 
-        address onBehalfOf = address(this);
+        address onBehalfOf = LzLib.bytes32ToAddress(from);
 
         _creditTo(_srcChainId, address(this), amount);
-        _depositToYieldbox(assetId, amount, _erc20, address(this), onBehalfOf);
+        _depositToYieldbox(
+            assetId,
+            amount,
+            share,
+            _erc20,
+            address(this),
+            onBehalfOf
+        );
 
         emit ReceiveFromChain(_srcChainId, onBehalfOf, amount);
     }
@@ -421,13 +431,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             );
 
         address _from = LzLib.bytes32ToAddress(from);
-        _retrieveFromYieldBox(
-            _assetId,
-            _amount,
-            _share,
-            address(this),
-            address(this)
-        );
+        _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
         _debitFrom(
             address(this),
@@ -560,12 +564,17 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
     function _depositToYieldbox(
         uint256 _assetId,
         uint256 _amount,
+        uint256 _share,
         IERC20 _erc20,
         address _from,
         address _to
     ) private {
+        if (_share > 0) {
+            //share takes precedance over amount
+            _amount = yieldBox.toAmount(_assetId, _share, false);
+        }
         _erc20.approve(address(yieldBox), _amount);
-        yieldBox.depositAsset(_assetId, _from, _to, _amount, 0);
+        yieldBox.depositAsset(_assetId, _from, _to, _amount, _share);
 
         emit YieldBoxDeposit(_amount);
     }
@@ -591,7 +600,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             success := call(gas(), to, amount, 0, 0, 0, 0)
         }
 
-        require(success, "ETH_TRANSFER_FAILED");
+        require(success, "TOFT: transfer failed (ETH)");
     }
 
     function _nonblockingLzReceive(
