@@ -11,7 +11,6 @@ import "tapioca-periph/contracts/interfaces/ITapiocaWrapper.sol";
 import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
 
-
 //
 //                 .(%%%%%%%%%%%%*       *
 //             #%%%%%%%%%%%%%%%%%%%%*  ####*
@@ -224,7 +223,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         uint16 lzDstChainId,
         SendOptions calldata options
     ) external payable {
-        require(amount > 0, 'TOFT: amount not valid');
+        require(amount > 0, "TOFT: amount not valid");
         if (options.wrap) {
             if (isNative) {
                 _wrapNative(_to);
@@ -330,7 +329,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
     ) external payable {
-        require(amount > 0, 'TOFT: amount not valid');
+        require(amount > 0, "TOFT: amount not valid");
 
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
@@ -393,19 +392,23 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
         bytes memory _payload,
         IERC20 _erc20
     ) internal virtual {
-        (
-            ,
-            ,
-            bytes32 from,
-            uint256 amount,
-            uint256 share,
-            uint256 assetId
-        ) = abi.decode(_payload, (uint16, bytes32, bytes32, uint256, uint256, uint256));
+        (, , bytes32 from, uint256 amount, uint256 share, uint256 assetId) = abi
+            .decode(
+                _payload,
+                (uint16, bytes32, bytes32, uint256, uint256, uint256)
+            );
 
         address onBehalfOf = LzLib.bytes32ToAddress(from);
 
         _creditTo(_srcChainId, address(this), amount);
-        _depositToYieldbox(assetId, amount, share, _erc20, address(this), onBehalfOf);
+        _depositToYieldbox(
+            assetId,
+            amount,
+            share,
+            _erc20,
+            address(this),
+            onBehalfOf
+        );
 
         emit ReceiveFromChain(_srcChainId, onBehalfOf, amount);
     }
@@ -428,13 +431,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit, BaseBoringBatchable {
             );
 
         address _from = LzLib.bytes32ToAddress(from);
-        _retrieveFromYieldBox(
-            _assetId,
-            _amount,
-            _share,
-            _from,
-            address(this)
-        );
+        _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
         _debitFrom(
             address(this),

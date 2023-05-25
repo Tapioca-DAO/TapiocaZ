@@ -342,7 +342,6 @@ describe('TapiocaOFT', () => {
                 ),
             )) as TapiocaOFT;
 
-
             // Deploy TapiocaOFT10
             {
                 const txData =
@@ -669,8 +668,10 @@ describe('TapiocaOFT', () => {
             strategy0Amount = await Strategy_0.vaultAmount();
             expect(strategy0Amount.eq(0)).to.be.true;
 
-            const signerBalanceAfterCrossChainWithdrawal = await tapiocaOFT10.balanceOf(signer.address);
-            expect(signerBalanceAfterCrossChainWithdrawal.gt(bigDummyAmount)).to.be.true;
+            const signerBalanceAfterCrossChainWithdrawal =
+                await tapiocaOFT10.balanceOf(signer.address);
+            expect(signerBalanceAfterCrossChainWithdrawal.gt(bigDummyAmount)).to
+                .be.true;
         });
     });
 });
