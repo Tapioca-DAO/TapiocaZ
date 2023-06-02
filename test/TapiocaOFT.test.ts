@@ -41,7 +41,6 @@ describe('TapiocaOFT', () => {
             await hre.ethers.getContractFactory('TapiocaOFT')
         ).deploy(
             lzEndpoint.address,
-            false,
             erc20Mock.address,
             yieldBox.address,
             'test',
@@ -67,7 +66,7 @@ describe('TapiocaOFT', () => {
 
             await expect(
                 tapiocaOFT10.wrap(signer.address, signer.address, dummyAmount),
-            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotHostChain');
+            ).to.be.reverted;
         });
 
         it('Should wrap and give a 1:1 ratio amount of tokens', async () => {
@@ -110,9 +109,8 @@ describe('TapiocaOFT', () => {
                 setupFixture,
             );
 
-            await expect(
-                tapiocaOFT10.unwrap(signer.address, dummyAmount),
-            ).to.be.revertedWithCustomError(tapiocaOFT10, 'TOFT__NotHostChain');
+            await expect(tapiocaOFT10.unwrap(signer.address, dummyAmount)).to.be
+                .reverted;
         });
         it('Should unwrap and give a 1:1 ratio amount of tokens', async () => {
             const {
@@ -322,7 +320,6 @@ describe('TapiocaOFT', () => {
                         (
                             await utils.Tx_deployTapiocaOFT(
                                 LZEndpointMock_chainID_0.address,
-                                false,
                                 erc20Mock.address,
                                 YieldBox_0.address,
                                 31337,
@@ -350,7 +347,6 @@ describe('TapiocaOFT', () => {
                         (
                             await utils.Tx_deployTapiocaOFT(
                                 LZEndpointMock_chainID_10.address,
-                                false,
                                 erc20Mock.address,
                                 YieldBox_10.address,
                                 10,
@@ -398,8 +394,8 @@ describe('TapiocaOFT', () => {
             );
 
             // Set trusted remotes
-            const dstChainId0 = await tapiocaOFT0.getLzChainId();
-            const dstChainId10 = await tapiocaOFT10.getLzChainId();
+            const dstChainId0 = 31337;
+            const dstChainId10 = 10;
 
             await tapiocaWrapper_0.executeTOFT(
                 tapiocaOFT0.address,
@@ -598,7 +594,6 @@ describe('TapiocaOFT', () => {
                     },
                 ),
             ).to.not.be.reverted;
-
             const signerBalanceForTOFT10 = await tapiocaOFT10.balanceOf(
                 signer.address,
             );

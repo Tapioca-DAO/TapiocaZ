@@ -156,7 +156,7 @@ contract TapiocaWrapper is Ownable {
         tapiocaOFTs.push(iOFT);
         tapiocaOFTsByErc20[_erc20] = iOFT;
 
-        if (iOFT.isHostChain()) {
+        if (iOFT.hostChainID() == block.chainid) {
             harvestableTapiocaOFTs.push(iOFT);
         }
         emit CreateOFT(iOFT, _erc20);

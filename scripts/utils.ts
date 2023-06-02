@@ -62,7 +62,6 @@ export const useUtils = (
     // UTILS
     const Tx_deployTapiocaOFT = async (
         lzEndpoint: string,
-        isNative: boolean,
         erc20Address: string,
         yieldBoxAddress: string,
         hostChainID: number,
@@ -82,7 +81,6 @@ export const useUtils = (
 
         const args: Parameters<TapiocaOFT__factory['deploy']> = [
             lzEndpoint,
-            isNative,
             erc20Address,
             yieldBoxAddress,
             erc20name,

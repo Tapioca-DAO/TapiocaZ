@@ -95,57 +95,6 @@ function PT_SEND_AND_CALL() external view returns (uint8)
 |---|---|---|
 | _0 | uint8 | undefined |
 
-### PT_YB_RETRIEVE_STRAT
-
-```solidity
-function PT_YB_RETRIEVE_STRAT() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-### PT_YB_SEND_SGL_BORROW
-
-```solidity
-function PT_YB_SEND_SGL_BORROW() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-### PT_YB_SEND_STRAT
-
-```solidity
-function PT_YB_SEND_STRAT() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### allowance
 
 ```solidity
@@ -213,23 +162,6 @@ function balanceOf(address account) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### batch
-
-```solidity
-function batch(bytes[] calls, bool revertOnFail) external payable
-```
-
-Allows batched call to self (this contract).
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| calls | bytes[] | An array of inputs for each call. |
-| revertOnFail | bool | If True then reverts after a failed call and stops doing further calls. |
 
 ### callOnOFTReceived
 
@@ -338,7 +270,7 @@ function decreaseAllowance(address spender, uint256 subtractedValue) external no
 ### erc20
 
 ```solidity
-function erc20() external view returns (contract IERC20)
+function erc20() external view returns (address)
 ```
 
 The ERC20 to wrap.
@@ -350,7 +282,7 @@ The ERC20 to wrap.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IERC20 | undefined |
+| _0 | address | undefined |
 
 ### estimateSendAndCallFee
 
@@ -474,23 +406,6 @@ function getConfig(uint16 _version, uint16 _chainId, address, uint256 _configTyp
 |---|---|---|
 | _0 | bytes | undefined |
 
-### getLzChainId
-
-```solidity
-function getLzChainId() external view returns (uint16)
-```
-
-returns current LayerZero chain id
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### getTrustedRemoteAddress
 
 ```solidity
@@ -546,40 +461,6 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 |---|---|---|
 | spender | address | undefined |
 | addedValue | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### isHostChain
-
-```solidity
-function isHostChain() external view returns (bool)
-```
-
-Check if the current chain is the host chain of the ERC20.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### isNative
-
-```solidity
-function isNative() external view returns (bool)
-```
-
-If this wrapper is for an ERC20 or a native token.
-
-
-
 
 #### Returns
 
@@ -1152,23 +1033,6 @@ function symbol() external view returns (string)
 |---|---|---|
 | _0 | string | undefined |
 
-### tapiocaWrapper
-
-```solidity
-function tapiocaWrapper() external view returns (contract TapiocaWrapper)
-```
-
-The TapiocaWrapper contract, owner of this contract.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract TapiocaWrapper | undefined |
-
 ### token
 
 ```solidity
@@ -1325,7 +1189,7 @@ function useCustomAdapterParams() external view returns (bool)
 ### wrap
 
 ```solidity
-function wrap(address _fromAddress, address _toAddress, uint256 _amount) external nonpayable
+function wrap(address _fromAddress, address _toAddress, uint256 _amount) external payable
 ```
 
 Wrap an ERC20 with a 1:1 ratio with a fee if existing.
@@ -1336,25 +1200,9 @@ Wrap an ERC20 with a 1:1 ratio with a fee if existing.
 
 | Name | Type | Description |
 |---|---|---|
-| _fromAddress | address | undefined |
+| _fromAddress | address | The address to wrap from. |
 | _toAddress | address | The address to wrap the ERC20 to. |
 | _amount | uint256 | The amount of ERC20 to wrap. |
-
-### wrapNative
-
-```solidity
-function wrapNative(address _toAddress) external payable
-```
-
-Wrap a native token with a 1:1 ratio with a fee if existing.
-
-*Since it can be executed only on the host chain, if an address exists on the linked chain it will not allowed to wrap.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _toAddress | address | The address to wrap the tokens to. |
 
 ### yieldBox
 
@@ -1394,23 +1242,6 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 | owner `indexed` | address | undefined |
 | spender `indexed` | address | undefined |
 | value  | uint256 | undefined |
-
-### Borrow
-
-```solidity
-event Borrow(address indexed _from, uint256 _amount)
-```
-
-event emitted when a borrow operation is performed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _from `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
 
 ### CallOFTReceivedSuccess
 
@@ -1520,25 +1351,6 @@ event RetryMessageSuccess(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, 
 | _srcAddress  | bytes | undefined |
 | _nonce  | uint64 | undefined |
 | _payloadHash  | bytes32 | undefined |
-
-### SendApproval
-
-```solidity
-event SendApproval(address _target, address _owner, address _spender, uint256 _amount)
-```
-
-event emitted when approvals are sent
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _target  | address | undefined |
-| _owner  | address | undefined |
-| _spender  | address | undefined |
-| _amount  | uint256 | undefined |
 
 ### SendToChain
 
@@ -1696,63 +1508,6 @@ event emitted when a wrap operation is performed
 | _from `indexed` | address | undefined |
 | _to `indexed` | address | undefined |
 | _amount  | uint256 | undefined |
-
-### YieldBoxDeposit
-
-```solidity
-event YieldBoxDeposit(uint256 _amount)
-```
-
-event emitted when a YieldBox deposit is done
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _amount  | uint256 | undefined |
-
-### YieldBoxRetrieval
-
-```solidity
-event YieldBoxRetrieval(uint256 _amount)
-```
-
-event emitted when YieldBox funds are removed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _amount  | uint256 | undefined |
-
-
-
-## Errors
-
-### TOFT_ZeroAmount
-
-```solidity
-error TOFT_ZeroAmount()
-```
-
-A zero amount was found
-
-
-
-
-### TOFT__NotHostChain
-
-```solidity
-error TOFT__NotHostChain()
-```
-
-Code executed not on main chain.
-
-
 
 
 

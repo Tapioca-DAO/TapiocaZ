@@ -30,12 +30,8 @@ contract TapiocaOFT is BaseTOFT {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
-    /// @notice The TapiocaWrapper contract, owner of this contract.
-    TapiocaWrapper public tapiocaWrapper;
-
     /// @notice creates a new TapiocaOFT
     /// @param _lzEndpoint LayerZero endpoint address
-    /// @param _isNative true if the underlying ERC20 is actually the chain's native coin
     /// @param _erc20 true the underlying ERC20 address
     /// @param _yieldBox the YieldBox address
     /// @param _name the TOFT name
@@ -44,8 +40,7 @@ contract TapiocaOFT is BaseTOFT {
     /// @param _hostChainID the TOFT host chain LayerZero id
     constructor(
         address _lzEndpoint,
-        bool _isNative,
-        IERC20 _erc20,
+        address _erc20,
         IYieldBoxBase _yieldBox,
         string memory _name,
         string memory _symbol,
@@ -54,39 +49,33 @@ contract TapiocaOFT is BaseTOFT {
     )
         BaseTOFT(
             _lzEndpoint,
-            _isNative,
             _erc20,
             _yieldBox,
             _name,
             _symbol,
             _decimal,
-            _hostChainID,
-            ITapiocaWrapper(msg.sender)
+            _hostChainID
         )
-    {
-        tapiocaWrapper = TapiocaWrapper(msg.sender);
-    }
+    {}
 
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
     /// @notice Wrap an ERC20 with a 1:1 ratio with a fee if existing.
     /// @dev Since it can be executed only on the main chain, if an address exists on the OP chain it will not allowed to wrap.
+    /// @param _fromAddress The address to wrap from.
     /// @param _toAddress The address to wrap the ERC20 to.
     /// @param _amount The amount of ERC20 to wrap.
     function wrap(
         address _fromAddress,
         address _toAddress,
         uint256 _amount
-    ) external onlyHostChain {
-        _wrap(_fromAddress, _toAddress, _amount);
-    }
-
-    /// @notice Wrap a native token with a 1:1 ratio with a fee if existing.
-    /// @dev Since it can be executed only on the host chain, if an address exists on the linked chain it will not allowed to wrap.
-    /// @param _toAddress The address to wrap the tokens to.
-    function wrapNative(address _toAddress) external payable onlyHostChain {
-        _wrapNative(_toAddress);
+    ) external payable onlyHostChain {
+        if (_isNative()) {
+            _wrapNative(_toAddress);
+        } else {
+            _wrap(_fromAddress, _toAddress, _amount);
+        }
     }
 
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.

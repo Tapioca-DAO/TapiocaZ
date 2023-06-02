@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./BaseTOFT.sol";
-import "./TapiocaWrapper.sol";
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -41,17 +40,6 @@ contract mTapiocaOFT is BaseTOFT {
     /// @dev a balancer can extract the underlying
     mapping(address => bool) public balancers;
 
-    /// @notice The TapiocaWrapper contract, owner of this contract.
-    TapiocaWrapper public tapiocaWrapper;
-
-    // ************** //
-    // *** ERRORS *** //
-    // ************** //
-    /// @notice Code executed not on one of the allowed chains
-    error TOFT_NotAllowedChain();
-    /// @notice Sender not allowed to perform an action
-    error TOFT_NotAuthorized();
-
     // ************** //
     // *** EVENTS *** //
     // ************** //
@@ -75,21 +63,16 @@ contract mTapiocaOFT is BaseTOFT {
     // ***************** //
     /// @notice Require that the caller is on the host chain of the ERC20.
     modifier onlyAllowedChain() {
-        if (!connectedChains[block.chainid]) {
-            revert TOFT_NotAllowedChain();
-        }
+        require(connectedChains[block.chainid], "TOFT: not allowed");
         _;
     }
     modifier notRebalancerRole() {
-        if (balancers[msg.sender]) {
-            revert TOFT_NotAuthorized();
-        }
+        require(!balancers[msg.sender], "TOFT: not authorized");
         _;
     }
 
     /// @notice creates a new mTapiocaOFT
     /// @param _lzEndpoint LayerZero endpoint address
-    /// @param _isNative true if the underlying ERC20 is actually the chain's native coin
     /// @param _erc20 true the underlying ERC20 address
     /// @param _yieldBox the YieldBox address
     /// @param _name the TOFT name
@@ -98,8 +81,7 @@ contract mTapiocaOFT is BaseTOFT {
     /// @param _hostChainID the TOFT host chain LayerZero id
     constructor(
         address _lzEndpoint,
-        bool _isNative,
-        IERC20 _erc20,
+        address _erc20,
         IYieldBoxBase _yieldBox,
         string memory _name,
         string memory _symbol,
@@ -108,17 +90,14 @@ contract mTapiocaOFT is BaseTOFT {
     )
         BaseTOFT(
             _lzEndpoint,
-            _isNative,
             _erc20,
             _yieldBox,
             _name,
             _symbol,
             _decimal,
-            _hostChainID,
-            ITapiocaWrapper(msg.sender)
+            _hostChainID
         )
     {
-        tapiocaWrapper = TapiocaWrapper(msg.sender);
         if (block.chainid == _hostChainID) {
             connectedChains[_hostChainID] = true;
             emit ConnectedChainStatusUpdated(_hostChainID, false, true);
@@ -136,17 +115,12 @@ contract mTapiocaOFT is BaseTOFT {
         address _fromAddress,
         address _toAddress,
         uint256 _amount
-    ) external onlyHostChain notRebalancerRole {
-        _wrap(_fromAddress, _toAddress, _amount);
-    }
-
-    /// @notice Wrap a native token with a 1:1 ratio with a fee if existing.
-    /// @dev Since it can be executed only on the host chain, if an address exists on the linked chain it will not allowed to wrap.
-    /// @param _toAddress The address to wrap the tokens to.
-    function wrapNative(
-        address _toAddress
     ) external payable onlyHostChain notRebalancerRole {
-        _wrapNative(_toAddress);
+        if (_isNative()) {
+            _wrapNative(_toAddress);
+        } else {
+            _wrap(_fromAddress, _toAddress, _amount);
+        }
     }
 
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
@@ -191,14 +165,14 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice extracts the underlying token/native for rebalancing
     /// @param _amount the amount used for rebalancing
     function extractUnderlying(uint256 _amount) external {
-        if (!balancers[msg.sender]) revert TOFT_NotAuthorized();
+        require(balancers[msg.sender], "TOFT: not authorized");
 
-        if (isNative) {
+        if (_isNative()) {
             _safeTransferETH(msg.sender, _amount);
         } else {
-            erc20.safeTransfer(msg.sender, _amount);
+            IERC20(erc20).safeTransfer(msg.sender, _amount);
         }
 
-        emit Rebalancing(msg.sender, _amount, isNative);
+        emit Rebalancing(msg.sender, _amount, _isNative());
     }
 }

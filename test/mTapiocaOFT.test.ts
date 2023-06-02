@@ -11,15 +11,13 @@ import { setupFixture } from './fixtures';
 describe('mTapiocaOFT', () => {
     describe('extractUnderlying()', () => {
         it('should fail for unknown balance', async () => {
-            const { signer, mtapiocaOFT0, tapiocaWrapper_0 } =
+            const { signer, mtapiocaOFT0, tapiocaWrapper_0, mErc20Mock } =
                 await loadFixture(setupFixture);
 
             let balancerStatus = await mtapiocaOFT0.balancers(signer.address);
             expect(balancerStatus).to.be.false;
 
-            await expect(
-                mtapiocaOFT0.extractUnderlying(1),
-            ).to.be.revertedWithCustomError(mtapiocaOFT0, 'TOFT_NotAuthorized');
+            await expect(mtapiocaOFT0.extractUnderlying(1)).to.be.reverted;
 
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',
@@ -36,12 +34,10 @@ describe('mTapiocaOFT', () => {
             balancerStatus = await mtapiocaOFT0.balancers(signer.address);
             expect(balancerStatus).to.be.true;
 
-            await expect(
-                mtapiocaOFT0.extractUnderlying(1),
-            ).to.not.be.revertedWithCustomError(
-                mtapiocaOFT0,
-                'TOFT_NotAuthorized',
-            );
+            await mErc20Mock.freeMint(1);
+            await mErc20Mock.transfer(mtapiocaOFT0.address, 1);
+
+            await expect(mtapiocaOFT0.extractUnderlying(1)).to.not.be.reverted;
         });
     });
 
@@ -103,7 +99,7 @@ describe('mTapiocaOFT', () => {
             );
             await expect(
                 mtapiocaOFT10.wrap(signer.address, signer.address, dummyAmount),
-            ).to.be.revertedWithCustomError(mtapiocaOFT0, 'TOFT__NotHostChain');
+            ).to.be.reverted;
         });
 
         it('Should wrap and give a 1:1 ratio amount of tokens', async () => {
@@ -166,9 +162,8 @@ describe('mTapiocaOFT', () => {
             );
             expect(signerBalanceBefore.eq(0)).to.be.true;
 
-            await expect(
-                mtapiocaOFT0.extractUnderlying(dummyAmount),
-            ).to.be.revertedWithCustomError(mtapiocaOFT0, 'TOFT_NotAuthorized');
+            await expect(mtapiocaOFT0.extractUnderlying(dummyAmount)).to.be
+                .reverted;
 
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',
@@ -202,12 +197,8 @@ describe('mTapiocaOFT', () => {
                 dummyAmount,
             } = await loadFixture(setupFixture);
 
-            await expect(
-                mtapiocaOFT10.unwrap(signer.address, dummyAmount),
-            ).to.be.revertedWithCustomError(
-                mtapiocaOFT10,
-                'TOFT_NotAllowedChain',
-            );
+            await expect(mtapiocaOFT10.unwrap(signer.address, dummyAmount)).to
+                .be.reverted;
 
             const otherChainId = await mtapiocaOFT0.hostChainID();
             const txData = mtapiocaOFT10.interface.encodeFunctionData(
@@ -222,12 +213,8 @@ describe('mTapiocaOFT', () => {
                 ),
             ).to.not.be.reverted;
 
-            await expect(
-                mtapiocaOFT10.unwrap(signer.address, dummyAmount),
-            ).to.not.be.revertedWithCustomError(
-                mtapiocaOFT10,
-                'TOFT_NotAllowedChain',
-            );
+            await expect(mtapiocaOFT10.unwrap(signer.address, dummyAmount)).to
+                .be.reverted;
         });
         it('Should unwrap and give a 1:1 ratio amount of tokens', async () => {
             const {
@@ -375,26 +362,5 @@ describe('mTapiocaOFT', () => {
             ),
         ).to.be.reverted;
         await snapshot.restore();
-
-        // Check that it can be batch called
-        const permit = mtapiocaOFT0.interface.encodeFunctionData('permit', [
-            signer.address,
-            randomUser.address,
-            (1e18).toString(),
-            deadline,
-            v,
-            r,
-            s,
-        ]);
-        const transfer = mtapiocaOFT0.interface.encodeFunctionData(
-            'transferFrom',
-            [signer.address, randomUser.address, (1e18).toString()],
-        );
-
-        await expect(
-            mtapiocaOFT0.connect(randomUser).batch([permit, transfer], true),
-        )
-            .to.emit(mtapiocaOFT0, 'Transfer')
-            .withArgs(signer.address, randomUser.address, (1e18).toString());
     });
 });

@@ -258,7 +258,6 @@ async function getPreDeploymentInfo(
 
     const toftDeployInfo = await utils.Tx_deployTapiocaOFT(
         currentChainInfo.address,
-        Boolean(args.isNative),
         ercAddress,
         yieldBoxAddress,
         Number(hostChainInfo.chainId),
