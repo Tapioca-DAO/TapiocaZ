@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 
 pragma solidity ^0.8.0;
-import "./TapiocaOFT.sol";
-import "./mTapiocaOFT.sol";
+import "./tOFT/TapiocaOFT.sol";
+// import "./mTapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 
 import "@openzeppelin/contracts/utils/Create2.sol";
@@ -165,6 +165,7 @@ contract TapiocaWrapper is Ownable {
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
+    //todo: fix
     function _createTOFT(
         address _erc20,
         bytes calldata _bytecode,
@@ -190,25 +191,26 @@ contract TapiocaWrapper is Ownable {
                 )
             );
             oft = address(toft);
-        } else {
-            mTapiocaOFT toft = mTapiocaOFT(
-                payable(
-                    Create2.deploy(
-                        0,
-                        keccak256(
-                            abi.encodePacked(
-                                keccak256(_bytecode),
-                                address(this),
-                                _erc20,
-                                _salt
-                            )
-                        ),
-                        _bytecode
-                    )
-                )
-            );
-            oft = address(toft);
-        }
+        } 
+        // else {
+        //     mTapiocaOFT toft = mTapiocaOFT(
+        //         payable(
+        //             Create2.deploy(
+        //                 0,
+        //                 keccak256(
+        //                     abi.encodePacked(
+        //                         keccak256(_bytecode),
+        //                         address(this),
+        //                         _erc20,
+        //                         _salt
+        //                     )
+        //                 ),
+        //                 _bytecode
+        //             )
+        //         )
+        //     );
+        //     oft = address(toft);
+        // }
         return oft;
     }
 }
