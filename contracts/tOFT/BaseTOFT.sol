@@ -116,32 +116,58 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
     /// @param assetId the destination YieldBox asset id
     /// @param lzDstChainId the destination LayerZero id
     /// @param options the operation data
-    /// @param airdropAdapterParam the LayerZero aidrop adapter params
-    /// @param retrieve true/false
-    function sendOrRetrieveStrategy(
+    function sendToStrategy(
         address from,
         address to,
         uint256 amount,
         uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
-        ITapiocaOFT.ISendOptions calldata options,
-        bytes memory airdropAdapterParam,
-        bool retrieve
+        ITapiocaOFT.ISendOptions calldata options
     ) external payable {
         _executeModule(
             Module.Strategy,
             abi.encodeWithSelector(
-                BaseTOFTStrategyModule.sendOrRetrieveStrategy.selector,
+                BaseTOFTStrategyModule.sendToStrategy.selector,
                 from,
                 to,
                 amount,
                 share,
                 assetId,
                 lzDstChainId,
-                options,
-                airdropAdapterParam,
-                retrieve
+                options
+            )
+        );
+    }
+
+    /// @notice extracts TOFT from a specific strategy available on another layer
+    /// @param from the sender address
+    /// @param amount the transferred amount
+    /// @param assetId the destination YieldBox asset id
+    /// @param lzDstChainId the destination LayerZero id
+    /// @param zroPaymentAddress LayerZero ZRO payment address
+    /// @param airdropAdapterParam the LayerZero aidrop adapter params
+    function retrieveFromStrategy(
+        address from,
+        uint256 amount,
+        uint256 share,
+        uint256 assetId,
+        uint16 lzDstChainId,
+        address zroPaymentAddress,
+        bytes memory airdropAdapterParam
+    ) external payable
+    {
+        _executeModule(
+            Module.Strategy,
+            abi.encodeWithSelector(
+                BaseTOFTStrategyModule.retrieveFromStrategy.selector,
+                from,
+                amount,
+                share,
+                assetId,
+                lzDstChainId,
+                zroPaymentAddress,
+                airdropAdapterParam
             )
         );
     }

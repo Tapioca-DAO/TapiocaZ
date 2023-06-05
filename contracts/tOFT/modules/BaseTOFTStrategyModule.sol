@@ -48,23 +48,21 @@ contract BaseTOFTStrategyModule is BaseTOFTModule {
     /// @param assetId the destination YieldBox asset id
     /// @param lzDstChainId the destination LayerZero id
     /// @param options the operation data
-    function sendOrRetrieveStrategy(
+    function sendToStrategy(
         address _from,
         address _to,
         uint256 amount,
         uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
-        ITapiocaOFT.ISendOptions calldata options,
-        bytes memory airdropAdapterParam,
-        bool retrieve
+        ITapiocaOFT.ISendOptions calldata options
     ) external payable {
         require(amount > 0, "TOFT_0");
         bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
-            retrieve ? PT_YB_RETRIEVE_STRAT : PT_YB_SEND_STRAT,
+            PT_YB_SEND_STRAT,
             bytes32(uint(uint160(_from))),
             toAddress,
             amount,
@@ -78,13 +76,51 @@ contract BaseTOFTStrategyModule is BaseTOFTModule {
             lzPayload,
             payable(_from),
             options.zroPaymentAddress,
-            retrieve
-                ? airdropAdapterParam
-                : abi.encodePacked(uint16(1), options.extraGasLimit),
+            abi.encodePacked(uint16(1), options.extraGasLimit),
             msg.value
         );
 
         emit SendToChain(lzDstChainId, _from, toAddress, amount);
+    }
+
+    /// @notice extracts TOFT from a specific strategy available on another layer
+    /// @param _from the sender address
+    /// @param amount the transferred amount
+    /// @param assetId the destination YieldBox asset id
+    /// @param lzDstChainId the destination LayerZero id
+    /// @param zroPaymentAddress LayerZero ZRO payment address
+    /// @param airdropAdapterParam the LayerZero aidrop adapter params
+    function retrieveFromStrategy(
+        address _from,
+        uint256 amount,
+        uint256 share,
+        uint256 assetId,
+        uint16 lzDstChainId,
+        address zroPaymentAddress,
+        bytes memory airdropAdapterParam
+    ) external payable {
+        require(amount > 0, "TOFT_0");
+
+        bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
+
+        bytes memory lzPayload = abi.encode(
+            PT_YB_RETRIEVE_STRAT,
+            LzLib.addressToBytes32(_from),
+            toAddress,
+            amount,
+            share,
+            assetId,
+            zroPaymentAddress
+        );
+        _lzSend(
+            lzDstChainId,
+            lzPayload,
+            payable(msg.sender),
+            zroPaymentAddress,
+            airdropAdapterParam,
+            msg.value
+        );
+        emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
     }
 
     function strategyDeposit(

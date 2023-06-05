@@ -254,7 +254,7 @@ describe('TapiocaOFT', () => {
         });
     });
 
-    describe('sendOrRetrieveStrategy()', () => {
+    describe('sendOrRetrieveStrategy', () => {
         const deployYieldBox = async (signer: SignerWithAddress) => {
             const YieldBoxURIBuilder = new YieldBoxURIBuilder__factory(signer);
             const YieldBox = new YieldBox__factory(signer);
@@ -602,7 +602,7 @@ describe('TapiocaOFT', () => {
             const asset = await YieldBox_0.assets(tapiocaOFT0Id);
             expect(asset[2]).to.eq(Strategy_0.address);
 
-            await tapiocaOFT10.sendOrRetrieveStrategy(
+            await tapiocaOFT10.sendToStrategy(
                 signer.address,
                 signer.address,
                 bigDummyAmount,
@@ -613,8 +613,6 @@ describe('TapiocaOFT', () => {
                     extraGasLimit: '2500000',
                     zroPaymentAddress: ethers.constants.AddressZero,
                 },
-                ethers.utils.toUtf8Bytes(''),
-                false,
                 {
                     value: ethers.utils.parseEther('15'),
                 },
@@ -649,7 +647,7 @@ describe('TapiocaOFT', () => {
                 Strategy_0.address,
                 yb0Balance.sub(bigDummyAmount),
             ); //assures the strategy has enough tokens to withdraw
-            await tapiocaOFT10.sendOrRetrieveStrategy(
+            await tapiocaOFT10.retrieveFromStrategy(
                 signer.address,
                 yb0BalanceAfterCrossChainDeposit,
                 toWithdrawShare,
@@ -657,7 +655,6 @@ describe('TapiocaOFT', () => {
                 dstChainId0,
                 ethers.constants.AddressZero,
                 airdropAdapterParams,
-                true,
                 {
                     value: ethers.utils.parseEther('10'),
                 },

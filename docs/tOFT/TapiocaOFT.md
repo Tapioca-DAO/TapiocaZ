@@ -731,6 +731,28 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
+### retrieveFromStrategy
+
+```solidity
+function retrieveFromStrategy(address from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
+```
+
+extracts TOFT from a specific strategy available on another layer
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | the sender address |
+| amount | uint256 | the transferred amount |
+| share | uint256 | undefined |
+| assetId | uint256 | the destination YieldBox asset id |
+| lzDstChainId | uint16 | the destination LayerZero id |
+| zroPaymentAddress | address | LayerZero ZRO payment address |
+| airdropAdapterParam | bytes | the LayerZero aidrop adapter params |
+
 ### retryMessage
 
 ```solidity
@@ -812,10 +834,10 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 | _amount | uint256 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
 
-### sendOrRetrieveStrategy
+### sendToStrategy
 
 ```solidity
-function sendOrRetrieveStrategy(address from, address to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options, bytes airdropAdapterParam, bool retrieve) external payable
+function sendToStrategy(address from, address to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
 ```
 
 
@@ -833,8 +855,6 @@ function sendOrRetrieveStrategy(address from, address to, uint256 amount, uint25
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | options | ITapiocaOFT.ISendOptions | undefined |
-| airdropAdapterParam | bytes | undefined |
-| retrieve | bool | undefined |
 
 ### sendToYBAndBorrow
 
