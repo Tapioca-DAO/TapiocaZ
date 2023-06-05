@@ -14,9 +14,6 @@ contract BaseTOFTLeverageModule is BaseTOFTModule {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
-    // ************ //
-    // *** VARS *** //
-    // ************ //
     uint16 constant PT_LEVERAGE_MARKET_DOWN = 776;
 
     constructor(
@@ -37,9 +34,7 @@ contract BaseTOFTLeverageModule is BaseTOFTModule {
             _decimal,
             _hostChainID
         )
-    {
-    }
-
+    {}
 
     function sendForLeverage(
         uint256 amount,
@@ -72,10 +67,7 @@ contract BaseTOFTLeverageModule is BaseTOFTModule {
         emit SendToChain(lzData.lzDstChainId, msg.sender, senderBytes, amount);
     }
 
-     function leverageDown(
-        uint16 _srcChainId,
-        bytes memory _payload
-    ) public {
+    function leverageDown(uint16 _srcChainId, bytes memory _payload) public {
         (
             ,
             ,
@@ -142,19 +134,6 @@ contract BaseTOFTLeverageModule is BaseTOFTModule {
             _safeTransferETH(_toAddress, _amount);
         } else {
             IERC20(erc20).safeTransfer(_toAddress, _amount);
-        }
-    }
-
-    function _nonblockingLzReceive(
-        uint16 _srcChainId,
-        bytes memory,
-        uint64,
-        bytes memory _payload
-    ) internal virtual override {
-        uint256 packetType = _payload.toUint256(0);
-
-        if (packetType == PT_LEVERAGE_MARKET_DOWN) {
-            leverageDown(_srcChainId, _payload);
         }
     }
 }

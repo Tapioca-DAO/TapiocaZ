@@ -11,7 +11,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 
 contract BaseTOFTModule is OFTV2 {
-
     // ************ //
     // *** VARS *** //
     // ************ //
@@ -26,6 +25,7 @@ contract BaseTOFTModule is OFTV2 {
     uint8 internal _decimalCache;
 
     receive() external payable {}
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -57,7 +57,6 @@ contract BaseTOFTModule is OFTV2 {
         return _decimalCache;
     }
 
-
     // ********************** //
     // *** INTERNAL FUNCTIONS *** //
     // ********************** //
@@ -65,7 +64,4 @@ contract BaseTOFTModule is OFTV2 {
         (bool sent, ) = to.call{value: amount}("");
         require(sent, "TOFT_failed");
     }
-
-
-
 }

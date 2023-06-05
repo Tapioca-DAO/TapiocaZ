@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "./TapiocaOFT.sol";
-import "./mTapiocaOFT.sol";
+import "./tOFT/TapiocaOFT.sol";
+import "./tOFT/mTapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 
 import "@openzeppelin/contracts/utils/Create2.sol";

@@ -1388,6 +1388,24 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 | spender `indexed` | address | undefined |
 | value  | uint256 | undefined |
 
+### BalancerStatusUpdated
+
+```solidity
+event BalancerStatusUpdated(address indexed _balancer, bool _bool, bool _new)
+```
+
+event emitted when balancer status is updated
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _balancer `indexed` | address | undefined |
+| _bool  | bool | undefined |
+| _new  | bool | undefined |
+
 ### CallOFTReceivedSuccess
 
 ```solidity
@@ -1406,6 +1424,24 @@ event CallOFTReceivedSuccess(uint16 indexed _srcChainId, bytes _srcAddress, uint
 | _srcAddress  | bytes | undefined |
 | _nonce  | uint64 | undefined |
 | _hash  | bytes32 | undefined |
+
+### ConnectedChainStatusUpdated
+
+```solidity
+event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new)
+```
+
+event emitted when a connected chain is reigstered or unregistered
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _chain  | uint256 | undefined |
+| _old  | bool | undefined |
+| _new  | bool | undefined |
 
 ### MessageFailed
 
@@ -1459,6 +1495,24 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 |---|---|---|
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
+
+### Rebalancing
+
+```solidity
+event Rebalancing(address indexed _balancer, uint256 _amount, bool _isNative)
+```
+
+event emitted when rebalancing is performed
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _balancer `indexed` | address | undefined |
+| _amount  | uint256 | undefined |
+| _isNative  | bool | undefined |
 
 ### ReceiveFromChain
 

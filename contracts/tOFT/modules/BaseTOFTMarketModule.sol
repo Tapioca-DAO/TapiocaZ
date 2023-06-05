@@ -40,9 +40,7 @@ contract BaseTOFTMarketModule is BaseTOFTModule {
             _decimal,
             _hostChainID
         )
-    {
-    }
-
+    {}
 
     /// @notice sends TOFT to a specific chain and performs a borrow operation
     /// @param _from the sender address
@@ -92,11 +90,7 @@ contract BaseTOFTMarketModule is BaseTOFTModule {
         emit SendToChain(lzDstChainId, _from, toAddress, borrowParams.amount);
     }
 
-
-    function borrow(
-        uint16 _srcChainId,
-        bytes memory _payload
-    ) public payable {
+    function borrow(uint16 _srcChainId, bytes memory _payload) public payable {
         (
             ,
             address _from, //from
@@ -183,19 +177,6 @@ contract BaseTOFTMarketModule is BaseTOFTModule {
             unchecked {
                 ++i;
             }
-        }
-    }
-
-    function _nonblockingLzReceive(
-        uint16 _srcChainId,
-        bytes memory,
-        uint64,
-        bytes memory _payload
-    ) internal virtual override {
-        uint256 packetType = _payload.toUint256(0);
-
-        if (packetType == PT_YB_SEND_SGL_BORROW) {
-            borrow(_srcChainId, _payload);
         }
     }
 }

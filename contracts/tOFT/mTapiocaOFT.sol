@@ -16,6 +16,24 @@ contract mTapiocaOFT is BaseTOFT {
     /// @dev a balancer can extract the underlying
     mapping(address => bool) public balancers;
 
+    // ************** //
+    // *** EVENTS *** //
+    // ************** //
+    /// @notice event emitted when a connected chain is reigstered or unregistered
+    event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new);
+    /// @notice event emitted when balancer status is updated
+    event BalancerStatusUpdated(
+        address indexed _balancer,
+        bool _bool,
+        bool _new
+    );
+    /// @notice event emitted when rebalancing is performed
+    event Rebalancing(
+        address indexed _balancer,
+        uint256 _amount,
+        bool _isNative
+    );
+
     /// @notice creates a new mTapiocaOFT
     /// @param _lzEndpoint LayerZero endpoint address
     /// @param _erc20 true the underlying ERC20 address
@@ -93,6 +111,11 @@ contract mTapiocaOFT is BaseTOFT {
         uint256 _chain,
         bool _status
     ) external onlyOwner {
+        emit ConnectedChainStatusUpdated(
+            _chain,
+            connectedChains[_chain],
+            _status
+        );
         connectedChains[_chain] = _status;
     }
 
@@ -103,6 +126,7 @@ contract mTapiocaOFT is BaseTOFT {
         address _balancer,
         bool _status
     ) external onlyOwner {
+        emit BalancerStatusUpdated(_balancer, balancers[_balancer], _status);
         balancers[_balancer] = _status;
     }
 
@@ -111,10 +135,13 @@ contract mTapiocaOFT is BaseTOFT {
     function extractUnderlying(uint256 _amount) external {
         require(balancers[msg.sender], "TOFT_auth");
 
-        if (erc20 == address(0)) {
+        bool _isNative = erc20 == address(0);
+        if (_isNative) {
             _safeTransferETH(msg.sender, _amount);
         } else {
             IERC20(erc20).safeTransfer(msg.sender, _amount);
         }
+
+        emit Rebalancing(msg.sender, _amount, _isNative);
     }
 }

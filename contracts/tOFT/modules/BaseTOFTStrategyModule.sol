@@ -39,9 +39,7 @@ contract BaseTOFTStrategyModule is BaseTOFTModule {
             _decimal,
             _hostChainID
         )
-    {
-    }
-
+    {}
 
     /// @notice sends TOFT to a specific strategy available on another layer
     /// @param _from the sender address
@@ -88,7 +86,6 @@ contract BaseTOFTStrategyModule is BaseTOFTModule {
 
         emit SendToChain(lzDstChainId, _from, toAddress, amount);
     }
-
 
     function strategyDeposit(
         uint16 _srcChainId,
@@ -198,21 +195,4 @@ contract BaseTOFTStrategyModule is BaseTOFTModule {
     ) private {
         yieldBox.withdraw(_assetId, _from, _to, _amount, _share);
     }
-
-
-    function _nonblockingLzReceive(
-        uint16 _srcChainId,
-        bytes memory,
-        uint64,
-        bytes memory _payload
-    ) internal virtual override {
-        uint256 packetType = _payload.toUint256(0);
-
-        if (packetType == PT_YB_SEND_STRAT) {
-            strategyDeposit(_srcChainId, _payload, IERC20(address(this)));
-        } else if (packetType == PT_YB_RETRIEVE_STRAT) {
-            strategyWithdraw(_srcChainId, _payload);
-        } 
-    }
-
 }

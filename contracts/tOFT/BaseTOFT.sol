@@ -16,9 +16,9 @@ import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 
 //TOFT MODULES
-import "./BaseTOFTLeverageModule.sol";
-import "./BaseTOFTStrategyModule.sol";
-import "./BaseTOFTMarketModule.sol";
+import "./modules/BaseTOFTLeverageModule.sol";
+import "./modules/BaseTOFTStrategyModule.sol";
+import "./modules/BaseTOFTMarketModule.sol";
 
 abstract contract BaseTOFT is OFTV2, ERC20Permit {
     using SafeERC20 for IERC20;
@@ -132,7 +132,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         _executeModule(
             Module.Strategy,
             abi.encodeWithSelector(
-                BaseTOFTStrategyModule.sendOrRetrieveStrategy.selector, 
+                BaseTOFTStrategyModule.sendOrRetrieveStrategy.selector,
                 from,
                 to,
                 amount,
@@ -168,7 +168,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         _executeModule(
             Module.Market,
             abi.encodeWithSelector(
-                BaseTOFTMarketModule.sendToYBAndBorrow.selector, 
+                BaseTOFTMarketModule.sendToYBAndBorrow.selector,
                 from,
                 to,
                 lzDstChainId,
@@ -197,7 +197,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         _executeModule(
             Module.Leverage,
             abi.encodeWithSelector(
-                BaseTOFTLeverageModule.sendForLeverage.selector, 
+                BaseTOFTLeverageModule.sendForLeverage.selector,
                 amount,
                 leverageFor,
                 lzData,
@@ -251,7 +251,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         address module;
         if (_module == Module.Leverage) {
             module = address(leverageModule);
-        } 
+        }
         if (module == address(0)) {
             revert("TOFT_module");
         }
@@ -285,7 +285,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         return abi.decode(_returnData, (string)); // All that remains is the revert string
     }
 
-
     //---LZ---
     function _nonblockingLzReceive(
         uint16 _srcChainId,
@@ -299,7 +298,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             _executeModule(
                 Module.Strategy,
                 abi.encodeWithSelector(
-                    BaseTOFTStrategyModule.strategyDeposit.selector, 
+                    BaseTOFTStrategyModule.strategyDeposit.selector,
                     _srcChainId,
                     _payload,
                     IERC20(address(this))
@@ -309,7 +308,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             _executeModule(
                 Module.Strategy,
                 abi.encodeWithSelector(
-                    BaseTOFTStrategyModule.strategyWithdraw.selector, 
+                    BaseTOFTStrategyModule.strategyWithdraw.selector,
                     _srcChainId,
                     _payload
                 )
@@ -318,7 +317,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             _executeModule(
                 Module.Leverage,
                 abi.encodeWithSelector(
-                    BaseTOFTLeverageModule.leverageDown.selector, 
+                    BaseTOFTLeverageModule.leverageDown.selector,
                     _srcChainId,
                     _payload
                 )
@@ -327,7 +326,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             _executeModule(
                 Module.Market,
                 abi.encodeWithSelector(
-                    BaseTOFTMarketModule.borrow.selector, 
+                    BaseTOFTMarketModule.borrow.selector,
                     _srcChainId,
                     _payload
                 )
