@@ -155,8 +155,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         uint16 lzDstChainId,
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
-    ) external payable
-    {
+    ) external payable {
         _executeModule(
             Module.Strategy,
             abi.encodeWithSelector(
@@ -277,7 +276,12 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         address module;
         if (_module == Module.Leverage) {
             module = address(leverageModule);
-        }
+        } else if (_module == Module.Strategy) {
+            module = address(strategyModule);
+        } else if(_module == Module.Market) {
+            module = address(marketModule);
+        } 
+        
         if (module == address(0)) {
             revert("TOFT_module");
         }
