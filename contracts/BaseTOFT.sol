@@ -55,6 +55,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         bytes32 s;
     }
     struct IWithdrawParams {
+        bool withdraw;
         uint256 withdrawLzFeeAmount;
         bool withdrawOnOtherChain;
         uint16 withdrawLzChainId;
@@ -270,7 +271,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             lzPayload,
             payable(lzData.refundAddress),
             lzData.zroPaymentAddress,
-            lzData.airdropAdapterParam,
+            lzData.dstAirdropAdapterParam,
             msg.value
         );
         emit SendToChain(lzData.lzDstChainId, msg.sender, senderBytes, amount);
@@ -438,7 +439,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             borrowParams.borrowAmount,
             true,
             true,
-            true,
+            withdrawParams.withdraw,
             withdrawData
         );
     }

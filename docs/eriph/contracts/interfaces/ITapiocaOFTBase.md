@@ -10,6 +10,23 @@
 
 ## Methods
 
+### erc20
+
+```solidity
+function erc20() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### hostChainID
 
 ```solidity
@@ -26,6 +43,23 @@ function hostChainID() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
+
+### lzEndpoint
+
+```solidity
+function lzEndpoint() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 ### unwrap
 

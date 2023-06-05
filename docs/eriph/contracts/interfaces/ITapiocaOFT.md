@@ -88,23 +88,6 @@ function extractUnderlying(uint256 _amount) external nonpayable
 |---|---|---|
 | _amount | uint256 | undefined |
 
-### getLzChainId
-
-```solidity
-function getLzChainId() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### harvestFees
 
 ```solidity
@@ -173,6 +156,23 @@ function isTrustedRemote(uint16 lzChainId, bytes path) external view returns (bo
 |---|---|---|
 | _0 | bool | undefined |
 
+### lzEndpoint
+
+```solidity
+function lzEndpoint() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### retrieveFromStrategy
 
 ```solidity
@@ -194,6 +194,26 @@ function retrieveFromStrategy(address _from, uint256 amount, uint256 share, uint
 | lzDstChainId | uint16 | undefined |
 | zroPaymentAddress | address | undefined |
 | airdropAdapterParam | bytes | undefined |
+
+### sendForLeverage
+
+```solidity
+function sendForLeverage(uint256 amount, address leverageFor, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageExternalContractsData externalData) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| leverageFor | address | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
 
 ### sendFrom
 
