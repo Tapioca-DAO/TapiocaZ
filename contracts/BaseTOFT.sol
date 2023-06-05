@@ -472,7 +472,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         _unwrap(address(this), amount);
 
         //swap to USDO
-        _approve(address(this), externalData.swapper, amount);
+        _approve(erc20, externalData.swapper, amount);
         ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
             .buildSwapData(erc20, swapData.tokenOut, amount, 0, false, false);
         (uint256 amountOut, ) = ISwapper(externalData.swapper).swap(
@@ -483,7 +483,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         );
 
         //repay
-        _approve(address(this), externalData.magnetar, amountOut);
+        _approve(swapData.tokenOut, externalData.magnetar, amountOut);
         IMagnetar(externalData.magnetar).depositAndRepay(
             externalData.srcMarket,
             leverageFor,
