@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 //LZ
 import "tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol";
+import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 
 //OZ
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
@@ -13,6 +14,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 
@@ -38,35 +40,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
     /// @notice Decimal cache number of the ERC20.
     uint8 internal _decimalCache;
 
-    struct ISendOptions {
-        uint256 extraGasLimit;
-        address zroPaymentAddress;
-    }
-    struct IApproval {
-        bool allowFailure;
-        address target;
-        bool permitBorrow;
-        address owner;
-        address spender;
-        uint256 value;
-        uint256 deadline;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-    struct IWithdrawParams {
-        bool withdraw;
-        uint256 withdrawLzFeeAmount;
-        bool withdrawOnOtherChain;
-        uint16 withdrawLzChainId;
-        bytes withdrawAdapterParams;
-    }
-    struct IBorrowParams {
-        uint256 amount;
-        uint256 borrowAmount;
-        address marketHelper;
-        address market;
-    }
 
     // ******************//
     // *** MODIFIERS *** //
@@ -121,38 +94,40 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
     /// @param assetId the destination YieldBox asset id
     /// @param lzDstChainId the destination LayerZero id
     /// @param options the operation data
-    function sendToStrategy(
+    function sendOrRetrieveStrategy(
         address _from,
         address _to,
         uint256 amount,
         uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
-        ISendOptions calldata options
+        ITapiocaOFT.ISendOptions calldata options,
+        bytes memory airdropAdapterParam,
+        bool retrieve
     ) external payable {
         require(amount > 0, "TOFT_0");
-        bytes32 toAddress = bytes32(uint(uint160(_to)));
+        bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
-            PT_YB_SEND_STRAT,
+            retrieve? PT_YB_RETRIEVE_STRAT : PT_YB_SEND_STRAT,
             bytes32(uint(uint160(_from))),
             toAddress,
             amount,
             share,
-            assetId
+            assetId,
+            options.zroPaymentAddress
         );
 
-        bytes memory adapterParam = abi.encodePacked(
-            uint16(1),
-            options.extraGasLimit
-        );
         _lzSend(
             lzDstChainId,
             lzPayload,
             payable(_from),
             options.zroPaymentAddress,
-            adapterParam,
+            retrieve ? airdropAdapterParam : abi.encodePacked(
+                uint16(1),
+                options.extraGasLimit
+            ),
             msg.value
         );
 
@@ -173,12 +148,12 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         address _to,
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,
-        IBorrowParams calldata borrowParams,
-        IWithdrawParams calldata withdrawParams,
-        ISendOptions calldata options,
-        IApproval[] calldata approvals
+        ITapiocaOFT.IBorrowParams calldata borrowParams,
+        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
+        ITapiocaOFT.ISendOptions calldata options,
+        ITapiocaOFT.IApproval[] calldata approvals
     ) external payable {
-        bytes32 toAddress = bytes32(uint(uint160(_to)));
+        bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(
             _from,
             lzEndpoint.getChainId(),
@@ -207,46 +182,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         emit SendToChain(lzDstChainId, _from, toAddress, borrowParams.amount);
     }
 
-    /// @notice extracts TOFT from a specific strategy available on another layer
-    /// @param _from the sender address
-    /// @param amount the transferred amount
-    /// @param assetId the destination YieldBox asset id
-    /// @param lzDstChainId the destination LayerZero id
-    /// @param zroPaymentAddress LayerZero ZRO payment address
-    /// @param airdropAdapterParam the LayerZero aidrop adapter params
-    function retrieveFromStrategy(
-        address _from,
-        uint256 amount,
-        uint256 share,
-        uint256 assetId,
-        uint16 lzDstChainId,
-        address zroPaymentAddress,
-        bytes memory airdropAdapterParam
-    ) external payable {
-        require(amount > 0, "TOFT_0");
-
-        bytes32 toAddress = bytes32(uint(uint160(msg.sender)));
-
-        bytes memory lzPayload = abi.encode(
-            PT_YB_RETRIEVE_STRAT,
-            bytes32(uint(uint160(_from))),
-            toAddress,
-            amount,
-            share,
-            assetId,
-            zroPaymentAddress
-        );
-        _lzSend(
-            lzDstChainId,
-            lzPayload,
-            payable(msg.sender),
-            zroPaymentAddress,
-            airdropAdapterParam,
-            msg.value
-        );
-        emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
-    }
-
     function sendForLeverage(
         uint256 amount,
         address leverageFor,
@@ -254,7 +189,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         IUSDOBase.ILeverageSwapData calldata swapData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
-        bytes32 senderBytes = bytes32(uint(uint160(msg.sender)));
+        bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);
         _debitFrom(msg.sender, lzEndpoint.getChainId(), senderBytes, amount);
 
         bytes memory lzPayload = abi.encode(
@@ -263,6 +198,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             amount,
             swapData,
             externalData,
+            lzData,
             leverageFor
         );
 
@@ -320,10 +256,10 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         bytes memory _payload,
         IERC20 _erc20
     ) internal virtual {
-        (, , bytes32 from, uint256 amount, uint256 share, uint256 assetId) = abi
+        (, , bytes32 from, uint256 amount, uint256 share, uint256 assetId, ) = abi
             .decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint256, uint256, uint256)
+                (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
             );
 
         address onBehalfOf = address(uint160(uint(from)));
@@ -358,13 +294,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
                 (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
             );
 
-        address _from = address(uint160(uint(from)));
+        address _from = LzLib.bytes32ToAddress(from);
         _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
         _debitFrom(
             address(this),
             lzEndpoint.getChainId(),
-            bytes32(uint(uint160(address(this)))),
+            LzLib.addressToBytes32(address(this)),
             _amount
         );
 
@@ -383,7 +319,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         emit SendToChain(
             _srcChainId,
             _from,
-            bytes32(uint(uint160(address(this)))),
+            LzLib.addressToBytes32(address(this)),
             _amount
         );
 
@@ -401,19 +337,19 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         (
             ,
             address _from, //from
-            ,
-            IBorrowParams memory borrowParams,
-            IWithdrawParams memory withdrawParams,
-            IApproval[] memory approvals
+            bytes32 _to,
+            ITapiocaOFT.IBorrowParams memory borrowParams,
+            ITapiocaOFT.IWithdrawParams memory withdrawParams,
+            ITapiocaOFT.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
                 (
                     uint16,
                     address,
                     bytes32,
-                    IBorrowParams,
-                    IWithdrawParams,
-                    IApproval[]
+                    ITapiocaOFT.IBorrowParams,
+                    ITapiocaOFT.IWithdrawParams,
+                    ITapiocaOFT.IApproval[]
                 )
             );
 
@@ -429,12 +365,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             _from,
             withdrawParams.withdrawAdapterParams
         );
+
         approve(address(borrowParams.marketHelper), borrowParams.amount);
         IMagnetar(borrowParams.marketHelper).depositAddCollateralAndBorrow{
             value: msg.value
         }(
             borrowParams.market,
-            _from,
+            LzLib.bytes32ToAddress(_to),
             borrowParams.amount,
             borrowParams.borrowAmount,
             true,
@@ -454,6 +391,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             uint256 amount,
             IUSDOBase.ILeverageSwapData memory swapData,
             IUSDOBase.ILeverageExternalContractsData memory externalData,
+            IUSDOBase.ILeverageLZData memory lzData,
             address leverageFor
         ) = abi.decode(
                 _payload,
@@ -463,6 +401,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
                     uint256,
                     IUSDOBase.ILeverageSwapData,
                     IUSDOBase.ILeverageExternalContractsData,
+                    IUSDOBase.ILeverageLZData,
                     address
                 )
             );
@@ -473,7 +412,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         _unwrap(address(this), amount);
 
         //swap to USDO
-        _approve(erc20, externalData.swapper, amount);
+        IERC20(erc20).approve(externalData.swapper, amount);
         ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
             .buildSwapData(erc20, swapData.tokenOut, amount, 0, false, false);
         (uint256 amountOut, ) = ISwapper(externalData.swapper).swap(
@@ -484,18 +423,26 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         );
 
         //repay
-        _approve(swapData.tokenOut, externalData.magnetar, amountOut);
-        IMagnetar(externalData.magnetar).depositAndRepay(
-            externalData.srcMarket,
-            leverageFor,
-            amountOut,
-            amountOut,
-            true,
-            true
+        IUSDOBase.IApproval[] memory approvals;
+        IUSDOBase(swapData.tokenOut).sendAndLendOrRepay{value: address(this).balance}(
+            address(this), 
+            leverageFor, 
+            lzData.lzSrcChainId,
+            IUSDOBase.ILendParams({
+                repay: true, 
+                amount: amountOut, 
+                marketHelper: externalData.magnetar, 
+                market: externalData.srcMarket
+            }),
+            IUSDOBase.ISendOptions({
+                extraGasLimit: lzData.srcExtraGasLimit,
+                zroPaymentAddress: lzData.zroPaymentAddress
+            }),
+            approvals
         );
     }
 
-    function _callApproval(IApproval[] memory approvals) private {
+    function _callApproval(ITapiocaOFT.IApproval[] memory approvals) private {
         for (uint256 i = 0; i < approvals.length; ) {
             if (approvals[i].permitBorrow) {
                 try
