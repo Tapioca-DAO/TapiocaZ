@@ -16,7 +16,6 @@ import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 
-
 abstract contract BaseTOFT is OFTV2, ERC20Permit {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
@@ -68,7 +67,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         address market;
     }
 
-
     // ******************//
     // *** MODIFIERS *** //
     // ***************** //
@@ -88,7 +86,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         string memory _symbol,
         uint8 _decimal,
         uint256 _hostChainID
-    )   
+    )
         OFTV2(
             string(abi.encodePacked("TapiocaOFT-", _name)),
             string(abi.encodePacked("t", _symbol)),
@@ -144,7 +142,10 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             assetId
         );
 
-        bytes memory adapterParam = abi.encodePacked(uint16(1), options.extraGasLimit);
+        bytes memory adapterParam = abi.encodePacked(
+            uint16(1),
+            options.extraGasLimit
+        );
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -245,7 +246,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
     }
 
-
     function sendForLeverage(
         uint256 amount,
         address leverageFor,
@@ -279,7 +279,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
- 
+
     function _isNative() internal view returns (bool) {
         return erc20 == address(0);
     }
@@ -474,14 +474,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         //swap to USDO
         _approve(address(this), externalData.swapper, amount);
         ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
-            .buildSwapData(
-                erc20,
-                swapData.tokenOut,
-                amount,
-                0,
-                false,
-                false
-            );
+            .buildSwapData(erc20, swapData.tokenOut, amount, 0, false, false);
         (uint256 amountOut, ) = ISwapper(externalData.swapper).swap(
             _swapperData,
             swapData.amountOutMin,
@@ -500,7 +493,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             true
         );
     }
-
 
     function _callApproval(IApproval[] memory approvals) private {
         for (uint256 i = 0; i < approvals.length; ) {
@@ -553,7 +545,9 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         address _from,
         address _to
     ) private {
-        _amount = _share > 0 ? yieldBox.toAmount(_assetId, _share, false) : _amount;
+        _amount = _share > 0
+            ? yieldBox.toAmount(_assetId, _share, false)
+            : _amount;
         _erc20.approve(address(yieldBox), _amount);
         yieldBox.depositAsset(_assetId, _from, _to, _amount, _share);
     }
@@ -570,7 +564,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
     }
 
     function _safeTransferETH(address to, uint256 amount) internal {
-       (bool sent, ) = to.call{value: amount}("");
+        (bool sent, ) = to.call{value: amount}("");
         require(sent, "TOFT_failed");
     }
 

@@ -3,7 +3,6 @@ pragma solidity ^0.8.18;
 
 import "./BaseTOFT.sol";
 
-
 contract TapiocaOFT is BaseTOFT {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.18;
 import "./BaseTOFT.sol";
 
-
 contract mTapiocaOFT is BaseTOFT {
     using SafeERC20 for IERC20;
 
@@ -12,8 +11,8 @@ contract mTapiocaOFT is BaseTOFT {
 
     /// @notice allowed chains where you can unwrap your TOFT
     mapping(uint256 => bool) public connectedChains;
-    
-        /// @notice map of approved balancers
+
+    /// @notice map of approved balancers
     /// @dev a balancer can extract the underlying
     mapping(address => bool) public balancers;
 
@@ -72,10 +71,7 @@ contract mTapiocaOFT is BaseTOFT {
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
     /// @param _toAddress The address to unwrap the tokens to.
     /// @param _amount The amount of tokens to unwrap.
-    function unwrap(
-        address _toAddress,
-        uint256 _amount
-    ) external {
+    function unwrap(address _toAddress, uint256 _amount) external {
         require(connectedChains[block.chainid], "TOFT_host");
         require(!balancers[msg.sender], "TOFT_auth");
         _unwrap(_toAddress, _amount);
@@ -96,7 +92,7 @@ contract mTapiocaOFT is BaseTOFT {
 
     /// @notice updates a Balancer whitelist status
     /// @param _balancer the operator address
-     /// @param _status the new whitelist status
+    /// @param _status the new whitelist status
     function updateBalancerState(
         address _balancer,
         bool _status
@@ -115,5 +111,4 @@ contract mTapiocaOFT is BaseTOFT {
             IERC20(erc20).safeTransfer(msg.sender, _amount);
         }
     }
-
 }
