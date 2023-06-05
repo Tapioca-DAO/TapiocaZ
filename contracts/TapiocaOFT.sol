@@ -22,7 +22,10 @@ contract TapiocaOFT is BaseTOFT {
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
-        uint256 _hostChainID
+        uint256 _hostChainID,
+        address payable _leverageModule,
+        address payable _strategyModule,
+        address payable _marketModule
     )
         BaseTOFT(
             _lzEndpoint,
@@ -31,7 +34,10 @@ contract TapiocaOFT is BaseTOFT {
             _name,
             _symbol,
             _decimal,
-            _hostChainID
+            _hostChainID,
+            _leverageModule,
+            _strategyModule,
+            _marketModule
         )
     {}
 
@@ -48,7 +54,7 @@ contract TapiocaOFT is BaseTOFT {
         address _toAddress,
         uint256 _amount
     ) external payable onlyHostChain {
-        if (_isNative()) {
+        if (erc20 == address(0)) {
             _wrapNative(_toAddress);
         } else {
             _wrap(_fromAddress, _toAddress, _amount);

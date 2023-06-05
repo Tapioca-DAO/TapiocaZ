@@ -551,6 +551,23 @@ function isTrustedRemote(uint16 _srcChainId, bytes _srcAddress) external view re
 |---|---|---|
 | _0 | bool | undefined |
 
+### leverageModule
+
+```solidity
+function leverageModule() external view returns (contract BaseTOFTLeverageModule)
+```
+
+returns the leverage module
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract BaseTOFTLeverageModule | undefined |
+
 ### lzEndpoint
 
 ```solidity
@@ -586,6 +603,23 @@ function lzReceive(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _
 | _srcAddress | bytes | undefined |
 | _nonce | uint64 | undefined |
 | _payload | bytes | undefined |
+
+### marketModule
+
+```solidity
+function marketModule() external view returns (contract BaseTOFTMarketModule)
+```
+
+returns the Market module
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract BaseTOFTMarketModule | undefined |
 
 ### minDstGasLookup
 
@@ -841,7 +875,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendOrRetrieveStrategy
 
 ```solidity
-function sendOrRetrieveStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options, bytes airdropAdapterParam, bool retrieve) external payable
+function sendOrRetrieveStrategy(address from, address to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options, bytes airdropAdapterParam, bool retrieve) external payable
 ```
 
 
@@ -852,8 +886,8 @@ function sendOrRetrieveStrategy(address _from, address _to, uint256 amount, uint
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| _to | address | undefined |
+| from | address | undefined |
+| to | address | undefined |
 | amount | uint256 | undefined |
 | share | uint256 | undefined |
 | assetId | uint256 | undefined |
@@ -865,7 +899,7 @@ function sendOrRetrieveStrategy(address _from, address _to, uint256 amount, uint
 ### sendToYBAndBorrow
 
 ```solidity
-function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.ISendOptions options, ITapiocaOFT.IApproval[] approvals) external payable
+function sendToYBAndBorrow(address from, address to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.ISendOptions options, ITapiocaOFT.IApproval[] approvals) external payable
 ```
 
 
@@ -876,8 +910,8 @@ function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, byte
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| _to | address | undefined |
+| from | address | undefined |
+| to | address | undefined |
 | lzDstChainId | uint16 | undefined |
 | airdropAdapterParams | bytes | undefined |
 | borrowParams | ITapiocaOFT.IBorrowParams | undefined |
@@ -1053,6 +1087,23 @@ function sharedDecimals() external view returns (uint8)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint8 | undefined |
+
+### strategyModule
+
+```solidity
+function strategyModule() external view returns (contract BaseTOFTStrategyModule)
+```
+
+returns the Strategy module
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract BaseTOFTStrategyModule | undefined |
 
 ### supportsInterface
 
