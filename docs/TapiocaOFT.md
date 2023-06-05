@@ -760,6 +760,26 @@ function sendAndCall(address _from, uint16 _dstChainId, bytes32 _toAddress, uint
 | _dstGasForCall | uint64 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
 
+### sendForLeverage
+
+```solidity
+function sendForLeverage(uint256 amount, address leverageFor, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageExternalContractsData externalData) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| leverageFor | address | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
+
 ### sendFrom
 
 ```solidity
@@ -783,7 +803,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToStrategy
 
 ```solidity
-function sendToStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
+function sendToStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, BaseTOFT.ISendOptions options) external payable
 ```
 
 
@@ -800,12 +820,12 @@ function sendToStrategy(address _from, address _to, uint256 amount, uint256 shar
 | share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
-| options | BaseTOFT.SendOptions | undefined |
+| options | BaseTOFT.ISendOptions | undefined |
 
 ### sendToYBAndBorrow
 
 ```solidity
-function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, BaseTOFT.IBorrowParams borrowParams, BaseTOFT.IWithdrawParams withdrawParams, BaseTOFT.SendOptions options, BaseTOFT.IApproval[] approvals) external payable
+function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, BaseTOFT.IBorrowParams borrowParams, BaseTOFT.IWithdrawParams withdrawParams, BaseTOFT.ISendOptions options, BaseTOFT.IApproval[] approvals) external payable
 ```
 
 
@@ -822,7 +842,7 @@ function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, byte
 | airdropAdapterParams | bytes | undefined |
 | borrowParams | BaseTOFT.IBorrowParams | undefined |
 | withdrawParams | BaseTOFT.IWithdrawParams | undefined |
-| options | BaseTOFT.SendOptions | undefined |
+| options | BaseTOFT.ISendOptions | undefined |
 | approvals | BaseTOFT.IApproval[] | undefined |
 
 ### setConfig
@@ -1472,42 +1492,6 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 | from `indexed` | address | undefined |
 | to `indexed` | address | undefined |
 | value  | uint256 | undefined |
-
-### Unwrap
-
-```solidity
-event Unwrap(address indexed _from, address indexed _to, uint256 _amount)
-```
-
-event emitted when an unwrap operation is performed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _from `indexed` | address | undefined |
-| _to `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
-
-### Wrap
-
-```solidity
-event Wrap(address indexed _from, address indexed _to, uint256 _amount)
-```
-
-event emitted when a wrap operation is performed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _from `indexed` | address | undefined |
-| _to `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
 
 
 

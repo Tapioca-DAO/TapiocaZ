@@ -1,34 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
-
+pragma solidity ^0.8.18;
 import "./BaseTOFT.sol";
 
-//
-//                 .(%%%%%%%%%%%%*       *
-//             #%%%%%%%%%%%%%%%%%%%%*  ####*
-//          #%%%%%%%%%%%%%%%%%%%%%#  /####
-//       ,%%%%%%%%%%%%%%%%%%%%%%%   ####.  %
-//                                #####
-//                              #####
-//   #####%#####              *####*  ####%#####*
-//  (#########(              #####     ##########.
-//  ##########             #####.      .##########
-//                       ,####/
-//                      #####
-//  %%%%%%%%%%        (####.           *%%%%%%%%%#
-//  .%%%%%%%%%%     *####(            .%%%%%%%%%%
-//   *%%%%%%%%%%   #####             #%%%%%%%%%%
-//               (####.
-//      ,((((  ,####(          /(((((((((((((
-//        *,  #####  ,(((((((((((((((((((((
-//          (####   ((((((((((((((((((((/
-//         ####*  (((((((((((((((((((
-//                     ,**//*,.
 
-//Merged tOFT (eg: arbitrum eth, mainnet eth, optimism eth)
 contract mTapiocaOFT is BaseTOFT {
     using SafeERC20 for IERC20;
-    using BytesLib for bytes;
 
     // ************ //
     // *** VARS *** //
@@ -36,40 +12,10 @@ contract mTapiocaOFT is BaseTOFT {
 
     /// @notice allowed chains where you can unwrap your TOFT
     mapping(uint256 => bool) public connectedChains;
-    /// @notice map of approved balancers
+    
+        /// @notice map of approved balancers
     /// @dev a balancer can extract the underlying
     mapping(address => bool) public balancers;
-
-    // ************** //
-    // *** EVENTS *** //
-    // ************** //
-    /// @notice event emitted when a connected chain is reigstered or unregistered
-    event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new);
-    /// @notice event emitted when balancer status is updated
-    event BalancerStatusUpdated(
-        address indexed _balancer,
-        bool _bool,
-        bool _new
-    );
-    /// @notice event emitted when rebalancing is performed
-    event Rebalancing(
-        address indexed _balancer,
-        uint256 _amount,
-        bool _isNative
-    );
-
-    // ******************//
-    // *** MODIFIERS *** //
-    // ***************** //
-    /// @notice Require that the caller is on the host chain of the ERC20.
-    modifier onlyAllowedChain() {
-        require(connectedChains[block.chainid], "TOFT: not allowed");
-        _;
-    }
-    modifier notRebalancerRole() {
-        require(!balancers[msg.sender], "TOFT: not authorized");
-        _;
-    }
 
     /// @notice creates a new mTapiocaOFT
     /// @param _lzEndpoint LayerZero endpoint address
@@ -100,7 +46,6 @@ contract mTapiocaOFT is BaseTOFT {
     {
         if (block.chainid == _hostChainID) {
             connectedChains[_hostChainID] = true;
-            emit ConnectedChainStatusUpdated(_hostChainID, false, true);
         }
     }
 
@@ -115,7 +60,8 @@ contract mTapiocaOFT is BaseTOFT {
         address _fromAddress,
         address _toAddress,
         uint256 _amount
-    ) external payable onlyHostChain notRebalancerRole {
+    ) external payable onlyHostChain {
+        require(!balancers[msg.sender], "TOFT_auth");
         if (_isNative()) {
             _wrapNative(_toAddress);
         } else {
@@ -129,7 +75,9 @@ contract mTapiocaOFT is BaseTOFT {
     function unwrap(
         address _toAddress,
         uint256 _amount
-    ) external onlyAllowedChain notRebalancerRole {
+    ) external {
+        require(connectedChains[block.chainid], "TOFT_host");
+        require(!balancers[msg.sender], "TOFT_auth");
         _unwrap(_toAddress, _amount);
     }
 
@@ -143,36 +91,29 @@ contract mTapiocaOFT is BaseTOFT {
         uint256 _chain,
         bool _status
     ) external onlyOwner {
-        emit ConnectedChainStatusUpdated(
-            _chain,
-            connectedChains[_chain],
-            _status
-        );
         connectedChains[_chain] = _status;
     }
 
     /// @notice updates a Balancer whitelist status
     /// @param _balancer the operator address
-    /// @param _status the new whitelist status
+     /// @param _status the new whitelist status
     function updateBalancerState(
         address _balancer,
         bool _status
     ) external onlyOwner {
-        emit BalancerStatusUpdated(_balancer, balancers[_balancer], _status);
         balancers[_balancer] = _status;
     }
 
     /// @notice extracts the underlying token/native for rebalancing
     /// @param _amount the amount used for rebalancing
     function extractUnderlying(uint256 _amount) external {
-        require(balancers[msg.sender], "TOFT: not authorized");
+        require(balancers[msg.sender], "TOFT_auth");
 
         if (_isNative()) {
             _safeTransferETH(msg.sender, _amount);
         } else {
             IERC20(erc20).safeTransfer(msg.sender, _amount);
         }
-
-        emit Rebalancing(msg.sender, _amount, _isNative());
     }
+
 }

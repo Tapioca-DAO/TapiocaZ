@@ -1,41 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.18;
 
 //LZ
 import "tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol";
-import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 
 //OZ
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 //TAPIOCA
 import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
-import "tapioca-periph/contracts/interfaces/ITapiocaWrapper.sol";
 import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
+import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
+import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 
-//
-//                 .(%%%%%%%%%%%%*       *
-//             #%%%%%%%%%%%%%%%%%%%%*  ####*
-//          #%%%%%%%%%%%%%%%%%%%%%#  /####
-//       ,%%%%%%%%%%%%%%%%%%%%%%%   ####.  %
-//                                #####
-//                              #####
-//   #####%#####              *####*  ####%#####*
-//  (#########(              #####     ##########.
-//  ##########             #####.      .##########
-//                       ,####/
-//                      #####x
-//  %%%%%%%%%%        (####.           *%%%%%%%%%#
-//  .%%%%%%%%%%     *####(            .%%%%%%%%%%
-//   *%%%%%%%%%%   #####             #%%%%%%%%%%
-//               (####.
-//      ,((((  ,####(          /(((((((((((((
-//        *,  #####  ,(((((((((((((((((((((
-//          (####   ((((((((((((((((((((/
-//         ####*  (((((((((((((((((((
-//                     ,**//*,.
 
 abstract contract BaseTOFT is OFTV2, ERC20Permit {
     using SafeERC20 for IERC20;
@@ -50,6 +30,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
     uint16 constant PT_YB_SEND_STRAT = 770;
     uint16 constant PT_YB_RETRIEVE_STRAT = 771;
     uint16 constant PT_YB_SEND_SGL_BORROW = 775;
+    uint16 constant PT_LEVERAGE_MARKET_DOWN = 776;
 
     /// @notice The ERC20 to wrap.
     address public erc20;
@@ -58,10 +39,9 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
     /// @notice Decimal cache number of the ERC20.
     uint8 internal _decimalCache;
 
-    struct SendOptions {
+    struct ISendOptions {
         uint256 extraGasLimit;
         address zroPaymentAddress;
-        bool wrap;
     }
     struct IApproval {
         bool allowFailure;
@@ -88,20 +68,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         address market;
     }
 
-    // ************** //
-    // *** EVENTS *** //
-    // ************** //
-    /// @notice event emitted when a wrap operation is performed
-    event Wrap(address indexed _from, address indexed _to, uint256 _amount);
-    /// @notice event emitted when an unwrap operation is performed
-    event Unwrap(address indexed _from, address indexed _to, uint256 _amount);
 
     // ******************//
     // *** MODIFIERS *** //
     // ***************** //
     /// @notice Require that the caller is on the host chain of the ERC20.
     modifier onlyHostChain() {
-        require(block.chainid == hostChainID, "TOFT: not host");
+        require(block.chainid == hostChainID, "TOFT_host");
         _;
     }
 
@@ -115,7 +88,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         string memory _symbol,
         uint8 _decimal,
         uint256 _hostChainID
-    )
+    )   
         OFTV2(
             string(abi.encodePacked("TapiocaOFT-", _name)),
             string(abi.encodePacked("t", _symbol)),
@@ -156,31 +129,22 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
-        SendOptions calldata options
+        ISendOptions calldata options
     ) external payable {
-        require(amount > 0, "TOFT: amount not valid");
-        if (options.wrap) {
-            if (_isNative()) {
-                _wrapNative(_to);
-            } else {
-                _wrap(_from, _to, amount);
-            }
-        }
-        bytes32 toAddress = LzLib.addressToBytes32(_to);
+        require(amount > 0, "TOFT_0");
+        bytes32 toAddress = bytes32(uint(uint160(_to)));
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
             PT_YB_SEND_STRAT,
-            LzLib.addressToBytes32(_from),
+            bytes32(uint(uint160(_from))),
             toAddress,
             amount,
             share,
             assetId
         );
 
-        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
-            options.extraGasLimit
-        );
+        bytes memory adapterParam = abi.encodePacked(uint16(1), options.extraGasLimit);
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -209,17 +173,10 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         bytes calldata airdropAdapterParams,
         IBorrowParams calldata borrowParams,
         IWithdrawParams calldata withdrawParams,
-        SendOptions calldata options,
+        ISendOptions calldata options,
         IApproval[] calldata approvals
     ) external payable {
-        if (options.wrap) {
-            if ((_isNative())) {
-                _wrapNative(_to);
-            } else {
-                _wrap(_from, _to, borrowParams.amount);
-            }
-        }
-        bytes32 toAddress = LzLib.addressToBytes32(_to);
+        bytes32 toAddress = bytes32(uint(uint160(_to)));
         _debitFrom(
             _from,
             lzEndpoint.getChainId(),
@@ -264,13 +221,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
     ) external payable {
-        require(amount > 0, "TOFT: amount not valid");
+        require(amount > 0, "TOFT_0");
 
-        bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
+        bytes32 toAddress = bytes32(uint(uint160(msg.sender)));
 
         bytes memory lzPayload = abi.encode(
             PT_YB_RETRIEVE_STRAT,
-            LzLib.addressToBytes32(_from),
+            bytes32(uint(uint160(_from))),
             toAddress,
             amount,
             share,
@@ -288,9 +245,41 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         emit SendToChain(lzDstChainId, msg.sender, toAddress, amount);
     }
 
+
+    function sendForLeverage(
+        uint256 amount,
+        address leverageFor,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData
+    ) external payable {
+        bytes32 senderBytes = bytes32(uint(uint160(msg.sender)));
+        _debitFrom(msg.sender, lzEndpoint.getChainId(), senderBytes, amount);
+
+        bytes memory lzPayload = abi.encode(
+            PT_LEVERAGE_MARKET_DOWN,
+            senderBytes,
+            amount,
+            swapData,
+            externalData,
+            leverageFor
+        );
+
+        _lzSend(
+            lzData.lzDstChainId,
+            lzPayload,
+            payable(lzData.refundAddress),
+            lzData.zroPaymentAddress,
+            lzData.airdropAdapterParam,
+            msg.value
+        );
+        emit SendToChain(lzData.lzDstChainId, msg.sender, senderBytes, amount);
+    }
+
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
     // ************************* //
+ 
     function _isNative() internal view returns (bool) {
         return erc20 == address(0);
     }
@@ -303,18 +292,16 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         if (_fromAddress != msg.sender) {
             require(
                 allowance(_fromAddress, msg.sender) >= _amount,
-                "TOFT: not allowed"
+                "TOFT_allowed"
             );
         }
         IERC20(erc20).safeTransferFrom(_fromAddress, address(this), _amount);
         _mint(_toAddress, _amount);
-        emit Wrap(_fromAddress, _toAddress, _amount);
     }
 
     function _wrapNative(address _toAddress) internal virtual {
-        require(msg.value > 0, "TOFT: value 0");
+        require(msg.value > 0, "TOFT_0");
         _mint(_toAddress, msg.value);
-        emit Wrap(msg.sender, _toAddress, msg.value);
     }
 
     function _unwrap(address _toAddress, uint256 _amount) internal virtual {
@@ -325,8 +312,6 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         } else {
             IERC20(erc20).safeTransfer(_toAddress, _amount);
         }
-
-        emit Unwrap(msg.sender, _toAddress, _amount);
     }
 
     function _strategyDeposit(
@@ -340,7 +325,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
                 (uint16, bytes32, bytes32, uint256, uint256, uint256)
             );
 
-        address onBehalfOf = LzLib.bytes32ToAddress(from);
+        address onBehalfOf = address(uint160(uint(from)));
 
         _creditTo(_srcChainId, address(this), amount);
         _depositToYieldbox(
@@ -372,13 +357,13 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
                 (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
             );
 
-        address _from = LzLib.bytes32ToAddress(from);
+        address _from = address(uint160(uint(from)));
         _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
         _debitFrom(
             address(this),
             lzEndpoint.getChainId(),
-            LzLib.addressToBytes32(address(this)),
+            bytes32(uint(uint160(address(this)))),
             _amount
         );
 
@@ -397,7 +382,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         emit SendToChain(
             _srcChainId,
             _from,
-            LzLib.addressToBytes32(address(this)),
+            bytes32(uint(uint160(address(this)))),
             _amount
         );
 
@@ -458,7 +443,66 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         );
     }
 
-    function _callApproval(IApproval[] memory approvals) internal virtual {
+    function _leverageDown(
+        uint16 _srcChainId,
+        bytes memory _payload
+    ) internal virtual {
+        (
+            ,
+            ,
+            uint256 amount,
+            IUSDOBase.ILeverageSwapData memory swapData,
+            IUSDOBase.ILeverageExternalContractsData memory externalData,
+            address leverageFor
+        ) = abi.decode(
+                _payload,
+                (
+                    uint16,
+                    bytes32,
+                    uint256,
+                    IUSDOBase.ILeverageSwapData,
+                    IUSDOBase.ILeverageExternalContractsData,
+                    address
+                )
+            );
+
+        _creditTo(_srcChainId, address(this), amount);
+
+        //unwrap
+        _unwrap(address(this), amount);
+
+        //swap to USDO
+        _approve(address(this), externalData.swapper, amount);
+        ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
+            .buildSwapData(
+                erc20,
+                swapData.tokenOut,
+                amount,
+                0,
+                false,
+                false
+            );
+        (uint256 amountOut, ) = ISwapper(externalData.swapper).swap(
+            _swapperData,
+            swapData.amountOutMin,
+            address(this),
+            swapData.data
+        );
+
+        //repay
+        _approve(address(this), externalData.magnetar, amountOut);
+        IMagnetar(externalData.magnetar).depositAndRepay(
+            externalData.srcMarket,
+            leverageFor,
+            amountOut,
+            amountOut,
+            true,
+            true
+        );
+    }
+
+
+    function _callApproval(IApproval[] memory approvals) private {
         for (uint256 i = 0; i < approvals.length; ) {
             if (approvals[i].permitBorrow) {
                 try
@@ -509,10 +553,7 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
         address _from,
         address _to
     ) private {
-        if (_share > 0) {
-            //share takes precedance over amount
-            _amount = yieldBox.toAmount(_assetId, _share, false);
-        }
+        _amount = _share > 0 ? yieldBox.toAmount(_assetId, _share, false) : _amount;
         _erc20.approve(address(yieldBox), _amount);
         yieldBox.depositAsset(_assetId, _from, _to, _amount, _share);
     }
@@ -529,14 +570,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
     }
 
     function _safeTransferETH(address to, uint256 amount) internal {
-        bool success;
-
-        assembly {
-            // Transfer the ETH and store if it succeeded or not.
-            success := call(gas(), to, amount, 0, 0, 0, 0)
-        }
-
-        require(success, "TOFT: transfer failed (ETH)");
+       (bool sent, ) = to.call{value: amount}("");
+        require(sent, "TOFT_failed");
     }
 
     function _nonblockingLzReceive(
@@ -553,6 +588,8 @@ abstract contract BaseTOFT is OFTV2, ERC20Permit {
             _strategyWithdraw(_srcChainId, _payload);
         } else if (packetType == PT_YB_SEND_SGL_BORROW) {
             _borrow(_srcChainId, _payload);
+        } else if (packetType == PT_LEVERAGE_MARKET_DOWN) {
+            _leverageDown(_srcChainId, _payload);
         } else {
             packetType = _payload.toUint8(0);
             if (packetType == PT_SEND) {

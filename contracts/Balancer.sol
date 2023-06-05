@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.18;
 
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IStargateRouter.sol";
