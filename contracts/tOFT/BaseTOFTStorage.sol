@@ -3,29 +3,39 @@ pragma solidity ^0.8.18;
 
 //LZ
 import "tapioca-sdk/dist/contracts/token/oft/v2/OFTV2.sol";
+import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 
 //OZ
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-//TAPIOCA
+//TAPIOCA INTERFACES
 import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
+import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 
-contract BaseTOFTModule is OFTV2 {
+
+contract BaseTOFTStorage is OFTV2 {
     // ************ //
     // *** VARS *** //
     // ************ //
     /// @notice The YieldBox address.
     IYieldBoxBase public yieldBox;
-
     /// @notice The ERC20 to wrap.
     address public erc20;
     /// @notice The host chain ID of the ERC20
     uint256 public hostChainID;
     /// @notice Decimal cache number of the ERC20.
     uint8 internal _decimalCache;
+   
+    uint16 internal constant PT_YB_SEND_STRAT = 770;
+    uint16 internal constant PT_YB_RETRIEVE_STRAT = 771;
+    uint16 internal constant PT_YB_SEND_SGL_BORROW = 775;
+    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 776;
+
 
     receive() external payable {}
-
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -46,22 +56,6 @@ contract BaseTOFTModule is OFTV2 {
         _decimalCache = _decimal;
         hostChainID = _hostChainID;
         yieldBox = _yieldBox;
-    }
-
-    // ********************** //
-    // *** VIEW FUNCTIONS *** //
-    // ********************** //
-    /// @notice decimal number of the ERC20
-    function decimals() public view override returns (uint8) {
-        if (_decimalCache == 0) return 18; //temporary fix for LZ _sharedDecimals check
-        return _decimalCache;
-    }
-
-    // ********************** //
-    // *** INTERNAL FUNCTIONS *** //
-    // ********************** //
-    function _safeTransferETH(address to, uint256 amount) internal {
-        (bool sent, ) = to.call{value: amount}("");
-        require(sent, "TOFT_failed");
+       
     }
 }

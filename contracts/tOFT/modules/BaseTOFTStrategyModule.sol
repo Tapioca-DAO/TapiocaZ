@@ -9,17 +9,11 @@ import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 
-import "./BaseTOFTModule.sol";
+import "../BaseTOFTStorage.sol";
 
-contract BaseTOFTStrategyModule is BaseTOFTModule {
+contract BaseTOFTStrategyModule is BaseTOFTStorage {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
-
-    // ************ //
-    // *** VARS *** //
-    // ************ //
-    uint16 constant PT_YB_SEND_STRAT = 770;
-    uint16 constant PT_YB_RETRIEVE_STRAT = 771;
 
     constructor(
         address _lzEndpoint,
@@ -30,7 +24,7 @@ contract BaseTOFTStrategyModule is BaseTOFTModule {
         uint8 _decimal,
         uint256 _hostChainID
     )
-        BaseTOFTModule(
+        BaseTOFTStorage(
             _lzEndpoint,
             _erc20,
             _yieldBox,

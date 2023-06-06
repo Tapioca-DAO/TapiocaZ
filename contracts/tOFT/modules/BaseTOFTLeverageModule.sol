@@ -8,14 +8,11 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 
-import "./BaseTOFTModule.sol";
+import "../BaseTOFTStorage.sol";
 
-contract BaseTOFTLeverageModule is BaseTOFTModule {
+contract BaseTOFTLeverageModule is BaseTOFTStorage {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
-
-    uint16 constant PT_LEVERAGE_MARKET_DOWN = 776;
-
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -25,7 +22,7 @@ contract BaseTOFTLeverageModule is BaseTOFTModule {
         uint8 _decimal,
         uint256 _hostChainID
     )
-        BaseTOFTModule(
+        BaseTOFTStorage(
             _lzEndpoint,
             _erc20,
             _yieldBox,
@@ -127,7 +124,7 @@ contract BaseTOFTLeverageModule is BaseTOFTModule {
         );
     }
 
-    function _unwrap(address _toAddress, uint256 _amount) internal virtual {
+    function _unwrap(address _toAddress, uint256 _amount) private {
         _burn(msg.sender, _amount);
 
         if (erc20 == address(0)) {
@@ -135,5 +132,10 @@ contract BaseTOFTLeverageModule is BaseTOFTModule {
         } else {
             IERC20(erc20).safeTransfer(_toAddress, _amount);
         }
+    }
+
+     function _safeTransferETH(address to, uint256 amount) private {
+        (bool sent, ) = to.call{value: amount}("");
+        require(sent, "TOFT_failed");
     }
 }

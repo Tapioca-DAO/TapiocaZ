@@ -63,6 +63,9 @@ describe('TapiocaWrapper', () => {
                 'erc20symbol',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             const txData = (
                 await ethers.getContractFactory('TapiocaOFT')
@@ -105,6 +108,9 @@ describe('TapiocaWrapper', () => {
                 'erc20symbol',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             // Prepare the transaction data and call create
             const txData = (
@@ -173,6 +179,9 @@ describe('TapiocaWrapper', () => {
                 'erc20symbol',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             // Prepare the transaction data and call create
             const txData = (
@@ -241,6 +250,9 @@ describe('TapiocaWrapper', () => {
                 'erc20symbol',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             // Prepare the transaction data and call create
             const txData = (
@@ -287,6 +299,9 @@ describe('TapiocaWrapper', () => {
                 'erc20symbol2',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             mtxData = (
                 await ethers.getContractFactory('mTapiocaOFT')

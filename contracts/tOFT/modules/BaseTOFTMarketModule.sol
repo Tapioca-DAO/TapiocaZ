@@ -11,16 +11,11 @@ import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
 
-import "./BaseTOFTModule.sol";
+import "../BaseTOFTStorage.sol";
 
-contract BaseTOFTMarketModule is BaseTOFTModule {
+contract BaseTOFTMarketModule is BaseTOFTStorage {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
-
-    // ************ //
-    // *** VARS *** //
-    // ************ //
-    uint16 constant PT_YB_SEND_SGL_BORROW = 775;
 
     constructor(
         address _lzEndpoint,
@@ -31,7 +26,7 @@ contract BaseTOFTMarketModule is BaseTOFTModule {
         uint8 _decimal,
         uint256 _hostChainID
     )
-        BaseTOFTModule(
+        BaseTOFTStorage(
             _lzEndpoint,
             _erc20,
             _yieldBox,
@@ -114,6 +109,7 @@ contract BaseTOFTMarketModule is BaseTOFTModule {
             _callApproval(approvals);
         }
         _creditTo(_srcChainId, address(this), borrowParams.amount);
+
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         bytes memory withdrawData = abi.encode(

@@ -76,6 +76,42 @@ export const useUtils = (
         const erc20symbol = await erc20.symbol();
         const erc20decimal = await erc20.decimals();
 
+        const leverageModule = await (
+            await ethers.getContractFactory('BaseTOFTLeverageModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+
+        const strategyModule = await (
+            await ethers.getContractFactory('BaseTOFTStrategyModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+
+        const marketModule = await (
+            await ethers.getContractFactory('BaseTOFTMarketModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
 
@@ -87,6 +123,9 @@ export const useUtils = (
             erc20symbol,
             erc20decimal,
             hostChainID,
+            leverageModule.address,
+            strategyModule.address,
+            marketModule.address,
         ];
 
         const txData = (
