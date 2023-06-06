@@ -110,7 +110,6 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         }
         _creditTo(_srcChainId, address(this), borrowParams.amount);
 
-
         // Use market helper to deposit, add collateral to market and withdrawTo
         bytes memory withdrawData = abi.encode(
             withdrawParams.withdrawOnOtherChain,

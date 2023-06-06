@@ -13,6 +13,7 @@ import "../BaseTOFTStorage.sol";
 contract BaseTOFTLeverageModule is BaseTOFTStorage {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -134,7 +135,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         }
     }
 
-     function _safeTransferETH(address to, uint256 amount) private {
+    function _safeTransferETH(address to, uint256 amount) private {
         (bool sent, ) = to.call{value: amount}("");
         require(sent, "TOFT_failed");
     }

@@ -15,7 +15,6 @@ import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 
-
 contract BaseTOFTStorage is OFTV2 {
     // ************ //
     // *** VARS *** //
@@ -28,14 +27,14 @@ contract BaseTOFTStorage is OFTV2 {
     uint256 public hostChainID;
     /// @notice Decimal cache number of the ERC20.
     uint8 internal _decimalCache;
-   
+
     uint16 internal constant PT_YB_SEND_STRAT = 770;
     uint16 internal constant PT_YB_RETRIEVE_STRAT = 771;
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 775;
     uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 776;
 
-
     receive() external payable {}
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -56,6 +55,5 @@ contract BaseTOFTStorage is OFTV2 {
         _decimalCache = _decimal;
         hostChainID = _hostChainID;
         yieldBox = _yieldBox;
-       
     }
 }

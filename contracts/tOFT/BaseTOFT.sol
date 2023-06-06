@@ -20,7 +20,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         Strategy,
         Market
     }
-   
+
     /// @notice returns the leverage module
     BaseTOFTLeverageModule public leverageModule;
 
@@ -38,7 +38,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         require(block.chainid == hostChainID, "TOFT_host");
         _;
     }
-
 
     constructor(
         address _lzEndpoint,
