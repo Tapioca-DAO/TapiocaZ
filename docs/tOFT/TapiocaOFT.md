@@ -1,4 +1,4 @@
-# mTapiocaOFT
+# TapiocaOFT
 
 
 
@@ -95,57 +95,6 @@ function PT_SEND_AND_CALL() external view returns (uint8)
 |---|---|---|
 | _0 | uint8 | undefined |
 
-### PT_YB_RETRIEVE_STRAT
-
-```solidity
-function PT_YB_RETRIEVE_STRAT() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-### PT_YB_SEND_SGL_BORROW
-
-```solidity
-function PT_YB_SEND_SGL_BORROW() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-### PT_YB_SEND_STRAT
-
-```solidity
-function PT_YB_SEND_STRAT() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### allowance
 
 ```solidity
@@ -214,45 +163,6 @@ function balanceOf(address account) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### balancers
-
-```solidity
-function balancers(address) external view returns (bool)
-```
-
-map of approved balancers
-
-*a balancer can extract the underlying*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### batch
-
-```solidity
-function batch(bytes[] calls, bool revertOnFail) external payable
-```
-
-Allows batched call to self (this contract).
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| calls | bytes[] | An array of inputs for each call. |
-| revertOnFail | bool | If True then reverts after a failed call and stops doing further calls. |
-
 ### callOnOFTReceived
 
 ```solidity
@@ -292,28 +202,6 @@ function circulatingSupply() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### connectedChains
-
-```solidity
-function connectedChains(uint256) external view returns (bool)
-```
-
-allowed chains where you can unwrap your TOFT
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
 
 ### creditedPackets
 
@@ -382,7 +270,7 @@ function decreaseAllowance(address spender, uint256 subtractedValue) external no
 ### erc20
 
 ```solidity
-function erc20() external view returns (contract IERC20)
+function erc20() external view returns (address)
 ```
 
 The ERC20 to wrap.
@@ -394,7 +282,7 @@ The ERC20 to wrap.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IERC20 | undefined |
+| _0 | address | undefined |
 
 ### estimateSendAndCallFee
 
@@ -451,22 +339,6 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 |---|---|---|
 | nativeFee | uint256 | undefined |
 | zroFee | uint256 | undefined |
-
-### extractUnderlying
-
-```solidity
-function extractUnderlying(uint256 _amount) external nonpayable
-```
-
-extracts the underlying token/native for rebalancing
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _amount | uint256 | the amount used for rebalancing |
 
 ### failedMessages
 
@@ -534,23 +406,6 @@ function getConfig(uint16 _version, uint16 _chainId, address, uint256 _configTyp
 |---|---|---|
 | _0 | bytes | undefined |
 
-### getLzChainId
-
-```solidity
-function getLzChainId() external view returns (uint16)
-```
-
-returns current LayerZero chain id
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### getTrustedRemoteAddress
 
 ```solidity
@@ -613,40 +468,6 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 |---|---|---|
 | _0 | bool | undefined |
 
-### isHostChain
-
-```solidity
-function isHostChain() external view returns (bool)
-```
-
-Check if the current chain is the host chain of the ERC20.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### isNative
-
-```solidity
-function isNative() external view returns (bool)
-```
-
-If this wrapper is for an ERC20 or a native token.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
 ### isTrustedRemote
 
 ```solidity
@@ -669,6 +490,23 @@ function isTrustedRemote(uint16 _srcChainId, bytes _srcAddress) external view re
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
+
+### leverageModule
+
+```solidity
+function leverageModule() external view returns (contract BaseTOFTLeverageModule)
+```
+
+returns the leverage module
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract BaseTOFTLeverageModule | undefined |
 
 ### lzEndpoint
 
@@ -705,6 +543,23 @@ function lzReceive(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _
 | _srcAddress | bytes | undefined |
 | _nonce | uint64 | undefined |
 | _payload | bytes | undefined |
+
+### marketModule
+
+```solidity
+function marketModule() external view returns (contract BaseTOFTMarketModule)
+```
+
+returns the Market module
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract BaseTOFTMarketModule | undefined |
 
 ### minDstGasLookup
 
@@ -879,7 +734,7 @@ function renounceOwnership() external nonpayable
 ### retrieveFromStrategy
 
 ```solidity
-function retrieveFromStrategy(address _from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
+function retrieveFromStrategy(address from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
 extracts TOFT from a specific strategy available on another layer
@@ -890,7 +745,7 @@ extracts TOFT from a specific strategy available on another layer
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | the sender address |
+| from | address | the sender address |
 | amount | uint256 | the transferred amount |
 | share | uint256 | undefined |
 | assetId | uint256 | the destination YieldBox asset id |
@@ -939,6 +794,26 @@ function sendAndCall(address _from, uint16 _dstChainId, bytes32 _toAddress, uint
 | _dstGasForCall | uint64 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
 
+### sendForLeverage
+
+```solidity
+function sendForLeverage(uint256 amount, address leverageFor, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageExternalContractsData externalData) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| leverageFor | address | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
+
 ### sendFrom
 
 ```solidity
@@ -962,7 +837,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToStrategy
 
 ```solidity
-function sendToStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, BaseTOFT.SendOptions options) external payable
+function sendToStrategy(address from, address to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
 ```
 
 
@@ -973,18 +848,18 @@ function sendToStrategy(address _from, address _to, uint256 amount, uint256 shar
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| _to | address | undefined |
+| from | address | undefined |
+| to | address | undefined |
 | amount | uint256 | undefined |
 | share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
-| options | BaseTOFT.SendOptions | undefined |
+| options | ITapiocaOFT.ISendOptions | undefined |
 
 ### sendToYBAndBorrow
 
 ```solidity
-function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, BaseTOFT.IBorrowParams borrowParams, BaseTOFT.IWithdrawParams withdrawParams, BaseTOFT.SendOptions options, BaseTOFT.IApproval[] approvals) external payable
+function sendToYBAndBorrow(address from, address to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.ISendOptions options, ITapiocaOFT.IApproval[] approvals) external payable
 ```
 
 
@@ -995,14 +870,14 @@ function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, byte
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | undefined |
-| _to | address | undefined |
+| from | address | undefined |
+| to | address | undefined |
 | lzDstChainId | uint16 | undefined |
 | airdropAdapterParams | bytes | undefined |
-| borrowParams | BaseTOFT.IBorrowParams | undefined |
-| withdrawParams | BaseTOFT.IWithdrawParams | undefined |
-| options | BaseTOFT.SendOptions | undefined |
-| approvals | BaseTOFT.IApproval[] | undefined |
+| borrowParams | ITapiocaOFT.IBorrowParams | undefined |
+| withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
+| options | ITapiocaOFT.ISendOptions | undefined |
+| approvals | ITapiocaOFT.IApproval[] | undefined |
 
 ### setConfig
 
@@ -1173,6 +1048,23 @@ function sharedDecimals() external view returns (uint8)
 |---|---|---|
 | _0 | uint8 | undefined |
 
+### strategyModule
+
+```solidity
+function strategyModule() external view returns (contract BaseTOFTStrategyModule)
+```
+
+returns the Strategy module
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract BaseTOFTStrategyModule | undefined |
+
 ### supportsInterface
 
 ```solidity
@@ -1211,23 +1103,6 @@ function symbol() external view returns (string)
 | Name | Type | Description |
 |---|---|---|
 | _0 | string | undefined |
-
-### tapiocaWrapper
-
-```solidity
-function tapiocaWrapper() external view returns (contract TapiocaWrapper)
-```
-
-The TapiocaWrapper contract, owner of this contract.
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract TapiocaWrapper | undefined |
 
 ### token
 
@@ -1365,40 +1240,6 @@ Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
 | _toAddress | address | The address to unwrap the tokens to. |
 | _amount | uint256 | The amount of tokens to unwrap. |
 
-### updateBalancerState
-
-```solidity
-function updateBalancerState(address _balancer, bool _status) external nonpayable
-```
-
-updates a Balancer whitelist status
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _balancer | address | the operator address |
-| _status | bool | the new whitelist status |
-
-### updateConnectedChain
-
-```solidity
-function updateConnectedChain(uint256 _chain, bool _status) external nonpayable
-```
-
-updates a connected chain whitelist status
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _chain | uint256 | the block.chainid of that specific chain |
-| _status | bool | the new whitelist status |
-
 ### useCustomAdapterParams
 
 ```solidity
@@ -1419,7 +1260,7 @@ function useCustomAdapterParams() external view returns (bool)
 ### wrap
 
 ```solidity
-function wrap(address _fromAddress, address _toAddress, uint256 _amount) external nonpayable
+function wrap(address _fromAddress, address _toAddress, uint256 _amount) external payable
 ```
 
 Wrap an ERC20 with a 1:1 ratio with a fee if existing.
@@ -1430,25 +1271,9 @@ Wrap an ERC20 with a 1:1 ratio with a fee if existing.
 
 | Name | Type | Description |
 |---|---|---|
-| _fromAddress | address | undefined |
+| _fromAddress | address | The address to wrap from. |
 | _toAddress | address | The address to wrap the ERC20 to. |
 | _amount | uint256 | The amount of ERC20 to wrap. |
-
-### wrapNative
-
-```solidity
-function wrapNative(address _toAddress) external payable
-```
-
-Wrap a native token with a 1:1 ratio with a fee if existing.
-
-*Since it can be executed only on the host chain, if an address exists on the linked chain it will not allowed to wrap.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _toAddress | address | The address to wrap the tokens to. |
 
 ### yieldBox
 
@@ -1489,41 +1314,6 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 | spender `indexed` | address | undefined |
 | value  | uint256 | undefined |
 
-### BalancerStatusUpdated
-
-```solidity
-event BalancerStatusUpdated(address indexed _balancer, bool _bool, bool _new)
-```
-
-event emitted when balancer status is updated
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _balancer `indexed` | address | undefined |
-| _bool  | bool | undefined |
-| _new  | bool | undefined |
-
-### Borrow
-
-```solidity
-event Borrow(address indexed _from, uint256 _amount)
-```
-
-event emitted when a borrow operation is performed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _from `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
-
 ### CallOFTReceivedSuccess
 
 ```solidity
@@ -1542,24 +1332,6 @@ event CallOFTReceivedSuccess(uint16 indexed _srcChainId, bytes _srcAddress, uint
 | _srcAddress  | bytes | undefined |
 | _nonce  | uint64 | undefined |
 | _hash  | bytes32 | undefined |
-
-### ConnectedChainStatusUpdated
-
-```solidity
-event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new)
-```
-
-event emitted when a connected chain is reigstered or unregistered
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _chain  | uint256 | undefined |
-| _old  | bool | undefined |
-| _new  | bool | undefined |
 
 ### MessageFailed
 
@@ -1614,24 +1386,6 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
 
-### Rebalancing
-
-```solidity
-event Rebalancing(address indexed _balancer, uint256 _amount, bool _isNative)
-```
-
-event emitted when rebalancing is performed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _balancer `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
-| _isNative  | bool | undefined |
-
 ### ReceiveFromChain
 
 ```solidity
@@ -1668,25 +1422,6 @@ event RetryMessageSuccess(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, 
 | _srcAddress  | bytes | undefined |
 | _nonce  | uint64 | undefined |
 | _payloadHash  | bytes32 | undefined |
-
-### SendApproval
-
-```solidity
-event SendApproval(address _target, address _owner, address _spender, uint256 _amount)
-```
-
-event emitted when approvals are sent
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _target  | address | undefined |
-| _owner  | address | undefined |
-| _spender  | address | undefined |
-| _amount  | uint256 | undefined |
 
 ### SendToChain
 
@@ -1808,121 +1543,6 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 | from `indexed` | address | undefined |
 | to `indexed` | address | undefined |
 | value  | uint256 | undefined |
-
-### Unwrap
-
-```solidity
-event Unwrap(address indexed _from, address indexed _to, uint256 _amount)
-```
-
-event emitted when an unwrap operation is performed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _from `indexed` | address | undefined |
-| _to `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
-
-### Wrap
-
-```solidity
-event Wrap(address indexed _from, address indexed _to, uint256 _amount)
-```
-
-event emitted when a wrap operation is performed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _from `indexed` | address | undefined |
-| _to `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
-
-### YieldBoxDeposit
-
-```solidity
-event YieldBoxDeposit(uint256 _amount)
-```
-
-event emitted when a YieldBox deposit is done
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _amount  | uint256 | undefined |
-
-### YieldBoxRetrieval
-
-```solidity
-event YieldBoxRetrieval(uint256 _amount)
-```
-
-event emitted when YieldBox funds are removed
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _amount  | uint256 | undefined |
-
-
-
-## Errors
-
-### TOFT_NotAllowedChain
-
-```solidity
-error TOFT_NotAllowedChain()
-```
-
-Code executed not on one of the allowed chains
-
-
-
-
-### TOFT_NotAuthorized
-
-```solidity
-error TOFT_NotAuthorized()
-```
-
-Sender not allowed to perform an action
-
-
-
-
-### TOFT_ZeroAmount
-
-```solidity
-error TOFT_ZeroAmount()
-```
-
-A zero amount was found
-
-
-
-
-### TOFT__NotHostChain
-
-```solidity
-error TOFT__NotHostChain()
-```
-
-Code executed not on main chain.
-
-
 
 
 

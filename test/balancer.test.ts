@@ -8,9 +8,8 @@ import { time } from '@nomicfoundation/hardhat-network-helpers';
 describe('Balancer', () => {
     describe('connectedOFTs', () => {
         it('should fail for unauthorized user', async () => {
-            const { randomUser, mtapiocaOFT0, balancer } = await loadFixture(
-                setupFixture,
-            );
+            const { randomUser, mtapiocaOFT0, balancer, tapiocaWrapper_0 } =
+                await loadFixture(setupFixture);
 
             expect(randomUser.address).to.not.eq(ethers.constants.AddressZero);
 
@@ -22,11 +21,11 @@ describe('Balancer', () => {
                 await hre.ethers.getContractFactory('TapiocaOFT')
             ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            const tWrapper = await ethers.getContractAt(
-                'TapiocaWrapper',
-                await mtapiocaOFT0.tapiocaWrapper(),
+            await tapiocaWrapper_0.executeTOFT(
+                mtapiocaOFT0.address,
+                encodedTX,
+                true,
             );
-            await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
             await expect(
                 balancer
@@ -55,11 +54,11 @@ describe('Balancer', () => {
                 await hre.ethers.getContractFactory('TapiocaOFT')
             ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            const tWrapper = await ethers.getContractAt(
-                'TapiocaWrapper',
-                await mtapiocaOFT0.tapiocaWrapper(),
+            await tapiocaWrapper_0.executeTOFT(
+                mtapiocaOFT0.address,
+                encodedTX,
+                true,
             );
-            await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
             await balancer.initConnectedOFT(
                 mtapiocaOFT0.address,
@@ -82,9 +81,8 @@ describe('Balancer', () => {
 
     describe('rebalance', async () => {
         it('should fail for unauthorized user', async () => {
-            const { randomUser, mtapiocaOFT0, balancer } = await loadFixture(
-                setupFixture,
-            );
+            const { randomUser, mtapiocaOFT0, balancer, tapiocaWrapper_0 } =
+                await loadFixture(setupFixture);
 
             const path = hre.ethers.utils.solidityPack(
                 ['address', 'address'],
@@ -94,11 +92,11 @@ describe('Balancer', () => {
                 await hre.ethers.getContractFactory('TapiocaOFT')
             ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            const tWrapper = await ethers.getContractAt(
-                'TapiocaWrapper',
-                await mtapiocaOFT0.tapiocaWrapper(),
+            await tapiocaWrapper_0.executeTOFT(
+                mtapiocaOFT0.address,
+                encodedTX,
+                true,
             );
-            await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
             await expect(
                 balancer
@@ -141,11 +139,11 @@ describe('Balancer', () => {
                 await hre.ethers.getContractFactory('TapiocaOFT')
             ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            const tWrapper = await ethers.getContractAt(
-                'TapiocaWrapper',
-                await mtapiocaOFT0.tapiocaWrapper(),
+            await tapiocaWrapper_0.executeTOFT(
+                mtapiocaOFT0.address,
+                encodedTX,
+                true,
             );
-            await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',
@@ -212,9 +210,8 @@ describe('Balancer', () => {
         });
 
         it('should test checker', async () => {
-            const { mtapiocaOFT0, mtapiocaOFT10, balancer } = await loadFixture(
-                setupFixture,
-            );
+            const { mtapiocaOFT0, mtapiocaOFT10, balancer, tapiocaWrapper_0 } =
+                await loadFixture(setupFixture);
 
             const path = hre.ethers.utils.solidityPack(
                 ['address', 'address'],
@@ -224,11 +221,11 @@ describe('Balancer', () => {
                 await hre.ethers.getContractFactory('TapiocaOFT')
             ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            const tWrapper = await ethers.getContractAt(
-                'TapiocaWrapper',
-                await mtapiocaOFT0.tapiocaWrapper(),
+            await tapiocaWrapper_0.executeTOFT(
+                mtapiocaOFT0.address,
+                encodedTX,
+                true,
             );
-            await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
             let checkData = await balancer.checker(mtapiocaOFT0.address, 1);
             expect(checkData.canExec).to.be.false;
@@ -272,11 +269,11 @@ describe('Balancer', () => {
                 await hre.ethers.getContractFactory('TapiocaOFT')
             ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            const tWrapper = await ethers.getContractAt(
-                'TapiocaWrapper',
-                await mtapiocaOFT0.tapiocaWrapper(),
+            await tapiocaWrapper_0.executeTOFT(
+                mtapiocaOFT0.address,
+                encodedTX,
+                true,
             );
-            await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',
@@ -386,11 +383,11 @@ describe('Balancer', () => {
                 await hre.ethers.getContractFactory('TapiocaOFT')
             ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            const tWrapper = await ethers.getContractAt(
-                'TapiocaWrapper',
-                await mtapiocaOFT0.tapiocaWrapper(),
+            await tapiocaWrapper_0.executeTOFT(
+                mtapiocaOFT0.address,
+                encodedTX,
+                true,
             );
-            await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
 
             const txData = mtapiocaOFT0.interface.encodeFunctionData(
                 'updateBalancerState',
@@ -469,7 +466,11 @@ describe('Balancer', () => {
                 await hre.ethers.getContractFactory('TapiocaOFT')
             ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            await tWrapper.executeTOFT(mtapiocaOFT0.address, encodedTX, true);
+            await tapiocaWrapper_0.executeTOFT(
+                mtapiocaOFT0.address,
+                encodedTX,
+                true,
+            );
             await expect(
                 balancer.rebalance(
                     mtapiocaOFT0.address,

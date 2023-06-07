@@ -88,23 +88,6 @@ function extractUnderlying(uint256 _amount) external nonpayable
 |---|---|---|
 | _amount | uint256 | undefined |
 
-### getLzChainId
-
-```solidity
-function getLzChainId() external view returns (uint16)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
 ### harvestFees
 
 ```solidity
@@ -150,23 +133,6 @@ function isHostChain() external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### isNative
-
-```solidity
-function isNative() external view returns (bool)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
 ### isTrustedRemote
 
 ```solidity
@@ -190,10 +156,27 @@ function isTrustedRemote(uint16 lzChainId, bytes path) external view returns (bo
 |---|---|---|
 | _0 | bool | undefined |
 
+### lzEndpoint
+
+```solidity
+function lzEndpoint() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### retrieveFromStrategy
 
 ```solidity
-function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
+function retrieveFromStrategy(address _from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
 
@@ -206,10 +189,31 @@ function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, ui
 |---|---|---|
 | _from | address | undefined |
 | amount | uint256 | undefined |
+| share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | zroPaymentAddress | address | undefined |
 | airdropAdapterParam | bytes | undefined |
+
+### sendForLeverage
+
+```solidity
+function sendForLeverage(uint256 amount, address leverageFor, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageExternalContractsData externalData) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+| leverageFor | address | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
 
 ### sendFrom
 
@@ -234,7 +238,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToStrategy
 
 ```solidity
-function sendToStrategy(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
+function sendToStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
 ```
 
 
@@ -248,6 +252,7 @@ function sendToStrategy(address _from, address _to, uint256 amount, uint256 asse
 | _from | address | undefined |
 | _to | address | undefined |
 | amount | uint256 | undefined |
+| share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | options | ITapiocaOFT.ISendOptions | undefined |

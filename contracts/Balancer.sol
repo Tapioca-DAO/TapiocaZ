@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.18;
 
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IStargateRouter.sol";
@@ -137,7 +137,7 @@ contract Balancer is Owned {
         uint16 _dstChainId
     ) external view returns (bool canExec, bytes memory execPayload) {
         bytes memory ercData;
-        if (ITapiocaOFT(_srcOft).isNative()) {
+        if (ITapiocaOFT(_srcOft).erc20() == address(0)) {
             ercData = abi.encode(
                 connectedOFTs[_srcOft][_dstChainId].srcPoolId,
                 connectedOFTs[_srcOft][_dstChainId].dstPoolId
@@ -196,7 +196,7 @@ contract Balancer is Owned {
         ITapiocaOFT(_srcOft).extractUnderlying(_amount);
 
         //send
-        bool _isNative = ITapiocaOFT(_srcOft).isNative();
+        bool _isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
         if (_isNative) {
             if (msg.value <= _amount) revert FeeAmountNotSet();
             _sendNative(_srcOft, _amount, _dstChainId, _slippage);
@@ -220,7 +220,7 @@ contract Balancer is Owned {
         address _dstOft,
         bytes memory _ercData
     ) external onlyOwner {
-        bool isNative = ITapiocaOFT(_srcOft).isNative();
+        bool isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
         if (!isNative && _ercData.length == 0) revert PoolInfoRequired();
         if (!_isValidOft(_srcOft, _dstOft, _dstChainId))
             revert DestinationOftNotValid();

@@ -57,13 +57,15 @@ describe('TapiocaWrapper', () => {
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Mock.address,
                 ethers.constants.AddressZero,
                 'erc20name',
                 'erc20symbol',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             const txData = (
                 await ethers.getContractFactory('TapiocaOFT')
@@ -100,13 +102,15 @@ describe('TapiocaWrapper', () => {
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Mock.address,
                 ethers.constants.AddressZero,
                 erc20Name,
                 'erc20symbol',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             // Prepare the transaction data and call create
             const txData = (
@@ -169,13 +173,15 @@ describe('TapiocaWrapper', () => {
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Mock.address,
                 ethers.constants.AddressZero,
                 erc20Name,
                 'erc20symbol',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             // Prepare the transaction data and call create
             const txData = (
@@ -238,13 +244,15 @@ describe('TapiocaWrapper', () => {
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Mock.address,
                 ethers.constants.AddressZero,
                 erc20Name,
                 'erc20symbol',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             // Prepare the transaction data and call create
             const txData = (
@@ -285,13 +293,15 @@ describe('TapiocaWrapper', () => {
 
             const mArgs: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Mock.address,
                 ethers.constants.AddressZero,
                 erc20Name,
                 'erc20symbol2',
                 2,
                 0,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
+                ethers.constants.AddressZero,
             ];
             mtxData = (
                 await ethers.getContractFactory('mTapiocaOFT')
@@ -323,7 +333,6 @@ describe('TapiocaWrapper', () => {
 
             const { txData: bytecode } = await Tx_deployTapiocaOFT(
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Mock.address,
                 ethers.constants.AddressZero,
                 0,
@@ -362,7 +371,6 @@ describe('TapiocaWrapper', () => {
             // First TOFT on chain 0, should be added to the harvestable array
             const { txData: bytecode } = await Tx_deployTapiocaOFT(
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Mock.address,
                 ethers.constants.AddressZero,
                 31337,
@@ -381,7 +389,6 @@ describe('TapiocaWrapper', () => {
             // Second TOFT on chain 10, should not be added to the harvestable array
             const { txData: bytecode10 } = await Tx_deployTapiocaOFT(
                 LZEndpointMock_chainID_10.address,
-                false,
                 erc20Mock1.address,
                 ethers.constants.AddressZero,
                 10,
@@ -431,7 +438,6 @@ describe('TapiocaWrapper', () => {
 
             const { txData: bytecode1 } = await Tx_deployTapiocaOFT(
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Address1,
                 ethers.constants.AddressZero,
                 0,
@@ -439,7 +445,6 @@ describe('TapiocaWrapper', () => {
             );
             const { txData: bytecode2 } = await Tx_deployTapiocaOFT(
                 LZEndpointMock_chainID_0.address,
-                false,
                 erc20Address2,
                 ethers.constants.AddressZero,
                 0,

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.18;
 
-pragma solidity ^0.8.0;
-import "./TapiocaOFT.sol";
-import "./mTapiocaOFT.sol";
+import "./tOFT/TapiocaOFT.sol";
+import "./tOFT/mTapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 
 import "@openzeppelin/contracts/utils/Create2.sol";
@@ -156,7 +156,7 @@ contract TapiocaWrapper is Ownable {
         tapiocaOFTs.push(iOFT);
         tapiocaOFTsByErc20[_erc20] = iOFT;
 
-        if (iOFT.isHostChain()) {
+        if (iOFT.hostChainID() == block.chainid) {
             harvestableTapiocaOFTs.push(iOFT);
         }
         emit CreateOFT(iOFT, _erc20);

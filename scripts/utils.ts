@@ -62,7 +62,6 @@ export const useUtils = (
     // UTILS
     const Tx_deployTapiocaOFT = async (
         lzEndpoint: string,
-        isNative: boolean,
         erc20Address: string,
         yieldBoxAddress: string,
         hostChainID: number,
@@ -77,18 +76,56 @@ export const useUtils = (
         const erc20symbol = await erc20.symbol();
         const erc20decimal = await erc20.decimals();
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-
-        const args: Parameters<TapiocaOFT__factory['deploy']> = [
+        const leverageModule = await (
+            await ethers.getContractFactory('BaseTOFTLeverageModule')
+        ).deploy(
             lzEndpoint,
-            isNative,
             erc20Address,
             yieldBoxAddress,
             erc20name,
             erc20symbol,
             erc20decimal,
             hostChainID,
+        );
+
+        const strategyModule = await (
+            await ethers.getContractFactory('BaseTOFTStrategyModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+
+        const marketModule = await (
+            await ethers.getContractFactory('BaseTOFTMarketModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+
+        const args: Parameters<TapiocaOFT__factory['deploy']> = [
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+            leverageModule.address,
+            strategyModule.address,
+            marketModule.address,
         ];
 
         const txData = (

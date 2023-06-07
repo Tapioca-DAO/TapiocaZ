@@ -106,7 +106,6 @@ export const setupFixture = async () => {
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock_chainID_0.address,
-                    false,
                     mErc20Mock.address,
                     YieldBox_0.address,
                     31337, //hardhat network
@@ -134,7 +133,6 @@ export const setupFixture = async () => {
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock_chainID_10.address,
-                    false,
                     mErc20Mock.address,
                     YieldBox_10.address,
                     10,
@@ -162,7 +160,6 @@ export const setupFixture = async () => {
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock_chainID_0.address,
-                    false,
                     erc20Mock.address,
                     YieldBox_0.address,
                     31337, //hardhat network
@@ -189,7 +186,6 @@ export const setupFixture = async () => {
             (
                 await utils.Tx_deployTapiocaOFT(
                     LZEndpointMock_chainID_10.address,
-                    false,
                     erc20Mock.address,
                     YieldBox_10.address,
                     10,
