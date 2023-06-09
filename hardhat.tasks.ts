@@ -6,7 +6,8 @@ import { deployBalancer__task } from './tasks/deploy/deployBalancer';
 import { deployTapiocaWrapper__task } from './tasks/deploy/deployTapiocaWrapper';
 import { deployTOFT__task } from './tasks/deploy/deployTOFT';
 import { deployTOFTMinter__task } from './tasks/deploy/testnet/deployTOFTMinter';
-import inquirer from 'inquirer';
+import { setConnectedChain__task } from './tasks/exec/setConnectedChain';
+
 task(
     'deployTapiocaWrapper',
     'Deploy the TapiocaWrapper',
@@ -17,7 +18,7 @@ task(
     'deployBalancer',
     'Deploy a mTOFT Balancer contract',
     deployBalancer__task,
-);
+).addFlag('overwrite', 'If the deployment should be overwritten');
 
 task('deployTOFT', 'Deploy a TOFT', deployTOFT__task)
     .addOptionalParam(
@@ -37,3 +38,8 @@ task(
     'Deploy the TOFTMinter',
     deployTOFTMinter__task,
 ).addFlag('overwrite', 'If the deployment should be overwritten');
+
+task('setConnectedChain', 'Update set connected chain', setConnectedChain__task)
+    .addParam('toft', 'mTapiocaOFT address')
+    .addParam('chain', 'Block chain id')
+    .addParam('status', 'true/false');
