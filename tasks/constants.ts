@@ -45,4 +45,14 @@ export const STARGATE_ROUTERS: {
         routerETH: '0x7612aE2a34E5A363E137De748801FB4c86499152',
         router: '0xb850873f4c993Ac2405A1AdD71F6ca5D4d4d6b4f',
     },
+    [EChainID.FUJI_AVALANCHE]: {
+        stargateChainId: '10106',
+        routerETH: '0x7612aE2a34E5A363E137De748801FB4c86499152',
+        router: '0xb850873f4c993Ac2405A1AdD71F6ca5D4d4d6b4f',
+    },
+    [EChainID.MUMBAI_POLYGON]: {
+        stargateChainId: '10109',
+        routerETH: '0x7612aE2a34E5A363E137De748801FB4c86499152',
+        router: '0xb850873f4c993Ac2405A1AdD71F6ca5D4d4d6b4f',
+    },
 };

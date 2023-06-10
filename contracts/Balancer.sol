@@ -54,9 +54,9 @@ contract Balancer is Owned {
     }
 
     /// @notice StargetETH router address
-    IStargateRouter immutable routerETH;
+    IStargateRouter public immutable routerETH;
     /// @notice Stargate router address
-    IStargateRouter immutable router;
+    IStargateRouter public immutable router;
 
     uint256 private constant SLIPPAGE_PRECISION = 1e5;
 
