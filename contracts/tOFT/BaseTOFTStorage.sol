@@ -30,6 +30,7 @@ contract BaseTOFTStorage is OFTV2 {
 
     uint16 internal constant PT_YB_SEND_STRAT = 770;
     uint16 internal constant PT_YB_RETRIEVE_STRAT = 771;
+    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 772;
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 775;
     uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 776;
 

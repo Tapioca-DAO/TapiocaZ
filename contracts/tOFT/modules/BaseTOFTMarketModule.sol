@@ -9,6 +9,7 @@ import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
+import "tapioca-periph/contracts/interfaces/IMarket.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
 
 import "../BaseTOFTStorage.sol";
@@ -36,6 +37,43 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             _hostChainID
         )
     {}
+
+    function removeCollateral(
+        address from,
+        address to,
+        uint16 lzDstChainId,
+        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
+        ITapiocaOFT.ISendOptions calldata options,
+        ITapiocaOFT.IRemoveParams calldata removeParams,
+        ITapiocaOFT.IApproval[] calldata approvals
+    ) external payable {
+        bytes32 toAddress = LzLib.addressToBytes32(to);
+
+        bytes memory lzPayload = abi.encode(
+            PT_MARKET_REMOVE_COLLATERAL,
+            from,
+            to,
+            toAddress,
+            removeParams,
+            withdrawParams,
+            approvals
+        );
+
+        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
+            options.extraGasLimit
+        );
+
+        _lzSend(
+            lzDstChainId,
+            lzPayload,
+            payable(from),
+            options.zroPaymentAddress,
+            adapterParam,
+            msg.value
+        );
+
+        emit SendToChain(lzDstChainId, from, toAddress, 0);
+    }
 
     /// @notice sends TOFT to a specific chain and performs a borrow operation
     /// @param _from the sender address
@@ -131,6 +169,62 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             withdrawParams.withdraw,
             withdrawData
         );
+    }
+
+    function remove(bytes memory _payload) public {
+        (
+            ,
+            ,
+            address to,
+            ,
+            ITapiocaOFT.IRemoveParams memory removeParams,
+            ITapiocaOFT.IWithdrawParams memory withdrawParams,
+            ITapiocaOFT.IApproval[] memory approvals
+        ) = abi.decode(
+                _payload,
+                (
+                    uint16,
+                    address,
+                    address,
+                    bytes32,
+                    ITapiocaOFT.IRemoveParams,
+                    ITapiocaOFT.IWithdrawParams,
+                    ITapiocaOFT.IApproval[]
+                )
+            );
+
+        if (approvals.length > 0) {
+            _callApproval(approvals);
+        }
+
+        approve(removeParams.market, removeParams.share);
+        IMarket(removeParams.market).removeCollateral(
+            to,
+            to,
+            removeParams.share
+        );
+        if (withdrawParams.withdraw) {
+            address ybAddress = IMarket(removeParams.market).yieldBox();
+            uint256 assetId = IMarket(removeParams.market).collateralId();
+            IMagnetar(removeParams.marketHelper).withdrawTo{
+                value: withdrawParams.withdrawLzFeeAmount
+            }(
+                ybAddress,
+                to,
+                assetId,
+                withdrawParams.withdrawLzChainId,
+                LzLib.addressToBytes32(to),
+                IYieldBoxBase(ybAddress).toAmount(
+                    assetId,
+                    removeParams.share,
+                    false
+                ),
+                removeParams.share,
+                withdrawParams.withdrawAdapterParams,
+                payable(to),
+                withdrawParams.withdrawLzFeeAmount
+            );
+        }
     }
 
     function _callApproval(ITapiocaOFT.IApproval[] memory approvals) private {

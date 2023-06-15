@@ -780,6 +780,28 @@ function precrime() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### removeCollateral
+
+```solidity
+function removeCollateral(address from, address to, uint16 lzDstChainId, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.ISendOptions options, ITapiocaOFT.IRemoveParams removeParams, ITapiocaOFT.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| to | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
+| options | ITapiocaOFT.ISendOptions | undefined |
+| removeParams | ITapiocaOFT.IRemoveParams | undefined |
+| approvals | ITapiocaOFT.IApproval[] | undefined |
+
 ### renounceOwnership
 
 ```solidity

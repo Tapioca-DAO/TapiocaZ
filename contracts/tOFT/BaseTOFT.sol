@@ -79,6 +79,39 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
+
+    /// @notice calls removeCollateral on another layer
+    /// @param from sending address
+    /// @param to receiver address
+    /// @param lzDstChainId LayerZero destination chain id
+    /// @param withdrawParams withdrawTo specific params
+    /// @param options send specific params
+    /// @param removeParams removeAsset specific params
+    /// @param approvals approvals specific params
+    function removeCollateral(
+        address from,
+        address to,
+        uint16 lzDstChainId,
+        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
+        ITapiocaOFT.ISendOptions calldata options,
+        ITapiocaOFT.IRemoveParams calldata removeParams,
+        ITapiocaOFT.IApproval[] calldata approvals
+    ) external payable {
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                BaseTOFTMarketModule.removeCollateral.selector,
+                from,
+                to,
+                lzDstChainId,
+                withdrawParams,
+                options,
+                removeParams,
+                approvals
+            )
+        );
+    }
+
     /// @notice sends TOFT to a specific strategy available on another layer
     /// @param from the sender address
     /// @param to the receiver address
@@ -328,6 +361,14 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
                 abi.encodeWithSelector(
                     BaseTOFTMarketModule.borrow.selector,
                     _srcChainId,
+                    _payload
+                )
+            );
+        } else if (packetType == PT_MARKET_REMOVE_COLLATERAL) {
+            _executeModule(
+                Module.Market,
+                abi.encodeWithSelector(
+                    BaseTOFTMarketModule.remove.selector,
                     _payload
                 )
             );
