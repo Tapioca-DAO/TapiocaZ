@@ -173,6 +173,29 @@ function lzEndpoint() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### removeCollateral
+
+```solidity
+function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ITapiocaOFT.IApproval[] approvals, bytes adapterParams) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| to | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| zroPaymentAddress | address | undefined |
+| withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
+| removeParams | ITapiocaOFT.IRemoveParams | undefined |
+| approvals | ITapiocaOFT.IApproval[] | undefined |
+| adapterParams | bytes | undefined |
+
 ### retrieveFromStrategy
 
 ```solidity

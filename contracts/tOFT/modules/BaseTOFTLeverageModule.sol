@@ -111,17 +111,27 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             address(this),
             leverageFor,
             lzData.lzSrcChainId,
+            lzData.zroPaymentAddress,
             IUSDOBase.ILendParams({
                 repay: true,
-                amount: amountOut,
+                depositAmount: amountOut,
+                repayAmount: 0,
                 marketHelper: externalData.magnetar,
-                market: externalData.srcMarket
+                market: externalData.srcMarket,
+                removeCollateral: false,
+                removeCollateralShare: 0
             }),
-            IUSDOBase.ISendOptions({
-                extraGasLimit: lzData.srcExtraGasLimit,
-                zroPaymentAddress: lzData.zroPaymentAddress
+            approvals,
+            IUSDOBase.IWithdrawParams({
+                withdraw: false,
+                withdrawLzFeeAmount: 0,
+                withdrawOnOtherChain: false,
+                withdrawLzChainId: 0,
+                withdrawAdapterParams: '0x'
             }),
-            approvals
+            LzLib.buildDefaultAdapterParams(
+                lzData.srcExtraGasLimit
+            )
         );
     }
 
