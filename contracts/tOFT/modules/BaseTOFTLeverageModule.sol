@@ -127,11 +127,9 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                 withdrawLzFeeAmount: 0,
                 withdrawOnOtherChain: false,
                 withdrawLzChainId: 0,
-                withdrawAdapterParams: '0x'
+                withdrawAdapterParams: "0x"
             }),
-            LzLib.buildDefaultAdapterParams(
-                lzData.srcExtraGasLimit
-            )
+            LzLib.buildDefaultAdapterParams(lzData.srcExtraGasLimit)
         );
     }
 
