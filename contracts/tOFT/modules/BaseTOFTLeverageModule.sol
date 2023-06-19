@@ -105,7 +105,8 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         );
 
         //repay
-        uint256 repayableAmount = IMagnetar(externalData.magnetar).getBorrowPartForAmount(externalData.srcMarket, amountOut);
+        uint256 repayableAmount = IMagnetar(externalData.magnetar)
+            .getBorrowPartForAmount(externalData.srcMarket, amountOut);
         IUSDOBase.IApproval[] memory approvals;
         IUSDOBase(swapData.tokenOut).sendAndLendOrRepay{
             value: address(this).balance
