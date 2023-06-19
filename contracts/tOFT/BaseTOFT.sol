@@ -84,18 +84,20 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
     /// @param from sending address
     /// @param to receiver address
     /// @param lzDstChainId LayerZero destination chain id
+    /// @param zroPaymentAddress LayerZero ZRO payment address
     /// @param withdrawParams withdrawTo specific params
-    /// @param options send specific params
     /// @param removeParams removeAsset specific params
     /// @param approvals approvals specific params
+    /// @param adapterParams LZ adapter params
     function removeCollateral(
         address from,
         address to,
         uint16 lzDstChainId,
+        address zroPaymentAddress,
         ITapiocaOFT.IWithdrawParams calldata withdrawParams,
-        ITapiocaOFT.ISendOptions calldata options,
         ITapiocaOFT.IRemoveParams calldata removeParams,
-        ITapiocaOFT.IApproval[] calldata approvals
+        ITapiocaOFT.IApproval[] calldata approvals,
+        bytes calldata adapterParams
     ) external payable {
         _executeModule(
             Module.Market,
@@ -104,10 +106,11 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
                 from,
                 to,
                 lzDstChainId,
+                zroPaymentAddress,
                 withdrawParams,
-                options,
                 removeParams,
-                approvals
+                approvals,
+                adapterParams
             )
         );
     }

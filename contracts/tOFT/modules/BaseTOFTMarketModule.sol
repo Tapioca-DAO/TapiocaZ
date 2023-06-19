@@ -11,6 +11,7 @@ import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 import "tapioca-periph/contracts/interfaces/IMarket.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
+import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 
 import "../BaseTOFTStorage.sol";
 
@@ -232,6 +233,21 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                         approvals[i].owner,
                         approvals[i].spender,
                         approvals[i].value,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
+            } else if (approvals[i].permitAll) {
+                try
+                    IPermitAll(approvals[i].target).permitAll(
+                        approvals[i].owner,
+                        approvals[i].spender,
                         approvals[i].deadline,
                         approvals[i].v,
                         approvals[i].r,
