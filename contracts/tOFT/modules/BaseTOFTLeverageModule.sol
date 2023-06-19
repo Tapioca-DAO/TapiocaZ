@@ -7,6 +7,7 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 //TAPIOCA
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
+import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 
 import "../BaseTOFTStorage.sol";
 
@@ -104,6 +105,8 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         );
 
         //repay
+        uint256 repayableAmount = IMagnetar(externalData.magnetar)
+            .getBorrowPartForAmount(externalData.srcMarket, amountOut);
         IUSDOBase.IApproval[] memory approvals;
         IUSDOBase(swapData.tokenOut).sendAndLendOrRepay{
             value: address(this).balance
@@ -111,17 +114,25 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             address(this),
             leverageFor,
             lzData.lzSrcChainId,
+            lzData.zroPaymentAddress,
             IUSDOBase.ILendParams({
                 repay: true,
-                amount: amountOut,
+                depositAmount: amountOut,
+                repayAmount: repayableAmount,
                 marketHelper: externalData.magnetar,
-                market: externalData.srcMarket
+                market: externalData.srcMarket,
+                removeCollateral: false,
+                removeCollateralShare: 0
             }),
-            IUSDOBase.ISendOptions({
-                extraGasLimit: lzData.srcExtraGasLimit,
-                zroPaymentAddress: lzData.zroPaymentAddress
+            approvals,
+            IUSDOBase.IWithdrawParams({
+                withdraw: false,
+                withdrawLzFeeAmount: 0,
+                withdrawOnOtherChain: false,
+                withdrawLzChainId: 0,
+                withdrawAdapterParams: "0x"
             }),
-            approvals
+            LzLib.buildDefaultAdapterParams(lzData.srcExtraGasLimit)
         );
     }
 

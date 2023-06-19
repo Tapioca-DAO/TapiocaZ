@@ -11,6 +11,7 @@ import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 import "tapioca-periph/contracts/interfaces/IMarket.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
+import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 
 import "../BaseTOFTStorage.sol";
 
@@ -42,10 +43,11 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         address from,
         address to,
         uint16 lzDstChainId,
+        address zroPaymentAddress,
         ITapiocaOFT.IWithdrawParams calldata withdrawParams,
-        ITapiocaOFT.ISendOptions calldata options,
         ITapiocaOFT.IRemoveParams calldata removeParams,
-        ITapiocaOFT.IApproval[] calldata approvals
+        ITapiocaOFT.IApproval[] calldata approvals,
+        bytes calldata adapterParams
     ) external payable {
         bytes32 toAddress = LzLib.addressToBytes32(to);
 
@@ -59,16 +61,12 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             approvals
         );
 
-        bytes memory adapterParam = LzLib.buildDefaultAdapterParams(
-            options.extraGasLimit
-        );
-
         _lzSend(
             lzDstChainId,
             lzPayload,
             payable(from),
-            options.zroPaymentAddress,
-            adapterParam,
+            zroPaymentAddress,
+            adapterParams,
             msg.value
         );
 
@@ -235,6 +233,21 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                         approvals[i].owner,
                         approvals[i].spender,
                         approvals[i].value,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
+            } else if (approvals[i].permitAll) {
+                try
+                    IPermitAll(approvals[i].target).permitAll(
+                        approvals[i].owner,
+                        approvals[i].spender,
                         approvals[i].deadline,
                         approvals[i].v,
                         approvals[i].r,

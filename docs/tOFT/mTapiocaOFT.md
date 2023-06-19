@@ -783,7 +783,7 @@ function precrime() external view returns (address)
 ### removeCollateral
 
 ```solidity
-function removeCollateral(address from, address to, uint16 lzDstChainId, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.ISendOptions options, ITapiocaOFT.IRemoveParams removeParams, ITapiocaOFT.IApproval[] approvals) external payable
+function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ITapiocaOFT.IApproval[] approvals, bytes adapterParams) external payable
 ```
 
 
@@ -797,10 +797,11 @@ function removeCollateral(address from, address to, uint16 lzDstChainId, ITapioc
 | from | address | undefined |
 | to | address | undefined |
 | lzDstChainId | uint16 | undefined |
+| zroPaymentAddress | address | undefined |
 | withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
-| options | ITapiocaOFT.ISendOptions | undefined |
 | removeParams | ITapiocaOFT.IRemoveParams | undefined |
 | approvals | ITapiocaOFT.IApproval[] | undefined |
+| adapterParams | bytes | undefined |
 
 ### renounceOwnership
 
