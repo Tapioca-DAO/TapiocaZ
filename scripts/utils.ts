@@ -87,6 +87,7 @@ export const useUtils = (
             erc20decimal,
             hostChainID,
         );
+        await leverageModule.deployed();
 
         const strategyModule = await (
             await ethers.getContractFactory('BaseTOFTStrategyModule')
@@ -99,6 +100,7 @@ export const useUtils = (
             erc20decimal,
             hostChainID,
         );
+        await strategyModule.deployed();
 
         const marketModule = await (
             await ethers.getContractFactory('BaseTOFTMarketModule')
@@ -111,6 +113,7 @@ export const useUtils = (
             erc20decimal,
             hostChainID,
         );
+        await marketModule.deployed();
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
