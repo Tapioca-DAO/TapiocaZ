@@ -57,7 +57,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
 
         bytes memory lzPayload = abi.encode(
             PT_YB_SEND_STRAT,
-            bytes32(uint(uint160(_from))),
+            LzLib.addressToBytes32(_from),
             toAddress,
             amount,
             share,
@@ -70,7 +70,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             lzPayload,
             payable(_from),
             options.zroPaymentAddress,
-            abi.encodePacked(uint16(1), options.extraGasLimit),
+            LzLib.buildDefaultAdapterParams(options.extraGasLimit),
             msg.value
         );
 
@@ -118,6 +118,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
     }
 
     function strategyDeposit(
+        address module,
         uint16 _srcChainId,
         bytes memory _payload,
         IERC20 _erc20
@@ -135,19 +136,45 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
                 (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
             );
 
-        address onBehalfOf = address(uint160(uint(from)));
-
+        uint256 balanceBefore = balanceOf(address(this));
         _creditTo(_srcChainId, address(this), amount);
-        _depositToYieldbox(
-            assetId,
-            amount,
-            share,
-            _erc20,
-            address(this),
-            onBehalfOf
+        uint256 balanceAfter = balanceOf(address(this));
+
+        address onBehalfOf = LzLib.bytes32ToAddress(from);
+        (bool success, bytes memory reason) = module.delegatecall(
+            abi.encodeWithSelector(
+                this.depositToYieldbox.selector,
+                assetId,
+                amount,
+                share,
+                _erc20,
+                address(this),
+                onBehalfOf
+            )
         );
+        if (!success) {
+            if (balanceAfter - balanceBefore >= amount) {
+                IERC20(address(this)).safeTransfer(onBehalfOf, amount);
+            }
+            revert(_getRevertMsg(reason)); //forward revert because it's handled by the main executor
+        }
 
         emit ReceiveFromChain(_srcChainId, onBehalfOf, amount);
+    }
+
+    function depositToYieldbox(
+        uint256 _assetId,
+        uint256 _amount,
+        uint256 _share,
+        IERC20 _erc20,
+        address _from,
+        address _to
+    ) public {
+        _amount = _share > 0
+            ? yieldBox.toAmount(_assetId, _share, false)
+            : _amount;
+        _erc20.approve(address(yieldBox), _amount);
+        yieldBox.depositAsset(_assetId, _from, _to, _amount, _share);
     }
 
     function strategyWithdraw(
@@ -200,20 +227,6 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
     }
 
     /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.
-    function _depositToYieldbox(
-        uint256 _assetId,
-        uint256 _amount,
-        uint256 _share,
-        IERC20 _erc20,
-        address _from,
-        address _to
-    ) private {
-        _amount = _share > 0
-            ? yieldBox.toAmount(_assetId, _share, false)
-            : _amount;
-        _erc20.approve(address(yieldBox), _amount);
-        yieldBox.depositAsset(_assetId, _from, _to, _amount, _share);
-    }
 
     /// @notice Receive an inter-chain transaction to execute a deposit inside YieldBox.
     function _retrieveFromYieldBox(
