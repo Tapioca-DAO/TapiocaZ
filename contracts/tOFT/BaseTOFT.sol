@@ -421,6 +421,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
                     BaseTOFTStrategyModule.strategyDeposit.selector,
                     strategyModule,
                     _srcChainId,
+                    _srcAddress,
+                    _nonce,
                     _payload,
                     IERC20(address(this))
                 ),
@@ -449,6 +451,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
                     BaseTOFTLeverageModule.leverageDown.selector,
                     leverageModule,
                     _srcChainId,
+                    _srcAddress,
+                    _nonce,
                     _payload
                 ),
                 _srcChainId,
@@ -463,6 +467,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
                     BaseTOFTMarketModule.borrow.selector,
                     marketModule,
                     _srcChainId,
+                    _srcAddress,
+                    _nonce,
                     _payload
                 ),
                 _srcChainId,
@@ -500,6 +506,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
                 abi.encodeWithSelector(
                     BaseTOFTOptionsModule.exercise.selector,
                     _srcChainId,
+                    _srcAddress,
+                    _nonce,
                     _payload
                 ),
                 _srcChainId,

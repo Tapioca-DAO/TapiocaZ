@@ -11,6 +11,8 @@ import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 import "tapioca-periph/contracts/interfaces/ISingularity.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
 import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOptionLiquidityProvision.sol";
 
 import "../BaseTOFTStorage.sol";
 
@@ -144,6 +146,8 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
     function leverageDown(
         address module,
         uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
         bytes memory _payload
     ) public {
         (
@@ -168,7 +172,11 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             );
 
         uint256 balanceBefore = balanceOf(address(this));
-        _creditTo(_srcChainId, address(this), amount);
+        bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
+        if (!credited) {
+            _creditTo(_srcChainId, address(this), amount);
+            creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
+        }
         uint256 balanceAfter = balanceOf(address(this));
 
         (bool success, bytes memory reason) = module.delegatecall(
@@ -230,7 +238,17 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                 marketHelper: externalData.magnetar,
                 market: externalData.srcMarket,
                 removeCollateral: false,
-                removeCollateralShare: 0
+                removeCollateralShare: 0,
+                lockData: ITapiocaOptionLiquidityProvision.IOptionsLockData({
+                    lock: false,
+                    target: address(0),
+                    lockDuration: 0,
+                    amount: 0
+                }),
+                participateData: ITapiocaOptionsBroker.IOptionsParticipateData({
+                    participate: false,
+                    target: address(0)
+                })
             }),
             approvals,
             IUSDOBase.IWithdrawParams({

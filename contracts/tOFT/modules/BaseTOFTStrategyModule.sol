@@ -120,6 +120,8 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
     function strategyDeposit(
         address module,
         uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
         bytes memory _payload,
         IERC20 _erc20
     ) public {
@@ -137,7 +139,11 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             );
 
         uint256 balanceBefore = balanceOf(address(this));
-        _creditTo(_srcChainId, address(this), amount);
+        bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
+        if (!credited) {
+            _creditTo(_srcChainId, address(this), amount);
+            creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
+        }
         uint256 balanceAfter = balanceOf(address(this));
 
         address onBehalfOf = LzLib.bytes32ToAddress(from);

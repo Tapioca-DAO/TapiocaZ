@@ -124,6 +124,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
     function borrow(
         address module,
         uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
         bytes memory _payload
     ) public payable {
         (
@@ -146,7 +148,11 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             );
 
         uint256 balanceBefore = balanceOf(address(this));
-        _creditTo(_srcChainId, address(this), borrowParams.amount);
+        bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
+        if (!credited) {
+            _creditTo(_srcChainId, address(this), borrowParams.amount);
+            creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
+        }
         uint256 balanceAfter = balanceOf(address(this));
 
         (bool success, bytes memory reason) = module.delegatecall(
