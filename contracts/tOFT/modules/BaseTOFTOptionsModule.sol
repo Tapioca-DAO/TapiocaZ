@@ -67,7 +67,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
             0
         );
     }
-    
+
     function exerciseOption(
         ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
             calldata optionsData,
@@ -111,7 +111,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
             toAddress,
             optionsData.paymentTokenAmount
         );
-    }   
+    }
 
     function sendFromDestination(bytes memory _payload) public {
         (
