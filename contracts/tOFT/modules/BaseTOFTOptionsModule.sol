@@ -34,6 +34,40 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
         )
     {}
 
+    function triggerSendFrom(
+        uint16 lzDstChainId,
+        bytes calldata airdropAdapterParams,
+        address zroPaymentAddress,
+        uint256 amount,
+        ISendFrom.LzCallParams calldata sendFromData,
+        ITapiocaOptionsBrokerCrossChain.IApproval[] calldata approvals
+    ) external payable {
+        bytes memory lzPayload = abi.encode(
+            PT_SEND_FROM,
+            msg.sender,
+            amount,
+            sendFromData,
+            lzEndpoint.getChainId(),
+            approvals
+        );
+
+        _lzSend(
+            lzDstChainId,
+            lzPayload,
+            payable(msg.sender),
+            zroPaymentAddress,
+            airdropAdapterParams,
+            msg.value
+        );
+
+        emit SendToChain(
+            lzDstChainId,
+            msg.sender,
+            LzLib.addressToBytes32(msg.sender),
+            0
+        );
+    }
+    
     function exerciseOption(
         ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
             calldata optionsData,
@@ -77,6 +111,41 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
             toAddress,
             optionsData.paymentTokenAmount
         );
+    }   
+
+    function sendFromDestination(bytes memory _payload) public {
+        (
+            ,
+            address from,
+            uint256 amount,
+            ISendFrom.LzCallParams memory callParams,
+            uint16 lzDstChainId,
+            ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
+        ) = abi.decode(
+                _payload,
+                (
+                    uint16,
+                    address,
+                    uint256,
+                    ISendFrom.LzCallParams,
+                    uint16,
+                    ITapiocaOptionsBrokerCrossChain.IApproval[]
+                )
+            );
+
+        if (approvals.length > 0) {
+            _callApproval(approvals);
+        }
+
+        ISendFrom(address(this)).sendFrom{value: address(this).balance}(
+            from,
+            lzDstChainId,
+            LzLib.addressToBytes32(from),
+            amount,
+            callParams
+        );
+
+        emit ReceiveFromChain(lzDstChainId, from, 0);
     }
 
     function exercise(

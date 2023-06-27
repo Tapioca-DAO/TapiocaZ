@@ -86,6 +86,36 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
+    /// @notice triggers a sendFrom to another layer from destination
+    /// @param lzDstChainId LZ destination id
+    /// @param airdropAdapterParams airdrop params
+    /// @param zroPaymentAddress ZRO payment address
+    /// @param amount amount to send back
+    /// @param sendFromData data needed to trigger sendFrom on destination
+    /// @param approvals approvals array
+    function triggerSendFrom(
+        uint16 lzDstChainId,
+        bytes calldata airdropAdapterParams,
+        address zroPaymentAddress,
+        uint256 amount,
+        ISendFrom.LzCallParams calldata sendFromData,
+        ITapiocaOptionsBrokerCrossChain.IApproval[] calldata approvals
+    ) external payable {
+        _executeModule(
+            Module.Options,
+            abi.encodeWithSelector(
+                BaseTOFTOptionsModule.triggerSendFrom.selector,
+                lzDstChainId,
+                airdropAdapterParams,
+                zroPaymentAddress,
+                amount,
+                sendFromData,
+                approvals
+            ),
+            false
+        );
+    }
+
     /// @notice Exercise an oTAP position
     /// @param optionsData oTap exerciseOptions data
     /// @param lzData data needed for the cross chain transer
@@ -508,6 +538,18 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
                     _srcChainId,
                     _srcAddress,
                     _nonce,
+                    _payload
+                ),
+                _srcChainId,
+                _srcAddress,
+                _nonce,
+                _payload
+            );
+        } else if (packetType == PT_SEND_FROM) {
+            _executeOnDestination(
+                Module.Options,
+                abi.encodeWithSelector(
+                    BaseTOFTOptionsModule.sendFromDestination.selector,
                     _payload
                 ),
                 _srcChainId,

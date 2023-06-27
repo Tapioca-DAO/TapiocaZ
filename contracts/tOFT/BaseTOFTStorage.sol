@@ -35,6 +35,7 @@ contract BaseTOFTStorage is OFTV2 {
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 775;
     uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 776;
     uint16 internal constant PT_TAP_EXERCISE = 777;
+    uint16 internal constant PT_SEND_FROM = 778;
 
     receive() external payable {}
 
