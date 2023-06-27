@@ -35,77 +35,128 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
     {}
 
     function exerciseOption(
-        address from,
-        uint256 paymentTokenAmount,
-        uint16 lzDstChainId,
-        address zroPaymentAddress,
-        uint256 extraGas,
-        address target,
-        uint256 oTAPTokenID,
-        address paymentToken,
-        uint256 tapAmount,
-        ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
+        ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
+            calldata optionsData,
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
+            calldata tapSendData,
+        ITapiocaOptionsBrokerCrossChain.IApproval[] calldata approvals
     ) external payable {
-        bytes32 toAddress = LzLib.addressToBytes32(from);
+        bytes32 toAddress = LzLib.addressToBytes32(optionsData.from);
 
         _debitFrom(
-            from,
+            optionsData.from,
             lzEndpoint.getChainId(),
             toAddress,
-            paymentTokenAmount
+            optionsData.paymentTokenAmount
         );
 
         bytes memory lzPayload = abi.encode(
             PT_TAP_EXERCISE,
-            from,
-            target,
-            paymentTokenAmount,
-            oTAPTokenID,
-            paymentToken,
-            tapAmount,
+            optionsData,
+            tapSendData,
             approvals
         );
 
-        bytes memory adapterParams = LzLib.buildDefaultAdapterParams(extraGas);
+        bytes memory adapterParams = LzLib.buildDefaultAdapterParams(
+            lzData.extraGas
+        );
 
         _lzSend(
-            lzDstChainId,
+            lzData.lzDstChainId,
             lzPayload,
-            payable(from),
-            zroPaymentAddress,
+            payable(optionsData.from),
+            lzData.zroPaymentAddress,
             adapterParams,
             msg.value
         );
 
-        emit SendToChain(lzDstChainId, from, toAddress, paymentTokenAmount);
+        emit SendToChain(
+            lzData.lzDstChainId,
+            optionsData.from,
+            toAddress,
+            optionsData.paymentTokenAmount
+        );
     }
 
-    function exercise(uint16 _srcChainId, bytes memory _payload) public {
+    function exercise(
+        address module,
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) public {
         (
             ,
-            address from,
-            address target,
-            uint256 paymentTokenAmount,
-            uint256 oTAPTokenID,
-            address paymentToken,
-            uint256 tapAmount,
+            ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
+                memory optionsData,
+            ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
+                memory tapSendData,
             ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
                 (
                     uint16,
-                    address,
-                    address,
-                    uint256,
-                    uint256,
-                    address,
-                    uint256,
+                    ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData,
+                    ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData,
                     ITapiocaOptionsBrokerCrossChain.IApproval[]
                 )
             );
 
-        _creditTo(_srcChainId, from, paymentTokenAmount);
+        uint256 balanceBefore = balanceOf(address(this));
+        bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
+        if (!credited) {
+            _creditTo(
+                _srcChainId,
+                address(this),
+                optionsData.paymentTokenAmount
+            );
+            creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
+        }
+        uint256 balanceAfter = balanceOf(address(this));
 
+        (bool success, bytes memory reason) = module.delegatecall(
+            abi.encodeWithSelector(
+                this.exerciseInternal.selector,
+                optionsData.from,
+                optionsData.oTAPTokenID,
+                optionsData.paymentToken,
+                optionsData.tapAmount,
+                optionsData.target,
+                tapSendData,
+                approvals
+            )
+        );
+
+        if (!success) {
+            if (
+                balanceAfter - balanceBefore >= optionsData.paymentTokenAmount
+            ) {
+                IERC20(address(this)).safeTransfer(
+                    optionsData.from,
+                    optionsData.paymentTokenAmount
+                );
+            }
+            revert(_getRevertMsg(reason)); //forward revert because it's handled by the main executor
+        }
+
+        emit ReceiveFromChain(
+            _srcChainId,
+            optionsData.from,
+            optionsData.paymentTokenAmount
+        );
+    }
+
+    function exerciseInternal(
+        address from,
+        uint256 oTAPTokenID,
+        address paymentToken,
+        uint256 tapAmount,
+        address target,
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
+            memory tapSendData,
+        ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
+    ) public {
         if (approvals.length > 0) {
             _callApproval(approvals);
         }
@@ -115,8 +166,23 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
             paymentToken,
             tapAmount
         );
-
-        emit ReceiveFromChain(_srcChainId, from, paymentTokenAmount);
+        if (tapSendData.withdrawOnAnotherChain) {
+            ISendFrom(tapSendData.tapOftAddress).sendFrom(
+                address(this),
+                tapSendData.lzDstChainId,
+                LzLib.addressToBytes32(from),
+                tapAmount,
+                ISendFrom.LzCallParams({
+                    refundAddress: payable(from),
+                    zroPaymentAddress: tapSendData.zroPaymentAddress,
+                    adapterParams: LzLib.buildDefaultAdapterParams(
+                        tapSendData.extraGas
+                    )
+                })
+            );
+        } else {
+            IERC20(tapSendData.tapOftAddress).safeTransfer(from, tapAmount);
+        }
     }
 
     function _callApproval(

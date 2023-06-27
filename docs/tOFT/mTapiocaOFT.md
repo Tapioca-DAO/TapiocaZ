@@ -387,7 +387,7 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 ### exerciseOption
 
 ```solidity
-function exerciseOption(address from, uint256 paymentTokenAmount, uint16 lzDstChainId, address zroPaymentAddress, uint256 extraGas, address target, uint256 oTAPTokenID, address paymentToken, uint256 tapAmount, ITapiocaOptionsBrokerCrossChain.IApproval[] approvals) external payable
+function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ITapiocaOptionsBrokerCrossChain.IApproval[] approvals) external payable
 ```
 
 
@@ -398,15 +398,9 @@ function exerciseOption(address from, uint256 paymentTokenAmount, uint16 lzDstCh
 
 | Name | Type | Description |
 |---|---|---|
-| from | address | undefined |
-| paymentTokenAmount | uint256 | undefined |
-| lzDstChainId | uint16 | undefined |
-| zroPaymentAddress | address | undefined |
-| extraGas | uint256 | undefined |
-| target | address | undefined |
-| oTAPTokenID | uint256 | undefined |
-| paymentToken | address | undefined |
-| tapAmount | uint256 | undefined |
+| optionsData | ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData | undefined |
+| lzData | ITapiocaOptionsBrokerCrossChain.IExerciseLZData | undefined |
+| tapSendData | ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData | undefined |
 | approvals | ITapiocaOptionsBrokerCrossChain.IApproval[] | undefined |
 
 ### extractUnderlying

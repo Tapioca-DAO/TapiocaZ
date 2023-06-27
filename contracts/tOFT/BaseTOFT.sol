@@ -87,41 +87,25 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
     /// @notice Exercise an oTAP position
-    /// @param from the address to debit token from
-    /// @param paymentTokenAmount the amount to send over layers
-    /// @param lzDstChainId LZ destination chain
-    /// @param zroPaymentAddress ZRO payment address
-    /// @param extraGas LZ transaction extra gas
-    /// @param target TapiocaOptionsBroker address
-    /// @param oTAPTokenID tokenId of the oTAP position, position must be active
-    /// @param paymentToken Address of the payment token to use, must be whitelisted
-    /// @param tapAmount Amount of TAP to exercise. If 0, the full amount is exercised
+    /// @param optionsData oTap exerciseOptions data
+    /// @param lzData data needed for the cross chain transer
+    /// @param tapSendData needed for withdrawing Tap token
     /// @param approvals array
     function exerciseOption(
-        address from,
-        uint256 paymentTokenAmount,
-        uint16 lzDstChainId,
-        address zroPaymentAddress,
-        uint256 extraGas,
-        address target,
-        uint256 oTAPTokenID,
-        address paymentToken,
-        uint256 tapAmount,
-        ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
+        ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
+            calldata optionsData,
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
+            calldata tapSendData,
+        ITapiocaOptionsBrokerCrossChain.IApproval[] calldata approvals
     ) external payable {
         _executeModule(
             Module.Options,
             abi.encodeWithSelector(
                 BaseTOFTOptionsModule.exerciseOption.selector,
-                from,
-                paymentTokenAmount,
-                lzDstChainId,
-                zroPaymentAddress,
-                extraGas,
-                target,
-                oTAPTokenID,
-                paymentToken,
-                tapAmount,
+                optionsData,
+                lzData,
+                tapSendData,
                 approvals
             ),
             false
