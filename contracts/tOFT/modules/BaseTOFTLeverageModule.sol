@@ -231,7 +231,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             leverageFor,
             lzData.lzSrcChainId,
             lzData.zroPaymentAddress,
-            IUSDOBase.ILendParams({
+            IUSDOBase.ILendOrRepayParams({
                 repay: true,
                 depositAmount: amountOut,
                 repayAmount: repayableAmount,
