@@ -52,7 +52,8 @@ contract mTapiocaOFT is BaseTOFT {
         uint256 _hostChainID,
         address payable _leverageModule,
         address payable _strategyModule,
-        address payable _marketModule
+        address payable _marketModule,
+        address payable _optionsModule
     )
         BaseTOFT(
             _lzEndpoint,
@@ -64,7 +65,8 @@ contract mTapiocaOFT is BaseTOFT {
             _hostChainID,
             _leverageModule,
             _strategyModule,
-            _marketModule
+            _marketModule,
+            _optionsModule
         )
     {
         if (block.chainid == _hostChainID) {

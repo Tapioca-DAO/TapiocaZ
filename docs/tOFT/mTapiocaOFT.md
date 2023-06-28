@@ -384,6 +384,25 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 | nativeFee | uint256 | undefined |
 | zroFee | uint256 | undefined |
 
+### exerciseOption
+
+```solidity
+function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ITapiocaOptionsBrokerCrossChain.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| optionsData | ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData | undefined |
+| lzData | ITapiocaOptionsBrokerCrossChain.IExerciseLZData | undefined |
+| tapSendData | ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData | undefined |
+| approvals | ITapiocaOptionsBrokerCrossChain.IApproval[] | undefined |
+
 ### extractUnderlying
 
 ```solidity
@@ -527,6 +546,28 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
+
+### initMultiSell
+
+```solidity
+function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ITapiocaOFT.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| share | uint256 | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
+| airdropAdapterParams | bytes | undefined |
+| approvals | ITapiocaOFT.IApproval[] | undefined |
 
 ### isTrustedRemote
 
@@ -701,6 +742,23 @@ function nonces(address owner) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
+
+### optionsModule
+
+```solidity
+function optionsModule() external view returns (contract BaseTOFTOptionsModule)
+```
+
+returns the Options module
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract BaseTOFTOptionsModule | undefined |
 
 ### owner
 
@@ -1283,6 +1341,27 @@ function transferOwnership(address newOwner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newOwner | address | undefined |
+
+### triggerSendFrom
+
+```solidity
+function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, address zroPaymentAddress, uint256 amount, ISendFrom.LzCallParams sendFromData, ITapiocaOptionsBrokerCrossChain.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| lzDstChainId | uint16 | undefined |
+| airdropAdapterParams | bytes | undefined |
+| zroPaymentAddress | address | undefined |
+| amount | uint256 | undefined |
+| sendFromData | ISendFrom.LzCallParams | undefined |
+| approvals | ITapiocaOptionsBrokerCrossChain.IApproval[] | undefined |
 
 ### trustedRemoteLookup
 

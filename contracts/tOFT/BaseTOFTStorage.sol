@@ -31,8 +31,11 @@ contract BaseTOFTStorage is OFTV2 {
     uint16 internal constant PT_YB_SEND_STRAT = 770;
     uint16 internal constant PT_YB_RETRIEVE_STRAT = 771;
     uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 772;
+    uint16 internal constant PT_MARKET_MULTIHOP_SELL = 773;
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 775;
     uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 776;
+    uint16 internal constant PT_TAP_EXERCISE = 777;
+    uint16 internal constant PT_SEND_FROM = 778;
 
     receive() external payable {}
 
@@ -56,5 +59,18 @@ contract BaseTOFTStorage is OFTV2 {
         _decimalCache = _decimal;
         hostChainID = _hostChainID;
         yieldBox = _yieldBox;
+    }
+
+    function _getRevertMsg(
+        bytes memory _returnData
+    ) internal pure returns (string memory) {
+        // If the _res length is less than 68, then the transaction failed silently (without a revert message)
+        if (_returnData.length < 68) return "TOFT_data";
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            // Slice the sighash.
+            _returnData := add(_returnData, 0x04)
+        }
+        return abi.decode(_returnData, (string)); // All that remains is the revert string
     }
 }

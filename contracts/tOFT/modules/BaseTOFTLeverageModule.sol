@@ -8,6 +8,11 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 import "tapioca-periph/contracts/interfaces/IMagnetar.sol";
+import "tapioca-periph/contracts/interfaces/ISingularity.sol";
+import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
+import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
+import "tapioca-periph/contracts/interfaces/ITapiocaOptionLiquidityProvision.sol";
 
 import "../BaseTOFTStorage.sol";
 
@@ -34,6 +39,40 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             _hostChainID
         )
     {}
+
+    function initMultiSell(
+        address from,
+        uint256 share,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData,
+        bytes calldata airdropAdapterParams,
+        ITapiocaOFT.IApproval[] calldata approvals
+    ) external payable {
+        bytes32 senderBytes = LzLib.addressToBytes32(from);
+
+        bytes memory lzPayload = abi.encode(
+            PT_MARKET_MULTIHOP_SELL,
+            senderBytes,
+            from,
+            share,
+            swapData,
+            lzData,
+            externalData,
+            airdropAdapterParams,
+            approvals
+        );
+
+        _lzSend(
+            lzData.lzSrcChainId,
+            lzPayload,
+            payable(lzData.refundAddress),
+            lzData.zroPaymentAddress,
+            airdropAdapterParams,
+            msg.value
+        );
+        emit SendToChain(lzData.lzSrcChainId, msg.sender, senderBytes, 0);
+    }
 
     function sendForLeverage(
         uint256 amount,
@@ -66,7 +105,51 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         emit SendToChain(lzData.lzDstChainId, msg.sender, senderBytes, amount);
     }
 
-    function leverageDown(uint16 _srcChainId, bytes memory _payload) public {
+    //---Destination calls---
+    function multiHop(bytes memory _payload) public {
+        (
+            ,
+            ,
+            address from,
+            uint256 share,
+            IUSDOBase.ILeverageSwapData memory swapData,
+            IUSDOBase.ILeverageLZData memory lzData,
+            IUSDOBase.ILeverageExternalContractsData memory externalData,
+            ITapiocaOFT.IApproval[] memory approvals
+        ) = abi.decode(
+                _payload,
+                (
+                    uint16,
+                    bytes32,
+                    address,
+                    uint256,
+                    IUSDOBase.ILeverageSwapData,
+                    IUSDOBase.ILeverageLZData,
+                    IUSDOBase.ILeverageExternalContractsData,
+                    ITapiocaOFT.IApproval[]
+                )
+            );
+
+        if (approvals.length > 0) {
+            _callApproval(approvals);
+        }
+
+        ISingularity(externalData.srcMarket).multiHopSellCollateral(
+            from,
+            share,
+            swapData,
+            lzData,
+            externalData
+        );
+    }
+
+    function leverageDown(
+        address module,
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) public {
         (
             ,
             ,
@@ -88,9 +171,42 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                 )
             );
 
-        _creditTo(_srcChainId, address(this), amount);
+        uint256 balanceBefore = balanceOf(address(this));
+        bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
+        if (!credited) {
+            _creditTo(_srcChainId, address(this), amount);
+            creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
+        }
+        uint256 balanceAfter = balanceOf(address(this));
 
-        //unwrap
+        (bool success, bytes memory reason) = module.delegatecall(
+            abi.encodeWithSelector(
+                this.leverageDownInternal.selector,
+                amount,
+                swapData,
+                externalData,
+                lzData,
+                leverageFor
+            )
+        );
+
+        if (!success) {
+            if (balanceAfter - balanceBefore >= amount) {
+                IERC20(address(this)).safeTransfer(leverageFor, amount);
+            }
+            revert(_getRevertMsg(reason)); //forward revert because it's handled by the main executor
+        }
+
+        emit ReceiveFromChain(_srcChainId, leverageFor, amount);
+    }
+
+    function leverageDownInternal(
+        uint256 amount,
+        IUSDOBase.ILeverageSwapData memory swapData,
+        IUSDOBase.ILeverageExternalContractsData memory externalData,
+        IUSDOBase.ILeverageLZData memory lzData,
+        address leverageFor
+    ) public payable {
         _unwrap(address(this), amount);
 
         //swap to USDO
@@ -122,7 +238,17 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                 marketHelper: externalData.magnetar,
                 market: externalData.srcMarket,
                 removeCollateral: false,
-                removeCollateralShare: 0
+                removeCollateralShare: 0,
+                lockData: ITapiocaOptionLiquidityProvision.IOptionsLockData({
+                    lock: false,
+                    target: address(0),
+                    lockDuration: 0,
+                    amount: 0
+                }),
+                participateData: ITapiocaOptionsBroker.IOptionsParticipateData({
+                    participate: false,
+                    target: address(0)
+                })
             }),
             approvals,
             IUSDOBase.IWithdrawParams({
@@ -149,5 +275,62 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
     function _safeTransferETH(address to, uint256 amount) private {
         (bool sent, ) = to.call{value: amount}("");
         require(sent, "TOFT_failed");
+    }
+
+    function _callApproval(ITapiocaOFT.IApproval[] memory approvals) private {
+        for (uint256 i = 0; i < approvals.length; ) {
+            if (approvals[i].permitBorrow) {
+                try
+                    IPermitBorrow(approvals[i].target).permitBorrow(
+                        approvals[i].owner,
+                        approvals[i].spender,
+                        approvals[i].value,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
+            } else if (approvals[i].permitAll) {
+                try
+                    IPermitAll(approvals[i].target).permitAll(
+                        approvals[i].owner,
+                        approvals[i].spender,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
+            } else {
+                try
+                    IERC20Permit(approvals[i].target).permit(
+                        approvals[i].owner,
+                        approvals[i].spender,
+                        approvals[i].value,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
+            }
+
+            unchecked {
+                ++i;
+            }
+        }
     }
 }

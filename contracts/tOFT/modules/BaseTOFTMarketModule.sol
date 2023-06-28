@@ -121,7 +121,13 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         emit SendToChain(lzDstChainId, _from, toAddress, borrowParams.amount);
     }
 
-    function borrow(uint16 _srcChainId, bytes memory _payload) public payable {
+    function borrow(
+        address module,
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) public payable {
         (
             ,
             address _from, //from
@@ -141,10 +147,45 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                 )
             );
 
+        uint256 balanceBefore = balanceOf(address(this));
+        bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
+        if (!credited) {
+            _creditTo(_srcChainId, address(this), borrowParams.amount);
+            creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
+        }
+        uint256 balanceAfter = balanceOf(address(this));
+
+        (bool success, bytes memory reason) = module.delegatecall(
+            abi.encodeWithSelector(
+                this.borrowInternal.selector,
+                _from,
+                _to,
+                borrowParams,
+                withdrawParams,
+                approvals
+            )
+        );
+
+        if (!success) {
+            if (balanceAfter - balanceBefore >= borrowParams.amount) {
+                IERC20(address(this)).safeTransfer(_from, borrowParams.amount);
+            }
+            revert(_getRevertMsg(reason)); //forward revert because it's handled by the main executor
+        }
+
+        emit ReceiveFromChain(_srcChainId, _from, borrowParams.amount);
+    }
+
+    function borrowInternal(
+        address _from, //from
+        bytes32 _to,
+        ITapiocaOFT.IBorrowParams memory borrowParams,
+        ITapiocaOFT.IWithdrawParams memory withdrawParams,
+        ITapiocaOFT.IApproval[] memory approvals
+    ) public payable {
         if (approvals.length > 0) {
             _callApproval(approvals);
         }
-        _creditTo(_srcChainId, address(this), borrowParams.amount);
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         bytes memory withdrawData = abi.encode(

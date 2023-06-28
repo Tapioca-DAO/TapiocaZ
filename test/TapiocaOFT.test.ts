@@ -50,6 +50,7 @@ describe('TapiocaOFT', () => {
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
         );
     });
     it('decimals()', async () => {

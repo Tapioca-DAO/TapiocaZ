@@ -115,6 +115,19 @@ export const useUtils = (
         );
         await marketModule.deployed();
 
+        const optionsModule = await (
+            await ethers.getContractFactory('BaseTOFTOptionsModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+        await optionsModule.deployed();
+
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
 
@@ -129,6 +142,7 @@ export const useUtils = (
             leverageModule.address,
             strategyModule.address,
             marketModule.address,
+            optionsModule.address,
         ];
 
         const txData = (
