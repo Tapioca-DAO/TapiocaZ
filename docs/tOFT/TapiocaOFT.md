@@ -343,7 +343,7 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 ### exerciseOption
 
 ```solidity
-function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ITapiocaOptionsBrokerCrossChain.IApproval[] approvals) external payable
+function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -357,7 +357,7 @@ function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData opt
 | optionsData | ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData | undefined |
 | lzData | ITapiocaOptionsBrokerCrossChain.IExerciseLZData | undefined |
 | tapSendData | ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData | undefined |
-| approvals | ITapiocaOptionsBrokerCrossChain.IApproval[] | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### failedMessages
 
@@ -490,7 +490,7 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 ### initMultiSell
 
 ```solidity
-function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ITapiocaOFT.IApproval[] approvals) external payable
+function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -507,7 +507,7 @@ function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData 
 | lzData | IUSDOBase.ILeverageLZData | undefined |
 | externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
 | airdropAdapterParams | bytes | undefined |
-| approvals | ITapiocaOFT.IApproval[] | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### isTrustedRemote
 
@@ -781,7 +781,7 @@ function precrime() external view returns (address)
 ### removeCollateral
 
 ```solidity
-function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ITapiocaOFT.IApproval[] approvals, bytes adapterParams) external payable
+function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ICommonData.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ICommonData.IApproval[] approvals, bytes adapterParams) external payable
 ```
 
 
@@ -796,9 +796,9 @@ function removeCollateral(address from, address to, uint16 lzDstChainId, address
 | to | address | undefined |
 | lzDstChainId | uint16 | undefined |
 | zroPaymentAddress | address | undefined |
-| withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
+| withdrawParams | ICommonData.IWithdrawParams | undefined |
 | removeParams | ITapiocaOFT.IRemoveParams | undefined |
-| approvals | ITapiocaOFT.IApproval[] | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 | adapterParams | bytes | undefined |
 
 ### renounceOwnership
@@ -918,7 +918,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToStrategy
 
 ```solidity
-function sendToStrategy(address from, address to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
+function sendToStrategy(address from, address to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ICommonData.ISendOptions options) external payable
 ```
 
 
@@ -935,12 +935,12 @@ function sendToStrategy(address from, address to, uint256 amount, uint256 share,
 | share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
-| options | ITapiocaOFT.ISendOptions | undefined |
+| options | ICommonData.ISendOptions | undefined |
 
 ### sendToYBAndBorrow
 
 ```solidity
-function sendToYBAndBorrow(address from, address to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.ISendOptions options, ITapiocaOFT.IApproval[] approvals) external payable
+function sendToYBAndBorrow(address from, address to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.ISendOptions options, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -956,9 +956,9 @@ function sendToYBAndBorrow(address from, address to, uint16 lzDstChainId, bytes 
 | lzDstChainId | uint16 | undefined |
 | airdropAdapterParams | bytes | undefined |
 | borrowParams | ITapiocaOFT.IBorrowParams | undefined |
-| withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
-| options | ITapiocaOFT.ISendOptions | undefined |
-| approvals | ITapiocaOFT.IApproval[] | undefined |
+| withdrawParams | ICommonData.IWithdrawParams | undefined |
+| options | ICommonData.ISendOptions | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### setConfig
 
@@ -1285,7 +1285,7 @@ function transferOwnership(address newOwner) external nonpayable
 ### triggerSendFrom
 
 ```solidity
-function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, address zroPaymentAddress, uint256 amount, ISendFrom.LzCallParams sendFromData, ITapiocaOptionsBrokerCrossChain.IApproval[] approvals) external payable
+function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, address zroPaymentAddress, uint256 amount, ISendFrom.LzCallParams sendFromData, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -1301,7 +1301,7 @@ function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, addres
 | zroPaymentAddress | address | undefined |
 | amount | uint256 | undefined |
 | sendFromData | ISendFrom.LzCallParams | undefined |
-| approvals | ITapiocaOptionsBrokerCrossChain.IApproval[] | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### trustedRemoteLookup
 

@@ -44,9 +44,9 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         address to,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
+        ICommonData.IWithdrawParams calldata withdrawParams,
         ITapiocaOFT.IRemoveParams calldata removeParams,
-        ITapiocaOFT.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable {
         bytes32 toAddress = LzLib.addressToBytes32(to);
@@ -88,9 +88,9 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,
         ITapiocaOFT.IBorrowParams calldata borrowParams,
-        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
-        ITapiocaOFT.ISendOptions calldata options,
-        ITapiocaOFT.IApproval[] calldata approvals
+        ICommonData.IWithdrawParams calldata withdrawParams,
+        ICommonData.ISendOptions calldata options,
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
         _debitFrom(
@@ -133,8 +133,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             address _from, //from
             bytes32 _to,
             ITapiocaOFT.IBorrowParams memory borrowParams,
-            ITapiocaOFT.IWithdrawParams memory withdrawParams,
-            ITapiocaOFT.IApproval[] memory approvals
+            ICommonData.IWithdrawParams memory withdrawParams,
+            ICommonData.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
                 (
@@ -142,8 +142,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                     address,
                     bytes32,
                     ITapiocaOFT.IBorrowParams,
-                    ITapiocaOFT.IWithdrawParams,
-                    ITapiocaOFT.IApproval[]
+                    ICommonData.IWithdrawParams,
+                    ICommonData.IApproval[]
                 )
             );
 
@@ -180,8 +180,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         address _from, //from
         bytes32 _to,
         ITapiocaOFT.IBorrowParams memory borrowParams,
-        ITapiocaOFT.IWithdrawParams memory withdrawParams,
-        ITapiocaOFT.IApproval[] memory approvals
+        ICommonData.IWithdrawParams memory withdrawParams,
+        ICommonData.IApproval[] memory approvals
     ) public payable {
         if (approvals.length > 0) {
             _callApproval(approvals);
@@ -217,8 +217,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             address to,
             ,
             ITapiocaOFT.IRemoveParams memory removeParams,
-            ITapiocaOFT.IWithdrawParams memory withdrawParams,
-            ITapiocaOFT.IApproval[] memory approvals
+            ICommonData.IWithdrawParams memory withdrawParams,
+            ICommonData.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
                 (
@@ -227,8 +227,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                     address,
                     bytes32,
                     ITapiocaOFT.IRemoveParams,
-                    ITapiocaOFT.IWithdrawParams,
-                    ITapiocaOFT.IApproval[]
+                    ICommonData.IWithdrawParams,
+                    ICommonData.IApproval[]
                 )
             );
 
@@ -266,7 +266,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         }
     }
 
-    function _callApproval(ITapiocaOFT.IApproval[] memory approvals) private {
+    function _callApproval(ICommonData.IApproval[] memory approvals) private {
         for (uint256 i = 0; i < approvals.length; ) {
             if (approvals[i].permitBorrow) {
                 try

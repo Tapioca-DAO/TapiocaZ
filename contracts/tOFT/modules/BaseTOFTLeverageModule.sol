@@ -47,7 +47,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         IUSDOBase.ILeverageLZData calldata lzData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData,
         bytes calldata airdropAdapterParams,
-        ITapiocaOFT.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         bytes32 senderBytes = LzLib.addressToBytes32(from);
 
@@ -115,7 +115,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             IUSDOBase.ILeverageSwapData memory swapData,
             IUSDOBase.ILeverageLZData memory lzData,
             IUSDOBase.ILeverageExternalContractsData memory externalData,
-            ITapiocaOFT.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
                 (
@@ -126,7 +126,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                     IUSDOBase.ILeverageSwapData,
                     IUSDOBase.ILeverageLZData,
                     IUSDOBase.ILeverageExternalContractsData,
-                    ITapiocaOFT.IApproval[]
+                    ICommonData.IApproval[]
                 )
             );
 
@@ -223,7 +223,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         //repay
         uint256 repayableAmount = IMagnetar(externalData.magnetar)
             .getBorrowPartForAmount(externalData.srcMarket, amountOut);
-        IUSDOBase.IApproval[] memory approvals;
+        ICommonData.IApproval[] memory approvals;
         IUSDOBase(swapData.tokenOut).sendAndLendOrRepay{
             value: address(this).balance
         }(
@@ -251,7 +251,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                 })
             }),
             approvals,
-            IUSDOBase.IWithdrawParams({
+            ICommonData.IWithdrawParams({
                 withdraw: false,
                 withdrawLzFeeAmount: 0,
                 withdrawOnOtherChain: false,
@@ -277,7 +277,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         require(sent, "TOFT_failed");
     }
 
-    function _callApproval(ITapiocaOFT.IApproval[] memory approvals) private {
+    function _callApproval(ICommonData.IApproval[] memory approvals) private {
         for (uint256 i = 0; i < approvals.length; ) {
             if (approvals[i].permitBorrow) {
                 try
