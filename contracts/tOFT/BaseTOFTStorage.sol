@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 //TAPIOCA INTERFACES
 import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
+import "tapioca-periph/contracts/interfaces/ICommonData.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 
 contract BaseTOFTStorage is OFTV2 {

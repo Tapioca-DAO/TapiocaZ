@@ -119,7 +119,7 @@ function hostChainID() external view returns (uint256)
 ### initMultiSell
 
 ```solidity
-function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ITapiocaOFT.IApproval[] approvals) external payable
+function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -136,7 +136,7 @@ function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData 
 | lzData | IUSDOBase.ILeverageLZData | undefined |
 | externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
 | airdropAdapterParams | bytes | undefined |
-| approvals | ITapiocaOFT.IApproval[] | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### isHostChain
 
@@ -198,7 +198,7 @@ function lzEndpoint() external view returns (address)
 ### removeCollateral
 
 ```solidity
-function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ITapiocaOFT.IApproval[] approvals, bytes adapterParams) external payable
+function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ICommonData.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ICommonData.IApproval[] approvals, bytes adapterParams) external payable
 ```
 
 
@@ -213,9 +213,9 @@ function removeCollateral(address from, address to, uint16 lzDstChainId, address
 | to | address | undefined |
 | lzDstChainId | uint16 | undefined |
 | zroPaymentAddress | address | undefined |
-| withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
+| withdrawParams | ICommonData.IWithdrawParams | undefined |
 | removeParams | ITapiocaOFT.IRemoveParams | undefined |
-| approvals | ITapiocaOFT.IApproval[] | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 | adapterParams | bytes | undefined |
 
 ### retrieveFromStrategy
@@ -283,7 +283,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToStrategy
 
 ```solidity
-function sendToStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ITapiocaOFT.ISendOptions options) external payable
+function sendToStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ICommonData.ISendOptions options) external payable
 ```
 
 
@@ -300,12 +300,12 @@ function sendToStrategy(address _from, address _to, uint256 amount, uint256 shar
 | share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
-| options | ITapiocaOFT.ISendOptions | undefined |
+| options | ICommonData.ISendOptions | undefined |
 
 ### sendToYBAndBorrow
 
 ```solidity
-function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ITapiocaOFT.IWithdrawParams withdrawParams, ITapiocaOFT.ISendOptions options, ITapiocaOFT.IApproval[] approvals) external payable
+function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.ISendOptions options, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -321,9 +321,9 @@ function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, byte
 | lzDstChainId | uint16 | undefined |
 | airdropAdapterParams | bytes | undefined |
 | borrowParams | ITapiocaOFT.IBorrowParams | undefined |
-| withdrawParams | ITapiocaOFT.IWithdrawParams | undefined |
-| options | ITapiocaOFT.ISendOptions | undefined |
-| approvals | ITapiocaOFT.IApproval[] | undefined |
+| withdrawParams | ICommonData.IWithdrawParams | undefined |
+| options | ICommonData.ISendOptions | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### totalFees
 

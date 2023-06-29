@@ -49,7 +49,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
-        ITapiocaOFT.ISendOptions calldata options
+        ICommonData.ISendOptions calldata options
     ) external payable {
         require(amount > 0, "TOFT_0");
         bytes32 toAddress = LzLib.addressToBytes32(_to);

@@ -99,7 +99,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         address zroPaymentAddress,
         uint256 amount,
         ISendFrom.LzCallParams calldata sendFromData,
-        ITapiocaOptionsBrokerCrossChain.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         _executeModule(
             Module.Options,
@@ -127,7 +127,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
-        ITapiocaOptionsBrokerCrossChain.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         _executeModule(
             Module.Options,
@@ -157,7 +157,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         IUSDOBase.ILeverageLZData calldata lzData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData,
         bytes calldata airdropAdapterParams,
-        ITapiocaOFT.IApproval[] memory approvals
+        ICommonData.IApproval[] memory approvals
     ) external payable {
         _executeModule(
             Module.Leverage,
@@ -189,9 +189,9 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         address to,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
+        ICommonData.IWithdrawParams calldata withdrawParams,
         ITapiocaOFT.IRemoveParams calldata removeParams,
-        ITapiocaOFT.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable {
         _executeModule(
@@ -225,7 +225,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
-        ITapiocaOFT.ISendOptions calldata options
+        ICommonData.ISendOptions calldata options
     ) external payable {
         _executeModule(
             Module.Strategy,
@@ -290,9 +290,9 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,
         ITapiocaOFT.IBorrowParams calldata borrowParams,
-        ITapiocaOFT.IWithdrawParams calldata withdrawParams,
-        ITapiocaOFT.ISendOptions calldata options,
-        ITapiocaOFT.IApproval[] calldata approvals
+        ICommonData.IWithdrawParams calldata withdrawParams,
+        ICommonData.ISendOptions calldata options,
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         _executeModule(
             Module.Market,

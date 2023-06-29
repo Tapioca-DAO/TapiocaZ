@@ -40,7 +40,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
         address zroPaymentAddress,
         uint256 amount,
         ISendFrom.LzCallParams calldata sendFromData,
-        ITapiocaOptionsBrokerCrossChain.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         bytes memory lzPayload = abi.encode(
             PT_SEND_FROM,
@@ -74,7 +74,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
-        ITapiocaOptionsBrokerCrossChain.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         bytes32 toAddress = LzLib.addressToBytes32(optionsData.from);
 
@@ -120,7 +120,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
             uint256 amount,
             ISendFrom.LzCallParams memory callParams,
             uint16 lzDstChainId,
-            ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
                 (
@@ -129,7 +129,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
                     uint256,
                     ISendFrom.LzCallParams,
                     uint16,
-                    ITapiocaOptionsBrokerCrossChain.IApproval[]
+                    ICommonData.IApproval[]
                 )
             );
 
@@ -161,14 +161,14 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
                 memory optionsData,
             ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
                 memory tapSendData,
-            ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
                 (
                     uint16,
                     ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData,
                     ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData,
-                    ITapiocaOptionsBrokerCrossChain.IApproval[]
+                    ICommonData.IApproval[]
                 )
             );
 
@@ -224,7 +224,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
         address target,
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             memory tapSendData,
-        ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
+        ICommonData.IApproval[] memory approvals
     ) public {
         if (approvals.length > 0) {
             _callApproval(approvals);
@@ -254,9 +254,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
         }
     }
 
-    function _callApproval(
-        ITapiocaOptionsBrokerCrossChain.IApproval[] memory approvals
-    ) private {
+    function _callApproval(ICommonData.IApproval[] memory approvals) private {
         for (uint256 i = 0; i < approvals.length; ) {
             if (approvals[i].permitBorrow) {
                 try
