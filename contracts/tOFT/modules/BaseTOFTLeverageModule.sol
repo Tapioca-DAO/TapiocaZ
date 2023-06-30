@@ -243,11 +243,13 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                     lock: false,
                     target: address(0),
                     lockDuration: 0,
-                    amount: 0
+                    amount: 0,
+                    fraction: 0
                 }),
                 participateData: ITapiocaOptionsBroker.IOptionsParticipateData({
                     participate: false,
-                    target: address(0)
+                    target: address(0),
+                    tOLPTokenId: 0
                 })
             }),
             approvals,

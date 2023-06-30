@@ -196,9 +196,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         );
 
         approve(address(borrowParams.marketHelper), borrowParams.amount);
-        IMagnetar(borrowParams.marketHelper).depositAddCollateralAndBorrow{
-            value: msg.value
-        }(
+        IMagnetar(borrowParams.marketHelper)
+            .depositAddCollateralAndBorrowFromMarket{value: msg.value}(
             borrowParams.market,
             LzLib.bytes32ToAddress(_to),
             borrowParams.amount,
@@ -245,7 +244,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         if (withdrawParams.withdraw) {
             address ybAddress = IMarket(removeParams.market).yieldBox();
             uint256 assetId = IMarket(removeParams.market).collateralId();
-            IMagnetar(removeParams.marketHelper).withdrawTo{
+            IMagnetar(removeParams.marketHelper).withdrawToChain{
                 value: withdrawParams.withdrawLzFeeAmount
             }(
                 ybAddress,
