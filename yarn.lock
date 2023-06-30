@@ -5621,10 +5621,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.npmjs.org/tapioca-sdk/-/tapioca-sdk-1.4.1.tgz#33063f3ecba027e7e2f599a13bad3588b1fb39bb"
-  integrity sha512-emH9VRkHvwMYvfFoLYAHDszCOSrkOO/pr5AjhmExc7A0uAH8dxhgcDzK7TWSrZvQ1ePXLj7AGyTBfYQ81D+n3g==
+tapioca-sdk@^1.4.6:
+  version "1.4.6"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.4.6.tgz#20536f4006bceb8925854eab2212228bc9a7de79"
+  integrity sha512-fUcBitIew8jPvgni+iM+SqTShvGUiJUuJbMV/nDHCk5Q3/gx6RtWr77HQhOwXV4sC+n1R61jWAqcgz9Ts9dXDg==
   dependencies:
     ethers "^5.4.7"
     fs-extra "^11.1.1"
