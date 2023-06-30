@@ -1,0 +1,1 @@
+cloc ./contracts/**/*.sol --exclude-content ".*(Test).*" --hide-rate  --by-file --csv --quiet > cloc-report.csv
