@@ -158,7 +158,6 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         (bool success, bytes memory reason) = module.delegatecall(
             abi.encodeWithSelector(
                 this.borrowInternal.selector,
-                _from,
                 _to,
                 borrowParams,
                 withdrawParams,
@@ -177,7 +176,6 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
     }
 
     function borrowInternal(
-        address _from, //from
         bytes32 _to,
         ITapiocaOFT.IBorrowParams memory borrowParams,
         ICommonData.IWithdrawParams memory withdrawParams,
@@ -188,13 +186,6 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         }
 
         // Use market helper to deposit, add collateral to market and withdrawTo
-        bytes memory withdrawData = abi.encode(
-            withdrawParams.withdrawOnOtherChain,
-            withdrawParams.withdrawLzChainId,
-            _from,
-            withdrawParams.withdrawAdapterParams
-        );
-
         approve(address(borrowParams.marketHelper), borrowParams.amount);
         IMagnetar(borrowParams.marketHelper)
             .depositAddCollateralAndBorrowFromMarket{value: msg.value}(
@@ -204,8 +195,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             borrowParams.borrowAmount,
             true,
             true,
-            withdrawParams.withdraw,
-            withdrawData
+            withdrawParams
         );
     }
 
