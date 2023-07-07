@@ -569,6 +569,28 @@ function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData 
 | airdropAdapterParams | bytes | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
 
+### isLdChain
+
+```solidity
+function isLdChain(uint16) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### isTrustedRemote
 
 ```solidity
@@ -1038,6 +1060,23 @@ function setConfig(uint16 _version, uint16 _chainId, uint256 _configType, bytes 
 | _chainId | uint16 | undefined |
 | _configType | uint256 | undefined |
 | _config | bytes | undefined |
+
+### setLdChain
+
+```solidity
+function setLdChain(uint16 _chainId, bool _isLdChain) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _chainId | uint16 | undefined |
+| _isLdChain | bool | undefined |
 
 ### setMinDstGas
 
