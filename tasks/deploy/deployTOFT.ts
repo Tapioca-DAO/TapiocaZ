@@ -82,13 +82,13 @@ export const deployTOFT__task = async (
         args.isMerged,
         args.overrideOptions,
     );
+
     await saveDeployedTOFT(hre, tag, deployedTOFT, {
         isToftHost: isCurrentChainHost,
         isMerged: Boolean(args.isMerged),
         isToft: true,
         args: toftDeployInfo.args,
     });
-
     console.log('[+] TOFT deployed successfully.');
     if (isCurrentChainHost) {
         console.log(

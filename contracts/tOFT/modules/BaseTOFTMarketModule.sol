@@ -45,17 +45,20 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         uint16 lzDstChainId,
         address zroPaymentAddress,
         ICommonData.IWithdrawParams calldata withdrawParams,
-        ITapiocaOFT.IRemoveParams calldata removeParams,
+        ITapiocaOFT.IRemoveParams memory removeParams,
         ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable {
         bytes32 toAddress = LzLib.addressToBytes32(to);
+
+        (removeParams.amount, ) = _removeDust(removeParams.amount);
 
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
             from,
             to,
             toAddress,
+            _ld2sd(removeParams.amount),
             removeParams,
             withdrawParams,
             approvals
@@ -93,17 +96,15 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         ICommonData.IApproval[] calldata approvals
     ) external payable {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
-        _debitFrom(
-            _from,
-            lzEndpoint.getChainId(),
-            toAddress,
-            borrowParams.amount
-        );
+
+        (uint256 amount, ) = _removeDust(borrowParams.amount);
+        _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
             PT_YB_SEND_SGL_BORROW,
             _from,
             toAddress,
+            _ld2sd(amount),
             borrowParams,
             withdrawParams,
             approvals
@@ -118,7 +119,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             msg.value
         );
 
-        emit SendToChain(lzDstChainId, _from, toAddress, borrowParams.amount);
+        emit SendToChain(lzDstChainId, _from, toAddress, amount);
     }
 
     function borrow(
@@ -132,6 +133,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             ,
             address _from, //from
             bytes32 _to,
+            uint64 amountSD,
             ITapiocaOFT.IBorrowParams memory borrowParams,
             ICommonData.IWithdrawParams memory withdrawParams,
             ICommonData.IApproval[] memory approvals
@@ -141,11 +143,14 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                     uint16,
                     address,
                     bytes32,
+                    uint64,
                     ITapiocaOFT.IBorrowParams,
                     ICommonData.IWithdrawParams,
                     ICommonData.IApproval[]
                 )
             );
+
+        borrowParams.amount = _sd2ld(amountSD);
 
         uint256 balanceBefore = balanceOf(address(this));
         bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
@@ -205,6 +210,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             ,
             address to,
             ,
+            uint64 removeCollateralAmount,
             ITapiocaOFT.IRemoveParams memory removeParams,
             ICommonData.IWithdrawParams memory withdrawParams,
             ICommonData.IApproval[] memory approvals
@@ -215,6 +221,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                     address,
                     address,
                     bytes32,
+                    uint64,
                     ITapiocaOFT.IRemoveParams,
                     ICommonData.IWithdrawParams,
                     ICommonData.IApproval[]
@@ -225,15 +232,20 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             _callApproval(approvals);
         }
 
-        approve(removeParams.market, removeParams.share);
-        IMarket(removeParams.market).removeCollateral(
-            to,
-            to,
-            removeParams.share
+        removeParams.amount = _sd2ld(removeCollateralAmount);
+
+        address ybAddress = IMarket(removeParams.market).yieldBox();
+        uint256 assetId = IMarket(removeParams.market).collateralId();
+
+        uint256 share = IYieldBoxBase(ybAddress).toShare(
+            assetId,
+            removeParams.amount,
+            false
         );
+
+        approve(removeParams.market, share);
+        IMarket(removeParams.market).removeCollateral(to, to, share);
         if (withdrawParams.withdraw) {
-            address ybAddress = IMarket(removeParams.market).yieldBox();
-            uint256 assetId = IMarket(removeParams.market).collateralId();
             IMagnetar(removeParams.marketHelper).withdrawToChain{
                 value: withdrawParams.withdrawLzFeeAmount
             }(
@@ -242,12 +254,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                 assetId,
                 withdrawParams.withdrawLzChainId,
                 LzLib.addressToBytes32(to),
-                IYieldBoxBase(ybAddress).toAmount(
-                    assetId,
-                    removeParams.share,
-                    false
-                ),
-                removeParams.share,
+                removeParams.amount,
+                share,
                 withdrawParams.withdrawAdapterParams,
                 payable(to),
                 withdrawParams.withdrawLzFeeAmount

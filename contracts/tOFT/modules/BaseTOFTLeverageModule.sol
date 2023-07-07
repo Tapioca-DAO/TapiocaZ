@@ -42,7 +42,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
 
     function initMultiSell(
         address from,
-        uint256 share,
+        uint256 amount,
         IUSDOBase.ILeverageSwapData calldata swapData,
         IUSDOBase.ILeverageLZData calldata lzData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData,
@@ -51,11 +51,12 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
     ) external payable {
         bytes32 senderBytes = LzLib.addressToBytes32(from);
 
+        (amount, ) = _removeDust(amount);
         bytes memory lzPayload = abi.encode(
             PT_MARKET_MULTIHOP_SELL,
             senderBytes,
             from,
-            share,
+            _ld2sd(amount),
             swapData,
             lzData,
             externalData,
@@ -82,12 +83,14 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
         bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);
+
+        (amount, ) = _removeDust(amount);
         _debitFrom(msg.sender, lzEndpoint.getChainId(), senderBytes, amount);
 
         bytes memory lzPayload = abi.encode(
             PT_LEVERAGE_MARKET_DOWN,
             senderBytes,
-            amount,
+            _ld2sd(amount),
             swapData,
             externalData,
             lzData,
@@ -111,7 +114,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             ,
             ,
             address from,
-            uint256 share,
+            uint64 amountSD,
             IUSDOBase.ILeverageSwapData memory swapData,
             IUSDOBase.ILeverageLZData memory lzData,
             IUSDOBase.ILeverageExternalContractsData memory externalData,
@@ -122,7 +125,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                     uint16,
                     bytes32,
                     address,
-                    uint256,
+                    uint64,
                     IUSDOBase.ILeverageSwapData,
                     IUSDOBase.ILeverageLZData,
                     IUSDOBase.ILeverageExternalContractsData,
@@ -134,6 +137,12 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             _callApproval(approvals);
         }
 
+        ISingularity market = ISingularity(externalData.srcMarket);
+        uint256 share = IYieldBoxBase(market.yieldBox()).toShare(
+            market.collateralId(),
+            _sd2ld(amountSD),
+            false
+        );
         ISingularity(externalData.srcMarket).multiHopSellCollateral(
             from,
             share,
@@ -153,7 +162,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         (
             ,
             ,
-            uint256 amount,
+            uint64 amountSD,
             IUSDOBase.ILeverageSwapData memory swapData,
             IUSDOBase.ILeverageExternalContractsData memory externalData,
             IUSDOBase.ILeverageLZData memory lzData,
@@ -163,7 +172,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                 (
                     uint16,
                     bytes32,
-                    uint256,
+                    uint64,
                     IUSDOBase.ILeverageSwapData,
                     IUSDOBase.ILeverageExternalContractsData,
                     IUSDOBase.ILeverageLZData,
@@ -171,6 +180,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
                 )
             );
 
+        uint256 amount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));
         bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
         if (!credited) {

@@ -53,13 +53,16 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
     ) external payable {
         require(amount > 0, "TOFT_0");
         bytes32 toAddress = LzLib.addressToBytes32(_to);
+
+        (amount, ) = _removeDust(amount);
+        (share, ) = _removeDust(share);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
             PT_YB_SEND_STRAT,
             LzLib.addressToBytes32(_from),
             toAddress,
-            amount,
+            _ld2sd(amount),
             share,
             assetId,
             options.zroPaymentAddress
@@ -97,11 +100,13 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
 
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
+        (amount, ) = _removeDust(amount);
+        (share, ) = _removeDust(share);
         bytes memory lzPayload = abi.encode(
             PT_YB_RETRIEVE_STRAT,
             LzLib.addressToBytes32(_from),
             toAddress,
-            amount,
+            _ld2sd(amount),
             share,
             assetId,
             zroPaymentAddress
@@ -129,15 +134,16 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             ,
             ,
             bytes32 from,
-            uint256 amount,
+            uint64 amountSD,
             uint256 share,
             uint256 assetId,
 
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
+                (uint16, bytes32, bytes32, uint64, uint256, uint256, address)
             );
 
+        uint256 amount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));
         bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
         if (!credited) {
@@ -191,18 +197,20 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             ,
             bytes32 from,
             ,
-            uint256 _amount,
+            uint64 amountSD,
             uint256 _share,
             uint256 _assetId,
             address _zroPaymentAddress
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint256, uint256, uint256, address)
+                (uint16, bytes32, bytes32, uint64, uint256, uint256, address)
             );
 
+        uint256 _amount = _sd2ld(amountSD);
         address _from = LzLib.bytes32ToAddress(from);
         _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
+        (_amount, ) = _removeDust(_amount);
         _debitFrom(
             address(this),
             lzEndpoint.getChainId(),
