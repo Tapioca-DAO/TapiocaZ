@@ -894,6 +894,23 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
+### rescueEth
+
+```solidity
+function rescueEth(uint256 amount, address to) external nonpayable
+```
+
+rescues unused ETH from the contract
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | the amount to rescue |
+| to | address | the recipient |
+
 ### retrieveFromStrategy
 
 ```solidity

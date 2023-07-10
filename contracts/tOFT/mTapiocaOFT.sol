@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
+
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./BaseTOFT.sol";
 
-contract mTapiocaOFT is BaseTOFT {
+contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // ************ //
@@ -134,8 +136,9 @@ contract mTapiocaOFT is BaseTOFT {
 
     /// @notice extracts the underlying token/native for rebalancing
     /// @param _amount the amount used for rebalancing
-    function extractUnderlying(uint256 _amount) external {
+    function extractUnderlying(uint256 _amount) external nonReentrant {
         require(balancers[msg.sender], "TOFT_auth");
+        require(_amount > 0, "TOFT_0");
 
         bool _isNative = erc20 == address(0);
         if (_isNative) {

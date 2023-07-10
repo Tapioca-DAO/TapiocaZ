@@ -80,7 +80,7 @@ contract Balancer is Owned {
     );
     /// @notice event emitted when max rebalanceable amount is updated
     event RebalanceAmountUpdated(
-        address _srcOft,
+        address indexed _srcOft,
         uint16 _dstChainId,
         uint256 _amount,
         uint256 _totalAmount
@@ -198,7 +198,7 @@ contract Balancer is Owned {
         //send
         bool _isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
         if (_isNative) {
-            if (msg.value <= _amount) revert FeeAmountNotSet();
+            if (msg.value != _amount) revert FeeAmountNotSet();
             _sendNative(_srcOft, _amount, _dstChainId, _slippage);
         } else {
             if (msg.value == 0) revert FeeAmountNotSet();
@@ -316,6 +316,7 @@ contract Balancer is Owned {
                 )
             });
 
+        erc20.approve(address(router), 0);
         erc20.approve(address(router), _amount);
         router.swap(
             _dstChainId,

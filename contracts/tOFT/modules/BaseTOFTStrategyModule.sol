@@ -185,6 +185,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         _amount = _share > 0
             ? yieldBox.toAmount(_assetId, _share, false)
             : _amount;
+        _erc20.approve(address(yieldBox), 0);
         _erc20.approve(address(yieldBox), _amount);
         yieldBox.depositAsset(_assetId, _from, _to, _amount, _share);
     }

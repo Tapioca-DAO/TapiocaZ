@@ -220,6 +220,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         _unwrap(address(this), amount);
 
         //swap to USDO
+        IERC20(erc20).approve(externalData.swapper, 0);
         IERC20(erc20).approve(externalData.swapper, amount);
         ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
             .buildSwapData(erc20, swapData.tokenOut, amount, 0, false, false);
@@ -275,6 +276,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
     }
 
     function _unwrap(address _toAddress, uint256 _amount) private {
+        require(_amount > 0, "TOFT_0");
         _burn(msg.sender, _amount);
 
         if (erc20 == address(0)) {

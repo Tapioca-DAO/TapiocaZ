@@ -353,6 +353,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
                 "TOFT_allowed"
             );
         }
+        require(_amount > 0, "TOFT_0");
         IERC20(erc20).safeTransferFrom(_fromAddress, address(this), _amount);
         _mint(_toAddress, _amount);
     }
