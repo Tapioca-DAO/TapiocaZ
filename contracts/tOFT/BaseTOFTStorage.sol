@@ -62,14 +62,6 @@ contract BaseTOFTStorage is OFTV2 {
         yieldBox = _yieldBox;
     }
 
-    /// @notice rescues unused ETH from the contract
-    /// @param amount the amount to rescue
-    /// @param to the recipient
-    function rescueEth(uint256 amount, address to) external onlyOwner {
-        (bool success, ) = to.call{value: amount}("");
-        require(success, "TOFT: transfer failed.");
-    }
-
     function _getRevertMsg(
         bytes memory _returnData
     ) internal pure returns (string memory) {

@@ -35,6 +35,9 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
     /// @notice returns the Options module
     BaseTOFTOptionsModule public optionsModule;
 
+    /// @notice returns the amount of total wrapped native coins
+    uint256 wrappedNativeAmount;
+
     // ******************//
     // *** MODIFIERS *** //
     // ***************** //
@@ -338,6 +341,23 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         );
     }
 
+    // ************************ //
+    // *** OWNER FUNCTIONS *** //
+    // ************************ //
+    /// @notice rescues unused ETH from the contract
+    /// @param amount the amount to rescue
+    /// @param to the recipient
+    function rescueEth(uint256 amount, address to) external onlyOwner {
+        uint256 balance = address(this).balance;
+        if (balance < wrappedNativeAmount) revert("TOFT_low_balance");
+
+        uint256 toRescue = balance - wrappedNativeAmount;
+        require(amount <= toRescue, "TOFT_large_amount");
+
+        (bool success, ) = to.call{value: amount}("");
+        require(success, "TOFT_Failed");
+    }
+
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
 
@@ -360,6 +380,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
 
     function _wrapNative(address _toAddress) internal virtual {
         require(msg.value > 0, "TOFT_0");
+        wrappedNativeAmount += msg.value;
         _mint(_toAddress, msg.value);
     }
 
@@ -367,6 +388,9 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         _burn(msg.sender, _amount);
 
         if (erc20 == address(0)) {
+            wrappedNativeAmount = wrappedNativeAmount > _amount
+                ? wrappedNativeAmount - _amount
+                : 0;
             _safeTransferETH(_toAddress, _amount);
         } else {
             IERC20(erc20).safeTransfer(_toAddress, _amount);
