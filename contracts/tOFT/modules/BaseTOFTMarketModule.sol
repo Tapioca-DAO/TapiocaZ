@@ -174,7 +174,13 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             if (balanceAfter - balanceBefore >= borrowParams.amount) {
                 IERC20(address(this)).safeTransfer(_from, borrowParams.amount);
             }
-            revert(_getRevertMsg(reason)); //forward revert because it's handled by the main executor
+            _storeFailedMessage(
+                _srcChainId,
+                _srcAddress,
+                _nonce,
+                _payload,
+                reason
+            );
         }
 
         emit ReceiveFromChain(_srcChainId, _from, borrowParams.amount);
