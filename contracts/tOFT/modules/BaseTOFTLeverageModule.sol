@@ -204,7 +204,13 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             if (balanceAfter - balanceBefore >= amount) {
                 IERC20(address(this)).safeTransfer(leverageFor, amount);
             }
-            revert(_getRevertMsg(reason)); //forward revert because it's handled by the main executor
+            _storeFailedMessage(
+                _srcChainId,
+                _srcAddress,
+                _nonce,
+                _payload,
+                reason
+            );
         }
 
         emit ReceiveFromChain(_srcChainId, leverageFor, amount);

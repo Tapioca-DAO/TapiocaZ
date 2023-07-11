@@ -213,7 +213,13 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
                     optionsData.paymentTokenAmount
                 );
             }
-            revert(_getRevertMsg(reason)); //forward revert because it's handled by the main executor
+            _storeFailedMessage(
+                _srcChainId,
+                _srcAddress,
+                _nonce,
+                _payload,
+                reason
+            );
         }
 
         emit ReceiveFromChain(
