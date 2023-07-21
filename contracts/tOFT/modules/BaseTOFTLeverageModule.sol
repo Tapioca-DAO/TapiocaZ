@@ -146,6 +146,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         ISingularity(externalData.srcMarket).multiHopSellCollateral(
             from,
             share,
+            true,
             swapData,
             lzData,
             externalData
@@ -238,8 +239,6 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         );
 
         //repay
-        uint256 repayableAmount = IMagnetar(externalData.magnetar)
-            .getBorrowPartForAmount(externalData.srcMarket, amountOut);
         ICommonData.IApproval[] memory approvals;
         IUSDOBase(swapData.tokenOut).sendAndLendOrRepay{
             value: address(this).balance
@@ -251,11 +250,11 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             IUSDOBase.ILendOrRepayParams({
                 repay: true,
                 depositAmount: amountOut,
-                repayAmount: repayableAmount,
+                repayAmount: 0, //it will be computed automatically at the destination IUSDO call
                 marketHelper: externalData.magnetar,
                 market: externalData.srcMarket,
                 removeCollateral: false,
-                removeCollateralShare: 0,
+                removeCollateralAmount: 0,
                 lockData: ITapiocaOptionLiquidityProvision.IOptionsLockData({
                     lock: false,
                     target: address(0),
