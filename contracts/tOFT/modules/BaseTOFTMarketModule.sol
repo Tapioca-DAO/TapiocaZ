@@ -199,7 +199,9 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
         IMagnetar(borrowParams.marketHelper)
-            .depositAddCollateralAndBorrowFromMarket{value: msg.value}(
+            .depositAddCollateralAndBorrowFromMarket{
+            value: withdrawParams.withdraw ? msg.value : 0
+        }(
             borrowParams.market,
             LzLib.bytes32ToAddress(_to),
             borrowParams.amount,
