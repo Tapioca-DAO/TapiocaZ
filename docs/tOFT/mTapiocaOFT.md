@@ -1470,28 +1470,6 @@ function useCustomAdapterParams() external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### validModules
-
-```solidity
-function validModules(address moduleAddr) external view returns (bool isValid)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| moduleAddr | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| isValid | bool | undefined |
-
 ### wrap
 
 ```solidity
