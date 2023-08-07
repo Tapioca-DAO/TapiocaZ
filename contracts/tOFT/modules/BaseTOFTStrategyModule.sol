@@ -130,6 +130,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         bytes memory _payload,
         IERC20 _erc20
     ) public {
+        require(validModules[module], "TOFT_MODULE");
         (
             ,
             ,

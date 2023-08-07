@@ -75,6 +75,11 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
         strategyModule = BaseTOFTStrategyModule(_strategyModule);
         marketModule = BaseTOFTMarketModule(_marketModule);
         optionsModule = BaseTOFTOptionsModule(_optionsModule);
+
+        validModules[_leverageModule] = true;
+        validModules[_strategyModule] = true;
+        validModules[_marketModule] = true;
+        validModules[_optionsModule] = true;
     }
 
     // ********************** //

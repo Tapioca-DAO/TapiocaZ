@@ -129,6 +129,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         uint64 _nonce,
         bytes memory _payload
     ) public payable {
+        require(validModules[module], "TOFT_MODULE");
         (
             ,
             address _from, //from

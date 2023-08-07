@@ -29,6 +29,8 @@ contract BaseTOFTStorage is OFTV2 {
     /// @notice Decimal cache number of the ERC20.
     uint8 internal _decimalCache;
 
+    mapping(address moduleAddr => bool isValid) internal validModules;
+
     uint16 internal constant PT_YB_SEND_STRAT = 770;
     uint16 internal constant PT_YB_RETRIEVE_STRAT = 771;
     uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 772;
