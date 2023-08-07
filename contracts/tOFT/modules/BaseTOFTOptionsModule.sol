@@ -159,6 +159,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
         uint64 _nonce,
         bytes memory _payload
     ) public {
+        require(validModules[module], "TOFT_MODULE");
         (
             ,
             uint64 amountSD,
