@@ -4,7 +4,6 @@ import hre, { ethers } from 'hardhat';
 import { setupFixture } from './fixtures';
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 
-//should be executed on mainnet fork
 describe('Balancer', () => {
     describe('connectedOFTs', () => {
         it('should fail for unauthorized user', async () => {
