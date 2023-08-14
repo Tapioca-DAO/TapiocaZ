@@ -356,7 +356,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         address,
         uint,
         bytes memory
-    ) external override { }
+    ) external override {}
 
     // ************************ //
     // *** OWNER FUNCTIONS *** //
