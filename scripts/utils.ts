@@ -72,9 +72,18 @@ export const useUtils = (
             await ethers.getContractAt('ERC20', erc20Address)
         ).connect(hostChainNetworkSigner);
 
-        const erc20name = await erc20.name();
-        const erc20symbol = await erc20.symbol();
-        const erc20decimal = await erc20.decimals();
+        const erc20name =
+            erc20Address == ethers.constants.AddressZero
+                ? 'Ethereum'
+                : await erc20.name();
+        const erc20symbol =
+            erc20Address == ethers.constants.AddressZero
+                ? 'ETH'
+                : await erc20.symbol();
+        const erc20decimal =
+            erc20Address == ethers.constants.AddressZero
+                ? 18
+                : await erc20.decimals();
 
         const leverageModule = await (
             await ethers.getContractFactory('BaseTOFTLeverageModule')

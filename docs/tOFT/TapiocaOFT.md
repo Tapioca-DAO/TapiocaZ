@@ -1129,6 +1129,27 @@ function setUseCustomAdapterParams(bool _useCustomAdapterParams) external nonpay
 |---|---|---|
 | _useCustomAdapterParams | bool | undefined |
 
+### sgReceive
+
+```solidity
+function sgReceive(uint16, bytes, uint256, address, uint256, bytes) external nonpayable
+```
+
+needed for Stargate Router to receive funds from Balancer.sol contract
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint16 | undefined |
+| _1 | bytes | undefined |
+| _2 | uint256 | undefined |
+| _3 | address | undefined |
+| _4 | uint256 | undefined |
+| _5 | bytes | undefined |
+
 ### sharedDecimals
 
 ```solidity

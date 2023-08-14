@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IStargateRouter.sol";
+import "tapioca-periph/contracts/interfaces/IStargateEthVault.sol";
 import "@rari-capital/solmate/src/auth/Owned.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
@@ -160,6 +161,64 @@ contract Balancer is Owned {
     // *********************** //
     // *** OWNER FUNCTIONS *** //
     // *********************** //
+    function retryRevert(
+        uint16 _srcChainId,
+        bytes calldata _srcAddress,
+        uint256 _nonce
+    ) external payable onlyOwner {
+        router.retryRevert{value: msg.value}(_srcChainId, _srcAddress, _nonce);
+    }
+
+    function instantRedeemLocal(
+        uint16 _srcPoolId,
+        uint256 _amountLP,
+        address _to
+    ) external onlyOwner returns (uint256 amountSD) {
+        amountSD = router.instantRedeemLocal(_srcPoolId, _amountLP, _to);
+    }
+
+    function redeemLocal(
+        uint16 _dstChainId,
+        uint256 _srcPoolId,
+        uint256 _dstPoolId,
+        address payable _refundAddress,
+        uint256 _amountLP,
+        bytes calldata _to,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) external payable onlyOwner {
+        router.redeemLocal{value: msg.value}(
+            _dstChainId,
+            _srcPoolId,
+            _dstPoolId,
+            _refundAddress,
+            _amountLP,
+            _to,
+            _lzTxParams
+        );
+    }
+
+    function redeemRemote(
+        uint16 _dstChainId,
+        uint256 _srcPoolId,
+        uint256 _dstPoolId,
+        address payable _refundAddress,
+        uint256 _amountLP,
+        uint256 _minAmountLD,
+        bytes calldata _to,
+        IStargateRouter.lzTxObj memory _lzTxParams
+    ) external payable onlyOwner {
+        router.redeemRemote{value: msg.value}(
+            _dstChainId,
+            _srcPoolId,
+            _dstPoolId,
+            _refundAddress,
+            _amountLP,
+            _minAmountLD,
+            _to,
+            _lzTxParams
+        );
+    }
+
     /// @notice performs a rebalance operation
     /// @dev callable only by the owner
     /// @param _srcOft the source TOFT address
@@ -197,8 +256,9 @@ contract Balancer is Owned {
 
         //send
         bool _isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
+
         if (_isNative) {
-            if (msg.value != _amount) revert FeeAmountNotSet();
+            if (msg.value == 0) revert FeeAmountNotSet();
             _sendNative(_srcOft, _amount, _dstChainId, _slippage);
         } else {
             if (msg.value == 0) revert FeeAmountNotSet();
@@ -282,8 +342,8 @@ contract Balancer is Owned {
         uint256 _slippage
     ) private {
         if (address(this).balance < _amount) revert ExceedsBalance();
-
-        routerETH.swapETH(
+        uint256 valueAmount = msg.value + _amount;
+        routerETH.swapETH{value: valueAmount}(
             _dstChainId,
             _oft, //refund
             abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),

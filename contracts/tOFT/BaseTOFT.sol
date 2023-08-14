@@ -9,7 +9,9 @@ import "./modules/BaseTOFTStrategyModule.sol";
 import "./modules/BaseTOFTMarketModule.sol";
 import "./modules/BaseTOFTOptionsModule.sol";
 
-contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
+import "tapioca-periph/contracts/interfaces/IStargateReceiver.sol";
+
+contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -345,6 +347,16 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit {
             false
         );
     }
+
+    /// @notice needed for Stargate Router to receive funds from Balancer.sol contract
+    function sgReceive(
+        uint16,
+        bytes memory,
+        uint,
+        address,
+        uint,
+        bytes memory
+    ) external override {}
 
     // ************************ //
     // *** OWNER FUNCTIONS *** //

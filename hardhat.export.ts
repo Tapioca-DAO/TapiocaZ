@@ -41,6 +41,7 @@ const supportedChains = SDK.API.utils.getSupportedChains().reduce(
     }),
     {} as { [key in TNetwork]: HttpNetworkConfig },
 );
+
 const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     SDK: { project: SDK.API.config.TAPIOCA_PROJECTS_NAME.TapiocaZ },
     solidity: {
@@ -63,6 +64,10 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
+            saveDeployments: false,
+            forking: {
+                url: supportedChains['ethereum'].url,
+            },
             hardfork: 'merge',
             allowUnlimitedContractSize: true,
             gas: 10_000_000,
