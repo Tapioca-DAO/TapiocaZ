@@ -82,6 +82,8 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         IUSDOBase.ILeverageSwapData calldata swapData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
+        require(swapData.tokenOut != address(this), "TOFT_token_not_valid");
+
         bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);
 
         (amount, ) = _removeDust(amount);
