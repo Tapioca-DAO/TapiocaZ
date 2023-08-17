@@ -371,7 +371,7 @@ contract Balancer is Owned {
             .lzTxObj({
                 dstGasForCall: 0,
                 dstNativeAmount: msg.value,
-                dstNativeAddr: abi.encode(
+                dstNativeAddr: abi.encodePacked(
                     connectedOFTs[_oft][_dstChainId].dstOft
                 )
             });
