@@ -219,12 +219,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
         (_amount, ) = _removeDust(_amount);
-        _debitFrom(
-            address(this),
-            lzEndpoint.getChainId(),
-            LzLib.addressToBytes32(address(this)),
-            _amount
-        );
+        _burn(address(this), _amount);
 
         bytes memory lzSendBackPayload = _encodeSendPayload(
             from,
