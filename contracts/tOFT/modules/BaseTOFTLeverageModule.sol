@@ -227,7 +227,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         IUSDOBase.ILeverageLZData memory lzData,
         address leverageFor
     ) public payable {
-        _unwrap(address(this), amount);
+        ITapiocaOFT(address(this)).unwrap(address(this), amount);
 
         //swap to USDO
         IERC20(erc20).approve(externalData.swapper, 0);
