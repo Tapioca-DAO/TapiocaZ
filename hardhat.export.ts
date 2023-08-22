@@ -101,8 +101,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         enabled: false,
     },
     dodoc: {
-        include: ['TapiocaWrapper', 'TapiocaOFT'],
-        exclude: ['TapiocaOFTMock'],
+        runOnCompile: true,
     },
     mocha: {
         timeout: 4000000,
