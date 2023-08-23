@@ -389,7 +389,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 allowance(_fromAddress, msg.sender) >= _amount,
                 "TOFT_allowed"
             );
-            _allowances[_fromAddress][msg.sender] -= _amount;
+            _spendAllowance(_fromAddress, msg.sender, _amount);
         }
         require(_amount > 0, "TOFT_0");
         IERC20(erc20).safeTransferFrom(_fromAddress, address(this), _amount);

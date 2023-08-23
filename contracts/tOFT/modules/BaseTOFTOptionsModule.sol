@@ -201,6 +201,7 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
                 optionsData.tapAmount,
                 optionsData.target,
                 tapSendData,
+                optionsData.paymentTokenAmount,
                 approvals
             )
         );
@@ -238,17 +239,32 @@ contract BaseTOFTOptionsModule is BaseTOFTStorage {
         address target,
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             memory tapSendData,
+        uint256 paymentTokenAmount,
         ICommonData.IApproval[] memory approvals
     ) public {
         if (approvals.length > 0) {
             _callApproval(approvals);
         }
 
+        uint256 paymentTokenBalanceBefore = IERC20(paymentToken).balanceOf(
+            address(this)
+        );
         ITapiocaOptionsBroker(target).exerciseOption(
             oTAPTokenID,
             paymentToken,
             tapAmount
         );
+        uint256 paymentTokenBalanceAfter = IERC20(paymentToken).balanceOf(
+            address(this)
+        );
+
+        if (paymentTokenBalanceBefore > paymentTokenBalanceAfter) {
+            uint256 diff = paymentTokenBalanceBefore - paymentTokenBalanceAfter;
+            if (diff < paymentTokenAmount) {
+                uint256 toReturn = paymentTokenAmount - diff;
+                IERC20(paymentToken).safeTransfer(from, toReturn);
+            }
+        }
         if (tapSendData.withdrawOnAnotherChain) {
             ISendFrom(tapSendData.tapOftAddress).sendFrom(
                 address(this),
