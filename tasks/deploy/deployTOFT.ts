@@ -61,6 +61,20 @@ export const deployTOFT__task = async (
         );
     }
 
+    let clusterAddress = hre.ethers.constants.AddressZero;
+    let clusterDep = hre.SDK.db
+        .loadGlobalDeployment(tag, 'Cluster', chainInfo.chainId)
+        .find((e) => e.name == 'Cluster');
+
+    if (!clusterDep) {
+        clusterDep = hre.SDK.db
+            .loadLocalDeployment(tag, chainInfo.chainId)
+            .find((e) => e.name == 'Cluster');
+    }
+    if (clusterDep) {
+        clusterAddress = clusterDep.address;
+    }
+
     /**
      * Deploy TOFT
      */
@@ -70,6 +84,7 @@ export const deployTOFT__task = async (
         tag,
         ercAddress,
         yieldBox.address,
+        clusterAddress,
         args,
     );
     const deployedTOFT = await initiateTOFTDeployment(
@@ -234,6 +249,7 @@ async function getPreDeploymentInfo(
     tag: string,
     ercAddress: string,
     yieldBoxAddress: string,
+    clusterAddress: string,
     args: { isMerged?: boolean; isNative?: boolean },
 ) {
     const signer = (await hre.ethers.getSigners())[0];
@@ -260,6 +276,7 @@ async function getPreDeploymentInfo(
         currentChainInfo.address,
         ercAddress,
         yieldBoxAddress,
+        clusterAddress,
         Number(hostChainInfo.chainId),
         await useNetwork(hre, hostChainName),
         args.isMerged,
