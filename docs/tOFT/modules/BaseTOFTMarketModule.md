@@ -225,6 +225,23 @@ function circulatingSupply() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### cluster
+
+```solidity
+function cluster() external view returns (contract ICluster)
+```
+
+The Cluster address
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ICluster | undefined |
+
 ### creditedPackets
 
 ```solidity

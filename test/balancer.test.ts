@@ -122,7 +122,6 @@ describe('Balancer', () => {
 
         it('should route funds to another OFT', async () => {
             const {
-                signer,
                 mtapiocaOFT0,
                 mtapiocaOFT10,
                 balancer,
@@ -187,6 +186,7 @@ describe('Balancer', () => {
                 ['uint256', 'uint256'],
                 [1, 1],
             );
+
             await balancer.rebalance(
                 mtapiocaOFT0.address,
                 1,

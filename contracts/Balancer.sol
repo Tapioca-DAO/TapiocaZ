@@ -384,7 +384,7 @@ contract Balancer is Owned {
             _amount,
             _computeMinAmount(_amount, _slippage),
             _lzTxParams,
-            _lzTxParams.dstNativeAddr,
+            abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
             "0x"
         );
     }
