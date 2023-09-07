@@ -101,7 +101,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         bytes memory airdropAdapterParam,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
-        require(amount > 0, "TOFT_0");
+        require(amount > 0 || share > 0, "TOFT_0");
 
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
@@ -218,7 +218,16 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             ICommonData.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint64, uint256, uint256, address, ICommonData.IApproval[])
+                (
+                    uint16,
+                    bytes32,
+                    bytes32,
+                    uint64,
+                    uint256,
+                    uint256,
+                    address,
+                    ICommonData.IApproval[]
+                )
             );
 
         uint256 _amount = _sd2ld(amountSD);
@@ -228,8 +237,13 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             _callApproval(approvals);
         }
 
-        _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
-
+        (_amount, ) = _retrieveFromYieldBox(
+            _assetId,
+            _amount,
+            _share,
+            _from,
+            address(this)
+        );
         (_amount, ) = _removeDust(_amount);
         _burn(address(this), _amount);
 
@@ -264,10 +278,17 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         uint256 _share,
         address _from,
         address _to
-    ) private {
-        yieldBox.withdraw(_assetId, _from, _to, _amount, _share);
+    ) private returns (uint256 amountOut, uint256 shareOut) {
+        _amount = _share > 0 ? 0 : _amount;
+        _share = _amount > 0 ? 0 : _share;
+        (amountOut, shareOut) = yieldBox.withdraw(
+            _assetId,
+            _from,
+            _to,
+            _amount,
+            _share
+        );
     }
-
 
     function _callApproval(ICommonData.IApproval[] memory approvals) private {
         for (uint256 i = 0; i < approvals.length; ) {
