@@ -677,10 +677,10 @@ function renounceOwnership() external nonpayable
 ### retrieveFromStrategy
 
 ```solidity
-function retrieveFromStrategy(address _from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
+function retrieveFromStrategy(address _from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, ICommonData.IApproval[] approvals) external payable
 ```
 
-extracts TOFT from a specific strategy available on another layer
+
 
 
 
@@ -688,13 +688,14 @@ extracts TOFT from a specific strategy available on another layer
 
 | Name | Type | Description |
 |---|---|---|
-| _from | address | the sender address |
-| amount | uint256 | the transferred amount |
+| _from | address | undefined |
+| amount | uint256 | undefined |
 | share | uint256 | undefined |
-| assetId | uint256 | the destination YieldBox asset id |
-| lzDstChainId | uint16 | the destination LayerZero id |
-| zroPaymentAddress | address | LayerZero ZRO payment address |
-| airdropAdapterParam | bytes | the LayerZero aidrop adapter params |
+| assetId | uint256 | undefined |
+| lzDstChainId | uint16 | undefined |
+| zroPaymentAddress | address | undefined |
+| airdropAdapterParam | bytes | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### retryMessage
 

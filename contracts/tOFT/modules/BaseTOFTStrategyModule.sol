@@ -8,6 +8,8 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
+import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
+import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 
 import "../BaseTOFTStorage.sol";
 
@@ -96,7 +98,8 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        bytes memory airdropAdapterParam
+        bytes memory airdropAdapterParam,
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         require(amount > 0, "TOFT_0");
 
@@ -111,7 +114,8 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             _ld2sd(amount),
             share,
             assetId,
-            zroPaymentAddress
+            zroPaymentAddress,
+            approvals
         );
         _lzSend(
             lzDstChainId,
@@ -210,14 +214,20 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             uint64 amountSD,
             uint256 _share,
             uint256 _assetId,
-            address _zroPaymentAddress
+            address _zroPaymentAddress,
+            ICommonData.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint64, uint256, uint256, address)
+                (uint16, bytes32, bytes32, uint64, uint256, uint256, address, ICommonData.IApproval[])
             );
 
         uint256 _amount = _sd2ld(amountSD);
         address _from = LzLib.bytes32ToAddress(from);
+
+        if (approvals.length > 0) {
+            _callApproval(approvals);
+        }
+
         _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
         (_amount, ) = _removeDust(_amount);
@@ -256,5 +266,63 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         address _to
     ) private {
         yieldBox.withdraw(_assetId, _from, _to, _amount, _share);
+    }
+
+
+    function _callApproval(ICommonData.IApproval[] memory approvals) private {
+        for (uint256 i = 0; i < approvals.length; ) {
+            if (approvals[i].permitBorrow) {
+                try
+                    IPermitBorrow(approvals[i].target).permitBorrow(
+                        approvals[i].owner,
+                        approvals[i].spender,
+                        approvals[i].value,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
+            } else if (approvals[i].permitAll) {
+                try
+                    IPermitAll(approvals[i].target).permitAll(
+                        approvals[i].owner,
+                        approvals[i].spender,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
+            } else {
+                try
+                    IERC20Permit(approvals[i].target).permit(
+                        approvals[i].owner,
+                        approvals[i].spender,
+                        approvals[i].value,
+                        approvals[i].deadline,
+                        approvals[i].v,
+                        approvals[i].r,
+                        approvals[i].s
+                    )
+                {} catch Error(string memory reason) {
+                    if (!approvals[i].allowFailure) {
+                        revert(reason);
+                    }
+                }
+            }
+
+            unchecked {
+                ++i;
+            }
+        }
     }
 }

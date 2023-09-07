@@ -269,7 +269,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        bytes memory airdropAdapterParam
+        bytes memory airdropAdapterParam,
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         _executeModule(
             Module.Strategy,
@@ -281,7 +282,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 assetId,
                 lzDstChainId,
                 zroPaymentAddress,
-                airdropAdapterParam
+                airdropAdapterParam,
+                approvals
             ),
             false
         );
