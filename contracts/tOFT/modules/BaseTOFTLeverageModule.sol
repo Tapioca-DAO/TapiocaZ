@@ -14,9 +14,9 @@ import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOptionLiquidityProvision.sol";
 
-import "../BaseTOFTStorage.sol";
+import "./TOFTCommon.sol";
 
-contract BaseTOFTLeverageModule is BaseTOFTStorage {
+contract BaseTOFTLeverageModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -309,62 +309,5 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
     function _safeTransferETH(address to, uint256 amount) private {
         (bool sent, ) = to.call{value: amount}("");
         require(sent, "TOFT_failed");
-    }
-
-    function _callApproval(ICommonData.IApproval[] memory approvals) private {
-        for (uint256 i = 0; i < approvals.length; ) {
-            if (approvals[i].permitBorrow) {
-                try
-                    IPermitBorrow(approvals[i].target).permitBorrow(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].value,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            } else if (approvals[i].permitAll) {
-                try
-                    IPermitAll(approvals[i].target).permitAll(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            } else {
-                try
-                    IERC20Permit(approvals[i].target).permit(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].value,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            }
-
-            unchecked {
-                ++i;
-            }
-        }
     }
 }
