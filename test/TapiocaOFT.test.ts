@@ -620,7 +620,6 @@ describe('TapiocaOFT', () => {
                 signer.address,
                 signer.address,
                 bigDummyAmount,
-                toDepositShare,
                 1, //asset id
                 dstChainId0,
                 {
@@ -664,7 +663,6 @@ describe('TapiocaOFT', () => {
             await tapiocaOFT10.retrieveFromStrategy(
                 signer.address,
                 yb0BalanceAfterCrossChainDeposit,
-                toWithdrawShare,
                 1,
                 dstChainId0,
                 ethers.constants.AddressZero,

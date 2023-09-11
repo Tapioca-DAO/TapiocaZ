@@ -234,7 +234,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         address from,
         address to,
         uint256 amount,
-        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         ICommonData.ISendOptions calldata options
@@ -246,7 +245,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 from,
                 to,
                 amount,
-                share,
                 assetId,
                 lzDstChainId,
                 options
@@ -265,7 +263,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     function retrieveFromStrategy(
         address from,
         uint256 amount,
-        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
@@ -278,7 +275,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 BaseTOFTStrategyModule.retrieveFromStrategy.selector,
                 from,
                 amount,
-                share,
                 assetId,
                 lzDstChainId,
                 zroPaymentAddress,

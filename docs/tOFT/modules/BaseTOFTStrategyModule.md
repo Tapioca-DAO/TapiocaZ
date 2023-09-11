@@ -270,7 +270,7 @@ function decreaseAllowance(address spender, uint256 subtractedValue) external no
 ### depositToYieldbox
 
 ```solidity
-function depositToYieldbox(uint256 _assetId, uint256 _amount, uint256 _share, contract IERC20 _erc20, address _from, address _to) external nonpayable
+function depositToYieldbox(uint256 _assetId, uint256 _amount, contract IERC20 _erc20, address _from, address _to) external nonpayable
 ```
 
 
@@ -283,7 +283,6 @@ function depositToYieldbox(uint256 _assetId, uint256 _amount, uint256 _share, co
 |---|---|---|
 | _assetId | uint256 | undefined |
 | _amount | uint256 | undefined |
-| _share | uint256 | undefined |
 | _erc20 | contract IERC20 | undefined |
 | _from | address | undefined |
 | _to | address | undefined |
@@ -677,7 +676,7 @@ function renounceOwnership() external nonpayable
 ### retrieveFromStrategy
 
 ```solidity
-function retrieveFromStrategy(address _from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, ICommonData.IApproval[] approvals) external payable
+function retrieveFromStrategy(address _from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -690,7 +689,6 @@ function retrieveFromStrategy(address _from, uint256 amount, uint256 share, uint
 |---|---|---|
 | _from | address | undefined |
 | amount | uint256 | undefined |
-| share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | zroPaymentAddress | address | undefined |
@@ -761,7 +759,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToStrategy
 
 ```solidity
-function sendToStrategy(address _from, address _to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ICommonData.ISendOptions options) external payable
+function sendToStrategy(address _from, address _to, uint256 amount, uint256 assetId, uint16 lzDstChainId, ICommonData.ISendOptions options) external payable
 ```
 
 
@@ -775,7 +773,6 @@ function sendToStrategy(address _from, address _to, uint256 amount, uint256 shar
 | _from | address | undefined |
 | _to | address | undefined |
 | amount | uint256 | undefined |
-| share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | options | ICommonData.ISendOptions | undefined |
