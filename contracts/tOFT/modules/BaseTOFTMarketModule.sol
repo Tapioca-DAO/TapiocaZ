@@ -207,10 +207,12 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
+
+        uint256 gas = withdrawParams.withdraw
+            ? (msg.value > 0 ? msg.value : address(this).balance)
+            : 0;
         IMagnetar(borrowParams.marketHelper)
-            .depositAddCollateralAndBorrowFromMarket{
-            value: withdrawParams.withdraw ? msg.value : 0
-        }(
+            .depositAddCollateralAndBorrowFromMarket{value: gas}(
             borrowParams.market,
             LzLib.bytes32ToAddress(_to),
             borrowParams.amount,
