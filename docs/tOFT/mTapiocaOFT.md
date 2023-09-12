@@ -404,7 +404,7 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 ### exerciseOption
 
 ```solidity
-function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ICommonData.IApproval[] approvals) external payable
+function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ICommonData.IApproval[] approvals, bytes adapterParams) external payable
 ```
 
 
@@ -419,6 +419,7 @@ function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData opt
 | lzData | ITapiocaOptionsBrokerCrossChain.IExerciseLZData | undefined |
 | tapSendData | ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| adapterParams | bytes | undefined |
 
 ### extractUnderlying
 

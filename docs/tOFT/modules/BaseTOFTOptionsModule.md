@@ -386,7 +386,7 @@ function exerciseInternal(address from, uint256 oTAPTokenID, address paymentToke
 ### exerciseOption
 
 ```solidity
-function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ICommonData.IApproval[] approvals) external payable
+function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ICommonData.IApproval[] approvals, bytes adapterParams) external payable
 ```
 
 
@@ -401,6 +401,7 @@ function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData opt
 | lzData | ITapiocaOptionsBrokerCrossChain.IExerciseLZData | undefined |
 | tapSendData | ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| adapterParams | bytes | undefined |
 
 ### failedMessages
 
