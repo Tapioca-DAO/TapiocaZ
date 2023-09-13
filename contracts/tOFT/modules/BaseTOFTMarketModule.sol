@@ -276,7 +276,6 @@ contract BaseTOFTMarketModule is TOFTCommon {
                 withdrawParams.withdrawLzChainId,
                 LzLib.addressToBytes32(to),
                 removeParams.amount,
-                share,
                 withdrawParams.withdrawAdapterParams,
                 payable(to),
                 withdrawParams.withdrawLzFeeAmount
