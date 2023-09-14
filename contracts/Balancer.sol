@@ -345,7 +345,7 @@ contract Balancer is Owned {
         uint256 valueAmount = msg.value + _amount;
         routerETH.swapETH{value: valueAmount}(
             _dstChainId,
-            _oft, //refund
+            _oft, //refund to the OFT so it can be used for rebalancing purposes in future operations
             abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
             _amount,
             _computeMinAmount(_amount, _slippage)
@@ -382,7 +382,7 @@ contract Balancer is Owned {
             _dstChainId,
             _srcPoolId,
             _dstPoolId,
-            _oft, //refund,
+            _oft, 
             _amount,
             _computeMinAmount(_amount, _slippage),
             _lzTxParams,

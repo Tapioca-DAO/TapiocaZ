@@ -264,7 +264,6 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                 withdrawParams.withdrawLzChainId,
                 LzLib.addressToBytes32(to),
                 removeParams.amount,
-                share,
                 withdrawParams.withdrawAdapterParams,
                 payable(to),
                 withdrawParams.withdrawLzFeeAmount
