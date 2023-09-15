@@ -8,10 +8,12 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
+import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
+import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 
-import "../BaseTOFTStorage.sol";
+import "./TOFTCommon.sol";
 
-contract BaseTOFTStrategyModule is BaseTOFTStorage {
+contract BaseTOFTStrategyModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -19,6 +21,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         address _lzEndpoint,
         address _erc20,
         IYieldBoxBase _yieldBox,
+        ICluster _cluster,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -28,6 +31,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             _lzEndpoint,
             _erc20,
             _yieldBox,
+            _cluster,
             _name,
             _symbol,
             _decimal,
@@ -46,7 +50,6 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         address _from,
         address _to,
         uint256 amount,
-        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         ICommonData.ISendOptions calldata options
@@ -55,7 +58,6 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
         (amount, ) = _removeDust(amount);
-        (share, ) = _removeDust(share);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
@@ -63,11 +65,16 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             LzLib.addressToBytes32(_from),
             toAddress,
             _ld2sd(amount),
-            share,
             assetId,
             options.zroPaymentAddress
         );
 
+        _checkGasLimit(
+            lzDstChainId,
+            PT_YB_SEND_STRAT,
+            LzLib.buildDefaultAdapterParams(options.extraGasLimit),
+            options.extraGasLimit
+        );
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -90,26 +97,32 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
     function retrieveFromStrategy(
         address _from,
         uint256 amount,
-        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        bytes memory airdropAdapterParam
+        bytes memory airdropAdapterParam,
+        ICommonData.IApproval[] calldata approvals
     ) external payable {
         require(amount > 0, "TOFT_0");
 
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
         (amount, ) = _removeDust(amount);
-        (share, ) = _removeDust(share);
         bytes memory lzPayload = abi.encode(
             PT_YB_RETRIEVE_STRAT,
             LzLib.addressToBytes32(_from),
             toAddress,
             _ld2sd(amount),
-            share,
             assetId,
-            zroPaymentAddress
+            zroPaymentAddress,
+            approvals
+        );
+
+        _checkGasLimit(
+            lzDstChainId,
+            PT_YB_RETRIEVE_STRAT,
+            airdropAdapterParam,
+            NO_EXTRA_GAS
         );
         _lzSend(
             lzDstChainId,
@@ -131,18 +144,10 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         IERC20 _erc20
     ) public {
         require(validModules[module], "TOFT_MODULE");
-        (
-            ,
-            ,
-            bytes32 from,
-            uint64 amountSD,
-            uint256 share,
-            uint256 assetId,
-
-        ) = abi.decode(
-                _payload,
-                (uint16, bytes32, bytes32, uint64, uint256, uint256, address)
-            );
+        (, , bytes32 from, uint64 amountSD, uint256 assetId, ) = abi.decode(
+            _payload,
+            (uint16, bytes32, bytes32, uint64, uint256, address)
+        );
 
         uint256 amount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));
@@ -159,7 +164,6 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
                 this.depositToYieldbox.selector,
                 assetId,
                 amount,
-                share,
                 _erc20,
                 address(this),
                 onBehalfOf
@@ -184,17 +188,13 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
     function depositToYieldbox(
         uint256 _assetId,
         uint256 _amount,
-        uint256 _share,
         IERC20 _erc20,
         address _from,
         address _to
     ) public {
-        _amount = _share > 0
-            ? yieldBox.toAmount(_assetId, _share, false)
-            : _amount;
         _erc20.approve(address(yieldBox), 0);
         _erc20.approve(address(yieldBox), _amount);
-        yieldBox.depositAsset(_assetId, _from, _to, _amount, _share);
+        yieldBox.depositAsset(_assetId, _from, _to, _amount, 0);
     }
 
     function strategyWithdraw(
@@ -206,25 +206,37 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
             bytes32 from,
             ,
             uint64 amountSD,
-            uint256 _share,
             uint256 _assetId,
-            address _zroPaymentAddress
+            address _zroPaymentAddress,
+            ICommonData.IApproval[] memory approvals
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint64, uint256, uint256, address)
+                (
+                    uint16,
+                    bytes32,
+                    bytes32,
+                    uint64,
+                    uint256,
+                    address,
+                    ICommonData.IApproval[]
+                )
             );
 
         uint256 _amount = _sd2ld(amountSD);
         address _from = LzLib.bytes32ToAddress(from);
-        _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
-        (_amount, ) = _removeDust(_amount);
-        _debitFrom(
-            address(this),
-            lzEndpoint.getChainId(),
-            LzLib.addressToBytes32(address(this)),
-            _amount
+        if (approvals.length > 0) {
+            _callApproval(approvals);
+        }
+
+        (_amount, ) = _retrieveFromYieldBox(
+            _assetId,
+            _amount,
+            _from,
+            address(this)
         );
+        (_amount, ) = _removeDust(_amount);
+        _burn(address(this), _amount);
 
         bytes memory lzSendBackPayload = _encodeSendPayload(
             from,
@@ -233,7 +245,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         _lzSend(
             _srcChainId,
             lzSendBackPayload,
-            payable(this),
+            payable(_from),
             _zroPaymentAddress,
             "",
             address(this).balance
@@ -254,10 +266,15 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
     function _retrieveFromYieldBox(
         uint256 _assetId,
         uint256 _amount,
-        uint256 _share,
         address _from,
         address _to
-    ) private {
-        yieldBox.withdraw(_assetId, _from, _to, _amount, _share);
+    ) private returns (uint256 amountOut, uint256 shareOut) {
+        (amountOut, shareOut) = yieldBox.withdraw(
+            _assetId,
+            _from,
+            _to,
+            _amount,
+            0
+        );
     }
 }

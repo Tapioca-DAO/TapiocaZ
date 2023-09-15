@@ -14,9 +14,9 @@ import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOptionLiquidityProvision.sol";
 
-import "../BaseTOFTStorage.sol";
+import "./TOFTCommon.sol";
 
-contract BaseTOFTLeverageModule is BaseTOFTStorage {
+contract BaseTOFTLeverageModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -24,6 +24,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         address _lzEndpoint,
         address _erc20,
         IYieldBoxBase _yieldBox,
+        ICluster _cluster,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -33,6 +34,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             _lzEndpoint,
             _erc20,
             _yieldBox,
+            _cluster,
             _name,
             _symbol,
             _decimal,
@@ -49,6 +51,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         bytes calldata airdropAdapterParams,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
+        _assureMaxSlippage(amount, swapData.amountOutMin);
         bytes32 senderBytes = LzLib.addressToBytes32(from);
 
         (amount, ) = _removeDust(amount);
@@ -64,6 +67,12 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             approvals
         );
 
+        _checkGasLimit(
+            lzData.lzSrcChainId,
+            PT_MARKET_MULTIHOP_SELL,
+            airdropAdapterParams,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzData.lzSrcChainId,
             lzPayload,
@@ -83,6 +92,11 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
         require(swapData.tokenOut != address(this), "TOFT_token_not_valid");
+        _assureMaxSlippage(amount, swapData.amountOutMin);
+        require(
+            cluster.isWhitelisted(lzData.lzDstChainId, externalData.swapper),
+            "TOFT_UNAUTHORIZED"
+        ); //fail fast
 
         bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);
 
@@ -99,6 +113,12 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
             leverageFor
         );
 
+        _checkGasLimit(
+            lzData.lzDstChainId,
+            PT_LEVERAGE_MARKET_DOWN,
+            lzData.dstAirdropAdapterParam,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzData.lzDstChainId,
             lzPayload,
@@ -227,9 +247,13 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         IUSDOBase.ILeverageLZData memory lzData,
         address leverageFor
     ) public payable {
-        _unwrap(address(this), amount);
+        ITapiocaOFT(address(this)).unwrap(address(this), amount);
 
         //swap to USDO
+        require(
+            cluster.isWhitelisted(0, externalData.swapper),
+            "TOFT_UNAUTHORIZED"
+        );
         IERC20(erc20).approve(externalData.swapper, 0);
         IERC20(erc20).approve(externalData.swapper, amount);
         ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
@@ -297,62 +321,5 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
     function _safeTransferETH(address to, uint256 amount) private {
         (bool sent, ) = to.call{value: amount}("");
         require(sent, "TOFT_failed");
-    }
-
-    function _callApproval(ICommonData.IApproval[] memory approvals) private {
-        for (uint256 i = 0; i < approvals.length; ) {
-            if (approvals[i].permitBorrow) {
-                try
-                    IPermitBorrow(approvals[i].target).permitBorrow(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].value,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            } else if (approvals[i].permitAll) {
-                try
-                    IPermitAll(approvals[i].target).permitAll(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            } else {
-                try
-                    IERC20Permit(approvals[i].target).permit(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].value,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            }
-
-            unchecked {
-                ++i;
-            }
-        }
     }
 }

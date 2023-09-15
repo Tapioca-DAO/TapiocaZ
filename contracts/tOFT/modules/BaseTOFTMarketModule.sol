@@ -23,6 +23,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         address _lzEndpoint,
         address _erc20,
         IYieldBoxBase _yieldBox,
+        ICluster _cluster,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -32,6 +33,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             _lzEndpoint,
             _erc20,
             _yieldBox,
+            _cluster,
             _name,
             _symbol,
             _decimal,
@@ -64,6 +66,12 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             approvals
         );
 
+        _checkGasLimit(
+            lzDstChainId,
+            PT_MARKET_REMOVE_COLLATERAL,
+            adapterParams,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -110,6 +118,12 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             approvals
         );
 
+        _checkGasLimit(
+            lzDstChainId,
+            PT_YB_SEND_SGL_BORROW,
+            airdropAdapterParams,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzDstChainId,
             lzPayload,

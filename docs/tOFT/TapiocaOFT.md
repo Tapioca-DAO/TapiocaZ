@@ -203,6 +203,23 @@ function circulatingSupply() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### cluster
+
+```solidity
+function cluster() external view returns (contract ICluster)
+```
+
+The Cluster address
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ICluster | undefined |
+
 ### creditedPackets
 
 ```solidity
@@ -343,7 +360,7 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 ### exerciseOption
 
 ```solidity
-function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ICommonData.IApproval[] approvals) external payable
+function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ICommonData.IApproval[] approvals, bytes adapterParams) external payable
 ```
 
 
@@ -358,6 +375,7 @@ function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData opt
 | lzData | ITapiocaOptionsBrokerCrossChain.IExerciseLZData | undefined |
 | tapSendData | ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| adapterParams | bytes | undefined |
 
 ### failedMessages
 
@@ -832,10 +850,10 @@ rescues unused ETH from the contract
 ### retrieveFromStrategy
 
 ```solidity
-function retrieveFromStrategy(address from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
+function retrieveFromStrategy(address from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, ICommonData.IApproval[] approvals) external payable
 ```
 
-extracts TOFT from a specific strategy available on another layer
+
 
 
 
@@ -843,13 +861,13 @@ extracts TOFT from a specific strategy available on another layer
 
 | Name | Type | Description |
 |---|---|---|
-| from | address | the sender address |
-| amount | uint256 | the transferred amount |
-| share | uint256 | undefined |
-| assetId | uint256 | the destination YieldBox asset id |
-| lzDstChainId | uint16 | the destination LayerZero id |
-| zroPaymentAddress | address | LayerZero ZRO payment address |
-| airdropAdapterParam | bytes | the LayerZero aidrop adapter params |
+| from | address | undefined |
+| amount | uint256 | undefined |
+| assetId | uint256 | undefined |
+| lzDstChainId | uint16 | undefined |
+| zroPaymentAddress | address | undefined |
+| airdropAdapterParam | bytes | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### retryMessage
 
@@ -935,7 +953,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToStrategy
 
 ```solidity
-function sendToStrategy(address from, address to, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, ICommonData.ISendOptions options) external payable
+function sendToStrategy(address from, address to, uint256 amount, uint256 assetId, uint16 lzDstChainId, ICommonData.ISendOptions options) external payable
 ```
 
 
@@ -949,7 +967,6 @@ function sendToStrategy(address from, address to, uint256 amount, uint256 share,
 | from | address | undefined |
 | to | address | undefined |
 | amount | uint256 | undefined |
-| share | uint256 | undefined |
 | assetId | uint256 | undefined |
 | lzDstChainId | uint16 | undefined |
 | options | ICommonData.ISendOptions | undefined |

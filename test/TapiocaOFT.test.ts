@@ -17,6 +17,7 @@ import { BN, getERC20PermitSignature } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TapiocaOFT } from '../typechain';
+import { Cluster__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-periphery';
 
 describe('TapiocaOFT', () => {
     it('simulate deploy', async () => {
@@ -37,12 +38,16 @@ describe('TapiocaOFT', () => {
         const YieldBoxMock = new YieldBoxMock__factory(deployer);
         const yieldBox = await YieldBoxMock.deploy();
 
+        const Cluster = new Cluster__factory(deployer);
+        const cluster = await Cluster.deploy(1);
+
         await (
             await hre.ethers.getContractFactory('TapiocaOFT')
         ).deploy(
             lzEndpoint.address,
             erc20Mock.address,
             yieldBox.address,
+            cluster.address,
             'test',
             'tt',
             18,
@@ -317,6 +322,9 @@ describe('TapiocaOFT', () => {
             const YieldBox_0 = yieldBox0Data.yieldBox;
             const YieldBox_10 = yieldBox10Data.yieldBox;
 
+            const Cluster = new Cluster__factory(signer);
+            const cluster = await Cluster.deploy(1);
+
             {
                 const txData =
                     await tapiocaWrapper_0.populateTransaction.createTOFT(
@@ -326,6 +334,7 @@ describe('TapiocaOFT', () => {
                                 LZEndpointMock_chainID_0.address,
                                 erc20Mock.address,
                                 YieldBox_0.address,
+                                cluster.address,
                                 31337,
                                 signer,
                             )
@@ -353,6 +362,7 @@ describe('TapiocaOFT', () => {
                                 LZEndpointMock_chainID_10.address,
                                 erc20Mock.address,
                                 YieldBox_10.address,
+                                cluster.address,
                                 10,
                                 signer,
                             )
@@ -610,7 +620,6 @@ describe('TapiocaOFT', () => {
                 signer.address,
                 signer.address,
                 bigDummyAmount,
-                toDepositShare,
                 1, //asset id
                 dstChainId0,
                 {
@@ -646,7 +655,15 @@ describe('TapiocaOFT', () => {
                 signer.address,
                 tapiocaOFT0Id,
             );
-
+            await tapiocaWrapper_10.executeTOFT(
+                tapiocaOFT10.address,
+                tapiocaOFT10.interface.encodeFunctionData('setMinDstGas', [
+                    dstChainId0,
+                    771,
+                    '200000',
+                ]),
+                true,
+            );
             await tapiocaOFT0.transfer(
                 Strategy_0.address,
                 yb0Balance.sub(bigDummyAmount),
@@ -654,11 +671,11 @@ describe('TapiocaOFT', () => {
             await tapiocaOFT10.retrieveFromStrategy(
                 signer.address,
                 yb0BalanceAfterCrossChainDeposit,
-                toWithdrawShare,
                 1,
                 dstChainId0,
                 ethers.constants.AddressZero,
                 airdropAdapterParams,
+                [],
                 {
                     value: ethers.utils.parseEther('10'),
                 },
