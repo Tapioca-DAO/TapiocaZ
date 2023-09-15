@@ -83,11 +83,10 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
         ICommonData.IApproval[] calldata approvals,
-        bytes calldata adapterParams,
-        ICluster _cluster
+        bytes calldata adapterParams
     ) external payable {
         require(
-            _cluster.isWhitelisted(
+            cluster.isWhitelisted(
                 lzData.lzDstChainId,
                 tapSendData.tapOftAddress
             ),
@@ -200,7 +199,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             );
 
         require(
-            _cluster.isWhitelisted(0, tapSendData.tapOftAddress),
+            cluster.isWhitelisted(0, tapSendData.tapOftAddress),
             "TOFT_UNAUTHORIZED"
         ); //fail fast
 
