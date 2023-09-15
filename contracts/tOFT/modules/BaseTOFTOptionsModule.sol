@@ -83,8 +83,17 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
         ICommonData.IApproval[] calldata approvals,
-        bytes calldata adapterParams
+        bytes calldata adapterParams,
+        ICluster _cluster
     ) external payable {
+        require(
+            _cluster.isWhitelisted(
+                lzData.lzDstChainId,
+                tapSendData.tapOftAddress
+            ),
+            "TOFT_UNAUTHORIZED"
+        ); //fail fast
+
         bytes32 toAddress = LzLib.addressToBytes32(optionsData.from);
 
         (uint256 paymentTokenAmount, ) = _removeDust(
@@ -189,6 +198,11 @@ contract BaseTOFTOptionsModule is TOFTCommon {
                     ICommonData.IApproval[]
                 )
             );
+
+        require(
+            _cluster.isWhitelisted(0, tapSendData.tapOftAddress),
+            "TOFT_UNAUTHORIZED"
+        ); //fail fast
 
         optionsData.paymentTokenAmount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));
