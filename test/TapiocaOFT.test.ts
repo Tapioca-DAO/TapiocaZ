@@ -88,22 +88,20 @@ describe('TapiocaOFT', () => {
             } = await loadFixture(setupFixture);
 
             await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
+            const vault = await tapiocaOFT0.vault();
 
             const balTOFTSignerBefore = await tapiocaOFT0.balanceOf(
                 signer.address,
             );
-            const balERC20ContractBefore = await erc20Mock.balanceOf(
-                tapiocaOFT0.address,
-            );
+            const balERC20ContractBefore = await erc20Mock.balanceOf(vault);
 
             await tapiocaOFT0.wrap(signer.address, signer.address, dummyAmount);
 
             const balTOFTSignerAfter = await tapiocaOFT0.balanceOf(
                 signer.address,
             );
-            const balERC20ContractAfter = await erc20Mock.balanceOf(
-                tapiocaOFT0.address,
-            );
+
+            const balERC20ContractAfter = await erc20Mock.balanceOf(vault);
 
             expect(balTOFTSignerAfter).eq(balTOFTSignerBefore.add(dummyAmount));
             expect(balERC20ContractAfter).eq(
@@ -121,6 +119,53 @@ describe('TapiocaOFT', () => {
             await expect(tapiocaOFT10.unwrap(signer.address, dummyAmount)).to.be
                 .reverted;
         });
+        it('should wrap and unwrap', async () => {
+            const {
+                signer,
+                erc20Mock,
+                tapiocaOFT0,
+                mintAndApprove,
+                dummyAmount,
+            } = await loadFixture(setupFixture);
+
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
+            await tapiocaOFT0.wrap(signer.address, signer.address, dummyAmount);
+
+            const vault = await tapiocaOFT0.vault();
+            const vaultContract = await ethers.getContractAt(
+                'TOFTVault',
+                vault,
+            );
+            let tapiocaOftBalance = await erc20Mock.balanceOf(
+                tapiocaOFT0.address,
+            );
+            let tapiocaOftVaultBalance = await erc20Mock.balanceOf(vault);
+            let supplyView = await vaultContract.viewSupply();
+
+            expect(tapiocaOftBalance.eq(0)).to.be.true;
+            expect(tapiocaOftVaultBalance.eq(dummyAmount)).to.be.true;
+            expect(supplyView.eq(dummyAmount)).to.be.true;
+
+            const signerBalanceBefore = await erc20Mock.balanceOf(
+                signer.address,
+            );
+            await expect(tapiocaOFT0.unwrap(signer.address, dummyAmount)).to.not
+                .be.reverted;
+
+            tapiocaOftBalance = await erc20Mock.balanceOf(tapiocaOFT0.address);
+            tapiocaOftVaultBalance = await erc20Mock.balanceOf(vault);
+            supplyView = await vaultContract.viewSupply();
+            expect(tapiocaOftBalance.eq(0)).to.be.true;
+            expect(tapiocaOftVaultBalance.eq(0)).to.be.true;
+            expect(supplyView.eq(0)).to.be.true;
+
+            const signerBalanceAfter = await erc20Mock.balanceOf(
+                signer.address,
+            );
+            expect(signerBalanceAfter.sub(signerBalanceBefore).eq(dummyAmount))
+                .to.be.true;
+        });
+
         it('Should unwrap and give a 1:1 ratio amount of tokens', async () => {
             const {
                 signer,
@@ -139,9 +184,8 @@ describe('TapiocaOFT', () => {
             const balERC20SignerBefore = await erc20Mock.balanceOf(
                 signer.address,
             );
-            const balERC20ContractBefore = await erc20Mock.balanceOf(
-                tapiocaOFT0.address,
-            );
+            const vault = await tapiocaOFT0.vault();
+            const balERC20ContractBefore = await erc20Mock.balanceOf(vault);
 
             await expect(tapiocaOFT0.unwrap(signer.address, dummyAmount)).to.not
                 .be.reverted;
@@ -152,9 +196,7 @@ describe('TapiocaOFT', () => {
             const balERC20SignerAfter = await erc20Mock.balanceOf(
                 signer.address,
             );
-            const balERC20ContractAfter = await erc20Mock.balanceOf(
-                tapiocaOFT0.address,
-            );
+            const balERC20ContractAfter = await erc20Mock.balanceOf(vault);
 
             expect(balTOFTSignerAfter).eq(balTOFTSignerBefore.sub(dummyAmount));
             expect(balERC20SignerAfter).eq(

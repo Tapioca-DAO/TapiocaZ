@@ -143,11 +143,7 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         require(_amount > 0, "TOFT_0");
 
         bool _isNative = erc20 == address(0);
-        if (_isNative) {
-            _safeTransferETH(msg.sender, _amount);
-        } else {
-            IERC20(erc20).safeTransfer(msg.sender, _amount);
-        }
+        vault.withdraw(msg.sender, _amount);
 
         emit Rebalancing(msg.sender, _amount, _isNative);
     }

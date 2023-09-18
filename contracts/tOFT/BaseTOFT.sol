@@ -8,6 +8,7 @@ import "./modules/BaseTOFTLeverageModule.sol";
 import "./modules/BaseTOFTStrategyModule.sol";
 import "./modules/BaseTOFTMarketModule.sol";
 import "./modules/BaseTOFTOptionsModule.sol";
+import "./TOFTVault.sol";
 
 import "tapioca-periph/contracts/interfaces/IStargateReceiver.sol";
 
@@ -39,6 +40,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
 
     /// @notice returns the amount of total wrapped native coins
     uint256 wrappedNativeAmount;
+
+    TOFTVault public vault;
 
     // ******************//
     // *** MODIFIERS *** //
@@ -84,6 +87,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         validModules[_strategyModule] = true;
         validModules[_marketModule] = true;
         validModules[_optionsModule] = true;
+
+        vault = new TOFTVault(_erc20);
     }
 
     // ********************** //
@@ -356,9 +361,15 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         bytes memory,
         uint,
         address,
-        uint,
+        uint amountLD,
         bytes memory
-    ) external override {}
+    ) external override {
+        if (erc20 == address(0)) {
+            vault.depositNative{value: amountLD}();
+        } else {
+            IERC20(erc20).safeTransfer(address(vault), amountLD);
+        }
+    }
 
     // ************************ //
     // *** OWNER FUNCTIONS *** //
@@ -368,12 +379,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param to the recipient
     function rescueEth(uint256 amount, address to) external onlyOwner {
         uint256 balance = address(this).balance;
-        if (balance < wrappedNativeAmount) revert("TOFT_low_balance");
-
-        uint256 toRescue = balance - wrappedNativeAmount;
-        require(amount <= toRescue, "TOFT_large_amount");
-
-        (bool success, ) = to.call{value: amount}("");
+        require(balance >= amount, "TOFT_HIGH_AMOUNT");
+        (bool success, ) = to.call{value: balance}("");
         require(success, "TOFT_Failed");
     }
 
@@ -394,35 +401,21 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
             _spendAllowance(_fromAddress, msg.sender, _amount);
         }
         require(_amount > 0, "TOFT_0");
-        IERC20(erc20).safeTransferFrom(_fromAddress, address(this), _amount);
+        IERC20(erc20).safeTransferFrom(_fromAddress, address(vault), _amount);
         _mint(_toAddress, _amount);
     }
 
     function _wrapNative(address _toAddress) internal virtual {
-        require(msg.value > 0, "TOFT_0");
-        wrappedNativeAmount += msg.value;
+        vault.depositNative();
         _mint(_toAddress, msg.value);
     }
 
     function _unwrap(address _toAddress, uint256 _amount) internal virtual {
         _burn(msg.sender, _amount);
-
-        if (erc20 == address(0)) {
-            wrappedNativeAmount = wrappedNativeAmount > _amount
-                ? wrappedNativeAmount - _amount
-                : 0;
-            _safeTransferETH(_toAddress, _amount);
-        } else {
-            IERC20(erc20).safeTransfer(_toAddress, _amount);
-        }
+        vault.withdraw(_toAddress, _amount);
     }
 
     //---private---
-    function _safeTransferETH(address to, uint256 amount) internal {
-        (bool sent, ) = to.call{value: amount}("");
-        require(sent, "TOFT_failed");
-    }
-
     function _extractModule(Module _module) private view returns (address) {
         address module;
         if (_module == Module.Leverage) {
