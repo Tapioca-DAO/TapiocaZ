@@ -249,11 +249,15 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             cluster.isWhitelisted(0, externalData.swapper),
             "TOFT_UNAUTHORIZED"
         );
-        IERC20(erc20).approve(externalData.swapper, 0);
-        IERC20(erc20).approve(externalData.swapper, amount);
+
+        if (erc20 != address(0)) {
+            //skip approvals for native gas
+            IERC20(erc20).approve(externalData.swapper, 0);
+            IERC20(erc20).approve(externalData.swapper, amount);
+        }
         ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
             .buildSwapData(erc20, swapData.tokenOut, amount, 0, false, false);
-        (uint256 amountOut, ) = ISwapper(externalData.swapper).swap(
+        (uint256 amountOut, ) = ISwapper(externalData.swapper).swap{value: erc20 == address(0) ? amount: 0}(
             _swapperData,
             swapData.amountOutMin,
             address(this),
