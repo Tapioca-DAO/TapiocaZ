@@ -83,6 +83,23 @@ function participate(uint256 tOLPTokenID) external nonpayable returns (uint256 o
 |---|---|---|
 | oTAPTokenID | uint256 | undefined |
 
+### tOLP
+
+```solidity
+function tOLP() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 
 
 
