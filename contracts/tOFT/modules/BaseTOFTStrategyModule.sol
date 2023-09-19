@@ -111,7 +111,14 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         bytes memory airdropAdapterParam,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
-        //allowance is checked on market
+        //allowance is also checked on market
+        if (_from != msg.sender) {
+            require(
+                allowance(_from, msg.sender) >= amount,
+                "TOFT_UNAUTHORIZED"
+            );
+            _spendAllowance(_from, msg.sender, amount);
+        }
 
         require(amount > 0, "TOFT_0");
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
