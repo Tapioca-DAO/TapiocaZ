@@ -370,10 +370,8 @@ contract Balancer is Owned {
         IStargateRouter.lzTxObj memory _lzTxParams = IStargateRouterBase
             .lzTxObj({
                 dstGasForCall: 0,
-                dstNativeAmount: msg.value,
-                dstNativeAddr: abi.encodePacked(
-                    connectedOFTs[_oft][_dstChainId].dstOft
-                )
+                dstNativeAmount: 0,
+                dstNativeAddr: "0x0"
             });
 
         erc20.approve(address(router), 0);
