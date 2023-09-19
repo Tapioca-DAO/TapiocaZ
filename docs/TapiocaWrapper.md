@@ -350,6 +350,17 @@ No TOFT has been deployed yet.
 
 
 
+### TapiocaWrapper__NotEnough
+
+```solidity
+error TapiocaWrapper__NotEnough()
+```
+
+Not enough provided
+
+
+
+
 ### TapiocaWrapper__TOFTExecutionFailed
 
 ```solidity

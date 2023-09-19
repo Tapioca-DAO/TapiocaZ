@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract TapiocaWrapper is Ownable {
     struct ExecutionCall {
         address toft;
+        uint256 value;
         bytes bytecode;
         bool revertOnFailure;
     }
@@ -48,6 +49,8 @@ contract TapiocaWrapper is Ownable {
     error TapiocaWrapper__TOFTExecutionFailed(bytes message);
     /// @notice No TOFT has been deployed yet.
     error TapiocaWrapper__NoTOFTDeployed();
+    /// @notice Not enough provided
+    error TapiocaWrapper__NotEnough();
 
     constructor(address _owner) {
         _transferOwnership(_owner);
@@ -121,14 +124,21 @@ contract TapiocaWrapper is Ownable {
         onlyOwner
         returns (bool success, bytes[] memory results)
     {
+        uint256 valAccumulator = 0;
+        uint256 totalVal = msg.value;
         results = new bytes[](_call.length);
         for (uint256 i = 0; i < _call.length; i++) {
+            valAccumulator += _call[i].value;
+
             (success, results[i]) = payable(_call[i].toft).call{
-                value: msg.value
+                value: _call[i].value
             }(_call[i].bytecode);
             if (_call[i].revertOnFailure && !success) {
                 revert TapiocaWrapper__TOFTExecutionFailed(results[i]);
             }
+        }
+        if (valAccumulator > totalVal) {
+            revert TapiocaWrapper__NotEnough();
         }
     }
 
