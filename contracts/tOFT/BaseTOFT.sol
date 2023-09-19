@@ -181,7 +181,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         _executeModule(
             Module.Leverage,
             abi.encodeWithSelector(
-                BaseTOFTLeverageModule.initMultiSell.selector,
+                BaseTOFTMarketModule.initMultiSell.selector,
                 from,
                 share,
                 swapData,
