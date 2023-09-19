@@ -50,7 +50,14 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes calldata airdropAdapterParams,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
-        // allowance checked on market
+        //allowance is also checked on market
+        if (from != msg.sender) {
+            require(
+                allowance(from, msg.sender) >= amount,
+                "TOFT_UNAUTHORIZED"
+            );
+            _spendAllowance(from, msg.sender, amount);
+        }
 
         _assureMaxSlippage(amount, swapData.amountOutMin);
         bytes32 senderBytes = LzLib.addressToBytes32(from);
