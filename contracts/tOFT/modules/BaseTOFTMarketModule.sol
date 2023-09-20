@@ -132,6 +132,12 @@ contract BaseTOFTMarketModule is TOFTCommon {
             cluster.isWhitelisted(lzDstChainId, removeParams.market),
             "TOFT_INVALID"
         );
+        if (withdrawParams.withdraw) {
+            require(
+                cluster.isWhitelisted(lzDstChainId, removeParams.marketHelper),
+                "TOFT_INVALID"
+            );
+        }
 
         _lzSend(
             lzDstChainId,
@@ -341,6 +347,10 @@ contract BaseTOFTMarketModule is TOFTCommon {
         approve(removeParams.market, share);
         IMarket(removeParams.market).removeCollateral(from, to, share);
         if (withdrawParams.withdraw) {
+            require(
+                cluster.isWhitelisted(0, removeParams.marketHelper),
+                "TOFT_INVALID"
+            );
             IMagnetar(removeParams.marketHelper).withdrawToChain{
                 value: withdrawParams.withdrawLzFeeAmount
             }(
