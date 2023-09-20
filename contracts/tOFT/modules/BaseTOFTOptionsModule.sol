@@ -44,7 +44,9 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         ISendFrom.LzCallParams calldata sendFromData,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
-        //no allowance check needed because the operation is executed against msg.sender
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            airdropAdapterParams
+        );
 
         (amount, ) = _removeDust(amount);
         bytes memory lzPayload = abi.encode(
@@ -53,7 +55,8 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             _ld2sd(amount),
             sendFromData,
             lzEndpoint.getChainId(),
-            approvals
+            approvals,
+            airdropAmount
         );
 
         _checkGasLimit(
@@ -62,6 +65,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             airdropAdapterParams,
             NO_EXTRA_GAS
         );
+
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -160,7 +164,8 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             uint64 amount,
             ISendFrom.LzCallParams memory callParams,
             uint16 lzDstChainId,
-            ICommonData.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals,
+            uint256 airdropAmount
         ) = abi.decode(
                 _payload,
                 (
@@ -169,7 +174,8 @@ contract BaseTOFTOptionsModule is TOFTCommon {
                     uint64,
                     ISendFrom.LzCallParams,
                     uint16,
-                    ICommonData.IApproval[]
+                    ICommonData.IApproval[],
+                    uint256
                 )
             );
 
@@ -177,7 +183,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             _callApproval(approvals);
         }
 
-        ISendFrom(address(this)).sendFrom{value: address(this).balance}(
+        ISendFrom(address(this)).sendFrom{value: airdropAmount}(
             from,
             lzDstChainId,
             LzLib.addressToBytes32(from),
