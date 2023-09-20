@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/ICommonData.sol";
+import "tapioca-periph/contracts/interfaces/ICluster.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 
 contract BaseTOFTStorage is OFTV2 {
@@ -22,6 +23,8 @@ contract BaseTOFTStorage is OFTV2 {
     // ************ //
     /// @notice The YieldBox address.
     IYieldBoxBase public yieldBox;
+    /// @notice The Cluster address
+    ICluster public cluster;
     /// @notice The ERC20 to wrap.
     address public erc20;
     /// @notice The host chain ID of the ERC20
@@ -46,6 +49,7 @@ contract BaseTOFTStorage is OFTV2 {
         address _lzEndpoint,
         address _erc20,
         IYieldBoxBase _yieldBox,
+        ICluster _cluster,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -62,6 +66,7 @@ contract BaseTOFTStorage is OFTV2 {
         _decimalCache = _decimal;
         hostChainID = _hostChainID;
         yieldBox = _yieldBox;
+        cluster = _cluster;
     }
 
     function _getRevertMsg(

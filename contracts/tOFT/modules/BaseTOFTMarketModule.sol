@@ -23,6 +23,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         address _lzEndpoint,
         address _erc20,
         IYieldBoxBase _yieldBox,
+        ICluster _cluster,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -32,6 +33,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             _lzEndpoint,
             _erc20,
             _yieldBox,
+            _cluster,
             _name,
             _symbol,
             _decimal,
@@ -62,6 +64,12 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             removeParams,
             withdrawParams,
             approvals
+        );
+
+        //fail fast
+        require(
+            cluster.isWhitelisted(lzDstChainId, removeParams.market),
+            "TOFT_INVALID"
         );
 
         _lzSend(
@@ -252,6 +260,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             false
         );
 
+        //market whitelist status
+        require(cluster.isWhitelisted(0, removeParams.market), "TOFT_INVALID");
         approve(removeParams.market, share);
         IMarket(removeParams.market).removeCollateral(to, to, share);
         if (withdrawParams.withdraw) {
