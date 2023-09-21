@@ -380,7 +380,7 @@ contract Balancer is Owned {
             _dstChainId,
             _srcPoolId,
             _dstPoolId,
-            _oft, 
+            _oft,
             _amount,
             _computeMinAmount(_amount, _slippage),
             _lzTxParams,
