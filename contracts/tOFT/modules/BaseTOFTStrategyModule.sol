@@ -8,8 +8,6 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
-import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
-import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 
 import "./TOFTCommon.sol";
 
@@ -108,8 +106,7 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
-        bytes memory airdropAdapterParam,
-        ICommonData.IApproval[] calldata approvals
+        bytes memory airdropAdapterParam
     ) external payable {
         //allowance is also checked on market
         if (_from != msg.sender) {
@@ -129,8 +126,7 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             toAddress,
             _ld2sd(amount),
             assetId,
-            zroPaymentAddress,
-            approvals
+            zroPaymentAddress
         );
 
         _checkGasLimit(
@@ -222,27 +218,14 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             ,
             uint64 amountSD,
             uint256 _assetId,
-            address _zroPaymentAddress,
-            ICommonData.IApproval[] memory approvals
+            address _zroPaymentAddress
         ) = abi.decode(
                 _payload,
-                (
-                    uint16,
-                    bytes32,
-                    bytes32,
-                    uint64,
-                    uint256,
-                    address,
-                    ICommonData.IApproval[]
-                )
+                (uint16, bytes32, bytes32, uint64, uint256, address)
             );
 
         uint256 _amount = _sd2ld(amountSD);
         address _from = LzLib.bytes32ToAddress(from);
-
-        if (approvals.length > 0) {
-            _callApproval(approvals);
-        }
 
         (_amount, ) = _retrieveFromYieldBox(
             _assetId,
