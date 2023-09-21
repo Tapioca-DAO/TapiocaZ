@@ -67,6 +67,12 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             approvals
         );
 
+        _checkGasLimit(
+            lzData.lzSrcChainId,
+            PT_MARKET_MULTIHOP_SELL,
+            airdropAdapterParams,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzData.lzSrcChainId,
             lzPayload,
@@ -107,6 +113,12 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             leverageFor
         );
 
+        _checkGasLimit(
+            lzData.lzDstChainId,
+            PT_LEVERAGE_MARKET_DOWN,
+            lzData.dstAirdropAdapterParam,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzData.lzDstChainId,
             lzPayload,

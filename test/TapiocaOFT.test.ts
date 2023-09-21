@@ -655,7 +655,15 @@ describe('TapiocaOFT', () => {
                 signer.address,
                 tapiocaOFT0Id,
             );
-
+            await tapiocaWrapper_10.executeTOFT(
+                tapiocaOFT10.address,
+                tapiocaOFT10.interface.encodeFunctionData('setMinDstGas', [
+                    dstChainId0,
+                    771,
+                    '200000',
+                ]),
+                true,
+            );
             await tapiocaOFT0.transfer(
                 Strategy_0.address,
                 yb0Balance.sub(bigDummyAmount),

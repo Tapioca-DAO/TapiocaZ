@@ -66,6 +66,13 @@ contract BaseTOFTMarketModule is TOFTCommon {
             approvals
         );
 
+        _checkGasLimit(
+            lzDstChainId,
+            PT_MARKET_REMOVE_COLLATERAL,
+            adapterParams,
+            NO_EXTRA_GAS
+        );
+
         //fail fast
         require(
             cluster.isWhitelisted(lzDstChainId, removeParams.market),
@@ -118,6 +125,12 @@ contract BaseTOFTMarketModule is TOFTCommon {
             approvals
         );
 
+        _checkGasLimit(
+            lzDstChainId,
+            PT_YB_SEND_SGL_BORROW,
+            airdropAdapterParams,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzDstChainId,
             lzPayload,

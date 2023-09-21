@@ -54,6 +54,12 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             approvals
         );
 
+        _checkGasLimit(
+            lzDstChainId,
+            PT_SEND_FROM,
+            airdropAdapterParams,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -99,6 +105,12 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             approvals
         );
 
+        _checkGasLimit(
+            lzData.lzDstChainId,
+            PT_TAP_EXERCISE,
+            adapterParams,
+            NO_EXTRA_GAS
+        );
         _lzSend(
             lzData.lzDstChainId,
             lzPayload,

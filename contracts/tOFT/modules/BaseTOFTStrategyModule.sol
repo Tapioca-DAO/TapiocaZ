@@ -67,6 +67,12 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             options.zroPaymentAddress
         );
 
+        _checkGasLimit(
+            lzDstChainId,
+            PT_YB_SEND_STRAT,
+            LzLib.buildDefaultAdapterParams(options.extraGasLimit),
+            options.extraGasLimit
+        );
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -106,6 +112,13 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             _ld2sd(amount),
             assetId,
             zroPaymentAddress
+        );
+
+        _checkGasLimit(
+            lzDstChainId,
+            PT_YB_RETRIEVE_STRAT,
+            airdropAdapterParam,
+            NO_EXTRA_GAS
         );
         _lzSend(
             lzDstChainId,
