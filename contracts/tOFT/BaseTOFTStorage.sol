@@ -88,6 +88,8 @@ contract BaseTOFTStorage is OFTV2 {
     function _getRevertMsg(
         bytes memory _returnData
     ) internal pure returns (string memory) {
+        if (_returnData.length > 1000) return "TOFT_LONG_REASON";
+
         // If the _res length is less than 68, then the transaction failed silently (without a revert message)
         if (_returnData.length < 68) return "TOFT_data";
         // solhint-disable-next-line no-inline-assembly
