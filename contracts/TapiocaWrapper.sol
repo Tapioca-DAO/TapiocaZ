@@ -31,8 +31,6 @@ contract TapiocaWrapper is Ownable {
     // ************** //
     /// @notice Called when a new OFT is deployed.
     event CreateOFT(ITapiocaOFT indexed _tapiocaOFT, address indexed _erc20);
-    /// @notice Called when fees are harvested.
-    event HarvestFees(address indexed _caller);
     /// @notice Called when fees are changed.
     event SetFees(uint256 _newFee);
 
@@ -75,18 +73,6 @@ contract TapiocaWrapper is Ownable {
             revert TapiocaWrapper__NoTOFTDeployed();
         }
         return tapiocaOFTs[tapiocaOFTs.length - 1];
-    }
-
-    // ************************ //
-    // *** PUBLIC FUNCTIONS *** //
-    // ************************ //
-
-    /// @notice Harvest fees from all the deployed TOFT contracts. Fees are transferred to the owner.
-    function harvestFees() external {
-        for (uint256 i = 0; i < harvestableTapiocaOFTs.length; i++) {
-            harvestableTapiocaOFTs[i].harvestFees();
-        }
-        emit HarvestFees(msg.sender);
     }
 
     // *********************** //
