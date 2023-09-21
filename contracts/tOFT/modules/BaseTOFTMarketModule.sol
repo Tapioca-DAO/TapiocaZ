@@ -113,7 +113,6 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
             from,
-            to,
             toAddress,
             _ld2sd(removeParams.amount),
             removeParams,
@@ -302,9 +301,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
     function remove(bytes memory _payload) public {
         (
             ,
-            ,
-            address to,
-            ,
+            address from,
+            bytes32 toBytes,
             uint64 removeCollateralAmount,
             ITapiocaOFT.IRemoveParams memory removeParams,
             ICommonData.IWithdrawParams memory withdrawParams,
@@ -314,7 +312,6 @@ contract BaseTOFTMarketModule is TOFTCommon {
                 (
                     uint16,
                     address,
-                    address,
                     bytes32,
                     uint64,
                     ITapiocaOFT.IRemoveParams,
@@ -323,6 +320,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
                 )
             );
 
+        address to = LzLib.bytes32ToAddress(toBytes);
         if (approvals.length > 0) {
             _callApproval(approvals);
         }
@@ -341,7 +339,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
         //market whitelist status
         require(cluster.isWhitelisted(0, removeParams.market), "TOFT_INVALID");
         approve(removeParams.market, share);
-        IMarket(removeParams.market).removeCollateral(to, to, share);
+        IMarket(removeParams.market).removeCollateral(from, to, share);
         if (withdrawParams.withdraw) {
             IMagnetar(removeParams.marketHelper).withdrawToChain{
                 value: withdrawParams.withdrawLzFeeAmount
