@@ -77,17 +77,6 @@ Execute the `_bytecode` against the `_toft`. Callable only by the owner.
 | success | bool | If the execution was successful. |
 | result | bytes | The error message if the execution failed. |
 
-### harvestFees
-
-```solidity
-function harvestFees() external nonpayable
-```
-
-Harvest fees from all the deployed TOFT contracts. Fees are transferred to the owner.
-
-
-
-
 ### harvestableTapiocaOFTsLength
 
 ```solidity
@@ -248,22 +237,6 @@ Called when a new OFT is deployed.
 | _tapiocaOFT `indexed` | contract ITapiocaOFT | undefined |
 | _erc20 `indexed` | address | undefined |
 
-### HarvestFees
-
-```solidity
-event HarvestFees(address indexed _caller)
-```
-
-Called when fees are harvested.
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _caller `indexed` | address | undefined |
-
 ### OwnershipTransferred
 
 ```solidity
@@ -346,6 +319,17 @@ error TapiocaWrapper__NoTOFTDeployed()
 ```
 
 No TOFT has been deployed yet.
+
+
+
+
+### TapiocaWrapper__NotEnough
+
+```solidity
+error TapiocaWrapper__NotEnough()
+```
+
+Not enough provided
 
 
 

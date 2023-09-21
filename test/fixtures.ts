@@ -13,6 +13,8 @@ import {
     StargateRouterETHMock__factory,
 } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
 
+import { Cluster__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-periphery';
+
 export const setupFixture = async () => {
     const signer = (await hre.ethers.getSigners())[0];
     const randomUser = new ethers.Wallet(
@@ -99,6 +101,14 @@ export const setupFixture = async () => {
         utils,
     } = await register(hre);
 
+    const Cluster = new Cluster__factory(signer);
+    const Cluster_0 = await Cluster.deploy(
+        await LZEndpointMock_chainID_0.getChainId(),
+    );
+    const Cluster_10 = await Cluster.deploy(
+        await LZEndpointMock_chainID_10.getChainId(),
+    );
+
     //Deploy mTapiocaOFT0
     {
         const txData = await tapiocaWrapper_0.populateTransaction.createTOFT(
@@ -108,6 +118,7 @@ export const setupFixture = async () => {
                     LZEndpointMock_chainID_0.address,
                     mErc20Mock.address,
                     YieldBox_0.address,
+                    Cluster_0.address,
                     31337, //hardhat network
                     signer,
                     true,
@@ -135,6 +146,7 @@ export const setupFixture = async () => {
                     LZEndpointMock_chainID_10.address,
                     mErc20Mock.address,
                     YieldBox_10.address,
+                    Cluster_10.address,
                     10,
                     signer,
                     true,
@@ -162,6 +174,7 @@ export const setupFixture = async () => {
                     LZEndpointMock_chainID_0.address,
                     erc20Mock.address,
                     YieldBox_0.address,
+                    Cluster_0.address,
                     31337, //hardhat network
                     signer,
                 )
@@ -188,6 +201,7 @@ export const setupFixture = async () => {
                     LZEndpointMock_chainID_10.address,
                     erc20Mock.address,
                     YieldBox_10.address,
+                    Cluster_10.address,
                     10,
                     signer,
                 )

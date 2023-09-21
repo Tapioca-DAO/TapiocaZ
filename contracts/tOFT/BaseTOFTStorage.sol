@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/ICommonData.sol";
+import "tapioca-periph/contracts/interfaces/ICluster.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 
 contract BaseTOFTStorage is OFTV2 {
@@ -22,6 +23,8 @@ contract BaseTOFTStorage is OFTV2 {
     // ************ //
     /// @notice The YieldBox address.
     IYieldBoxBase public yieldBox;
+    /// @notice The Cluster address
+    ICluster public cluster;
     /// @notice The ERC20 to wrap.
     address public erc20;
     /// @notice The host chain ID of the ERC20
@@ -40,12 +43,16 @@ contract BaseTOFTStorage is OFTV2 {
     uint16 internal constant PT_TAP_EXERCISE = 777;
     uint16 internal constant PT_SEND_FROM = 778;
 
+    uint256 public SWAP_MAX_SLIPPAGE = 500; //5%
+    uint256 internal constant SLIPPAGE_PRECISION = 1e4;
+
     receive() external payable {}
 
     constructor(
         address _lzEndpoint,
         address _erc20,
         IYieldBoxBase _yieldBox,
+        ICluster _cluster,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -62,11 +69,27 @@ contract BaseTOFTStorage is OFTV2 {
         _decimalCache = _decimal;
         hostChainID = _hostChainID;
         yieldBox = _yieldBox;
+        cluster = _cluster;
+    }
+
+    function setMaxSlippage(uint256 _slippage) external onlyOwner {
+        SWAP_MAX_SLIPPAGE = _slippage;
+    }
+
+    function _assureMaxSlippage(
+        uint256 amount,
+        uint256 minAmount
+    ) internal view {
+        uint256 slippageMinAmount = amount -
+            ((SWAP_MAX_SLIPPAGE * amount) / SLIPPAGE_PRECISION);
+        require(minAmount >= slippageMinAmount, "TOFT_SLIPPAGE");
     }
 
     function _getRevertMsg(
         bytes memory _returnData
     ) internal pure returns (string memory) {
+        if (_returnData.length > 1000) return "TOFT_LONG_REASON";
+
         // If the _res length is less than 68, then the transaction failed silently (without a revert message)
         if (_returnData.length < 68) return "TOFT_data";
         // solhint-disable-next-line no-inline-assembly

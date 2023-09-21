@@ -13,9 +13,9 @@ import "tapioca-periph/contracts/interfaces/IMarket.sol";
 import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
 import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 
-import "../BaseTOFTStorage.sol";
+import "./TOFTCommon.sol";
 
-contract BaseTOFTMarketModule is BaseTOFTStorage {
+contract BaseTOFTMarketModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -23,6 +23,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
         address _lzEndpoint,
         address _erc20,
         IYieldBoxBase _yieldBox,
+        ICluster _cluster,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -32,6 +33,7 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             _lzEndpoint,
             _erc20,
             _yieldBox,
+            _cluster,
             _name,
             _symbol,
             _decimal,
@@ -62,6 +64,12 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             removeParams,
             withdrawParams,
             approvals
+        );
+
+        //fail fast
+        require(
+            cluster.isWhitelisted(lzDstChainId, removeParams.market),
+            "TOFT_INVALID"
         );
 
         _lzSend(
@@ -199,10 +207,12 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
+
+        uint256 gas = withdrawParams.withdraw
+            ? (msg.value > 0 ? msg.value : address(this).balance)
+            : 0;
         IMagnetar(borrowParams.marketHelper)
-            .depositAddCollateralAndBorrowFromMarket{
-            value: withdrawParams.withdraw ? msg.value : 0
-        }(
+            .depositAddCollateralAndBorrowFromMarket{value: gas}(
             borrowParams.market,
             LzLib.bytes32ToAddress(_to),
             borrowParams.amount,
@@ -252,6 +262,8 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
             false
         );
 
+        //market whitelist status
+        require(cluster.isWhitelisted(0, removeParams.market), "TOFT_INVALID");
         approve(removeParams.market, share);
         IMarket(removeParams.market).removeCollateral(to, to, share);
         if (withdrawParams.withdraw) {
@@ -268,63 +280,6 @@ contract BaseTOFTMarketModule is BaseTOFTStorage {
                 payable(to),
                 withdrawParams.withdrawLzFeeAmount
             );
-        }
-    }
-
-    function _callApproval(ICommonData.IApproval[] memory approvals) private {
-        for (uint256 i = 0; i < approvals.length; ) {
-            if (approvals[i].permitBorrow) {
-                try
-                    IPermitBorrow(approvals[i].target).permitBorrow(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].value,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            } else if (approvals[i].permitAll) {
-                try
-                    IPermitAll(approvals[i].target).permitAll(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            } else {
-                try
-                    IERC20Permit(approvals[i].target).permit(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].value,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                }
-            }
-
-            unchecked {
-                ++i;
-            }
         }
     }
 }

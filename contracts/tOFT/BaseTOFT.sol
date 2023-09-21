@@ -53,6 +53,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         address _lzEndpoint,
         address _erc20,
         IYieldBoxBase _yieldBox,
+        ICluster _cluster,
         string memory _name,
         string memory _symbol,
         uint8 _decimal,
@@ -66,6 +67,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
             _lzEndpoint,
             _erc20,
             _yieldBox,
+            _cluster,
             _name,
             _symbol,
             _decimal,
@@ -137,7 +139,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        bytes calldata adapterParams
     ) external payable {
         _executeModule(
             Module.Options,
@@ -146,7 +149,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 optionsData,
                 lzData,
                 tapSendData,
-                approvals
+                approvals,
+                adapterParams
             ),
             false
         );
@@ -232,7 +236,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         address from,
         address to,
         uint256 amount,
-        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         ICommonData.ISendOptions calldata options
@@ -244,7 +247,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 from,
                 to,
                 amount,
-                share,
                 assetId,
                 lzDstChainId,
                 options
@@ -263,7 +265,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     function retrieveFromStrategy(
         address from,
         uint256 amount,
-        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
@@ -275,7 +276,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 BaseTOFTStrategyModule.retrieveFromStrategy.selector,
                 from,
                 amount,
-                share,
                 assetId,
                 lzDstChainId,
                 zroPaymentAddress,
@@ -389,6 +389,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 allowance(_fromAddress, msg.sender) >= _amount,
                 "TOFT_allowed"
             );
+            _spendAllowance(_fromAddress, msg.sender, _amount);
         }
         require(_amount > 0, "TOFT_0");
         IERC20(erc20).safeTransferFrom(_fromAddress, address(this), _amount);

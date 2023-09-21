@@ -3,6 +3,7 @@ import { useUtils } from '../scripts/utils';
 import hre, { ethers, network } from 'hardhat';
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 import { MTapiocaOFT } from 'tapioca-sdk/dist/typechain/tapiocaz';
+import { Cluster__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-periphery';
 
 export const register = async (hre: HardhatRuntimeEnvironment) => {
     const { ethers } = hre;
@@ -73,6 +74,9 @@ export async function registerFork() {
         deployer.address,
     );
 
+    const Cluster = new Cluster__factory(deployer);
+    const cluster = await Cluster.deploy(1);
+
     //Deploy mtOft1
     {
         const txData = await tapiocaWrapper1.populateTransaction.createTOFT(
@@ -82,6 +86,7 @@ export async function registerFork() {
                     process.env.LZ_ENDPOINT!,
                     ethers.constants.AddressZero, //gas token
                     yieldBox.address,
+                    cluster.address,
                     1,
                     deployer,
                     true,
@@ -109,6 +114,7 @@ export async function registerFork() {
                     process.env.LZ_ENDPOINT!,
                     ethers.constants.AddressZero, //gas token
                     yieldBox.address,
+                    cluster.address,
                     1,
                     deployer,
                     true,
