@@ -866,7 +866,7 @@ rescues unused ETH from the contract
 ### retrieveFromStrategy
 
 ```solidity
-function retrieveFromStrategy(address from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
+function retrieveFromStrategy(address from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
 extracts TOFT from a specific strategy available on another layer
@@ -879,7 +879,6 @@ extracts TOFT from a specific strategy available on another layer
 |---|---|---|
 | from | address | the sender address |
 | amount | uint256 | the transferred amount |
-| share | uint256 | undefined |
 | assetId | uint256 | the destination YieldBox asset id |
 | lzDstChainId | uint16 | the destination LayerZero id |
 | zroPaymentAddress | address | LayerZero ZRO payment address |
