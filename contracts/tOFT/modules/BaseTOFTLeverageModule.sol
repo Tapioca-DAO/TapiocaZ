@@ -42,48 +42,6 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         )
     {}
 
-    function initMultiSell(
-        address from,
-        uint256 amount,
-        IUSDOBase.ILeverageSwapData calldata swapData,
-        IUSDOBase.ILeverageLZData calldata lzData,
-        IUSDOBase.ILeverageExternalContractsData calldata externalData,
-        bytes calldata airdropAdapterParams,
-        ICommonData.IApproval[] calldata approvals
-    ) external payable {
-        _assureMaxSlippage(amount, swapData.amountOutMin);
-        bytes32 senderBytes = LzLib.addressToBytes32(from);
-
-        (amount, ) = _removeDust(amount);
-        bytes memory lzPayload = abi.encode(
-            PT_MARKET_MULTIHOP_SELL,
-            senderBytes,
-            from,
-            _ld2sd(amount),
-            swapData,
-            lzData,
-            externalData,
-            airdropAdapterParams,
-            approvals
-        );
-
-        _checkGasLimit(
-            lzData.lzSrcChainId,
-            PT_MARKET_MULTIHOP_SELL,
-            airdropAdapterParams,
-            NO_EXTRA_GAS
-        );
-        _lzSend(
-            lzData.lzSrcChainId,
-            lzPayload,
-            payable(lzData.refundAddress),
-            lzData.zroPaymentAddress,
-            airdropAdapterParams,
-            msg.value
-        );
-        emit SendToChain(lzData.lzSrcChainId, msg.sender, senderBytes, 0);
-    }
-
     function sendForLeverage(
         uint256 amount,
         address leverageFor,
@@ -91,6 +49,18 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         IUSDOBase.ILeverageSwapData calldata swapData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
+        if (leverageFor != msg.sender) {
+            require(
+                allowance(leverageFor, msg.sender) >= amount,
+                "TOFT_UNAUTHORIZED"
+            );
+            _spendAllowance(leverageFor, msg.sender, amount);
+        }
+
+        require(
+            swapData.tokenOut != address(this),
+            "USDO: token out not valid"
+        );
         require(swapData.tokenOut != address(this), "TOFT_token_not_valid");
         _assureMaxSlippage(amount, swapData.amountOutMin);
         require(
@@ -249,16 +219,17 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             cluster.isWhitelisted(0, externalData.swapper),
             "TOFT_UNAUTHORIZED"
         );
-        IERC20(erc20).approve(externalData.swapper, 0);
-        IERC20(erc20).approve(externalData.swapper, amount);
+
+        if (erc20 != address(0)) {
+            //skip approvals for native gas
+            IERC20(erc20).approve(externalData.swapper, 0);
+            IERC20(erc20).approve(externalData.swapper, amount);
+        }
         ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
             .buildSwapData(erc20, swapData.tokenOut, amount, 0, false, false);
-        (uint256 amountOut, ) = ISwapper(externalData.swapper).swap(
-            _swapperData,
-            swapData.amountOutMin,
-            address(this),
-            swapData.data
-        );
+        (uint256 amountOut, ) = ISwapper(externalData.swapper).swap{
+            value: erc20 == address(0) ? amount : 0
+        }(_swapperData, swapData.amountOutMin, address(this), swapData.data);
 
         //repay
         ICommonData.IApproval[] memory approvals;

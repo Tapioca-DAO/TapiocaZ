@@ -1241,7 +1241,7 @@ function setUseCustomAdapterParams(bool _useCustomAdapterParams) external nonpay
 ### sgReceive
 
 ```solidity
-function sgReceive(uint16, bytes, uint256, address, uint256, bytes) external nonpayable
+function sgReceive(uint16, bytes, uint256, address, uint256 amountLD, bytes) external nonpayable
 ```
 
 needed for Stargate Router to receive funds from Balancer.sol contract
@@ -1256,7 +1256,7 @@ needed for Stargate Router to receive funds from Balancer.sol contract
 | _1 | bytes | undefined |
 | _2 | uint256 | undefined |
 | _3 | address | undefined |
-| _4 | uint256 | undefined |
+| amountLD | uint256 | undefined |
 | _5 | bytes | undefined |
 
 ### sharedDecimals
@@ -1539,6 +1539,23 @@ function useCustomAdapterParams() external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
+
+### vault
+
+```solidity
+function vault() external view returns (contract TOFTVault)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract TOFTVault | undefined |
 
 ### wrap
 

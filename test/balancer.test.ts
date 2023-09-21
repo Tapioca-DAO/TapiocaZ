@@ -169,15 +169,16 @@ describe('Balancer', () => {
 
             const amount = ethers.utils.parseEther('1');
             await time.increase(86401);
-            await mErc20Mock.freeMint(amount);
-            await mErc20Mock.transfer(mtapiocaOFT0.address, amount);
 
-            const balance = await mErc20Mock.balanceOf(mtapiocaOFT0.address);
+            const vault = await mtapiocaOFT0.vault();
+            await mErc20Mock.freeMint(amount);
+            await mErc20Mock.transfer(vault, amount);
+
+            const balance = await mErc20Mock.balanceOf(vault);
             expect(balance.eq(amount)).to.be.true;
 
-            const balanceOft10Before = await mErc20Mock.balanceOf(
-                mtapiocaOFT10.address,
-            );
+            const vault10 = await mtapiocaOFT10.vault();
+            const balanceOft10Before = await mErc20Mock.balanceOf(vault10);
             expect(balanceOft10Before.eq(0)).to.be.true;
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
@@ -197,14 +198,10 @@ describe('Balancer', () => {
                     value: ethers.utils.parseEther('0.1'),
                 },
             );
-            const balanceOft10After = await mErc20Mock.balanceOf(
-                mtapiocaOFT10.address,
-            );
+            const balanceOft10After = await mErc20Mock.balanceOf(vault10);
             expect(balanceOft10After.eq(amount)).to.be.true;
 
-            const balanceOft0After = await mErc20Mock.balanceOf(
-                mtapiocaOFT0.address,
-            );
+            const balanceOft0After = await mErc20Mock.balanceOf(vault);
             expect(balanceOft0After.eq(0)).to.be.true;
         });
 
@@ -310,11 +307,12 @@ describe('Balancer', () => {
                 ),
             ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
 
+            const vault = await mtapiocaOFT0.vault();
             await time.increase(86401);
             await mErc20Mock.freeMint(amount.add(1));
-            await mErc20Mock.transfer(mtapiocaOFT0.address, amount.add(1));
+            await mErc20Mock.transfer(vault, amount.add(1));
 
-            const balance = await mErc20Mock.balanceOf(mtapiocaOFT0.address);
+            const balance = await mErc20Mock.balanceOf(vault);
             expect(balance.eq(amount.add(1))).to.be.true;
 
             await expect(
@@ -424,11 +422,12 @@ describe('Balancer', () => {
                 ),
             ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
 
+            const vault = await mtapiocaOFT0.vault();
             await time.increase(86401);
             await mErc20Mock.freeMint(amount.add(1));
-            await mErc20Mock.transfer(mtapiocaOFT0.address, amount.add(1));
+            await mErc20Mock.transfer(vault, amount.add(1));
 
-            const balance = await mErc20Mock.balanceOf(mtapiocaOFT0.address);
+            const balance = await mErc20Mock.balanceOf(vault);
             expect(balance.eq(amount.add(1))).to.be.true;
 
             await expect(

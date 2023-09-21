@@ -41,6 +41,50 @@ contract BaseTOFTMarketModule is TOFTCommon {
         )
     {}
 
+    function initMultiSell(
+        address from,
+        uint256 amount,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData,
+        bytes calldata airdropAdapterParams,
+        ICommonData.IApproval[] calldata approvals
+    ) external payable {
+        // allowance checked on market
+
+        _assureMaxSlippage(amount, swapData.amountOutMin);
+        bytes32 senderBytes = LzLib.addressToBytes32(from);
+
+        (amount, ) = _removeDust(amount);
+        bytes memory lzPayload = abi.encode(
+            PT_MARKET_MULTIHOP_SELL,
+            senderBytes,
+            from,
+            _ld2sd(amount),
+            swapData,
+            lzData,
+            externalData,
+            airdropAdapterParams,
+            approvals
+        );
+
+        _checkGasLimit(
+            lzData.lzSrcChainId,
+            PT_MARKET_MULTIHOP_SELL,
+            airdropAdapterParams,
+            NO_EXTRA_GAS
+        );
+        _lzSend(
+            lzData.lzSrcChainId,
+            lzPayload,
+            payable(lzData.refundAddress),
+            lzData.zroPaymentAddress,
+            airdropAdapterParams,
+            msg.value
+        );
+        emit SendToChain(lzData.lzSrcChainId, msg.sender, senderBytes, 0);
+    }
+
     function removeCollateral(
         address from,
         address to,
@@ -51,10 +95,10 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable {
+        //allowance is checked on market
+
         bytes32 toAddress = LzLib.addressToBytes32(to);
-
         (removeParams.amount, ) = _removeDust(removeParams.amount);
-
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
             from,
@@ -110,6 +154,14 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ICommonData.ISendOptions calldata options,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
+        if (_from != msg.sender) {
+            require(
+                allowance(_from, msg.sender) >= borrowParams.amount,
+                "TOFT_UNAUTHORIZED"
+            );
+            _spendAllowance(_from, msg.sender, borrowParams.amount);
+        }
+
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
         (uint256 amount, ) = _removeDust(borrowParams.amount);

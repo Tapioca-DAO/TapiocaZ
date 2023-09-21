@@ -55,6 +55,14 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         require(amount > 0, "TOFT_0");
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
+        if (_from != msg.sender) {
+            require(
+                allowance(_from, msg.sender) >= amount,
+                "TOFT_UNAUTHORIZED"
+            );
+            _spendAllowance(_from, msg.sender, amount);
+        }
+
         (amount, ) = _removeDust(amount);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
@@ -100,10 +108,10 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
     ) external payable {
+        //allowance is checked on market
+
         require(amount > 0, "TOFT_0");
-
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
-
         (amount, ) = _removeDust(amount);
         bytes memory lzPayload = abi.encode(
             PT_YB_RETRIEVE_STRAT,
