@@ -51,6 +51,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         bytes calldata airdropAdapterParams,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
+        _assureMaxSlippage(amount, swapData.amountOutMin);
         bytes32 senderBytes = LzLib.addressToBytes32(from);
 
         (amount, ) = _removeDust(amount);
@@ -85,6 +86,7 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
         require(swapData.tokenOut != address(this), "TOFT_token_not_valid");
+        _assureMaxSlippage(amount, swapData.amountOutMin);
 
         bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);
 

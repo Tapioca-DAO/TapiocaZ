@@ -78,6 +78,23 @@ function PT_SEND_AND_CALL() external view returns (uint8)
 |---|---|---|
 | _0 | uint8 | undefined |
 
+### SWAP_MAX_SLIPPAGE
+
+```solidity
+function SWAP_MAX_SLIPPAGE() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### allowance
 
 ```solidity
@@ -810,6 +827,22 @@ function setConfig(uint16 _version, uint16 _chainId, uint256 _configType, bytes 
 | _chainId | uint16 | undefined |
 | _configType | uint256 | undefined |
 | _config | bytes | undefined |
+
+### setMaxSlippage
+
+```solidity
+function setMaxSlippage(uint256 _slippage) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _slippage | uint256 | undefined |
 
 ### setMinDstGas
 
