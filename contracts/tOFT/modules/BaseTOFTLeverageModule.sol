@@ -165,14 +165,9 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             _sd2ld(amountSD),
             false
         );
-        ISingularity(externalData.srcMarket).multiHopSellCollateral(
-            from,
-            share,
-            true,
-            swapData,
-            lzData,
-            externalData
-        );
+        ISingularity(externalData.srcMarket).multiHopSellCollateral{
+            value: address(this).balance
+        }(from, share, true, swapData, lzData, externalData);
     }
 
     function leverageDown(
