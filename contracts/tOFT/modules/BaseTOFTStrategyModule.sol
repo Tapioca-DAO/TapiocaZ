@@ -193,7 +193,7 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             address _zroPaymentAddress
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint64, uint256, uint256, address)
+                (uint16, bytes32, bytes32, uint64, uint256, address)
             );
 
         uint256 _amount = _sd2ld(amountSD);
