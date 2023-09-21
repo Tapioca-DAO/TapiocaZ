@@ -675,7 +675,6 @@ describe('TapiocaOFT', () => {
                 dstChainId0,
                 ethers.constants.AddressZero,
                 airdropAdapterParams,
-                [],
                 {
                     value: ethers.utils.parseEther('10'),
                 },
