@@ -48,7 +48,6 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         address _from,
         address _to,
         uint256 amount,
-        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         ICommonData.ISendOptions calldata options
@@ -57,7 +56,6 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
         (amount, ) = _removeDust(amount);
-        (share, ) = _removeDust(share);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
 
         bytes memory lzPayload = abi.encode(
@@ -65,7 +63,6 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             LzLib.addressToBytes32(_from),
             toAddress,
             _ld2sd(amount),
-            share,
             assetId,
             options.zroPaymentAddress
         );
@@ -92,24 +89,21 @@ contract BaseTOFTStrategyModule is TOFTCommon {
     function retrieveFromStrategy(
         address _from,
         uint256 amount,
-        uint256 share,
         uint256 assetId,
         uint16 lzDstChainId,
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
     ) external payable {
-        require(amount > 0 || share > 0, "TOFT_0");
+        require(amount > 0, "TOFT_0");
 
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
         (amount, ) = _removeDust(amount);
-        (share, ) = _removeDust(share);
         bytes memory lzPayload = abi.encode(
             PT_YB_RETRIEVE_STRAT,
             LzLib.addressToBytes32(_from),
             toAddress,
             _ld2sd(amount),
-            share,
             assetId,
             zroPaymentAddress
         );
@@ -133,18 +127,10 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         IERC20 _erc20
     ) public {
         require(validModules[module], "TOFT_MODULE");
-        (
-            ,
-            ,
-            bytes32 from,
-            uint64 amountSD,
-            uint256 share,
-            uint256 assetId,
-
-        ) = abi.decode(
-                _payload,
-                (uint16, bytes32, bytes32, uint64, uint256, uint256, address)
-            );
+        (, , bytes32 from, uint64 amountSD, uint256 assetId, ) = abi.decode(
+            _payload,
+            (uint16, bytes32, bytes32, uint64, uint256, address)
+        );
 
         uint256 amount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));
@@ -161,7 +147,6 @@ contract BaseTOFTStrategyModule is TOFTCommon {
                 this.depositToYieldbox.selector,
                 assetId,
                 amount,
-                share,
                 _erc20,
                 address(this),
                 onBehalfOf
@@ -186,17 +171,13 @@ contract BaseTOFTStrategyModule is TOFTCommon {
     function depositToYieldbox(
         uint256 _assetId,
         uint256 _amount,
-        uint256 _share,
         IERC20 _erc20,
         address _from,
         address _to
     ) public {
-        _amount = _share > 0
-            ? yieldBox.toAmount(_assetId, _share, false)
-            : _amount;
         _erc20.approve(address(yieldBox), 0);
         _erc20.approve(address(yieldBox), _amount);
-        yieldBox.depositAsset(_assetId, _from, _to, _amount, _share);
+        yieldBox.depositAsset(_assetId, _from, _to, _amount, 0);
     }
 
     function strategyWithdraw(
@@ -208,12 +189,11 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             bytes32 from,
             ,
             uint64 amountSD,
-            uint256 _share,
             uint256 _assetId,
             address _zroPaymentAddress
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint64, uint256, uint256, address)
+                (uint16, bytes32, bytes32, uint64, uint256, address)
             );
 
         uint256 _amount = _sd2ld(amountSD);
@@ -222,7 +202,6 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         (_amount, ) = _retrieveFromYieldBox(
             _assetId,
             _amount,
-            _share,
             _from,
             address(this)
         );
@@ -257,18 +236,15 @@ contract BaseTOFTStrategyModule is TOFTCommon {
     function _retrieveFromYieldBox(
         uint256 _assetId,
         uint256 _amount,
-        uint256 _share,
         address _from,
         address _to
     ) private returns (uint256 amountOut, uint256 shareOut) {
-        _amount = _share > 0 ? 0 : _amount;
-        _share = _amount > 0 ? 0 : _share;
         (amountOut, shareOut) = yieldBox.withdraw(
             _assetId,
             _from,
             _to,
             _amount,
-            _share
+            0
         );
     }
 }
