@@ -98,7 +98,7 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         address zroPaymentAddress,
         bytes memory airdropAdapterParam
     ) external payable {
-        require(amount > 0, "TOFT_0");
+        require(amount > 0 || share > 0, "TOFT_0");
 
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
 
@@ -218,8 +218,14 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
 
         uint256 _amount = _sd2ld(amountSD);
         address _from = LzLib.bytes32ToAddress(from);
-        _retrieveFromYieldBox(_assetId, _amount, _share, _from, address(this));
 
+        (_amount, ) = _retrieveFromYieldBox(
+            _assetId,
+            _amount,
+            _share,
+            _from,
+            address(this)
+        );
         (_amount, ) = _removeDust(_amount);
         _burn(address(this), _amount);
 
@@ -254,7 +260,15 @@ contract BaseTOFTStrategyModule is BaseTOFTStorage {
         uint256 _share,
         address _from,
         address _to
-    ) private {
-        yieldBox.withdraw(_assetId, _from, _to, _amount, _share);
+    ) private returns (uint256 amountOut, uint256 shareOut) {
+        _amount = _share > 0 ? 0 : _amount;
+        _share = _amount > 0 ? 0 : _share;
+        (amountOut, shareOut) = yieldBox.withdraw(
+            _assetId,
+            _from,
+            _to,
+            _amount,
+            _share
+        );
     }
 }
