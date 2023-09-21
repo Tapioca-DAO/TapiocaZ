@@ -52,10 +52,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
     ) external payable {
         //allowance is also checked on market
         if (from != msg.sender) {
-            require(
-                allowance(from, msg.sender) >= amount,
-                "TOFT_UNAUTHORIZED"
-            );
+            require(allowance(from, msg.sender) >= amount, "TOFT_UNAUTHORIZED");
             _spendAllowance(from, msg.sender, amount);
         }
 
@@ -102,7 +99,14 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable {
-        //allowance is checked on market
+        //allowance is also checked on market
+        if (from != msg.sender) {
+            require(
+                allowance(from, msg.sender) >= removeParams.amount,
+                "TOFT_UNAUTHORIZED"
+            );
+            _spendAllowance(from, msg.sender, removeParams.amount);
+        }
 
         bytes32 toAddress = LzLib.addressToBytes32(to);
         (removeParams.amount, ) = _removeDust(removeParams.amount);
