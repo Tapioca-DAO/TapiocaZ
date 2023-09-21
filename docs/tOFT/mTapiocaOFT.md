@@ -926,10 +926,10 @@ rescues unused ETH from the contract
 ### retrieveFromStrategy
 
 ```solidity
-function retrieveFromStrategy(address from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam, ICommonData.IApproval[] approvals) external payable
+function retrieveFromStrategy(address from, uint256 amount, uint256 share, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
 ```
 
-
+extracts TOFT from a specific strategy available on another layer
 
 
 
@@ -937,14 +937,13 @@ function retrieveFromStrategy(address from, uint256 amount, uint256 share, uint2
 
 | Name | Type | Description |
 |---|---|---|
-| from | address | undefined |
-| amount | uint256 | undefined |
+| from | address | the sender address |
+| amount | uint256 | the transferred amount |
 | share | uint256 | undefined |
-| assetId | uint256 | undefined |
-| lzDstChainId | uint16 | undefined |
-| zroPaymentAddress | address | undefined |
-| airdropAdapterParam | bytes | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
+| assetId | uint256 | the destination YieldBox asset id |
+| lzDstChainId | uint16 | the destination LayerZero id |
+| zroPaymentAddress | address | LayerZero ZRO payment address |
+| airdropAdapterParam | bytes | the LayerZero aidrop adapter params |
 
 ### retryMessage
 
