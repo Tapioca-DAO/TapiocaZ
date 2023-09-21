@@ -9,9 +9,9 @@ import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import "tapioca-periph/contracts/interfaces/ISwapper.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 
-import "../BaseTOFTStorage.sol";
+import "./TOFTCommon.sol";
 
-contract BaseTOFTStrategyModule is BaseTOFTStorage {
+contract BaseTOFTStrategyModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
