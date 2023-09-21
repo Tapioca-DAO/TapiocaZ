@@ -76,7 +76,8 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        bytes calldata adapterParams
     ) external payable {
         bytes32 toAddress = LzLib.addressToBytes32(optionsData.from);
 
@@ -96,10 +97,6 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             optionsData,
             tapSendData,
             approvals
-        );
-
-        bytes memory adapterParams = LzLib.buildDefaultAdapterParams(
-            lzData.extraGas
         );
 
         _lzSend(
@@ -268,7 +265,9 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             }
         }
         if (tapSendData.withdrawOnAnotherChain) {
-            ISendFrom(tapSendData.tapOftAddress).sendFrom(
+            ISendFrom(tapSendData.tapOftAddress).sendFrom{
+                value: address(this).balance
+            }(
                 address(this),
                 tapSendData.lzDstChainId,
                 LzLib.addressToBytes32(from),

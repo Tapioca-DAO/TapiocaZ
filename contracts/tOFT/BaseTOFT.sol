@@ -139,7 +139,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        bytes calldata adapterParams
     ) external payable {
         _executeModule(
             Module.Options,
@@ -148,7 +149,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 optionsData,
                 lzData,
                 tapSendData,
-                approvals
+                approvals,
+                adapterParams
             ),
             false
         );
