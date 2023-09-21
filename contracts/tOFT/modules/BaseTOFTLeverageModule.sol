@@ -87,6 +87,10 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
     ) external payable {
         require(swapData.tokenOut != address(this), "TOFT_token_not_valid");
         _assureMaxSlippage(amount, swapData.amountOutMin);
+        require(
+            cluster.isWhitelisted(lzData.lzDstChainId, externalData.swapper),
+            "TOFT_UNAUTHORIZED"
+        ); //fail fast
 
         bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);
 
@@ -234,6 +238,10 @@ contract BaseTOFTLeverageModule is BaseTOFTStorage {
         ITapiocaOFT(address(this)).unwrap(address(this), amount);
 
         //swap to USDO
+        require(
+            cluster.isWhitelisted(0, externalData.swapper),
+            "TOFT_UNAUTHORIZED"
+        );
         IERC20(erc20).approve(externalData.swapper, 0);
         IERC20(erc20).approve(externalData.swapper, amount);
         ISwapper.SwapData memory _swapperData = ISwapper(externalData.swapper)
