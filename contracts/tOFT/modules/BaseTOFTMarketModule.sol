@@ -218,6 +218,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
         uint64 _nonce,
         bytes memory _payload
     ) public payable {
+        require(msg.sender == address(this), "TOFT_CALLER");
         require(validModules[module], "TOFT_MODULE");
         (
             ,
@@ -305,6 +306,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
     }
 
     function remove(bytes memory _payload) public {
+        require(msg.sender == address(this), "TOFT_CALLER");
         (
             ,
             address from,
