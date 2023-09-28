@@ -376,9 +376,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param amount the amount to rescue
     /// @param to the recipient
     function rescueEth(uint256 amount, address to) external onlyOwner {
-        uint256 balance = address(this).balance;
-        require(balance >= amount, "TOFT_HIGH_AMOUNT");
-        (bool success, ) = to.call{value: balance}("");
+        (bool success, ) = to.call{value: amount}("");
         require(success, "TOFT_Failed");
     }
 
