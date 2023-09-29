@@ -8,7 +8,10 @@ import "tapioca-periph/contracts/interfaces/ICommonData.sol";
 import "../BaseTOFTStorage.sol";
 
 abstract contract TOFTCommon is BaseTOFTStorage {
-    function _callApproval(ICommonData.IApproval[] memory approvals, uint16 actionType) internal {
+    function _callApproval(
+        ICommonData.IApproval[] memory approvals,
+        uint16 actionType
+    ) internal {
         for (uint256 i = 0; i < approvals.length; ) {
             if (approvals[i].approveOnYieldBox) {
                 _permitOnYieldBox(approvals[i]);

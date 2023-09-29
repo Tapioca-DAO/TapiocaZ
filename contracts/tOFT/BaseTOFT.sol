@@ -552,7 +552,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 _nonce,
                 _payload
             );
-        } 
+        }
         // else if (packetType == PT_MARKET_MULTIHOP_SELL) {
         //     _executeOnDestination(
         //         Module.Leverage,
@@ -565,7 +565,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         //         _nonce,
         //         _payload
         //     );
-        // } 
+        // }
         else if (packetType == PT_TAP_EXERCISE) {
             _executeOnDestination(
                 Module.Options,
