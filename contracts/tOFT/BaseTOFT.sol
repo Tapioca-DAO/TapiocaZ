@@ -106,14 +106,12 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @notice triggers a sendFrom to another layer from destination
     /// @param lzDstChainId LZ destination id
     /// @param airdropAdapterParams airdrop params
-    /// @param zroPaymentAddress ZRO payment address
     /// @param amount amount to send back
     /// @param sendFromData data needed to trigger sendFrom on destination
     /// @param approvals approvals array
     function triggerSendFrom(
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,
-        address zroPaymentAddress,
         uint256 amount,
         ISendFrom.LzCallParams calldata sendFromData,
         ICommonData.IApproval[] calldata approvals
@@ -124,7 +122,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 BaseTOFTOptionsModule.triggerSendFrom.selector,
                 lzDstChainId,
                 airdropAdapterParams,
-                zroPaymentAddress,
                 amount,
                 sendFromData,
                 approvals

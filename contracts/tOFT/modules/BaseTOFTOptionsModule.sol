@@ -39,7 +39,6 @@ contract BaseTOFTOptionsModule is TOFTCommon {
     function triggerSendFrom(
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,
-        address zroPaymentAddress,
         uint256 amount,
         ISendFrom.LzCallParams calldata sendFromData,
         ICommonData.IApproval[] calldata approvals
@@ -70,7 +69,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             lzDstChainId,
             lzPayload,
             payable(msg.sender),
-            zroPaymentAddress,
+            sendFromData.zroPaymentAddress,
             airdropAdapterParams,
             msg.value
         );
