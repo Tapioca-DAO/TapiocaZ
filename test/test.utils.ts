@@ -75,7 +75,7 @@ export async function registerFork() {
     );
 
     const Cluster = new Cluster__factory(deployer);
-    const cluster = await Cluster.deploy(1);
+    const cluster = await Cluster.deploy(process.env.LZ_ENDPOINT!);
 
     //Deploy mtOft1
     {

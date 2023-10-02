@@ -57,7 +57,9 @@ describe('TapiocaWrapper', () => {
             await erc20Mock.updateMintLimit(ethers.constants.MaxUint256);
 
             const Cluster = new Cluster__factory(deployer);
-            const cluster = await Cluster.deploy(1);
+            const cluster = await Cluster.deploy(
+                LZEndpointMock_chainID_0.address,
+            );
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
@@ -107,7 +109,9 @@ describe('TapiocaWrapper', () => {
             const erc20Name = 'erc20name';
 
             const Cluster = new Cluster__factory(deployer);
-            const cluster = await Cluster.deploy(1);
+            const cluster = await Cluster.deploy(
+                LZEndpointMock_chainID_0.address,
+            );
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
@@ -183,7 +187,9 @@ describe('TapiocaWrapper', () => {
             const erc20Name = 'erc20name';
 
             const Cluster = new Cluster__factory(deployer);
-            const cluster = await Cluster.deploy(1);
+            const cluster = await Cluster.deploy(
+                LZEndpointMock_chainID_0.address,
+            );
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
@@ -259,7 +265,9 @@ describe('TapiocaWrapper', () => {
             let erc20Name = 'erc20name';
 
             const Cluster = new Cluster__factory(deployer);
-            const cluster = await Cluster.deploy(1);
+            const cluster = await Cluster.deploy(
+                LZEndpointMock_chainID_0.address,
+            );
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
                 LZEndpointMock_chainID_0.address,
@@ -354,7 +362,9 @@ describe('TapiocaWrapper', () => {
 
             expect(await tapiocaWrapper.tapiocaOFTLength()).to.eq(0);
             const Cluster = new Cluster__factory(signer);
-            const cluster = await Cluster.deploy(1);
+            const cluster = await Cluster.deploy(
+                LZEndpointMock_chainID_0.address,
+            );
 
             const { txData: bytecode } = await Tx_deployTapiocaOFT(
                 LZEndpointMock_chainID_0.address,
@@ -395,7 +405,9 @@ describe('TapiocaWrapper', () => {
             );
 
             const Cluster = new Cluster__factory(signer);
-            const cluster = await Cluster.deploy(1);
+            const cluster = await Cluster.deploy(
+                LZEndpointMock_chainID_0.address,
+            );
 
             // First TOFT on chain 0, should be added to the harvestable array
             const { txData: bytecode } = await Tx_deployTapiocaOFT(
@@ -468,7 +480,9 @@ describe('TapiocaWrapper', () => {
             const erc20Address2 = erc20Mock2.address;
 
             const Cluster = new Cluster__factory(signer);
-            const cluster = await Cluster.deploy(1);
+            const cluster = await Cluster.deploy(
+                LZEndpointMock_chainID_0.address,
+            );
 
             const { txData: bytecode1 } = await Tx_deployTapiocaOFT(
                 LZEndpointMock_chainID_0.address,
