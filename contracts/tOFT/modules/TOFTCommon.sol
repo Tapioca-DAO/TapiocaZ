@@ -9,7 +9,7 @@ import "../BaseTOFTStorage.sol";
 
 abstract contract TOFTCommon is BaseTOFTStorage {
     function _callApproval(ICommonData.IApproval[] memory approvals) internal {
-        for (uint256 i = 0; i < approvals.length; ) {
+        for (uint256 i; i < approvals.length; ) {
             if (approvals[i].permitBorrow) {
                 try
                     IPermitBorrow(approvals[i].target).permitBorrow(

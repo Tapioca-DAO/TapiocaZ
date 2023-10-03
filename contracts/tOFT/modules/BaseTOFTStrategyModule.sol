@@ -52,7 +52,7 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         uint16 lzDstChainId,
         ICommonData.ISendOptions calldata options
     ) external payable {
-        require(amount > 0, "TOFT_0");
+        require(amount != 0, "TOFT_0");
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
         if (_from != msg.sender) {
@@ -117,7 +117,7 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             _spendAllowance(_from, msg.sender, amount);
         }
 
-        require(amount > 0, "TOFT_0");
+        require(amount != 0, "TOFT_0");
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
         (amount, ) = _removeDust(amount);
         bytes memory lzPayload = abi.encode(

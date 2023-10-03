@@ -257,7 +257,7 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 ### SetFees
 
 ```solidity
-event SetFees(uint256 _newFee)
+event SetFees(uint256 indexed _newFee)
 ```
 
 Called when fees are changed.
@@ -268,7 +268,7 @@ Called when fees are changed.
 
 | Name | Type | Description |
 |---|---|---|
-| _newFee  | uint256 | undefined |
+| _newFee `indexed` | uint256 | undefined |
 
 
 

@@ -67,23 +67,23 @@ contract Balancer is Owned {
     /// @notice event emitted when mTapiocaOFT is initialized
     event ConnectedChainUpdated(
         address indexed _srcOft,
-        uint16 _dstChainId,
+        uint16 indexed _dstChainId,
         address indexed _dstOft
     );
     /// @notice event emitted when a rebalance operation is performed
     /// @dev rebalancing means sending an amount of the underlying token to one of the connected chains
     event Rebalanced(
         address indexed _srcOft,
-        uint16 _dstChainId,
-        uint256 _slippage,
+        uint16 indexed _dstChainId,
+        uint256 indexed _slippage,
         uint256 _amount,
         bool _isNative
     );
     /// @notice event emitted when max rebalanceable amount is updated
     event RebalanceAmountUpdated(
         address indexed _srcOft,
-        uint16 _dstChainId,
-        uint256 _amount,
+        uint16 indexed _dstChainId,
+        uint256 indexed _amount,
         uint256 _totalAmount
     );
 
