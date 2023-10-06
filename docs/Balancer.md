@@ -278,7 +278,7 @@ function setOwner(address newOwner) external nonpayable
 ### ConnectedChainUpdated
 
 ```solidity
-event ConnectedChainUpdated(address indexed _srcOft, uint16 _dstChainId, address indexed _dstOft)
+event ConnectedChainUpdated(address indexed _srcOft, uint16 indexed _dstChainId, address indexed _dstOft)
 ```
 
 event emitted when mTapiocaOFT is initialized
@@ -290,7 +290,7 @@ event emitted when mTapiocaOFT is initialized
 | Name | Type | Description |
 |---|---|---|
 | _srcOft `indexed` | address | undefined |
-| _dstChainId  | uint16 | undefined |
+| _dstChainId `indexed` | uint16 | undefined |
 | _dstOft `indexed` | address | undefined |
 
 ### OwnerUpdated
@@ -313,7 +313,7 @@ event OwnerUpdated(address indexed user, address indexed newOwner)
 ### RebalanceAmountUpdated
 
 ```solidity
-event RebalanceAmountUpdated(address indexed _srcOft, uint16 _dstChainId, uint256 _amount, uint256 _totalAmount)
+event RebalanceAmountUpdated(address indexed _srcOft, uint16 indexed _dstChainId, uint256 indexed _amount, uint256 _totalAmount)
 ```
 
 event emitted when max rebalanceable amount is updated
@@ -325,14 +325,14 @@ event emitted when max rebalanceable amount is updated
 | Name | Type | Description |
 |---|---|---|
 | _srcOft `indexed` | address | undefined |
-| _dstChainId  | uint16 | undefined |
-| _amount  | uint256 | undefined |
+| _dstChainId `indexed` | uint16 | undefined |
+| _amount `indexed` | uint256 | undefined |
 | _totalAmount  | uint256 | undefined |
 
 ### Rebalanced
 
 ```solidity
-event Rebalanced(address indexed _srcOft, uint16 _dstChainId, uint256 _slippage, uint256 _amount, bool _isNative)
+event Rebalanced(address indexed _srcOft, uint16 indexed _dstChainId, uint256 indexed _slippage, uint256 _amount, bool _isNative)
 ```
 
 event emitted when a rebalance operation is performed
@@ -344,8 +344,8 @@ event emitted when a rebalance operation is performed
 | Name | Type | Description |
 |---|---|---|
 | _srcOft `indexed` | address | undefined |
-| _dstChainId  | uint16 | undefined |
-| _slippage  | uint256 | undefined |
+| _dstChainId `indexed` | uint16 | undefined |
+| _slippage `indexed` | uint256 | undefined |
 | _amount  | uint256 | undefined |
 | _isNative  | bool | undefined |
 

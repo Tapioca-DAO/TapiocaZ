@@ -1595,7 +1595,7 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 ### BalancerStatusUpdated
 
 ```solidity
-event BalancerStatusUpdated(address indexed _balancer, bool _bool, bool _new)
+event BalancerStatusUpdated(address indexed _balancer, bool indexed _bool, bool indexed _new)
 ```
 
 event emitted when balancer status is updated
@@ -1607,8 +1607,8 @@ event emitted when balancer status is updated
 | Name | Type | Description |
 |---|---|---|
 | _balancer `indexed` | address | undefined |
-| _bool  | bool | undefined |
-| _new  | bool | undefined |
+| _bool `indexed` | bool | undefined |
+| _new `indexed` | bool | undefined |
 
 ### CallOFTReceivedSuccess
 
@@ -1632,7 +1632,7 @@ event CallOFTReceivedSuccess(uint16 indexed _srcChainId, bytes _srcAddress, uint
 ### ConnectedChainStatusUpdated
 
 ```solidity
-event ConnectedChainStatusUpdated(uint256 _chain, bool _old, bool _new)
+event ConnectedChainStatusUpdated(uint256 indexed _chain, bool indexed _old, bool indexed _new)
 ```
 
 event emitted when a connected chain is reigstered or unregistered
@@ -1643,9 +1643,9 @@ event emitted when a connected chain is reigstered or unregistered
 
 | Name | Type | Description |
 |---|---|---|
-| _chain  | uint256 | undefined |
-| _old  | bool | undefined |
-| _new  | bool | undefined |
+| _chain `indexed` | uint256 | undefined |
+| _old `indexed` | bool | undefined |
+| _new `indexed` | bool | undefined |
 
 ### MessageFailed
 
@@ -1703,7 +1703,7 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 ### Rebalancing
 
 ```solidity
-event Rebalancing(address indexed _balancer, uint256 _amount, bool _isNative)
+event Rebalancing(address indexed _balancer, uint256 indexed _amount, bool indexed _isNative)
 ```
 
 event emitted when rebalancing is performed
@@ -1715,8 +1715,8 @@ event emitted when rebalancing is performed
 | Name | Type | Description |
 |---|---|---|
 | _balancer `indexed` | address | undefined |
-| _amount  | uint256 | undefined |
-| _isNative  | bool | undefined |
+| _amount `indexed` | uint256 | undefined |
+| _isNative `indexed` | bool | undefined |
 
 ### ReceiveFromChain
 
