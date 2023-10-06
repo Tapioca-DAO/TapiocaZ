@@ -161,38 +161,38 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         );
     }
 
-    /// @notice inits a multiHopSellCollateral call
-    /// @param from The user who sells
-    /// @param share Collateral YieldBox-shares to sell
-    /// @param swapData Swap data used on destination chain for swapping USDO to the underlying TOFT token
-    /// @param lzData LayerZero specific data
-    /// @param externalData External contracts used for the cross chain operation
-    /// @param airdropAdapterParams default or airdrop adapter params
-    /// @param approvals array
-    function initMultiSell(
-        address from,
-        uint256 share,
-        IUSDOBase.ILeverageSwapData calldata swapData,
-        IUSDOBase.ILeverageLZData calldata lzData,
-        IUSDOBase.ILeverageExternalContractsData calldata externalData,
-        bytes calldata airdropAdapterParams,
-        ICommonData.IApproval[] memory approvals
-    ) external payable {
-        _executeModule(
-            Module.Leverage,
-            abi.encodeWithSelector(
-                BaseTOFTMarketModule.initMultiSell.selector,
-                from,
-                share,
-                swapData,
-                lzData,
-                externalData,
-                airdropAdapterParams,
-                approvals
-            ),
-            false
-        );
-    }
+    // /// @notice inits a multiHopSellCollateral call
+    // /// @param from The user who sells
+    // /// @param share Collateral YieldBox-shares to sell
+    // /// @param swapData Swap data used on destination chain for swapping USDO to the underlying TOFT token
+    // /// @param lzData LayerZero specific data
+    // /// @param externalData External contracts used for the cross chain operation
+    // /// @param airdropAdapterParams default or airdrop adapter params
+    // /// @param approvals array
+    // function initMultiSell(
+    //     address from,
+    //     uint256 share,
+    //     IUSDOBase.ILeverageSwapData calldata swapData,
+    //     IUSDOBase.ILeverageLZData calldata lzData,
+    //     IUSDOBase.ILeverageExternalContractsData calldata externalData,
+    //     bytes calldata airdropAdapterParams,
+    //     ICommonData.IApproval[] memory approvals
+    // ) external payable {
+    //     _executeModule(
+    //         Module.Leverage,
+    //         abi.encodeWithSelector(
+    //             BaseTOFTMarketModule.initMultiSell.selector,
+    //             from,
+    //             share,
+    //             swapData,
+    //             lzData,
+    //             externalData,
+    //             airdropAdapterParams,
+    //             approvals
+    //         ),
+    //         false
+    //     );
+    // }
 
     /// @notice calls removeCollateral on another layer
     /// @param from sending address
@@ -513,7 +513,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 Module.Leverage,
                 abi.encodeWithSelector(
                     BaseTOFTLeverageModule.leverageDown.selector,
-                    leverageModule,
+                    address(leverageModule),
                     _srcChainId,
                     _srcAddress,
                     _nonce,
@@ -529,7 +529,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 Module.Market,
                 abi.encodeWithSelector(
                     BaseTOFTMarketModule.borrow.selector,
-                    marketModule,
+                    address(marketModule),
                     _srcChainId,
                     _srcAddress,
                     _nonce,
@@ -552,23 +552,26 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 _nonce,
                 _payload
             );
-        } else if (packetType == PT_MARKET_MULTIHOP_SELL) {
-            _executeOnDestination(
-                Module.Leverage,
-                abi.encodeWithSelector(
-                    BaseTOFTLeverageModule.multiHop.selector,
-                    _payload
-                ),
-                _srcChainId,
-                _srcAddress,
-                _nonce,
-                _payload
-            );
-        } else if (packetType == PT_TAP_EXERCISE) {
+        }
+        // else if (packetType == PT_MARKET_MULTIHOP_SELL) {
+        //     _executeOnDestination(
+        //         Module.Leverage,
+        //         abi.encodeWithSelector(
+        //             BaseTOFTLeverageModule.multiHop.selector,
+        //             _payload
+        //         ),
+        //         _srcChainId,
+        //         _srcAddress,
+        //         _nonce,
+        //         _payload
+        //     );
+        // }
+        else if (packetType == PT_TAP_EXERCISE) {
             _executeOnDestination(
                 Module.Options,
                 abi.encodeWithSelector(
                     BaseTOFTOptionsModule.exercise.selector,
+                    address(optionsModule),
                     _srcChainId,
                     _srcAddress,
                     _nonce,

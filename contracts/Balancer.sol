@@ -256,17 +256,31 @@ contract Balancer is Owned {
 
         //send
         bool _isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
+        if (msg.value == 0) revert FeeAmountNotSet();
 
         if (_isNative) {
-            if (msg.value == 0) revert FeeAmountNotSet();
             _sendNative(_srcOft, _amount, _dstChainId, _slippage);
         } else {
-            if (msg.value == 0) revert FeeAmountNotSet();
             _sendToken(_srcOft, _amount, _dstChainId, _slippage, _ercData);
         }
 
         connectedOFTs[_srcOft][_dstChainId].rebalanceable -= _amount;
         emit Rebalanced(_srcOft, _dstChainId, _slippage, _amount, _isNative);
+    }
+
+    /// @notice saves token/native gas from this contract
+    /// @param _token the token address; `address(0)` should be passed for the Native coin
+    /// @param _amount the amount to be saved
+    function emergencySaveTokens(
+        address _token,
+        uint256 _amount
+    ) external onlyOwner {
+        if (_token == address(0)) {
+            (bool sent, ) = msg.sender.call{value: _amount}("");
+            require(sent, "Balancer: ETH transfer failed");
+        } else {
+            IERC20(_token).safeTransfer(msg.sender, _amount);
+        }
     }
 
     /// @notice registeres mTapiocaOFT for rebalancing
@@ -345,7 +359,7 @@ contract Balancer is Owned {
         uint256 valueAmount = msg.value + _amount;
         routerETH.swapETH{value: valueAmount}(
             _dstChainId,
-            _oft, //refund to the OFT so it can be used for rebalancing purposes in future operations
+            address(this),
             abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
             _amount,
             _computeMinAmount(_amount, _slippage)
@@ -376,11 +390,11 @@ contract Balancer is Owned {
 
         erc20.approve(address(router), 0);
         erc20.approve(address(router), _amount);
-        router.swap(
+        router.swap{value: msg.value}(
             _dstChainId,
             _srcPoolId,
             _dstPoolId,
-            _oft,
+            address(this),
             _amount,
             _computeMinAmount(_amount, _slippage),
             _lzTxParams,

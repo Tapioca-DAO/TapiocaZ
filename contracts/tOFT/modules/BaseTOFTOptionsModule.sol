@@ -125,13 +125,16 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             toAddress,
             paymentTokenAmount
         );
-
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            adapterParams
+        );
         bytes memory lzPayload = abi.encode(
             PT_TAP_EXERCISE,
             _ld2sd(paymentTokenAmount),
             optionsData,
             tapSendData,
-            approvals
+            approvals,
+            airdropAmount
         );
 
         _checkGasLimit(
@@ -180,7 +183,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             );
 
         if (approvals.length > 0) {
-            _callApproval(approvals);
+            _callApproval(approvals, PT_SEND_FROM);
         }
 
         ISendFrom(address(this)).sendFrom{value: airdropAmount}(
@@ -201,6 +204,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         uint64 _nonce,
         bytes memory _payload
     ) public {
+        require(msg.sender == address(this), "TOFT_CALLER");
         require(validModules[module], "TOFT_MODULE");
         (
             ,
@@ -209,7 +213,8 @@ contract BaseTOFTOptionsModule is TOFTCommon {
                 memory optionsData,
             ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
                 memory tapSendData,
-            ICommonData.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals,
+            uint256 airdropAmount
         ) = abi.decode(
                 _payload,
                 (
@@ -217,7 +222,8 @@ contract BaseTOFTOptionsModule is TOFTCommon {
                     uint64,
                     ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData,
                     ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData,
-                    ICommonData.IApproval[]
+                    ICommonData.IApproval[],
+                    uint256
                 )
             );
 
@@ -249,7 +255,8 @@ contract BaseTOFTOptionsModule is TOFTCommon {
                 optionsData.target,
                 tapSendData,
                 optionsData.paymentTokenAmount,
-                approvals
+                approvals,
+                airdropAmount
             )
         );
 
@@ -287,10 +294,11 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             memory tapSendData,
         uint256 paymentTokenAmount,
-        ICommonData.IApproval[] memory approvals
+        ICommonData.IApproval[] memory approvals,
+        uint256 airdropAmount
     ) public {
         if (approvals.length > 0) {
-            _callApproval(approvals);
+            _callApproval(approvals, PT_TAP_EXERCISE);
         }
 
         uint256 paymentTokenBalanceBefore = IERC20(paymentToken).balanceOf(
@@ -313,9 +321,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             }
         }
         if (tapSendData.withdrawOnAnotherChain) {
-            ISendFrom(tapSendData.tapOftAddress).sendFrom{
-                value: address(this).balance
-            }(
+            ISendFrom(tapSendData.tapOftAddress).sendFrom{value: airdropAmount}(
                 address(this),
                 tapSendData.lzDstChainId,
                 LzLib.addressToBytes32(from),
