@@ -39,7 +39,7 @@ describe('TapiocaOFT', () => {
         const yieldBox = await YieldBoxMock.deploy();
 
         const Cluster = new Cluster__factory(deployer);
-        const cluster = await Cluster.deploy(1);
+        const cluster = await Cluster.deploy(lzEndpoint.address);
 
         await (
             await hre.ethers.getContractFactory('TapiocaOFT')
@@ -365,7 +365,9 @@ describe('TapiocaOFT', () => {
             const YieldBox_10 = yieldBox10Data.yieldBox;
 
             const Cluster = new Cluster__factory(signer);
-            const cluster = await Cluster.deploy(1);
+            const cluster = await Cluster.deploy(
+                LZEndpointMock_chainID_0.address,
+            );
 
             {
                 const txData =
