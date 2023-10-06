@@ -515,7 +515,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 Module.Leverage,
                 abi.encodeWithSelector(
                     BaseTOFTLeverageModule.leverageDown.selector,
-                    leverageModule,
+                    address(leverageModule),
                     _srcChainId,
                     _srcAddress,
                     _nonce,
@@ -531,7 +531,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 Module.Market,
                 abi.encodeWithSelector(
                     BaseTOFTMarketModule.borrow.selector,
-                    marketModule,
+                    address(marketModule),
                     _srcChainId,
                     _srcAddress,
                     _nonce,
@@ -571,6 +571,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 Module.Options,
                 abi.encodeWithSelector(
                     BaseTOFTOptionsModule.exercise.selector,
+                    address(optionsModule),
                     _srcChainId,
                     _srcAddress,
                     _nonce,
