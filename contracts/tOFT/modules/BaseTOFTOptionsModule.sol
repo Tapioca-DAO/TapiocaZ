@@ -183,7 +183,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             );
 
         if (approvals.length > 0) {
-            _callApproval(approvals);
+            _callApproval(approvals, PT_SEND_FROM);
         }
 
         ISendFrom(address(this)).sendFrom{value: airdropAmount}(
@@ -298,7 +298,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         uint256 airdropAmount
     ) public {
         if (approvals.length > 0) {
-            _callApproval(approvals);
+            _callApproval(approvals, PT_TAP_EXERCISE);
         }
 
         uint256 paymentTokenBalanceBefore = IERC20(paymentToken).balanceOf(

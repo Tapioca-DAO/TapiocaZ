@@ -101,45 +101,45 @@ contract BaseTOFTLeverageModule is TOFTCommon {
     }
 
     //---Destination calls---
-    function multiHop(bytes memory _payload) public {
-        require(msg.sender == address(this), "TOFT_CALLER");
-        (
-            ,
-            ,
-            address from,
-            uint64 amountSD,
-            IUSDOBase.ILeverageSwapData memory swapData,
-            IUSDOBase.ILeverageLZData memory lzData,
-            IUSDOBase.ILeverageExternalContractsData memory externalData,
-            ICommonData.IApproval[] memory approvals
-        ) = abi.decode(
-                _payload,
-                (
-                    uint16,
-                    bytes32,
-                    address,
-                    uint64,
-                    IUSDOBase.ILeverageSwapData,
-                    IUSDOBase.ILeverageLZData,
-                    IUSDOBase.ILeverageExternalContractsData,
-                    ICommonData.IApproval[]
-                )
-            );
+    // function multiHop(bytes memory _payload) public {
+    //     require(msg.sender == address(this), "TOFT_CALLER");
+    //     (
+    //         ,
+    //         ,
+    //         address from,
+    //         uint64 amountSD,
+    //         IUSDOBase.ILeverageSwapData memory swapData,
+    //         IUSDOBase.ILeverageLZData memory lzData,
+    //         IUSDOBase.ILeverageExternalContractsData memory externalData,
+    //         ICommonData.IApproval[] memory approvals
+    //     ) = abi.decode(
+    //             _payload,
+    //             (
+    //                 uint16,
+    //                 bytes32,
+    //                 address,
+    //                 uint64,
+    //                 IUSDOBase.ILeverageSwapData,
+    //                 IUSDOBase.ILeverageLZData,
+    //                 IUSDOBase.ILeverageExternalContractsData,
+    //                 ICommonData.IApproval[]
+    //             )
+    //         );
 
-        if (approvals.length > 0) {
-            _callApproval(approvals);
-        }
+    //     if (approvals.length > 0) {
+    //         _callApproval(approvals, PT_MARKET_MULTIHOP_SELL);
+    //     }
 
-        ISingularity market = ISingularity(externalData.srcMarket);
-        uint256 share = IYieldBoxBase(market.yieldBox()).toShare(
-            market.collateralId(),
-            _sd2ld(amountSD),
-            false
-        );
-        ISingularity(externalData.srcMarket).multiHopSellCollateral{
-            value: address(this).balance
-        }(from, share, true, swapData, lzData, externalData);
-    }
+    //     ISingularity market = ISingularity(externalData.srcMarket);
+    //     uint256 share = IYieldBoxBase(market.yieldBox()).toShare(
+    //         market.collateralId(),
+    //         _sd2ld(amountSD),
+    //         false
+    //     );
+    //     ISingularity(externalData.srcMarket).multiHopSellCollateral{
+    //         value: address(this).balance
+    //     }(from, share, true, swapData, lzData, externalData);
+    // }
 
     function leverageDown(
         address module,
