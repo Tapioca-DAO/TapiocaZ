@@ -110,6 +110,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         bytes32 toAddress = LzLib.addressToBytes32(to);
         (removeParams.amount, ) = _removeDust(removeParams.amount);
+
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
             from,
@@ -182,7 +183,9 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         (uint256 amount, ) = _removeDust(borrowParams.amount);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
-
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            airdropAdapterParams
+        );
         bytes memory lzPayload = abi.encode(
             PT_YB_SEND_SGL_BORROW,
             _from,
@@ -190,7 +193,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
             _ld2sd(amount),
             borrowParams,
             withdrawParams,
-            approvals
+            approvals,
+            airdropAmount
         );
 
         _checkGasLimit(
@@ -226,7 +230,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
             uint64 amountSD,
             ITapiocaOFT.IBorrowParams memory borrowParams,
             ICommonData.IWithdrawParams memory withdrawParams,
-            ICommonData.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals,
+            uint256 airdropAmount
         ) = abi.decode(
                 _payload,
                 (
@@ -236,7 +241,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
                     uint64,
                     ITapiocaOFT.IBorrowParams,
                     ICommonData.IWithdrawParams,
-                    ICommonData.IApproval[]
+                    ICommonData.IApproval[],
+                    uint256
                 )
             );
 
@@ -256,7 +262,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
                 _to,
                 borrowParams,
                 withdrawParams,
-                approvals
+                approvals,
+                airdropAmount
             )
         );
 
@@ -280,7 +287,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes32 _to,
         ITapiocaOFT.IBorrowParams memory borrowParams,
         ICommonData.IWithdrawParams memory withdrawParams,
-        ICommonData.IApproval[] memory approvals
+        ICommonData.IApproval[] memory approvals,
+        uint256 airdropAmount
     ) public payable {
         if (approvals.length > 0) {
             _callApproval(approvals);
@@ -290,7 +298,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
         approve(address(borrowParams.marketHelper), borrowParams.amount);
 
         uint256 gas = withdrawParams.withdraw
-            ? (msg.value > 0 ? msg.value : address(this).balance)
+            ? (msg.value > 0 ? msg.value : airdropAmount)
             : 0;
         IMagnetar(borrowParams.marketHelper)
             .depositAddCollateralAndBorrowFromMarket{value: gas}(
