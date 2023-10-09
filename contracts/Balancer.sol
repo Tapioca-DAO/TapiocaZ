@@ -279,7 +279,10 @@ contract Balancer is Owned {
             (bool sent, ) = msg.sender.call{value: _amount}("");
             require(sent, "Balancer: ETH transfer failed");
         } else {
-            require(IERC20(_token).transfer(msg.sender, _amount), "Balancer: token transfer failed");
+            require(
+                IERC20(_token).transfer(msg.sender, _amount),
+                "Balancer: token transfer failed"
+            );
         }
     }
 
@@ -390,11 +393,10 @@ contract Balancer is Owned {
             payable(this),
             _amount,
             _computeMinAmount(_amount, _slippage),
-            IStargateRouterBase
-                .lzTxObj({
-                    dstGasForCall: 0,
-                    dstNativeAmount: 0,
-                    dstNativeAddr: "0x0"
+            IStargateRouterBase.lzTxObj({
+                dstGasForCall: 0,
+                dstNativeAmount: 0,
+                dstNativeAddr: "0x0"
             }),
             abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
             "0x"
