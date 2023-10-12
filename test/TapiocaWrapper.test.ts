@@ -59,6 +59,7 @@ describe('TapiocaWrapper', () => {
             const Cluster = new Cluster__factory(deployer);
             const cluster = await Cluster.deploy(
                 LZEndpointMock_chainID_0.address,
+                deployer.address,
             );
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
@@ -111,6 +112,7 @@ describe('TapiocaWrapper', () => {
             const Cluster = new Cluster__factory(deployer);
             const cluster = await Cluster.deploy(
                 LZEndpointMock_chainID_0.address,
+                deployer.address,
             );
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
@@ -189,6 +191,7 @@ describe('TapiocaWrapper', () => {
             const Cluster = new Cluster__factory(deployer);
             const cluster = await Cluster.deploy(
                 LZEndpointMock_chainID_0.address,
+                deployer.address,
             );
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
@@ -267,6 +270,7 @@ describe('TapiocaWrapper', () => {
             const Cluster = new Cluster__factory(deployer);
             const cluster = await Cluster.deploy(
                 LZEndpointMock_chainID_0.address,
+                deployer.address,
             );
 
             const args: Parameters<TapiocaOFT__factory['deploy']> = [
@@ -364,6 +368,7 @@ describe('TapiocaWrapper', () => {
             const Cluster = new Cluster__factory(signer);
             const cluster = await Cluster.deploy(
                 LZEndpointMock_chainID_0.address,
+                signer.address,
             );
 
             const { txData: bytecode } = await Tx_deployTapiocaOFT(
@@ -407,6 +412,7 @@ describe('TapiocaWrapper', () => {
             const Cluster = new Cluster__factory(signer);
             const cluster = await Cluster.deploy(
                 LZEndpointMock_chainID_0.address,
+                signer.address,
             );
 
             // First TOFT on chain 0, should be added to the harvestable array
@@ -482,6 +488,7 @@ describe('TapiocaWrapper', () => {
             const Cluster = new Cluster__factory(signer);
             const cluster = await Cluster.deploy(
                 LZEndpointMock_chainID_0.address,
+                signer.address,
             );
 
             const { txData: bytecode1 } = await Tx_deployTapiocaOFT(

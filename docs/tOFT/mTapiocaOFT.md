@@ -1048,6 +1048,22 @@ function sendToYBAndBorrow(address from, address to, uint16 lzDstChainId, bytes 
 | options | ICommonData.ISendOptions | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
 
+### setCluster
+
+```solidity
+function setCluster(contract ICluster _cluster) external nonpayable
+```
+
+updates the cluster address
+
+*can only be called by the owner*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _cluster | contract ICluster | the new address |
+
 ### setConfig
 
 ```solidity

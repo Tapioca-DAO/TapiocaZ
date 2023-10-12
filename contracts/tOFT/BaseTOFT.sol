@@ -372,6 +372,14 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     // ************************ //
     // *** OWNER FUNCTIONS *** //
     // ************************ //
+    /// @notice updates the cluster address
+    /// @dev can only be called by the owner
+    /// @param _cluster the new address
+    function setCluster(ICluster _cluster) external {
+        require(address(_cluster) != address(0), "TOFT_0");
+        cluster = _cluster;
+    }
+
     /// @notice rescues unused ETH from the contract
     /// @param amount the amount to rescue
     /// @param to the recipient

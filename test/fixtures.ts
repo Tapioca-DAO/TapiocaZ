@@ -104,9 +104,11 @@ export const setupFixture = async () => {
     const Cluster = new Cluster__factory(signer);
     const Cluster_0 = await Cluster.deploy(
         await LZEndpointMock_chainID_0.address,
+        signer.address,
     );
     const Cluster_10 = await Cluster.deploy(
         await LZEndpointMock_chainID_10.address,
+        signer.address,
     );
 
     //Deploy mTapiocaOFT0
