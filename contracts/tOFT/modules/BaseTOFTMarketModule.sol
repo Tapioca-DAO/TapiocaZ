@@ -129,10 +129,12 @@ contract BaseTOFTMarketModule is TOFTCommon {
         );
 
         //fail fast
-        require(
-            cluster.isWhitelisted(lzDstChainId, removeParams.market),
-            "TOFT_INVALID"
-        );
+        if (removeParams.market != address(0)) {
+            require(
+                cluster.isWhitelisted(lzDstChainId, removeParams.market),
+                "TOFT_INVALID"
+            );
+        }
         if (withdrawParams.withdraw) {
             require(
                 cluster.isWhitelisted(lzDstChainId, removeParams.marketHelper),
@@ -353,7 +355,12 @@ contract BaseTOFTMarketModule is TOFTCommon {
         );
 
         //market whitelist status
-        require(cluster.isWhitelisted(0, removeParams.market), "TOFT_INVALID");
+        if (removeParams.market != address(0)) {
+            require(
+                cluster.isWhitelisted(0, removeParams.market),
+                "TOFT_INVALID"
+            );
+        }
         approve(removeParams.market, share);
         IMarket(removeParams.market).removeCollateral(from, to, share);
         if (withdrawParams.withdraw) {

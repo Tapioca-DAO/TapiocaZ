@@ -91,13 +91,15 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         ICommonData.IApproval[] calldata approvals,
         bytes calldata adapterParams
     ) external payable {
-        require(
-            cluster.isWhitelisted(
-                lzData.lzDstChainId,
-                tapSendData.tapOftAddress
-            ),
-            "TOFT_UNAUTHORIZED"
-        ); //fail fast
+        if (tapSendData.tapOftAddress != address(0)) {
+            require(
+                cluster.isWhitelisted(
+                    lzData.lzDstChainId,
+                    tapSendData.tapOftAddress
+                ),
+                "TOFT_UNAUTHORIZED"
+            ); //fail fast
+        }
 
         // allowance is also checked on SGL
         // check it here as well because tokens are moved over layers
@@ -227,10 +229,12 @@ contract BaseTOFTOptionsModule is TOFTCommon {
                 )
             );
 
-        require(
-            cluster.isWhitelisted(0, tapSendData.tapOftAddress),
-            "TOFT_UNAUTHORIZED"
-        ); //fail fast
+        if (tapSendData.tapOftAddress != address(0)) {
+            require(
+                cluster.isWhitelisted(0, tapSendData.tapOftAddress),
+                "TOFT_UNAUTHORIZED"
+            ); //fail fast
+        }
 
         optionsData.paymentTokenAmount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));

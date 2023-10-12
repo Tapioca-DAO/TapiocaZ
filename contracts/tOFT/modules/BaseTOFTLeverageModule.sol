@@ -63,10 +63,15 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         );
         require(swapData.tokenOut != address(this), "TOFT_token_not_valid");
         _assureMaxSlippage(amount, swapData.amountOutMin);
-        require(
-            cluster.isWhitelisted(lzData.lzDstChainId, externalData.swapper),
-            "TOFT_UNAUTHORIZED"
-        ); //fail fast
+        if (externalData.swapper != address(0)) {
+            require(
+                cluster.isWhitelisted(
+                    lzData.lzDstChainId,
+                    externalData.swapper
+                ),
+                "TOFT_UNAUTHORIZED"
+            ); //fail fast
+        }
 
         bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);
 
@@ -217,10 +222,12 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         ITapiocaOFT(address(this)).unwrap(address(this), amount);
 
         //swap to USDO
-        require(
-            cluster.isWhitelisted(0, externalData.swapper),
-            "TOFT_UNAUTHORIZED"
-        );
+        if (externalData.swapper != address(0)) {
+            require(
+                cluster.isWhitelisted(0, externalData.swapper),
+                "TOFT_UNAUTHORIZED"
+            );
+        }
 
         if (erc20 != address(0)) {
             //skip approvals for native gas
