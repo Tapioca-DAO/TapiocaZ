@@ -120,13 +120,18 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         require(amount != 0, "TOFT_0");
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
         (amount, ) = _removeDust(amount);
+
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            airdropAdapterParam
+        );
         bytes memory lzPayload = abi.encode(
             PT_YB_RETRIEVE_STRAT,
             LzLib.addressToBytes32(_from),
             toAddress,
             _ld2sd(amount),
             assetId,
-            zroPaymentAddress
+            zroPaymentAddress,
+            airdropAmount
         );
 
         _checkGasLimit(
@@ -220,10 +225,11 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             ,
             uint64 amountSD,
             uint256 _assetId,
-            address _zroPaymentAddress
+            address _zroPaymentAddress,
+            uint256 airdropAmount
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, bytes32, uint64, uint256, address)
+                (uint16, bytes32, bytes32, uint64, uint256, address, uint256)
             );
 
         uint256 _amount = _sd2ld(amountSD);
@@ -248,7 +254,7 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             payable(_from),
             _zroPaymentAddress,
             "",
-            address(this).balance
+            airdropAmount
         );
         emit SendToChain(
             _srcChainId,

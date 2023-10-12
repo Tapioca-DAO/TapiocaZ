@@ -78,6 +78,9 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         (amount, ) = _removeDust(amount);
         _debitFrom(msg.sender, lzEndpoint.getChainId(), senderBytes, amount);
 
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            lzData.dstAirdropAdapterParam
+        );
         bytes memory lzPayload = abi.encode(
             PT_LEVERAGE_MARKET_DOWN,
             senderBytes,
@@ -85,7 +88,8 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             swapData,
             externalData,
             lzData,
-            leverageFor
+            leverageFor,
+            airdropAmount
         );
 
         _checkGasLimit(
@@ -162,7 +166,8 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             IUSDOBase.ILeverageSwapData memory swapData,
             IUSDOBase.ILeverageExternalContractsData memory externalData,
             IUSDOBase.ILeverageLZData memory lzData,
-            address leverageFor
+            address leverageFor,
+            uint256 airdropAmount
         ) = abi.decode(
                 _payload,
                 (
@@ -172,7 +177,8 @@ contract BaseTOFTLeverageModule is TOFTCommon {
                     IUSDOBase.ILeverageSwapData,
                     IUSDOBase.ILeverageExternalContractsData,
                     IUSDOBase.ILeverageLZData,
-                    address
+                    address,
+                    uint256
                 )
             );
 
@@ -192,24 +198,41 @@ contract BaseTOFTLeverageModule is TOFTCommon {
                 swapData,
                 externalData,
                 lzData,
-                leverageFor
+                leverageFor,
+                airdropAmount
             )
         );
 
         if (!success) {
-            if (balanceAfter - balanceBefore >= amount) {
-                IERC20(address(this)).safeTransfer(leverageFor, amount);
-            }
-            _storeFailedMessage(
+            _storeAndSend(
+                balanceAfter - balanceBefore >= amount,
+                amount,
+                leverageFor,
+                reason,
                 _srcChainId,
                 _srcAddress,
                 _nonce,
-                _payload,
-                reason
+                _payload
             );
         }
 
         emit ReceiveFromChain(_srcChainId, leverageFor, amount);
+    }
+
+    function _storeAndSend(
+        bool refund,
+        uint256 amount,
+        address leverageFor,
+        bytes memory reason,
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) private {
+        if (refund) {
+            IERC20(address(this)).safeTransfer(leverageFor, amount);
+        }
+        _storeFailedMessage(_srcChainId, _srcAddress, _nonce, _payload, reason);
     }
 
     function leverageDownInternal(
@@ -217,7 +240,8 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         IUSDOBase.ILeverageSwapData memory swapData,
         IUSDOBase.ILeverageExternalContractsData memory externalData,
         IUSDOBase.ILeverageLZData memory lzData,
-        address leverageFor
+        address leverageFor,
+        uint256 airdropAmount
     ) public payable {
         ITapiocaOFT(address(this)).unwrap(address(this), amount);
 
@@ -242,9 +266,7 @@ contract BaseTOFTLeverageModule is TOFTCommon {
 
         //repay
         ICommonData.IApproval[] memory approvals;
-        IUSDOBase(swapData.tokenOut).sendAndLendOrRepay{
-            value: address(this).balance
-        }(
+        IUSDOBase(swapData.tokenOut).sendAndLendOrRepay{value: airdropAmount}(
             address(this),
             leverageFor,
             lzData.lzSrcChainId,

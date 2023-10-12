@@ -531,7 +531,7 @@ function leverageDown(address module, uint16 _srcChainId, bytes _srcAddress, uin
 ### leverageDownInternal
 
 ```solidity
-function leverageDownInternal(uint256 amount, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageExternalContractsData externalData, IUSDOBase.ILeverageLZData lzData, address leverageFor) external payable
+function leverageDownInternal(uint256 amount, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageExternalContractsData externalData, IUSDOBase.ILeverageLZData lzData, address leverageFor, uint256 airdropAmount) external payable
 ```
 
 
@@ -547,6 +547,7 @@ function leverageDownInternal(uint256 amount, IUSDOBase.ILeverageSwapData swapDa
 | externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
 | lzData | IUSDOBase.ILeverageLZData | undefined |
 | leverageFor | address | undefined |
+| airdropAmount | uint256 | undefined |
 
 ### lzEndpoint
 

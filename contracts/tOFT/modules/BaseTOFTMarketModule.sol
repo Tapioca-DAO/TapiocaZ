@@ -111,6 +111,9 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes32 toAddress = LzLib.addressToBytes32(to);
         (removeParams.amount, ) = _removeDust(removeParams.amount);
 
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            adapterParams
+        );
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
             from,
@@ -118,7 +121,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
             _ld2sd(removeParams.amount),
             removeParams,
             withdrawParams,
-            approvals
+            approvals,
+            airdropAmount
         );
 
         _checkGasLimit(
@@ -300,11 +304,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
 
-        uint256 gas = withdrawParams.withdraw
-            ? (msg.value > 0 ? msg.value : airdropAmount)
-            : 0;
         IMagnetar(borrowParams.marketHelper)
-            .depositAddCollateralAndBorrowFromMarket{value: gas}(
+            .depositAddCollateralAndBorrowFromMarket{value: airdropAmount}(
             borrowParams.market,
             LzLib.bytes32ToAddress(_to),
             borrowParams.amount,
@@ -324,7 +325,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
             uint64 removeCollateralAmount,
             ITapiocaOFT.IRemoveParams memory removeParams,
             ICommonData.IWithdrawParams memory withdrawParams,
-            ICommonData.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals,
+            uint256 airdropAmount
         ) = abi.decode(
                 _payload,
                 (
@@ -334,7 +336,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
                     uint64,
                     ITapiocaOFT.IRemoveParams,
                     ICommonData.IWithdrawParams,
-                    ICommonData.IApproval[]
+                    ICommonData.IApproval[],
+                    uint256
                 )
             );
 
@@ -364,6 +367,10 @@ contract BaseTOFTMarketModule is TOFTCommon {
         approve(removeParams.market, share);
         IMarket(removeParams.market).removeCollateral(from, to, share);
         if (withdrawParams.withdraw) {
+            require(
+                airdropAmount >= withdrawParams.withdrawLzFeeAmount,
+                "TOFT_GAS"
+            );
             require(
                 cluster.isWhitelisted(0, removeParams.marketHelper),
                 "TOFT_INVALID"
