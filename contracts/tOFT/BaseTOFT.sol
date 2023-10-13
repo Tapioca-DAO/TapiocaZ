@@ -5,9 +5,14 @@ import "./BaseTOFTStorage.sol";
 
 //TOFT MODULES
 import "./modules/BaseTOFTLeverageModule.sol";
+import "./modules/BaseTOFTLeverageDestinationModule.sol";
 import "./modules/BaseTOFTStrategyModule.sol";
+import "./modules/BaseTOFTStrategyDestinationModule.sol";
 import "./modules/BaseTOFTMarketModule.sol";
+import "./modules/BaseTOFTMarketDestinationModule.sol";
 import "./modules/BaseTOFTOptionsModule.sol";
+import "./modules/BaseTOFTOptionsDestinationModule.sol";
+import "./modules/BaseTOFTGenericModule.sol";
 import "./TOFTVault.sol";
 
 import "tapioca-periph/contracts/interfaces/IStargateReceiver.sol";
@@ -19,29 +24,41 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     // ************ //
     // *** VARS *** //
     // ************ //
-    enum Module {
-        Leverage,
-        Strategy,
-        Market,
-        Options
-    }
 
     /// @notice returns the leverage module
-    BaseTOFTLeverageModule public leverageModule;
+    BaseTOFTLeverageModule private _leverageModule;
+    /// @notice returns the leverage module
+    BaseTOFTLeverageDestinationModule private _leverageDestinationModule;
 
     /// @notice returns the Strategy module
-    BaseTOFTStrategyModule public strategyModule;
+    BaseTOFTStrategyModule private _strategyModule;
+    /// @notice returns the Strategy module
+    BaseTOFTStrategyDestinationModule private _strategyDestinationModule;
 
     /// @notice returns the Market module
-    BaseTOFTMarketModule public marketModule;
+    BaseTOFTMarketModule private _marketModule;
+    /// @notice returns the Market module
+    BaseTOFTMarketDestinationModule private _marketDestinationModule;
 
     /// @notice returns the Options module
-    BaseTOFTOptionsModule public optionsModule;
+    BaseTOFTOptionsModule private _optionsModule;
+    /// @notice returns the Options module
+    BaseTOFTOptionsDestinationModule private _optionsDestinationModule;
+
+    /// @notice returns the Options module
+    BaseTOFTGenericModule private _genericModule;
 
     /// @notice returns the amount of total wrapped native coins
     uint256 wrappedNativeAmount;
 
     TOFTVault public vault;
+
+    struct DestinationCall {
+        Module module;
+        bytes4 functionSelector;
+    }
+    // Define a mapping from packetType to destination module and function selector.
+    mapping(uint256 => DestinationCall) private _destinationMappings;
 
     // ******************//
     // *** MODIFIERS *** //
@@ -61,10 +78,15 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         string memory _symbol,
         uint8 _decimal,
         uint256 _hostChainID,
-        address payable _leverageModule,
-        address payable _strategyModule,
-        address payable _marketModule,
-        address payable _optionsModule
+        address payable __leverageModule,
+        address payable __leverageDestinationModule,
+        address payable __strategyModule,
+        address payable __strategyDestinationModule,
+        address payable __marketModule,
+        address payable __marketDestinationModule,
+        address payable __optionsModule,
+        address payable __optionsDestinationModule,
+        address payable __genericModule
     )
         BaseTOFTStorage(
             _lzEndpoint,
@@ -78,15 +100,83 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         )
         ERC20Permit(string(abi.encodePacked("TapiocaOFT-", _name)))
     {
-        leverageModule = BaseTOFTLeverageModule(_leverageModule);
-        strategyModule = BaseTOFTStrategyModule(_strategyModule);
-        marketModule = BaseTOFTMarketModule(_marketModule);
-        optionsModule = BaseTOFTOptionsModule(_optionsModule);
+        //Set modules
+        _leverageModule = BaseTOFTLeverageModule(__leverageModule);
+        _leverageDestinationModule = BaseTOFTLeverageDestinationModule(
+            __leverageDestinationModule
+        );
 
-        validModules[_leverageModule] = true;
-        validModules[_strategyModule] = true;
-        validModules[_marketModule] = true;
-        validModules[_optionsModule] = true;
+        _strategyModule = BaseTOFTStrategyModule(__strategyModule);
+        _strategyDestinationModule = BaseTOFTStrategyDestinationModule(
+            __strategyDestinationModule
+        );
+
+        _marketModule = BaseTOFTMarketModule(__marketModule);
+        _marketDestinationModule = BaseTOFTMarketDestinationModule(
+            __marketDestinationModule
+        );
+
+        _optionsModule = BaseTOFTOptionsModule(__optionsModule);
+        _optionsDestinationModule = BaseTOFTOptionsDestinationModule(
+            __optionsDestinationModule
+        );
+
+        _genericModule = BaseTOFTGenericModule(__genericModule);
+
+        //Set modules' addresses
+        _moduleAddresses[Module.Generic] = __genericModule;
+        _moduleAddresses[Module.Options] = __optionsModule;
+        _moduleAddresses[
+            Module.OptionsDestination
+        ] = __optionsDestinationModule;
+        _moduleAddresses[Module.Leverage] = __leverageModule;
+        _moduleAddresses[
+            Module.LeverageDestination
+        ] = __leverageDestinationModule;
+        _moduleAddresses[Module.Market] = __marketModule;
+        _moduleAddresses[Module.MarketDestination] = __marketDestinationModule;
+
+        //Set destination mappings
+        _destinationMappings[PT_YB_SEND_STRAT] = DestinationCall({
+            module: Module.StrategyDestination,
+            functionSelector: BaseTOFTStrategyDestinationModule
+                .strategyDeposit
+                .selector
+        });
+        _destinationMappings[PT_YB_RETRIEVE_STRAT] = DestinationCall({
+            module: Module.StrategyDestination,
+            functionSelector: BaseTOFTStrategyDestinationModule
+                .strategyWithdraw
+                .selector
+        });
+        _destinationMappings[PT_MARKET_REMOVE_COLLATERAL] = DestinationCall({
+            module: Module.MarketDestination,
+            functionSelector: BaseTOFTMarketDestinationModule.remove.selector
+        });
+        _destinationMappings[PT_YB_SEND_SGL_BORROW] = DestinationCall({
+            module: Module.MarketDestination,
+            functionSelector: BaseTOFTMarketDestinationModule.borrow.selector
+        });
+        _destinationMappings[PT_MARKET_MULTIHOP_SELL] = DestinationCall({
+            module: Module.LeverageDestination,
+            functionSelector: BaseTOFTLeverageDestinationModule
+                .multiHop
+                .selector
+        });
+        _destinationMappings[PT_LEVERAGE_MARKET_DOWN] = DestinationCall({
+            module: Module.LeverageDestination,
+            functionSelector: BaseTOFTLeverageDestinationModule
+                .leverageDown
+                .selector
+        });
+        _destinationMappings[PT_TAP_EXERCISE] = DestinationCall({
+            module: Module.OptionsDestination,
+            functionSelector: BaseTOFTOptionsDestinationModule.exercise.selector
+        });
+        _destinationMappings[PT_SEND_FROM] = DestinationCall({
+            module: Module.Generic,
+            functionSelector: BaseTOFTGenericModule.sendFromDestination.selector
+        });
 
         vault = new TOFTVault(_erc20);
     }
@@ -103,97 +193,69 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
-    /// @notice triggers a sendFrom to another layer from destination
-    /// @param lzDstChainId LZ destination id
-    /// @param airdropAdapterParams airdrop params
-    /// @param zroPaymentAddress ZRO payment address
-    /// @param amount amount to send back
-    /// @param sendFromData data needed to trigger sendFrom on destination
-    /// @param approvals approvals array
-    function triggerSendFrom(
-        uint16 lzDstChainId,
+
+    //----Leverage---
+    /// @notice inits a multiHopSellCollateral call
+    /// @param from The user who sells
+    /// @param share Collateral YieldBox-shares to sell
+    /// @param swapData Swap data used on destination chain for swapping USDO to the underlying TOFT token
+    /// @param lzData LayerZero specific data
+    /// @param externalData External contracts used for the cross chain operation
+    /// @param airdropAdapterParams default or airdrop adapter params
+    /// @param approvals array
+    function initMultiSell(
+        address from,
+        uint256 share,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData,
         bytes calldata airdropAdapterParams,
-        address zroPaymentAddress,
-        uint256 amount,
-        ISendFrom.LzCallParams calldata sendFromData,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] memory approvals
     ) external payable {
         _executeModule(
-            Module.Options,
+            Module.Leverage,
             abi.encodeWithSelector(
-                BaseTOFTOptionsModule.triggerSendFrom.selector,
-                lzDstChainId,
+                BaseTOFTLeverageModule.initMultiSell.selector,
+                from,
+                share,
+                swapData,
+                lzData,
+                externalData,
                 airdropAdapterParams,
-                zroPaymentAddress,
-                amount,
-                sendFromData,
                 approvals
             ),
             false
         );
     }
 
-    /// @notice Exercise an oTAP position
-    /// @param optionsData oTap exerciseOptions data
-    /// @param lzData data needed for the cross chain transer
-    /// @param tapSendData needed for withdrawing Tap token
-    /// @param approvals array
-    function exerciseOption(
-        ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
-            calldata optionsData,
-        ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
-        ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
-            calldata tapSendData,
-        ICommonData.IApproval[] calldata approvals,
-        bytes calldata adapterParams
+    /// @notice sends TOFT to a specific chain and performs a leverage down operation
+    /// @param amount the amount to use
+    /// @param leverageFor the receiver address
+    /// @param lzData LZ specific data
+    /// @param swapData ISwapper specific data
+    /// @param externalData external contracts used for the flow
+    function sendForLeverage(
+        uint256 amount,
+        address leverageFor,
+        IUSDOBase.ILeverageLZData calldata lzData,
+        IUSDOBase.ILeverageSwapData calldata swapData,
+        IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
         _executeModule(
-            Module.Options,
+            Module.Leverage,
             abi.encodeWithSelector(
-                BaseTOFTOptionsModule.exerciseOption.selector,
-                optionsData,
+                BaseTOFTLeverageModule.sendForLeverage.selector,
+                amount,
+                leverageFor,
                 lzData,
-                tapSendData,
-                approvals,
-                adapterParams
+                swapData,
+                externalData
             ),
             false
         );
     }
 
-    // /// @notice inits a multiHopSellCollateral call
-    // /// @param from The user who sells
-    // /// @param share Collateral YieldBox-shares to sell
-    // /// @param swapData Swap data used on destination chain for swapping USDO to the underlying TOFT token
-    // /// @param lzData LayerZero specific data
-    // /// @param externalData External contracts used for the cross chain operation
-    // /// @param airdropAdapterParams default or airdrop adapter params
-    // /// @param approvals array
-    // function initMultiSell(
-    //     address from,
-    //     uint256 share,
-    //     IUSDOBase.ILeverageSwapData calldata swapData,
-    //     IUSDOBase.ILeverageLZData calldata lzData,
-    //     IUSDOBase.ILeverageExternalContractsData calldata externalData,
-    //     bytes calldata airdropAdapterParams,
-    //     ICommonData.IApproval[] memory approvals
-    // ) external payable {
-    //     _executeModule(
-    //         Module.Leverage,
-    //         abi.encodeWithSelector(
-    //             BaseTOFTMarketModule.initMultiSell.selector,
-    //             from,
-    //             share,
-    //             swapData,
-    //             lzData,
-    //             externalData,
-    //             airdropAdapterParams,
-    //             approvals
-    //         ),
-    //         false
-    //     );
-    // }
-
+    //----Market---
     /// @notice calls removeCollateral on another layer
     /// @param from sending address
     /// @param to receiver address
@@ -230,6 +292,72 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         );
     }
 
+    /// @notice sends TOFT to a specific chain and performs a borrow operation
+    /// @param from the sender address
+    /// @param to the receiver address
+    /// @param lzDstChainId the destination LayerZero id
+    /// @param airdropAdapterParams the LayerZero aidrop adapter params
+    /// @param borrowParams the borrow operation data
+    /// @param withdrawParams the withdraw operation data
+    /// @param options the cross chain send operation data
+    /// @param approvals the cross chain approval operation data
+    function sendToYBAndBorrow(
+        address from,
+        address to,
+        uint16 lzDstChainId,
+        bytes calldata airdropAdapterParams,
+        ITapiocaOFT.IBorrowParams calldata borrowParams,
+        ICommonData.IWithdrawParams calldata withdrawParams,
+        ICommonData.ISendOptions calldata options,
+        ICommonData.IApproval[] calldata approvals
+    ) external payable {
+        _executeModule(
+            Module.Market,
+            abi.encodeWithSelector(
+                BaseTOFTMarketModule.sendToYBAndBorrow.selector,
+                from,
+                to,
+                lzDstChainId,
+                airdropAdapterParams,
+                borrowParams,
+                withdrawParams,
+                options,
+                approvals
+            ),
+            false
+        );
+    }
+
+    //----Options---
+    /// @notice Exercise an oTAP position
+    /// @param optionsData oTap exerciseOptions data
+    /// @param lzData data needed for the cross chain transer
+    /// @param tapSendData needed for withdrawing Tap token
+    /// @param approvals array
+    function exerciseOption(
+        ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
+            calldata optionsData,
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZData calldata lzData,
+        ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
+            calldata tapSendData,
+        ICommonData.IApproval[] calldata approvals,
+        bytes calldata adapterParams
+    ) external payable {
+        _executeModule(
+            Module.Options,
+            abi.encodeWithSelector(
+                BaseTOFTOptionsModule.exerciseOption.selector,
+                optionsData,
+                lzData,
+                tapSendData,
+                approvals,
+                adapterParams
+            ),
+            false
+        );
+    }
+
+    //----Strategy---
     /// @notice sends TOFT to a specific strategy available on another layer
     /// @param from the sender address
     /// @param to the receiver address
@@ -290,64 +418,32 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         );
     }
 
-    /// @notice sends TOFT to a specific chain and performs a borrow operation
-    /// @param from the sender address
-    /// @param to the receiver address
-    /// @param lzDstChainId the destination LayerZero id
-    /// @param airdropAdapterParams the LayerZero aidrop adapter params
-    /// @param borrowParams the borrow operation data
-    /// @param withdrawParams the withdraw operation data
-    /// @param options the cross chain send operation data
-    /// @param approvals the cross chain approval operation data
-    function sendToYBAndBorrow(
-        address from,
-        address to,
+    //----Generic---
+    /// @notice triggers a sendFrom to another layer from destination
+    /// @param lzDstChainId LZ destination id
+    /// @param airdropAdapterParams airdrop params
+    /// @param zroPaymentAddress ZRO payment address
+    /// @param amount amount to send back
+    /// @param sendFromData data needed to trigger sendFrom on destination
+    /// @param approvals approvals array
+    function triggerSendFrom(
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,
-        ITapiocaOFT.IBorrowParams calldata borrowParams,
-        ICommonData.IWithdrawParams calldata withdrawParams,
-        ICommonData.ISendOptions calldata options,
+        address zroPaymentAddress,
+        uint256 amount,
+        ISendFrom.LzCallParams calldata sendFromData,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
         _executeModule(
-            Module.Market,
+            Module.Options,
             abi.encodeWithSelector(
-                BaseTOFTMarketModule.sendToYBAndBorrow.selector,
-                from,
-                to,
+                BaseTOFTGenericModule.triggerSendFrom.selector,
                 lzDstChainId,
                 airdropAdapterParams,
-                borrowParams,
-                withdrawParams,
-                options,
-                approvals
-            ),
-            false
-        );
-    }
-
-    /// @notice sends TOFT to a specific chain and performs a leverage down operation
-    /// @param amount the amount to use
-    /// @param leverageFor the receiver address
-    /// @param lzData LZ specific data
-    /// @param swapData ISwapper specific data
-    /// @param externalData external contracts used for the flow
-    function sendForLeverage(
-        uint256 amount,
-        address leverageFor,
-        IUSDOBase.ILeverageLZData calldata lzData,
-        IUSDOBase.ILeverageSwapData calldata swapData,
-        IUSDOBase.ILeverageExternalContractsData calldata externalData
-    ) external payable {
-        _executeModule(
-            Module.Leverage,
-            abi.encodeWithSelector(
-                BaseTOFTLeverageModule.sendForLeverage.selector,
+                zroPaymentAddress,
                 amount,
-                leverageFor,
-                lzData,
-                swapData,
-                externalData
+                sendFromData,
+                approvals
             ),
             false
         );
@@ -390,6 +486,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
 
     // ************************* //
     // *** PRIVATE FUNCTIONS *** //
+    // ************************* //
 
     //---internal-
     function _wrap(
@@ -421,21 +518,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
 
     //---private---
     function _extractModule(Module _module) private view returns (address) {
-        address module;
-        if (_module == Module.Leverage) {
-            module = address(leverageModule);
-        } else if (_module == Module.Strategy) {
-            module = address(strategyModule);
-        } else if (_module == Module.Market) {
-            module = address(marketModule);
-        } else if (_module == Module.Options) {
-            module = address(optionsModule);
-        }
-
-        if (module == address(0)) {
-            revert("TOFT_module");
-        }
-
+        address module = _moduleAddresses[_module];
+        require(module != address(0), "TOFT_module");
         return module;
     }
 
@@ -486,115 +570,41 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     ) internal virtual override {
         uint256 packetType = _payload.toUint256(0);
 
-        if (packetType == PT_YB_SEND_STRAT) {
+        if (_destinationMappings[packetType].module != Module(0)) {
+            DestinationCall memory callInfo = _destinationMappings[packetType];
             _executeOnDestination(
-                Module.Strategy,
+                callInfo.module,
                 abi.encodeWithSelector(
-                    BaseTOFTStrategyModule.strategyDeposit.selector,
-                    strategyModule,
+                    callInfo.functionSelector,
+                    callInfo.module == Module.StrategyDestination
+                        ? address(_strategyDestinationModule)
+                        : (
+                            callInfo.module == Module.MarketDestination
+                                ? address(_marketDestinationModule)
+                                : (
+                                    callInfo.module ==
+                                        Module.LeverageDestination
+                                        ? address(_leverageDestinationModule)
+                                        : (
+                                            callInfo.module ==
+                                                Module.OptionsDestination
+                                                ? address(
+                                                    _optionsDestinationModule
+                                                )
+                                                : (
+                                                    callInfo.module ==
+                                                        Module.Generic
+                                                        ? address(
+                                                            _genericModule
+                                                        )
+                                                        : address(0)
+                                                )
+                                        )
+                                )
+                        ),
                     _srcChainId,
                     _srcAddress,
                     _nonce,
-                    _payload,
-                    IERC20(address(this))
-                ),
-                _srcChainId,
-                _srcAddress,
-                _nonce,
-                _payload
-            );
-        } else if (packetType == PT_YB_RETRIEVE_STRAT) {
-            _executeOnDestination(
-                Module.Strategy,
-                abi.encodeWithSelector(
-                    BaseTOFTStrategyModule.strategyWithdraw.selector,
-                    _srcChainId,
-                    _payload
-                ),
-                _srcChainId,
-                _srcAddress,
-                _nonce,
-                _payload
-            );
-        } else if (packetType == PT_LEVERAGE_MARKET_DOWN) {
-            _executeOnDestination(
-                Module.Leverage,
-                abi.encodeWithSelector(
-                    BaseTOFTLeverageModule.leverageDown.selector,
-                    address(leverageModule),
-                    _srcChainId,
-                    _srcAddress,
-                    _nonce,
-                    _payload
-                ),
-                _srcChainId,
-                _srcAddress,
-                _nonce,
-                _payload
-            );
-        } else if (packetType == PT_YB_SEND_SGL_BORROW) {
-            _executeOnDestination(
-                Module.Market,
-                abi.encodeWithSelector(
-                    BaseTOFTMarketModule.borrow.selector,
-                    address(marketModule),
-                    _srcChainId,
-                    _srcAddress,
-                    _nonce,
-                    _payload
-                ),
-                _srcChainId,
-                _srcAddress,
-                _nonce,
-                _payload
-            );
-        } else if (packetType == PT_MARKET_REMOVE_COLLATERAL) {
-            _executeOnDestination(
-                Module.Market,
-                abi.encodeWithSelector(
-                    BaseTOFTMarketModule.remove.selector,
-                    _payload
-                ),
-                _srcChainId,
-                _srcAddress,
-                _nonce,
-                _payload
-            );
-        }
-        // else if (packetType == PT_MARKET_MULTIHOP_SELL) {
-        //     _executeOnDestination(
-        //         Module.Leverage,
-        //         abi.encodeWithSelector(
-        //             BaseTOFTLeverageModule.multiHop.selector,
-        //             _payload
-        //         ),
-        //         _srcChainId,
-        //         _srcAddress,
-        //         _nonce,
-        //         _payload
-        //     );
-        // }
-        else if (packetType == PT_TAP_EXERCISE) {
-            _executeOnDestination(
-                Module.Options,
-                abi.encodeWithSelector(
-                    BaseTOFTOptionsModule.exercise.selector,
-                    address(optionsModule),
-                    _srcChainId,
-                    _srcAddress,
-                    _nonce,
-                    _payload
-                ),
-                _srcChainId,
-                _srcAddress,
-                _nonce,
-                _payload
-            );
-        } else if (packetType == PT_SEND_FROM) {
-            _executeOnDestination(
-                Module.Options,
-                abi.encodeWithSelector(
-                    BaseTOFTOptionsModule.sendFromDestination.selector,
                     _payload
                 ),
                 _srcChainId,

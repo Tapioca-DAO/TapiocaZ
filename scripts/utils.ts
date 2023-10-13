@@ -99,6 +99,19 @@ export const useUtils = (
             hostChainID,
         );
         await leverageModule.deployed();
+        const leverageDestinationModule = await (
+            await ethers.getContractFactory('BaseTOFTLeverageDestinationModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            clusterAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+        await leverageDestinationModule.deployed();
 
         const strategyModule = await (
             await ethers.getContractFactory('BaseTOFTStrategyModule')
@@ -113,6 +126,19 @@ export const useUtils = (
             hostChainID,
         );
         await strategyModule.deployed();
+        const strategyDestinationModule = await (
+            await ethers.getContractFactory('BaseTOFTStrategyDestinationModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            clusterAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+        await strategyDestinationModule.deployed();
 
         const marketModule = await (
             await ethers.getContractFactory('BaseTOFTMarketModule')
@@ -127,6 +153,19 @@ export const useUtils = (
             hostChainID,
         );
         await marketModule.deployed();
+        const marketDestinationModule = await (
+            await ethers.getContractFactory('BaseTOFTMarketDestinationModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            clusterAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+        await marketDestinationModule.deployed();
 
         const optionsModule = await (
             await ethers.getContractFactory('BaseTOFTOptionsModule')
@@ -141,6 +180,33 @@ export const useUtils = (
             hostChainID,
         );
         await optionsModule.deployed();
+        const optionsDestinationModule = await (
+            await ethers.getContractFactory('BaseTOFTOptionsDestinationModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            clusterAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+        await optionsDestinationModule.deployed();
+
+        const genericModule = await (
+            await ethers.getContractFactory('BaseTOFTGenericModule')
+        ).deploy(
+            lzEndpoint,
+            erc20Address,
+            yieldBoxAddress,
+            clusterAddress,
+            erc20name,
+            erc20symbol,
+            erc20decimal,
+            hostChainID,
+        );
+        await genericModule.deployed();
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -155,9 +221,14 @@ export const useUtils = (
             erc20decimal,
             hostChainID,
             leverageModule.address,
+            leverageDestinationModule.address,
             strategyModule.address,
+            strategyDestinationModule.address,
             marketModule.address,
+            marketDestinationModule.address,
             optionsModule.address,
+            optionsDestinationModule.address,
+            genericModule.address,
         ];
 
         const txData = (

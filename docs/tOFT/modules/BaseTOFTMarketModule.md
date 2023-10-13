@@ -163,46 +163,6 @@ function balanceOf(address account) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### borrow
-
-```solidity
-function borrow(address module, uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _payload) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| module | address | undefined |
-| _srcChainId | uint16 | undefined |
-| _srcAddress | bytes | undefined |
-| _nonce | uint64 | undefined |
-| _payload | bytes | undefined |
-
-### borrowInternal
-
-```solidity
-function borrowInternal(bytes32 _to, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.IApproval[] approvals, uint256 airdropAmount) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _to | bytes32 | undefined |
-| borrowParams | ITapiocaOFT.IBorrowParams | undefined |
-| withdrawParams | ICommonData.IWithdrawParams | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
-| airdropAmount | uint256 | undefined |
-
 ### callOnOFTReceived
 
 ```solidity
@@ -698,22 +658,6 @@ function precrime() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
-
-### remove
-
-```solidity
-function remove(bytes _payload) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _payload | bytes | undefined |
 
 ### removeCollateral
 

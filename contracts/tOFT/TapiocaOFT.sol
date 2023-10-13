@@ -23,10 +23,15 @@ contract TapiocaOFT is BaseTOFT {
         string memory _symbol,
         uint8 _decimal,
         uint256 _hostChainID,
-        address payable _leverageModule,
-        address payable _strategyModule,
-        address payable _marketModule,
-        address payable _optionsModule
+        address payable __leverageModule,
+        address payable __leverageDestinationModule,
+        address payable __strategyModule,
+        address payable __strategyDestinationModule,
+        address payable __marketModule,
+        address payable __marketDestinationModule,
+        address payable __optionsModule,
+        address payable __optionsDestinationModule,
+        address payable __genericModule
     )
         BaseTOFT(
             _lzEndpoint,
@@ -37,10 +42,15 @@ contract TapiocaOFT is BaseTOFT {
             _symbol,
             _decimal,
             _hostChainID,
-            _leverageModule,
-            _strategyModule,
-            _marketModule,
-            _optionsModule
+            __leverageModule,
+            __leverageDestinationModule,
+            __strategyModule,
+            __strategyDestinationModule,
+            __marketModule,
+            __marketDestinationModule,
+            __optionsModule,
+            __optionsDestinationModule,
+            __genericModule
         )
     {}
 

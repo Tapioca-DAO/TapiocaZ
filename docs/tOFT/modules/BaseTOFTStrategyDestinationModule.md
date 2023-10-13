@@ -1,4 +1,4 @@
-# BaseTOFT
+# BaseTOFTStrategyDestinationModule
 
 
 
@@ -26,23 +26,6 @@ function DEFAULT_PAYLOAD_SIZE_LIMIT() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### DOMAIN_SEPARATOR
-
-```solidity
-function DOMAIN_SEPARATOR() external view returns (bytes32)
-```
-
-
-
-*See {IERC20Permit-DOMAIN_SEPARATOR}.*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
 
 ### NO_EXTRA_GAS
 
@@ -267,9 +250,9 @@ function creditedPackets(uint16, bytes, uint64) external view returns (bool)
 function decimals() external view returns (uint8)
 ```
 
-decimal number of the ERC20
 
 
+*Returns the number of decimals used to get its user representation. For example, if `decimals` equals `2`, a balance of `505` tokens should be displayed to a user as `5.05` (`505 / 10 ** 2`). Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei. This is the value {ERC20} uses, unless this function is overridden; NOTE: This information is only used for _display_ purposes: it in no way affects any of the arithmetic of the contract, including {IERC20-balanceOf} and {IERC20-transfer}.*
 
 
 #### Returns
@@ -300,6 +283,27 @@ function decreaseAllowance(address spender, uint256 subtractedValue) external no
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
+
+### depositToYieldbox
+
+```solidity
+function depositToYieldbox(address module, uint256 _assetId, uint256 _amount, contract IERC20 _erc20, address _from, address _to) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| module | address | undefined |
+| _assetId | uint256 | undefined |
+| _amount | uint256 | undefined |
+| _erc20 | contract IERC20 | undefined |
+| _from | address | undefined |
+| _to | address | undefined |
 
 ### erc20
 
@@ -373,26 +377,6 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 |---|---|---|
 | nativeFee | uint256 | undefined |
 | zroFee | uint256 | undefined |
-
-### exerciseOption
-
-```solidity
-function exerciseOption(ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData, ITapiocaOptionsBrokerCrossChain.IExerciseLZData lzData, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, ICommonData.IApproval[] approvals, bytes adapterParams) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| optionsData | ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData | undefined |
-| lzData | ITapiocaOptionsBrokerCrossChain.IExerciseLZData | undefined |
-| tapSendData | ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
-| adapterParams | bytes | undefined |
 
 ### failedMessages
 
@@ -522,28 +506,6 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 |---|---|---|
 | _0 | bool | undefined |
 
-### initMultiSell
-
-```solidity
-function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ICommonData.IApproval[] approvals) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| share | uint256 | undefined |
-| swapData | IUSDOBase.ILeverageSwapData | undefined |
-| lzData | IUSDOBase.ILeverageLZData | undefined |
-| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
-| airdropAdapterParams | bytes | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
-
 ### isTrustedRemote
 
 ```solidity
@@ -662,28 +624,6 @@ function nonblockingLzReceive(uint16 _srcChainId, bytes _srcAddress, uint64 _non
 | _nonce | uint64 | undefined |
 | _payload | bytes | undefined |
 
-### nonces
-
-```solidity
-function nonces(address owner) external view returns (uint256)
-```
-
-
-
-*See {IERC20Permit-nonces}.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| owner | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### owner
 
 ```solidity
@@ -723,28 +663,6 @@ function payloadSizeLimitLookup(uint16) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### permit
-
-```solidity
-function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
-```
-
-
-
-*See {IERC20Permit-permit}.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| owner | address | undefined |
-| spender | address | undefined |
-| value | uint256 | undefined |
-| deadline | uint256 | undefined |
-| v | uint8 | undefined |
-| r | bytes32 | undefined |
-| s | bytes32 | undefined |
-
 ### precrime
 
 ```solidity
@@ -762,29 +680,6 @@ function precrime() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### removeCollateral
-
-```solidity
-function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ICommonData.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ICommonData.IApproval[] approvals, bytes adapterParams) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| to | address | undefined |
-| lzDstChainId | uint16 | undefined |
-| zroPaymentAddress | address | undefined |
-| withdrawParams | ICommonData.IWithdrawParams | undefined |
-| removeParams | ITapiocaOFT.IRemoveParams | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
-| adapterParams | bytes | undefined |
-
 ### renounceOwnership
 
 ```solidity
@@ -795,44 +690,6 @@ function renounceOwnership() external nonpayable
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
-
-### rescueEth
-
-```solidity
-function rescueEth(uint256 amount, address to) external nonpayable
-```
-
-rescues unused ETH from the contract
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| amount | uint256 | the amount to rescue |
-| to | address | the recipient |
-
-### retrieveFromStrategy
-
-```solidity
-function retrieveFromStrategy(address from, uint256 amount, uint256 assetId, uint16 lzDstChainId, address zroPaymentAddress, bytes airdropAdapterParam) external payable
-```
-
-extracts TOFT from a specific strategy available on another layer
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | the sender address |
-| amount | uint256 | the transferred amount |
-| assetId | uint256 | the destination YieldBox asset id |
-| lzDstChainId | uint16 | the destination LayerZero id |
-| zroPaymentAddress | address | LayerZero ZRO payment address |
-| airdropAdapterParam | bytes | the LayerZero aidrop adapter params |
 
 ### retryMessage
 
@@ -875,26 +732,6 @@ function sendAndCall(address _from, uint16 _dstChainId, bytes32 _toAddress, uint
 | _dstGasForCall | uint64 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
 
-### sendForLeverage
-
-```solidity
-function sendForLeverage(uint256 amount, address leverageFor, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageExternalContractsData externalData) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| amount | uint256 | undefined |
-| leverageFor | address | undefined |
-| lzData | IUSDOBase.ILeverageLZData | undefined |
-| swapData | IUSDOBase.ILeverageSwapData | undefined |
-| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
-
 ### sendFrom
 
 ```solidity
@@ -914,66 +751,6 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 | _toAddress | bytes32 | undefined |
 | _amount | uint256 | undefined |
 | _callParams | ICommonOFT.LzCallParams | undefined |
-
-### sendToStrategy
-
-```solidity
-function sendToStrategy(address from, address to, uint256 amount, uint256 assetId, uint16 lzDstChainId, ICommonData.ISendOptions options) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| to | address | undefined |
-| amount | uint256 | undefined |
-| assetId | uint256 | undefined |
-| lzDstChainId | uint16 | undefined |
-| options | ICommonData.ISendOptions | undefined |
-
-### sendToYBAndBorrow
-
-```solidity
-function sendToYBAndBorrow(address from, address to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.ISendOptions options, ICommonData.IApproval[] approvals) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| to | address | undefined |
-| lzDstChainId | uint16 | undefined |
-| airdropAdapterParams | bytes | undefined |
-| borrowParams | ITapiocaOFT.IBorrowParams | undefined |
-| withdrawParams | ICommonData.IWithdrawParams | undefined |
-| options | ICommonData.ISendOptions | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
-
-### setCluster
-
-```solidity
-function setCluster(contract ICluster _cluster) external nonpayable
-```
-
-updates the cluster address
-
-*can only be called by the owner*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _cluster | contract ICluster | the new address |
 
 ### setConfig
 
@@ -1143,27 +920,6 @@ function setUseCustomAdapterParams(bool _useCustomAdapterParams) external nonpay
 |---|---|---|
 | _useCustomAdapterParams | bool | undefined |
 
-### sgReceive
-
-```solidity
-function sgReceive(uint16, bytes, uint256, address, uint256 amountLD, bytes) external nonpayable
-```
-
-needed for Stargate Router to receive funds from Balancer.sol contract
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-| _1 | bytes | undefined |
-| _2 | uint256 | undefined |
-| _3 | address | undefined |
-| amountLD | uint256 | undefined |
-| _5 | bytes | undefined |
-
 ### sharedDecimals
 
 ```solidity
@@ -1180,6 +936,44 @@ function sharedDecimals() external view returns (uint8)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint8 | undefined |
+
+### strategyDeposit
+
+```solidity
+function strategyDeposit(address module, uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _payload, contract IERC20 _erc20) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| module | address | undefined |
+| _srcChainId | uint16 | undefined |
+| _srcAddress | bytes | undefined |
+| _nonce | uint64 | undefined |
+| _payload | bytes | undefined |
+| _erc20 | contract IERC20 | undefined |
+
+### strategyWithdraw
+
+```solidity
+function strategyWithdraw(uint16 _srcChainId, bytes _payload) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _srcChainId | uint16 | undefined |
+| _payload | bytes | undefined |
 
 ### supportsInterface
 
@@ -1317,27 +1111,6 @@ function transferOwnership(address newOwner) external nonpayable
 |---|---|---|
 | newOwner | address | undefined |
 
-### triggerSendFrom
-
-```solidity
-function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, address zroPaymentAddress, uint256 amount, ISendFrom.LzCallParams sendFromData, ICommonData.IApproval[] approvals) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| lzDstChainId | uint16 | undefined |
-| airdropAdapterParams | bytes | undefined |
-| zroPaymentAddress | address | undefined |
-| amount | uint256 | undefined |
-| sendFromData | ISendFrom.LzCallParams | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
-
 ### trustedRemoteLookup
 
 ```solidity
@@ -1376,23 +1149,6 @@ function useCustomAdapterParams() external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### vault
-
-```solidity
-function vault() external view returns (contract TOFTVault)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract TOFTVault | undefined |
 
 ### yieldBox
 
