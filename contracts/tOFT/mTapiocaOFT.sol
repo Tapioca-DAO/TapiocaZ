@@ -22,7 +22,11 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     // *** EVENTS *** //
     // ************** //
     /// @notice event emitted when a connected chain is reigstered or unregistered
-    event ConnectedChainStatusUpdated(uint256 indexed _chain, bool indexed _old, bool indexed _new);
+    event ConnectedChainStatusUpdated(
+        uint256 indexed _chain,
+        bool indexed _old,
+        bool indexed _new
+    );
     /// @notice event emitted when balancer status is updated
     event BalancerStatusUpdated(
         address indexed _balancer,
