@@ -40,8 +40,7 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         uint16 _srcChainId,
         bytes memory _srcAddress,
         uint64 _nonce,
-        bytes memory _payload,
-        IERC20 _erc20
+        bytes memory _payload
     ) public {
         require(
             msg.sender == address(this) &&
@@ -67,9 +66,9 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
             abi.encodeWithSelector(
                 this.depositToYieldbox.selector,
                 module,
+                yieldBox,
                 assetId,
                 amount,
-                _erc20,
                 address(this),
                 onBehalfOf
             )
@@ -92,9 +91,9 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
 
     function depositToYieldbox(
         address module,
+        IYieldBoxBase _yieldBox,
         uint256 _assetId,
         uint256 _amount,
-        IERC20 _erc20,
         address _from,
         address _to
     ) public {
@@ -103,13 +102,17 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
                 _moduleAddresses[Module.StrategyDestination] == module,
             "TOFT_CALLER"
         );
-        _erc20.approve(address(yieldBox), 0);
-        _erc20.approve(address(yieldBox), _amount);
-        yieldBox.depositAsset(_assetId, _from, _to, _amount, 0);
+        IERC20(address(this)).approve(address(_yieldBox), 0);
+        IERC20(address(this)).approve(address(_yieldBox), _amount);
+        uint256 share = _yieldBox.toShare(_assetId, _amount, false);
+        _yieldBox.depositAsset(_assetId, _from, _to, 0, share);
     }
 
     function strategyWithdraw(
+        address,
         uint16 _srcChainId,
+        bytes memory,
+        uint64,
         bytes memory _payload
     ) public {
         require(msg.sender == address(this), "TOFT_CALLER");
@@ -133,7 +136,8 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
             _assetId,
             _amount,
             _from,
-            address(this)
+            address(this),
+            yieldBox
         );
         (_amount, ) = _removeDust(_amount);
         _burn(address(this), _amount);
@@ -165,10 +169,11 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         uint256 _assetId,
         uint256 _amount,
         address _from,
-        address _to
+        address _to,
+        IYieldBoxBase _yieldBox
     ) private returns (uint256 amountOut, uint256 shareOut) {
         require(msg.sender == address(this), "TOFT_CALLER");
-        (amountOut, shareOut) = yieldBox.withdraw(
+        (amountOut, shareOut) = _yieldBox.withdraw(
             _assetId,
             _from,
             _to,

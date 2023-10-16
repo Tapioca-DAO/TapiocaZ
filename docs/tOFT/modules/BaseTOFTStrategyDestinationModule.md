@@ -287,7 +287,7 @@ function decreaseAllowance(address spender, uint256 subtractedValue) external no
 ### depositToYieldbox
 
 ```solidity
-function depositToYieldbox(address module, uint256 _assetId, uint256 _amount, contract IERC20 _erc20, address _from, address _to) external nonpayable
+function depositToYieldbox(address module, contract IYieldBoxBase _yieldBox, uint256 _assetId, uint256 _amount, address _from, address _to) external nonpayable
 ```
 
 
@@ -299,9 +299,9 @@ function depositToYieldbox(address module, uint256 _assetId, uint256 _amount, co
 | Name | Type | Description |
 |---|---|---|
 | module | address | undefined |
+| _yieldBox | contract IYieldBoxBase | undefined |
 | _assetId | uint256 | undefined |
 | _amount | uint256 | undefined |
-| _erc20 | contract IERC20 | undefined |
 | _from | address | undefined |
 | _to | address | undefined |
 
@@ -940,7 +940,7 @@ function sharedDecimals() external view returns (uint8)
 ### strategyDeposit
 
 ```solidity
-function strategyDeposit(address module, uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _payload, contract IERC20 _erc20) external nonpayable
+function strategyDeposit(address module, uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _payload) external nonpayable
 ```
 
 
@@ -956,12 +956,11 @@ function strategyDeposit(address module, uint16 _srcChainId, bytes _srcAddress, 
 | _srcAddress | bytes | undefined |
 | _nonce | uint64 | undefined |
 | _payload | bytes | undefined |
-| _erc20 | contract IERC20 | undefined |
 
 ### strategyWithdraw
 
 ```solidity
-function strategyWithdraw(uint16 _srcChainId, bytes _payload) external nonpayable
+function strategyWithdraw(address, uint16 _srcChainId, bytes, uint64, bytes _payload) external nonpayable
 ```
 
 
@@ -972,7 +971,10 @@ function strategyWithdraw(uint16 _srcChainId, bytes _payload) external nonpayabl
 
 | Name | Type | Description |
 |---|---|---|
+| _0 | address | undefined |
 | _srcChainId | uint16 | undefined |
+| _2 | bytes | undefined |
+| _3 | uint64 | undefined |
 | _payload | bytes | undefined |
 
 ### supportsInterface

@@ -39,7 +39,13 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
         )
     {}
 
-    function multiHop(bytes memory _payload) public {
+    function multiHop(
+        address,
+        uint16,
+        bytes memory,
+        uint64,
+        bytes memory _payload
+    ) public {
         require(msg.sender == address(this), "TOFT_CALLER");
         (
             ,
@@ -89,7 +95,7 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
         require(
             msg.sender == address(this) &&
                 _moduleAddresses[Module.LeverageDestination] == module,
-            "TOFT_MODULE"
+            "TOFT_CALLER"
         );
         (
             ,
@@ -114,20 +120,18 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
                 )
             );
 
-        uint256 amount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));
         bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
         if (!credited) {
-            _creditTo(_srcChainId, address(this), amount);
+            _creditTo(_srcChainId, address(this), _sd2ld(amountSD));
             creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
         }
-        uint256 balanceAfter = balanceOf(address(this));
 
         (bool success, bytes memory reason) = module.delegatecall(
             abi.encodeWithSelector(
                 this.leverageDownInternal.selector,
                 module,
-                amount,
+                _sd2ld(amountSD),
                 swapData,
                 externalData,
                 lzData,
@@ -138,8 +142,8 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
 
         if (!success) {
             _storeAndSend(
-                balanceAfter - balanceBefore >= amount,
-                amount,
+                balanceOf(address(this)) - balanceBefore >= _sd2ld(amountSD),
+                _sd2ld(amountSD),
                 leverageFor,
                 reason,
                 _srcChainId,
@@ -149,7 +153,7 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
             );
         }
 
-        emit ReceiveFromChain(_srcChainId, leverageFor, amount);
+        emit ReceiveFromChain(_srcChainId, leverageFor, _sd2ld(amountSD));
     }
 
     function _storeAndSend(

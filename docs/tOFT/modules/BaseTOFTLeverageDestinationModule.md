@@ -612,7 +612,7 @@ function minDstGasLookup(uint16, uint16) external view returns (uint256)
 ### multiHop
 
 ```solidity
-function multiHop(bytes _payload) external nonpayable
+function multiHop(address, uint16, bytes, uint64, bytes _payload) external nonpayable
 ```
 
 
@@ -623,6 +623,10 @@ function multiHop(bytes _payload) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
+| _0 | address | undefined |
+| _1 | uint16 | undefined |
+| _2 | bytes | undefined |
+| _3 | uint64 | undefined |
 | _payload | bytes | undefined |
 
 ### name

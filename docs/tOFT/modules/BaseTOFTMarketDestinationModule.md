@@ -703,7 +703,7 @@ function precrime() external view returns (address)
 ### remove
 
 ```solidity
-function remove(bytes _payload) external nonpayable
+function remove(address, uint16, bytes, uint64, bytes _payload) external nonpayable
 ```
 
 
@@ -714,6 +714,10 @@ function remove(bytes _payload) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
+| _0 | address | undefined |
+| _1 | uint16 | undefined |
+| _2 | bytes | undefined |
+| _3 | uint64 | undefined |
 | _payload | bytes | undefined |
 
 ### renounceOwnership

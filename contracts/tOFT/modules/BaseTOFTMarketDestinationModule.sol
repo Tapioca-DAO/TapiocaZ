@@ -81,7 +81,6 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
             _creditTo(_srcChainId, address(this), borrowParams.amount);
             creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
         }
-        uint256 balanceAfter = balanceOf(address(this));
 
         (bool success, bytes memory reason) = module.delegatecall(
             abi.encodeWithSelector(
@@ -96,19 +95,35 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         );
 
         if (!success) {
-            if (balanceAfter - balanceBefore >= borrowParams.amount) {
-                IERC20(address(this)).safeTransfer(_from, borrowParams.amount);
-            }
-            _storeFailedMessage(
+            _storeAndSend(
+                balanceOf(address(this)) - balanceBefore >= borrowParams.amount,
+                borrowParams.amount,
+                _from,
+                reason,
                 _srcChainId,
                 _srcAddress,
                 _nonce,
-                _payload,
-                reason
+                _payload
             );
         }
 
         emit ReceiveFromChain(_srcChainId, _from, borrowParams.amount);
+    }
+
+    function _storeAndSend(
+        bool refund,
+        uint256 amount,
+        address leverageFor,
+        bytes memory reason,
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce,
+        bytes memory _payload
+    ) private {
+        if (refund) {
+            IERC20(address(this)).safeTransfer(leverageFor, amount);
+        }
+        _storeFailedMessage(_srcChainId, _srcAddress, _nonce, _payload, reason);
     }
 
     function borrowInternal(
@@ -143,7 +158,13 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         );
     }
 
-    function remove(bytes memory _payload) public {
+    function remove(
+        address,
+        uint16,
+        bytes memory,
+        uint64,
+        bytes memory _payload
+    ) public {
         require(msg.sender == address(this), "TOFT_CALLER");
         (
             ,

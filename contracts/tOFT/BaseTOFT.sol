@@ -135,6 +135,10 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ] = __leverageDestinationModule;
         _moduleAddresses[Module.Market] = __marketModule;
         _moduleAddresses[Module.MarketDestination] = __marketDestinationModule;
+        _moduleAddresses[Module.Strategy] = __strategyModule;
+        _moduleAddresses[
+            Module.StrategyDestination
+        ] = __strategyDestinationModule;
 
         //Set destination mappings
         _destinationMappings[PT_YB_SEND_STRAT] = DestinationCall({
