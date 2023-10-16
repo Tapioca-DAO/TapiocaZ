@@ -186,7 +186,7 @@ function borrow(address module, uint16 _srcChainId, bytes _srcAddress, uint64 _n
 ### borrowInternal
 
 ```solidity
-function borrowInternal(bytes32 _to, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.IApproval[] approvals) external payable
+function borrowInternal(bytes32 _to, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.IApproval[] approvals, uint256 airdropAmount) external payable
 ```
 
 
@@ -201,6 +201,7 @@ function borrowInternal(bytes32 _to, ITapiocaOFT.IBorrowParams borrowParams, ICo
 | borrowParams | ITapiocaOFT.IBorrowParams | undefined |
 | withdrawParams | ICommonData.IWithdrawParams | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| airdropAmount | uint256 | undefined |
 
 ### callOnOFTReceived
 
@@ -523,28 +524,6 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### initMultiSell
-
-```solidity
-function initMultiSell(address from, uint256 amount, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ICommonData.IApproval[] approvals) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| from | address | undefined |
-| amount | uint256 | undefined |
-| swapData | IUSDOBase.ILeverageSwapData | undefined |
-| lzData | IUSDOBase.ILeverageLZData | undefined |
-| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
-| airdropAdapterParams | bytes | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
 
 ### isTrustedRemote
 

@@ -1,64 +1,36 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "tapioca-periph/contracts/interfaces/IPermitBorrow.sol";
 import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
+import "tapioca-periph/contracts/interfaces/IPermitAction.sol";
 import "tapioca-periph/contracts/interfaces/ICommonData.sol";
 
 import "../BaseTOFTStorage.sol";
 
 abstract contract TOFTCommon is BaseTOFTStorage {
-    function _callApproval(ICommonData.IApproval[] memory approvals) internal {
-        for (uint256 i; i < approvals.length; ) {
-            if (approvals[i].permitBorrow) {
-                try
-                    IPermitBorrow(approvals[i].target).permitBorrow(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].value,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                } catch (bytes memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(_getRevertMsg(reason));
-                    }
-                }
-            } else if (approvals[i].permitAll) {
-                try
-                    IPermitAll(approvals[i].target).permitAll(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
-                    )
-                {} catch Error(string memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(reason);
-                    }
-                } catch (bytes memory reason) {
-                    if (!approvals[i].allowFailure) {
-                        revert(_getRevertMsg(reason));
-                    }
-                }
+    function _callApproval(
+        ICommonData.IApproval[] memory approvals,
+        uint16 actionType
+    ) internal {
+        for (uint256 i = 0; i < approvals.length; ) {
+            if (approvals[i].approveOnYieldBox) {
+                _permitOnYieldBox(approvals[i]);
             } else {
+                require(approvals[i].actionType == actionType, "TOFT_ACTION");
+                bytes memory sigData = abi.encode(
+                    approvals[i].permitBorrow,
+                    approvals[i].owner,
+                    approvals[i].spender,
+                    approvals[i].value,
+                    approvals[i].deadline,
+                    approvals[i].v,
+                    approvals[i].r,
+                    approvals[i].s
+                );
                 try
-                    IERC20Permit(approvals[i].target).permit(
-                        approvals[i].owner,
-                        approvals[i].spender,
-                        approvals[i].value,
-                        approvals[i].deadline,
-                        approvals[i].v,
-                        approvals[i].r,
-                        approvals[i].s
+                    IPermitAction(approvals[i].target).permitAction(
+                        sigData,
+                        approvals[i].actionType
                     )
                 {} catch Error(string memory reason) {
                     if (!approvals[i].allowFailure) {
@@ -73,6 +45,49 @@ abstract contract TOFTCommon is BaseTOFTStorage {
 
             unchecked {
                 ++i;
+            }
+        }
+    }
+
+    function _permitOnYieldBox(ICommonData.IApproval memory approval) private {
+        if (approval.permitAll) {
+            try
+                IPermitAll(approval.target).permitAll(
+                    approval.owner,
+                    approval.spender,
+                    approval.deadline,
+                    approval.v,
+                    approval.r,
+                    approval.s
+                )
+            {} catch Error(string memory reason) {
+                if (!approval.allowFailure) {
+                    revert(reason);
+                }
+            } catch (bytes memory reason) {
+                if (!approval.allowFailure) {
+                    revert(_getRevertMsg(reason));
+                }
+            }
+        } else {
+            try
+                IERC20Permit(approval.target).permit(
+                    approval.owner,
+                    approval.spender,
+                    approval.value,
+                    approval.deadline,
+                    approval.v,
+                    approval.r,
+                    approval.s
+                )
+            {} catch Error(string memory reason) {
+                if (!approval.allowFailure) {
+                    revert(reason);
+                }
+            } catch (bytes memory reason) {
+                if (!approval.allowFailure) {
+                    revert(_getRevertMsg(reason));
+                }
             }
         }
     }

@@ -41,53 +41,53 @@ contract BaseTOFTMarketModule is TOFTCommon {
         )
     {}
 
-    function initMultiSell(
-        address from,
-        uint256 amount,
-        IUSDOBase.ILeverageSwapData calldata swapData,
-        IUSDOBase.ILeverageLZData calldata lzData,
-        IUSDOBase.ILeverageExternalContractsData calldata externalData,
-        bytes calldata airdropAdapterParams,
-        ICommonData.IApproval[] calldata approvals
-    ) external payable {
-        //allowance is also checked on market
-        if (from != msg.sender) {
-            require(allowance(from, msg.sender) >= amount, "TOFT_UNAUTHORIZED");
-            _spendAllowance(from, msg.sender, amount);
-        }
+    // function initMultiSell(
+    //     address from,
+    //     uint256 amount,
+    //     IUSDOBase.ILeverageSwapData calldata swapData,
+    //     IUSDOBase.ILeverageLZData calldata lzData,
+    //     IUSDOBase.ILeverageExternalContractsData calldata externalData,
+    //     bytes calldata airdropAdapterParams,
+    //     ICommonData.IApproval[] calldata approvals
+    // ) external payable {
+    //     //allowance is also checked on market
+    //     if (from != msg.sender) {
+    //         require(allowance(from, msg.sender) >= amount, "TOFT_UNAUTHORIZED");
+    //         _spendAllowance(from, msg.sender, amount);
+    //     }
 
-        _assureMaxSlippage(amount, swapData.amountOutMin);
-        bytes32 senderBytes = LzLib.addressToBytes32(from);
+    //     _assureMaxSlippage(amount, swapData.amountOutMin);
+    //     bytes32 senderBytes = LzLib.addressToBytes32(from);
 
-        (amount, ) = _removeDust(amount);
-        bytes memory lzPayload = abi.encode(
-            PT_MARKET_MULTIHOP_SELL,
-            senderBytes,
-            from,
-            _ld2sd(amount),
-            swapData,
-            lzData,
-            externalData,
-            airdropAdapterParams,
-            approvals
-        );
+    //     (amount, ) = _removeDust(amount);
+    //     bytes memory lzPayload = abi.encode(
+    //         PT_MARKET_MULTIHOP_SELL,
+    //         senderBytes,
+    //         from,
+    //         _ld2sd(amount),
+    //         swapData,
+    //         lzData,
+    //         externalData,
+    //         airdropAdapterParams,
+    //         approvals
+    //     );
 
-        _checkGasLimit(
-            lzData.lzSrcChainId,
-            PT_MARKET_MULTIHOP_SELL,
-            airdropAdapterParams,
-            NO_EXTRA_GAS
-        );
-        _lzSend(
-            lzData.lzSrcChainId,
-            lzPayload,
-            payable(lzData.refundAddress),
-            lzData.zroPaymentAddress,
-            airdropAdapterParams,
-            msg.value
-        );
-        emit SendToChain(lzData.lzSrcChainId, msg.sender, senderBytes, 0);
-    }
+    //     _checkGasLimit(
+    //         lzData.lzSrcChainId,
+    //         PT_MARKET_MULTIHOP_SELL,
+    //         airdropAdapterParams,
+    //         NO_EXTRA_GAS
+    //     );
+    //     _lzSend(
+    //         lzData.lzSrcChainId,
+    //         lzPayload,
+    //         payable(lzData.refundAddress),
+    //         lzData.zroPaymentAddress,
+    //         airdropAdapterParams,
+    //         msg.value
+    //     );
+    //     emit SendToChain(lzData.lzSrcChainId, msg.sender, senderBytes, 0);
+    // }
 
     function removeCollateral(
         address from,
@@ -110,6 +110,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         bytes32 toAddress = LzLib.addressToBytes32(to);
         (removeParams.amount, ) = _removeDust(removeParams.amount);
+
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
             from,
@@ -182,7 +183,9 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         (uint256 amount, ) = _removeDust(borrowParams.amount);
         _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
-
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            airdropAdapterParams
+        );
         bytes memory lzPayload = abi.encode(
             PT_YB_SEND_SGL_BORROW,
             _from,
@@ -190,7 +193,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
             _ld2sd(amount),
             borrowParams,
             withdrawParams,
-            approvals
+            approvals,
+            airdropAmount
         );
 
         _checkGasLimit(
@@ -218,6 +222,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
         uint64 _nonce,
         bytes memory _payload
     ) public payable {
+        require(msg.sender == address(this), "TOFT_CALLER");
         require(validModules[module], "TOFT_MODULE");
         (
             ,
@@ -226,7 +231,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
             uint64 amountSD,
             ITapiocaOFT.IBorrowParams memory borrowParams,
             ICommonData.IWithdrawParams memory withdrawParams,
-            ICommonData.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals,
+            uint256 airdropAmount
         ) = abi.decode(
                 _payload,
                 (
@@ -236,7 +242,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
                     uint64,
                     ITapiocaOFT.IBorrowParams,
                     ICommonData.IWithdrawParams,
-                    ICommonData.IApproval[]
+                    ICommonData.IApproval[],
+                    uint256
                 )
             );
 
@@ -256,7 +263,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
                 _to,
                 borrowParams,
                 withdrawParams,
-                approvals
+                approvals,
+                airdropAmount
             )
         );
 
@@ -280,17 +288,18 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes32 _to,
         ITapiocaOFT.IBorrowParams memory borrowParams,
         ICommonData.IWithdrawParams memory withdrawParams,
-        ICommonData.IApproval[] memory approvals
+        ICommonData.IApproval[] memory approvals,
+        uint256 airdropAmount
     ) public payable {
         if (approvals.length > 0) {
-            _callApproval(approvals);
+            _callApproval(approvals, PT_YB_SEND_SGL_BORROW);
         }
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
 
         uint256 gas = withdrawParams.withdraw
-            ? (msg.value > 0 ? msg.value : address(this).balance)
+            ? (msg.value > 0 ? msg.value : airdropAmount)
             : 0;
         IMagnetar(borrowParams.marketHelper)
             .depositAddCollateralAndBorrowFromMarket{value: gas}(
@@ -305,6 +314,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
     }
 
     function remove(bytes memory _payload) public {
+        require(msg.sender == address(this), "TOFT_CALLER");
         (
             ,
             address from,
@@ -328,7 +338,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         address to = LzLib.bytes32ToAddress(toBytes);
         if (approvals.length > 0) {
-            _callApproval(approvals);
+            _callApproval(approvals, PT_MARKET_REMOVE_COLLATERAL);
         }
 
         removeParams.amount = _sd2ld(removeCollateralAmount);

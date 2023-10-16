@@ -154,6 +154,7 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         bytes memory _payload,
         IERC20 _erc20
     ) public {
+        require(msg.sender == address(this), "TOFT_CALLER");
         require(validModules[module], "TOFT_MODULE");
         (, , bytes32 from, uint64 amountSD, uint256 assetId, ) = abi.decode(
             _payload,
@@ -212,6 +213,7 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         uint16 _srcChainId,
         bytes memory _payload
     ) public {
+        require(msg.sender == address(this), "TOFT_CALLER");
         (
             ,
             bytes32 from,
