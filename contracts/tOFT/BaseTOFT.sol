@@ -78,15 +78,15 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         string memory _symbol,
         uint8 _decimal,
         uint256 _hostChainID,
-        address payable __leverageModule,
-        address payable __leverageDestinationModule,
-        address payable __strategyModule,
-        address payable __strategyDestinationModule,
-        address payable __marketModule,
-        address payable __marketDestinationModule,
-        address payable __optionsModule,
-        address payable __optionsDestinationModule,
-        address payable __genericModule
+        BaseTOFTLeverageModule __leverageModule,
+        BaseTOFTLeverageDestinationModule __leverageDestinationModule,
+        BaseTOFTStrategyModule __strategyModule,
+        BaseTOFTStrategyDestinationModule __strategyDestinationModule,
+        BaseTOFTMarketModule __marketModule,
+        BaseTOFTMarketDestinationModule __marketDestinationModule,
+        BaseTOFTOptionsModule __optionsModule,
+        BaseTOFTOptionsDestinationModule __optionsDestinationModule,
+        BaseTOFTGenericModule __genericModule
     )
         BaseTOFTStorage(
             _lzEndpoint,
@@ -101,44 +101,38 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ERC20Permit(string(abi.encodePacked("TapiocaOFT-", _name)))
     {
         //Set modules
-        _leverageModule = BaseTOFTLeverageModule(__leverageModule);
-        _leverageDestinationModule = BaseTOFTLeverageDestinationModule(
-            __leverageDestinationModule
-        );
+        _leverageModule = __leverageModule;
+        _leverageDestinationModule = __leverageDestinationModule;
 
-        _strategyModule = BaseTOFTStrategyModule(__strategyModule);
-        _strategyDestinationModule = BaseTOFTStrategyDestinationModule(
-            __strategyDestinationModule
-        );
+        _strategyModule = __strategyModule;
+        _strategyDestinationModule = __strategyDestinationModule;
 
-        _marketModule = BaseTOFTMarketModule(__marketModule);
-        _marketDestinationModule = BaseTOFTMarketDestinationModule(
-            __marketDestinationModule
-        );
+        _marketModule = __marketModule;
+        _marketDestinationModule = __marketDestinationModule;
 
-        _optionsModule = BaseTOFTOptionsModule(__optionsModule);
-        _optionsDestinationModule = BaseTOFTOptionsDestinationModule(
-            __optionsDestinationModule
-        );
+        _optionsModule = __optionsModule;
+        _optionsDestinationModule = __optionsDestinationModule;
 
-        _genericModule = BaseTOFTGenericModule(__genericModule);
+        _genericModule = __genericModule;
 
         //Set modules' addresses
-        _moduleAddresses[Module.Generic] = __genericModule;
-        _moduleAddresses[Module.Options] = __optionsModule;
-        _moduleAddresses[
-            Module.OptionsDestination
-        ] = __optionsDestinationModule;
-        _moduleAddresses[Module.Leverage] = __leverageModule;
-        _moduleAddresses[
-            Module.LeverageDestination
-        ] = __leverageDestinationModule;
-        _moduleAddresses[Module.Market] = __marketModule;
-        _moduleAddresses[Module.MarketDestination] = __marketDestinationModule;
-        _moduleAddresses[Module.Strategy] = __strategyModule;
-        _moduleAddresses[
-            Module.StrategyDestination
-        ] = __strategyDestinationModule;
+        _moduleAddresses[Module.Generic] = payable(__genericModule);
+        _moduleAddresses[Module.Options] = payable(__optionsModule);
+        _moduleAddresses[Module.OptionsDestination] = payable(
+            __optionsDestinationModule
+        );
+        _moduleAddresses[Module.Leverage] = payable(__leverageModule);
+        _moduleAddresses[Module.LeverageDestination] = payable(
+            __leverageDestinationModule
+        );
+        _moduleAddresses[Module.Market] = payable(__marketModule);
+        _moduleAddresses[Module.MarketDestination] = payable(
+            __marketDestinationModule
+        );
+        _moduleAddresses[Module.Strategy] = payable(__strategyModule);
+        _moduleAddresses[Module.StrategyDestination] = payable(
+            __strategyDestinationModule
+        );
 
         //Set destination mappings
         _destinationMappings[PT_YB_SEND_STRAT] = DestinationCall({

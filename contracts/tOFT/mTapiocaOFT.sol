@@ -57,15 +57,15 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         string memory _symbol,
         uint8 _decimal,
         uint256 _hostChainID,
-        address payable __leverageModule,
-        address payable __leverageDestinationModule,
-        address payable __strategyModule,
-        address payable __strategyDestinationModule,
-        address payable __marketModule,
-        address payable __marketDestinationModule,
-        address payable __optionsModule,
-        address payable __optionsDestinationModule,
-        address payable __genericModule
+        BaseTOFTLeverageModule __leverageModule,
+        BaseTOFTLeverageDestinationModule __leverageDestinationModule,
+        BaseTOFTStrategyModule __strategyModule,
+        BaseTOFTStrategyDestinationModule __strategyDestinationModule,
+        BaseTOFTMarketModule __marketModule,
+        BaseTOFTMarketDestinationModule __marketDestinationModule,
+        BaseTOFTOptionsModule __optionsModule,
+        BaseTOFTOptionsDestinationModule __optionsDestinationModule,
+        BaseTOFTGenericModule __genericModule
     )
         BaseTOFT(
             _lzEndpoint,
