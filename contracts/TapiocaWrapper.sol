@@ -32,7 +32,7 @@ contract TapiocaWrapper is Ownable {
     /// @notice Called when a new OFT is deployed.
     event CreateOFT(ITapiocaOFT indexed _tapiocaOFT, address indexed _erc20);
     /// @notice Called when fees are changed.
-    event SetFees(uint256 _newFee);
+    event SetFees(uint256 indexed _newFee);
 
     // ************** //
     // *** ERRORS *** //

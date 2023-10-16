@@ -13,7 +13,7 @@ abstract contract TOFTCommon is BaseTOFTStorage {
         uint16 actionType
     ) internal {
         for (uint256 i = 0; i < approvals.length; ) {
-            if (approvals[i].approveOnYieldBox) {
+            if (approvals[i].yieldBoxTypeApproval) {
                 _permitOnYieldBox(approvals[i]);
             } else {
                 require(approvals[i].actionType == actionType, "TOFT_ACTION");
