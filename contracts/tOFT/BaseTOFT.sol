@@ -570,36 +570,26 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
 
         if (_destinationMappings[packetType].module != Module(0)) {
             DestinationCall memory callInfo = _destinationMappings[packetType];
+            address targetModule;
+            if (callInfo.module == Module.StrategyDestination) {
+                targetModule = address(_strategyDestinationModule);
+            } else if (callInfo.module == Module.MarketDestination) {
+                targetModule = address(_marketDestinationModule);
+            } else if (callInfo.module == Module.LeverageDestination) {
+                targetModule = address(_leverageDestinationModule);
+            } else if (callInfo.module == Module.OptionsDestination) {
+                targetModule = address(_optionsDestinationModule);
+            } else if (callInfo.module == Module.Generic) {
+                targetModule = address(_genericModule);
+            } else {
+                targetModule = address(0);
+            }
+
             _executeOnDestination(
                 callInfo.module,
                 abi.encodeWithSelector(
                     callInfo.functionSelector,
-                    callInfo.module == Module.StrategyDestination
-                        ? address(_strategyDestinationModule)
-                        : (
-                            callInfo.module == Module.MarketDestination
-                                ? address(_marketDestinationModule)
-                                : (
-                                    callInfo.module ==
-                                        Module.LeverageDestination
-                                        ? address(_leverageDestinationModule)
-                                        : (
-                                            callInfo.module ==
-                                                Module.OptionsDestination
-                                                ? address(
-                                                    _optionsDestinationModule
-                                                )
-                                                : (
-                                                    callInfo.module ==
-                                                        Module.Generic
-                                                        ? address(
-                                                            _genericModule
-                                                        )
-                                                        : address(0)
-                                                )
-                                        )
-                                )
-                        ),
+                    targetModule,
                     _srcChainId,
                     _srcAddress,
                     _nonce,
