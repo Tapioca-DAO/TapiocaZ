@@ -39,7 +39,10 @@ describe('TapiocaOFT', () => {
         const yieldBox = await YieldBoxMock.deploy();
 
         const Cluster = new Cluster__factory(deployer);
-        const cluster = await Cluster.deploy(lzEndpoint.address);
+        const cluster = await Cluster.deploy(
+            lzEndpoint.address,
+            deployer.address,
+        );
 
         await (
             await hre.ethers.getContractFactory('TapiocaOFT')
@@ -52,6 +55,11 @@ describe('TapiocaOFT', () => {
             'tt',
             18,
             1,
+            ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
@@ -367,6 +375,7 @@ describe('TapiocaOFT', () => {
             const Cluster = new Cluster__factory(signer);
             const cluster = await Cluster.deploy(
                 LZEndpointMock_chainID_0.address,
+                signer.address,
             );
 
             {
@@ -660,6 +669,7 @@ describe('TapiocaOFT', () => {
             const asset = await YieldBox_0.assets(tapiocaOFT0Id);
             expect(asset[2]).to.eq(Strategy_0.address);
 
+            hre.tracer.enabled = true;
             await tapiocaOFT10.sendToStrategy(
                 signer.address,
                 signer.address,
@@ -667,13 +677,14 @@ describe('TapiocaOFT', () => {
                 1, //asset id
                 dstChainId0,
                 {
-                    extraGasLimit: '2500000',
+                    extraGasLimit: '3500000',
                     zroPaymentAddress: ethers.constants.AddressZero,
                 },
                 {
                     value: ethers.utils.parseEther('15'),
                 },
             );
+            hre.tracer.enabled = false;
 
             let strategy0Amount = await Strategy_0.vaultAmount();
             expect(strategy0Amount.gt(0)).to.be.true;

@@ -485,6 +485,28 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 |---|---|---|
 | _0 | bool | undefined |
 
+### initMultiSell
+
+```solidity
+function initMultiSell(address from, uint256 amount, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ICommonData.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| amount | uint256 | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
+| airdropAdapterParams | bytes | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
+
 ### isTrustedRemote
 
 ```solidity
@@ -507,46 +529,6 @@ function isTrustedRemote(uint16 _srcChainId, bytes _srcAddress) external view re
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### leverageDown
-
-```solidity
-function leverageDown(address module, uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _payload) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| module | address | undefined |
-| _srcChainId | uint16 | undefined |
-| _srcAddress | bytes | undefined |
-| _nonce | uint64 | undefined |
-| _payload | bytes | undefined |
-
-### leverageDownInternal
-
-```solidity
-function leverageDownInternal(uint256 amount, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageExternalContractsData externalData, IUSDOBase.ILeverageLZData lzData, address leverageFor) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| amount | uint256 | undefined |
-| swapData | IUSDOBase.ILeverageSwapData | undefined |
-| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
-| lzData | IUSDOBase.ILeverageLZData | undefined |
-| leverageFor | address | undefined |
 
 ### lzEndpoint
 

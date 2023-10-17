@@ -582,6 +582,28 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 |---|---|---|
 | _0 | bool | undefined |
 
+### initMultiSell
+
+```solidity
+function initMultiSell(address from, uint256 share, IUSDOBase.ILeverageSwapData swapData, IUSDOBase.ILeverageLZData lzData, IUSDOBase.ILeverageExternalContractsData externalData, bytes airdropAdapterParams, ICommonData.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| share | uint256 | undefined |
+| swapData | IUSDOBase.ILeverageSwapData | undefined |
+| lzData | IUSDOBase.ILeverageLZData | undefined |
+| externalData | IUSDOBase.ILeverageExternalContractsData | undefined |
+| airdropAdapterParams | bytes | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
+
 ### isTrustedRemote
 
 ```solidity
@@ -604,23 +626,6 @@ function isTrustedRemote(uint16 _srcChainId, bytes _srcAddress) external view re
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### leverageModule
-
-```solidity
-function leverageModule() external view returns (contract BaseTOFTLeverageModule)
-```
-
-returns the leverage module
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract BaseTOFTLeverageModule | undefined |
 
 ### lzEndpoint
 
@@ -657,23 +662,6 @@ function lzReceive(uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _
 | _srcAddress | bytes | undefined |
 | _nonce | uint64 | undefined |
 | _payload | bytes | undefined |
-
-### marketModule
-
-```solidity
-function marketModule() external view returns (contract BaseTOFTMarketModule)
-```
-
-returns the Market module
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract BaseTOFTMarketModule | undefined |
 
 ### minDstGasLookup
 
@@ -755,23 +743,6 @@ function nonces(address owner) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### optionsModule
-
-```solidity
-function optionsModule() external view returns (contract BaseTOFTOptionsModule)
-```
-
-returns the Options module
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract BaseTOFTOptionsModule | undefined |
 
 ### owner
 
@@ -1048,6 +1019,22 @@ function sendToYBAndBorrow(address from, address to, uint16 lzDstChainId, bytes 
 | options | ICommonData.ISendOptions | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
 
+### setCluster
+
+```solidity
+function setCluster(contract ICluster _cluster) external nonpayable
+```
+
+updates the cluster address
+
+*can only be called by the owner*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _cluster | contract ICluster | the new address |
+
 ### setConfig
 
 ```solidity
@@ -1253,23 +1240,6 @@ function sharedDecimals() external view returns (uint8)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint8 | undefined |
-
-### strategyModule
-
-```solidity
-function strategyModule() external view returns (contract BaseTOFTStrategyModule)
-```
-
-returns the Strategy module
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract BaseTOFTStrategyModule | undefined |
 
 ### supportsInterface
 

@@ -78,6 +78,23 @@ current OFT =&gt; chain =&gt; destination OFT
 | dstOft | address | undefined |
 | rebalanceable | uint256 | undefined |
 
+### emergencySaveTokens
+
+```solidity
+function emergencySaveTokens(address _token, uint256 _amount) external nonpayable
+```
+
+saves token/native gas from this contract
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _token | address | the token address; `address(0)` should be passed for the Native coin |
+| _amount | uint256 | the amount to be saved |
+
 ### initConnectedOFT
 
 ```solidity

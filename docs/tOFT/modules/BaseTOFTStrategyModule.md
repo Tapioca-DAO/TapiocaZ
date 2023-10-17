@@ -284,26 +284,6 @@ function decreaseAllowance(address spender, uint256 subtractedValue) external no
 |---|---|---|
 | _0 | bool | undefined |
 
-### depositToYieldbox
-
-```solidity
-function depositToYieldbox(uint256 _assetId, uint256 _amount, contract IERC20 _erc20, address _from, address _to) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _assetId | uint256 | undefined |
-| _amount | uint256 | undefined |
-| _erc20 | contract IERC20 | undefined |
-| _from | address | undefined |
-| _to | address | undefined |
-
 ### erc20
 
 ```solidity
@@ -977,44 +957,6 @@ function sharedDecimals() external view returns (uint8)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint8 | undefined |
-
-### strategyDeposit
-
-```solidity
-function strategyDeposit(address module, uint16 _srcChainId, bytes _srcAddress, uint64 _nonce, bytes _payload, contract IERC20 _erc20) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| module | address | undefined |
-| _srcChainId | uint16 | undefined |
-| _srcAddress | bytes | undefined |
-| _nonce | uint64 | undefined |
-| _payload | bytes | undefined |
-| _erc20 | contract IERC20 | undefined |
-
-### strategyWithdraw
-
-```solidity
-function strategyWithdraw(uint16 _srcChainId, bytes _payload) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _srcChainId | uint16 | undefined |
-| _payload | bytes | undefined |
 
 ### supportsInterface
 

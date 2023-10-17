@@ -279,7 +279,10 @@ contract Balancer is Owned {
             (bool sent, ) = msg.sender.call{value: _amount}("");
             require(sent, "Balancer: ETH transfer failed");
         } else {
-            IERC20(_token).safeTransfer(msg.sender, _amount);
+            require(
+                IERC20(_token).transfer(msg.sender, _amount),
+                "Balancer: token transfer failed"
+            );
         }
     }
 
@@ -359,7 +362,7 @@ contract Balancer is Owned {
         uint256 valueAmount = msg.value + _amount;
         routerETH.swapETH{value: valueAmount}(
             _dstChainId,
-            address(this),
+            payable(this),
             abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
             _amount,
             _computeMinAmount(_amount, _slippage)
@@ -381,23 +384,20 @@ contract Balancer is Owned {
             (uint256, uint256)
         );
 
-        IStargateRouter.lzTxObj memory _lzTxParams = IStargateRouterBase
-            .lzTxObj({
-                dstGasForCall: 0,
-                dstNativeAmount: 0,
-                dstNativeAddr: "0x0"
-            });
-
         erc20.approve(address(router), 0);
         erc20.approve(address(router), _amount);
         router.swap{value: msg.value}(
             _dstChainId,
             _srcPoolId,
             _dstPoolId,
-            address(this),
+            payable(this),
             _amount,
             _computeMinAmount(_amount, _slippage),
-            _lzTxParams,
+            IStargateRouterBase.lzTxObj({
+                dstGasForCall: 0,
+                dstNativeAmount: 0,
+                dstNativeAddr: "0x0"
+            }),
             abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
             "0x"
         );

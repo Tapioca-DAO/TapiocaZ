@@ -32,8 +32,6 @@ contract BaseTOFTStorage is OFTV2 {
     /// @notice Decimal cache number of the ERC20.
     uint8 internal _decimalCache;
 
-    mapping(address moduleAddr => bool isValid) internal validModules;
-
     uint16 internal constant PT_YB_SEND_STRAT = 770;
     uint16 internal constant PT_YB_RETRIEVE_STRAT = 771;
     uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 772;
@@ -45,6 +43,20 @@ contract BaseTOFTStorage is OFTV2 {
 
     uint256 public SWAP_MAX_SLIPPAGE = 500; //5%
     uint256 internal constant SLIPPAGE_PRECISION = 1e4;
+
+    enum Module {
+        NonModule, //0
+        Generic,
+        Leverage,
+        LeverageDestination,
+        Strategy,
+        StrategyDestination,
+        Market,
+        MarketDestination,
+        Options,
+        OptionsDestination
+    }
+    mapping(Module module => address moduleAddress) internal _moduleAddresses;
 
     receive() external payable {}
 
