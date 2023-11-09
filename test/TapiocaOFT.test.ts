@@ -669,7 +669,6 @@ describe('TapiocaOFT', () => {
             const asset = await YieldBox_0.assets(tapiocaOFT0Id);
             expect(asset[2]).to.eq(Strategy_0.address);
 
-            hre.tracer.enabled = true;
             await tapiocaOFT10.sendToStrategy(
                 signer.address,
                 signer.address,
@@ -684,7 +683,6 @@ describe('TapiocaOFT', () => {
                     value: ethers.utils.parseEther('15'),
                 },
             );
-            hre.tracer.enabled = false;
 
             let strategy0Amount = await Strategy_0.vaultAmount();
             expect(strategy0Amount.gt(0)).to.be.true;
