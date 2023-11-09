@@ -357,6 +357,26 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 | nativeFee | uint256 | undefined |
 | zroFee | uint256 | undefined |
 
+### executeApproval
+
+```solidity
+function executeApproval(address, uint16 lzSrcChainId, bytes, uint64, bytes _payload) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+| lzSrcChainId | uint16 | undefined |
+| _2 | bytes | undefined |
+| _3 | uint64 | undefined |
+| _payload | bytes | undefined |
+
 ### failedMessages
 
 ```solidity
@@ -1067,6 +1087,24 @@ function transferOwnership(address newOwner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newOwner | address | undefined |
+
+### triggerApproveOrRevoke
+
+```solidity
+function triggerApproveOrRevoke(uint16 lzDstChainId, ISendFrom.LzCallParams lzCallParams, ICommonData.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| lzDstChainId | uint16 | undefined |
+| lzCallParams | ISendFrom.LzCallParams | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
 
 ### triggerSendFrom
 

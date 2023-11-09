@@ -1,4 +1,4 @@
-# IPermitAll
+# IPermit
 
 
 
@@ -10,10 +10,10 @@
 
 ## Methods
 
-### permitAll
+### permit
 
 ```solidity
-function permitAll(address owner, address spender, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
 ```
 
 
@@ -26,15 +26,16 @@ function permitAll(address owner, address spender, uint256 deadline, uint8 v, by
 |---|---|---|
 | owner | address | undefined |
 | spender | address | undefined |
+| value | uint256 | undefined |
 | deadline | uint256 | undefined |
 | v | uint8 | undefined |
 | r | bytes32 | undefined |
 | s | bytes32 | undefined |
 
-### revokeAll
+### revoke
 
 ```solidity
-function revokeAll(address owner, address spender, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
+function revoke(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
 ```
 
 
@@ -47,6 +48,7 @@ function revokeAll(address owner, address spender, uint256 deadline, uint8 v, by
 |---|---|---|
 | owner | address | undefined |
 | spender | address | undefined |
+| value | uint256 | undefined |
 | deadline | uint256 | undefined |
 | v | uint8 | undefined |
 | r | bytes32 | undefined |

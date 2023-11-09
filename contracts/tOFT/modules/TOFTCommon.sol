@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import "tapioca-periph/contracts/interfaces/IPermit.sol";
 import "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 import "tapioca-periph/contracts/interfaces/IPermitAction.sol";
 import "tapioca-periph/contracts/interfaces/ICommonData.sol";
@@ -14,7 +15,11 @@ abstract contract TOFTCommon is BaseTOFTStorage {
     ) internal {
         for (uint256 i = 0; i < approvals.length; ) {
             if (approvals[i].yieldBoxTypeApproval) {
-                _permitOnYieldBox(approvals[i]);
+                if (approvals[i].revokeYieldBox) {
+                    _revokeOnYieldBox(approvals[i]);
+                } else {
+                    _permitOnYieldBox(approvals[i]);
+                }
             } else {
                 require(approvals[i].actionType == actionType, "TOFT_ACTION");
                 bytes memory sigData = abi.encode(
@@ -45,6 +50,49 @@ abstract contract TOFTCommon is BaseTOFTStorage {
 
             unchecked {
                 ++i;
+            }
+        }
+    }
+
+    function _revokeOnYieldBox(ICommonData.IApproval memory approval) private {
+        if (approval.permitAll) {
+            try
+                IPermitAll(approval.target).revokeAll(
+                    approval.owner,
+                    approval.spender,
+                    approval.deadline,
+                    approval.v,
+                    approval.r,
+                    approval.s
+                )
+            {} catch Error(string memory reason) {
+                if (!approval.allowFailure) {
+                    revert(reason);
+                }
+            } catch (bytes memory reason) {
+                if (!approval.allowFailure) {
+                    revert(_getRevertMsg(reason));
+                }
+            }
+        } else {
+            try
+                IPermit(approval.target).revoke(
+                    approval.owner,
+                    approval.spender,
+                    approval.value,
+                    approval.deadline,
+                    approval.v,
+                    approval.r,
+                    approval.s
+                )
+            {} catch Error(string memory reason) {
+                if (!approval.allowFailure) {
+                    revert(reason);
+                }
+            } catch (bytes memory reason) {
+                if (!approval.allowFailure) {
+                    revert(_getRevertMsg(reason));
+                }
             }
         }
     }

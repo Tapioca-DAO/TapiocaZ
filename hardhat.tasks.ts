@@ -8,6 +8,7 @@ import { deployTOFT__task } from './tasks/deploy/deployTOFT';
 import { deployTOFTMinter__task } from './tasks/deploy/testnet/deployTOFTMinter';
 import { setConnectedChain__task } from './tasks/exec/setConnectedChain';
 import { setCluster__task } from './tasks/exec/setCluster';
+import { saveBlockNumber__task } from './tasks/exec/saveBlockNumber';
 
 task(
     'deployTapiocaWrapper',
@@ -48,4 +49,5 @@ task('setConnectedChain', 'Update set connected chain', setConnectedChain__task)
 task('setCluster', 'Set cluster', setCluster__task)
     .addParam('toft', 'mTapiocaOFT address')
     .addParam('cluster', 'Cluster address');
- 
+
+task('saveBlockNumber', 'adsadasda', saveBlockNumber__task);
