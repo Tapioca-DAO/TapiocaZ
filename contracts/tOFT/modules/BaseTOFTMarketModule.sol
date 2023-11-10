@@ -72,7 +72,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
             airdropAmount
         );
 
-        _checkGasLimit(
+        _checkAdapterParams(
             lzDstChainId,
             PT_MARKET_REMOVE_COLLATERAL,
             adapterParams,
@@ -133,7 +133,9 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
         (uint256 amount, ) = _removeDust(borrowParams.amount);
-        _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
+        amount = _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
+        require(amount > 0, "TOFT_AMOUNT");
+
         (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
             airdropAdapterParams
         );
@@ -148,12 +150,13 @@ contract BaseTOFTMarketModule is TOFTCommon {
             airdropAmount
         );
 
-        _checkGasLimit(
+        _checkAdapterParams(
             lzDstChainId,
             PT_YB_SEND_SGL_BORROW,
             airdropAdapterParams,
             NO_EXTRA_GAS
         );
+
         _lzSend(
             lzDstChainId,
             lzPayload,

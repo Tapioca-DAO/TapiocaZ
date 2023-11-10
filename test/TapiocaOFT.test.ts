@@ -447,6 +447,41 @@ describe('TapiocaOFT', () => {
             const Strategy_0 = strategy0Data.tOFTStrategyMock;
             const Strategy_10 = strategy10Data.tOFTStrategyMock;
 
+            const setAdapterParamsFn =
+                tapiocaOFT10.interface.encodeFunctionData(
+                    'setUseCustomAdapterParams',
+                    [true],
+                );
+            await tapiocaWrapper_10.executeTOFT(
+                tapiocaOFT10.address,
+                setAdapterParamsFn,
+                true,
+            );
+            await tapiocaWrapper_0.executeTOFT(
+                tapiocaOFT0.address,
+                setAdapterParamsFn,
+                true,
+            );
+
+            let setMinGasFn = tapiocaOFT10.interface.encodeFunctionData(
+                'setMinDstGas',
+                [10, 0, 200_000],
+            );
+            await tapiocaWrapper_0.executeTOFT(
+                tapiocaOFT0.address,
+                setMinGasFn,
+                true,
+            );
+
+            setMinGasFn = tapiocaOFT10.interface.encodeFunctionData(
+                'setMinDstGas',
+                [31337, 0, 200_000],
+            );
+            await tapiocaWrapper_10.executeTOFT(
+                tapiocaOFT10.address,
+                setMinGasFn,
+                true,
+            );
             // Setup
             await mintAndApprove(
                 erc20Mock,
@@ -641,6 +676,10 @@ describe('TapiocaOFT', () => {
                 bigDummyAmount,
             );
 
+            const airdropAdapterParams = ethers.utils.solidityPack(
+                ['uint16', 'uint', 'uint', 'address'],
+                [2, 800000, ethers.utils.parseEther('2'), tapiocaOFT0.address],
+            );
             await expect(
                 tapiocaOFT0.sendFrom(
                     signer.address,
@@ -653,10 +692,10 @@ describe('TapiocaOFT', () => {
                     {
                         refundAddress: signer.address,
                         zroPaymentAddress: ethers.constants.AddressZero,
-                        adapterParams: '0x',
+                        adapterParams: airdropAdapterParams,
                     },
                     {
-                        value: ethers.utils.parseEther('0.02'),
+                        value: ethers.utils.parseEther('5'),
                         gasLimit: 2_000_000,
                     },
                 ),
@@ -692,12 +731,6 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0Id,
             );
             expect(yb0BalanceAfterCrossChainDeposit.gt(bigDummyAmount));
-
-            const airdropAdapterParams = ethers.utils.solidityPack(
-                ['uint16', 'uint', 'uint', 'address'],
-                [2, 800000, ethers.utils.parseEther('2'), tapiocaOFT0.address],
-            );
-
             await YieldBox_0.setApprovalForAsset(
                 tapiocaOFT0.address,
                 tapiocaOFT0Id,

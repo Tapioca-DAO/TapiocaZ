@@ -195,7 +195,8 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
                 withdrawLzFeeAmount: 0,
                 withdrawOnOtherChain: false,
                 withdrawLzChainId: 0,
-                withdrawAdapterParams: "0x"
+                withdrawAdapterParams: "0x",
+                unwrap: false
             }),
             LzLib.buildDefaultAdapterParams(lzData.srcExtraGasLimit)
         );

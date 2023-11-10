@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 //LZ
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
+import {ICommonOFT} from "tapioca-sdk/dist/contracts/token/oft/v2/ICommonOFT.sol";
 
 //TAPIOCA
 import "tapioca-periph/contracts/interfaces/ISendFrom.sol";
@@ -34,19 +35,110 @@ contract BaseTOFTGenericModule is TOFTCommon {
         )
     {}
 
+    function triggerSendFromWithParams(
+        address from,
+        uint16 lzDstChainId,
+        bytes32 toAddress,
+        uint256 amount,
+        ICommonOFT.LzCallParams calldata callParams,
+        bool unwrap,
+        ICommonData.IApproval[] calldata approvals
+    ) external payable {
+        if (from != msg.sender) {
+            require(allowance(from, msg.sender) >= amount, "TOFT_UNAUTHORIZED");
+            _spendAllowance(from, msg.sender, amount);
+        }
+        _checkAdapterParams(
+            lzDstChainId,
+            PT_SEND_FROM_PARAMS,
+            callParams.adapterParams,
+            NO_EXTRA_GAS
+        );
+
+        (amount, ) = _removeDust(amount);
+        amount = _debitFrom(from, lzDstChainId, toAddress, amount);
+        require(amount > 0, "TOFT_AMOUNT");
+        bytes memory lzPayload = abi.encode(
+            PT_SEND_FROM_PARAMS,
+            toAddress,
+            _ld2sd(amount),
+            unwrap,
+            approvals
+        );
+        _lzSend(
+            lzDstChainId,
+            lzPayload,
+            payable(msg.sender),
+            callParams.zroPaymentAddress,
+            callParams.adapterParams,
+            msg.value
+        );
+
+        emit SendToChain(lzDstChainId, from, toAddress, amount);
+    }
+
+    /// @dev destination call for BaseTOFTGenericModule.triggerSendFromWithParams
+    function executSendFromWithParams(
+        address,
+        uint16 lzSrcChainId,
+        bytes memory,
+        uint64,
+        bytes memory _payload
+    ) public {
+        require(msg.sender == address(this), "TOFT_CALLER");
+        (
+            ,
+            bytes32 to,
+            uint64 amountSD,
+            bool unwrap,
+            ICommonData.IApproval[] memory approvals
+        ) = abi.decode(
+                _payload,
+                (uint16, bytes32, uint64, bool, ICommonData.IApproval[])
+            );
+        if (approvals.length > 0) {
+            _callApproval(approvals, PT_SEND_FROM_PARAMS);
+        }
+
+        address toAddress = LzLib.bytes32ToAddress(to);
+        uint256 amount = _sd2ld(amountSD);
+
+        amount = _creditTo(
+            lzSrcChainId,
+            unwrap ? address(this) : toAddress,
+            amount
+        );
+        if (unwrap) {
+            ITapiocaOFTBase tOFT = ITapiocaOFTBase(address(this));
+            address toftERC20 = tOFT.erc20();
+
+            tOFT.unwrap(address(this), amount);
+
+            if (toftERC20 != address(0)) {
+                IERC20(toftERC20).safeTransfer(toAddress, amount);
+            } else {
+                (bool sent, ) = toAddress.call{value: amount}("");
+                require(sent, "TOFT_FAILED");
+            }
+        }
+
+        emit ReceiveFromChain(lzSrcChainId, toAddress, amount);
+    }
+
     function triggerApproveOrRevoke(
         uint16 lzDstChainId,
-        ISendFrom.LzCallParams calldata lzCallParams,
+        ICommonOFT.LzCallParams calldata lzCallParams,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
         bytes memory lzPayload = abi.encode(PT_APPROVE, msg.sender, approvals);
 
-        _checkGasLimit(
+        _checkAdapterParams(
             lzDstChainId,
             PT_APPROVE,
             lzCallParams.adapterParams,
             NO_EXTRA_GAS
         );
+
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -64,6 +156,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         );
     }
 
+    /// @dev destination call for `BaseTOFTGenericModule.triggerApproveOrRevoke`
     function executeApproval(
         address,
         uint16 lzSrcChainId,
@@ -89,7 +182,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         bytes calldata airdropAdapterParams,
         address zroPaymentAddress,
         uint256 amount,
-        ISendFrom.LzCallParams calldata sendFromData,
+        ICommonOFT.LzCallParams calldata sendFromData,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
         (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
@@ -98,7 +191,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
 
         (amount, ) = _removeDust(amount);
         bytes memory lzPayload = abi.encode(
-            PT_SEND_FROM,
+            PT_TRIGGER_SEND_FROM,
             msg.sender,
             _ld2sd(amount),
             sendFromData,
@@ -107,9 +200,9 @@ contract BaseTOFTGenericModule is TOFTCommon {
             airdropAmount
         );
 
-        _checkGasLimit(
+        _checkAdapterParams(
             lzDstChainId,
-            PT_SEND_FROM,
+            PT_TRIGGER_SEND_FROM,
             airdropAdapterParams,
             NO_EXTRA_GAS
         );
@@ -131,14 +224,14 @@ contract BaseTOFTGenericModule is TOFTCommon {
         );
     }
 
-    /// @dev destination call for USDOGenericModule.triggerSendFrom
+    /// @dev destination call for BaseTOFTGenericModule.triggerSendFrom
     function sendFromDestination(bytes memory _payload) public {
         require(msg.sender == address(this), "TOFT_CALLER");
         (
             ,
             address from,
             uint64 amount,
-            ISendFrom.LzCallParams memory callParams,
+            ICommonOFT.LzCallParams memory callParams,
             uint16 lzDstChainId,
             ICommonData.IApproval[] memory approvals,
             uint256 airdropAmount
@@ -148,7 +241,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
                     uint16,
                     address,
                     uint64,
-                    ISendFrom.LzCallParams,
+                    ICommonOFT.LzCallParams,
                     uint16,
                     ICommonData.IApproval[],
                     uint256
@@ -156,7 +249,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
             );
 
         if (approvals.length > 0) {
-            _callApproval(approvals, PT_SEND_FROM);
+            _callApproval(approvals, PT_TRIGGER_SEND_FROM);
         }
 
         ISendFrom(address(this)).sendFrom{value: airdropAmount}(

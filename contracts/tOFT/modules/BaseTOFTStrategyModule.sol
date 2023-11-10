@@ -62,7 +62,8 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         }
 
         (amount, ) = _removeDust(amount);
-        _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
+        amount = _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
+        require(amount > 0, "TOFT_AMOUNT");
 
         bytes memory lzPayload = abi.encode(
             PT_YB_SEND_STRAT,
@@ -73,12 +74,13 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             options.zroPaymentAddress
         );
 
-        _checkGasLimit(
+        _checkAdapterParams(
             lzDstChainId,
             PT_YB_SEND_STRAT,
             LzLib.buildDefaultAdapterParams(options.extraGasLimit),
             options.extraGasLimit
         );
+
         _lzSend(
             lzDstChainId,
             lzPayload,
@@ -132,12 +134,13 @@ contract BaseTOFTStrategyModule is TOFTCommon {
             airdropAmount
         );
 
-        _checkGasLimit(
+        _checkAdapterParams(
             lzDstChainId,
             PT_YB_RETRIEVE_STRAT,
             airdropAdapterParam,
             NO_EXTRA_GAS
         );
+
         _lzSend(
             lzDstChainId,
             lzPayload,

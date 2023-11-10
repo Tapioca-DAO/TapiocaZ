@@ -165,7 +165,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
             module: Module.OptionsDestination,
             functionSelector: BaseTOFTOptionsDestinationModule.exercise.selector
         });
-        _destinationMappings[PT_SEND_FROM] = DestinationCall({
+        _destinationMappings[PT_TRIGGER_SEND_FROM] = DestinationCall({
             module: Module.Generic,
             functionSelector: BaseTOFTGenericModule.sendFromDestination.selector
         });
@@ -173,7 +173,12 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
             module: Module.Generic,
             functionSelector: BaseTOFTGenericModule.executeApproval.selector
         });
-
+        _destinationMappings[PT_SEND_FROM_PARAMS] = DestinationCall({
+            module: Module.Generic,
+            functionSelector: BaseTOFTGenericModule
+                .executSendFromWithParams
+                .selector
+        });
         vault = new TOFTVault(_erc20);
     }
 
@@ -382,6 +387,39 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     }
 
     //----Generic---
+    /// @notice triggers a sendFromWithParams to another layer from destination
+    /// @param from address to debit from
+    /// @param lzDstChainId LZ destination id
+    /// @param to address to credit to
+    /// @param amount amount to send back
+    /// @param callParams LZ send call params
+    /// @param unwrap unwrap or not on destination
+    /// @param approvals approvals array
+    function triggerSendFromWithParams(
+        address from,
+        uint16 lzDstChainId,
+        bytes32 to,
+        uint256 amount,
+        ICommonOFT.LzCallParams calldata callParams,
+        bool unwrap,
+        ICommonData.IApproval[] calldata approvals
+    ) external payable {
+        _executeModule(
+            Module.Options,
+            abi.encodeWithSelector(
+                BaseTOFTGenericModule.triggerSendFromWithParams.selector,
+                from,
+                lzDstChainId,
+                to,
+                amount,
+                callParams,
+                unwrap,
+                approvals
+            ),
+            false
+        );
+    }
+
     /// @notice triggers a cross-chain approval
     /// @dev handled by BaseTOFTGenericModule
     /// @param lzDstChainId LZ destination id
@@ -389,7 +427,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param approvals approvals array
     function triggerApproveOrRevoke(
         uint16 lzDstChainId,
-        ISendFrom.LzCallParams calldata lzCallParams,
+        ICommonOFT.LzCallParams calldata lzCallParams,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
         _executeModule(
@@ -416,7 +454,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         bytes calldata airdropAdapterParams,
         address zroPaymentAddress,
         uint256 amount,
-        ISendFrom.LzCallParams calldata sendFromData,
+        ICommonOFT.LzCallParams calldata sendFromData,
         ICommonData.IApproval[] calldata approvals
     ) external payable {
         _executeModule(
