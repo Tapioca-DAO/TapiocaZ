@@ -58,6 +58,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
             ITapiocaOFT.IBorrowParams memory borrowParams,
             ICommonData.IWithdrawParams memory withdrawParams,
             ICommonData.IApproval[] memory approvals,
+            ICommonData.IApproval[] memory revokes,
             uint256 airdropAmount
         ) = abi.decode(
                 _payload,
@@ -69,6 +70,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
                     ITapiocaOFT.IBorrowParams,
                     ICommonData.IWithdrawParams,
                     ICommonData.IApproval[],
+                    ICommonData.IApproval[],
                     uint256
                 )
             );
@@ -76,12 +78,11 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         borrowParams.amount = _sd2ld(amountSD);
 
         uint256 balanceBefore = balanceOf(address(this));
-        bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
-        if (!credited) {
-            _creditTo(_srcChainId, address(this), borrowParams.amount);
-            creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
-        }
+        _checkCredited(borrowParams.amount, _srcChainId, _srcAddress, _nonce);
 
+        if (approvals.length > 0) {
+            _callApproval(approvals, PT_YB_SEND_SGL_BORROW);
+        }
         (bool success, bytes memory reason) = module.delegatecall(
             abi.encodeWithSelector(
                 this.borrowInternal.selector,
@@ -89,10 +90,12 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
                 _to,
                 borrowParams,
                 withdrawParams,
-                approvals,
                 airdropAmount
             )
         );
+        if (revokes.length > 0) {
+            _callApproval(revokes, PT_YB_SEND_SGL_BORROW);
+        }
 
         if (!success) {
             _storeAndSend(
@@ -108,6 +111,19 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         }
 
         emit ReceiveFromChain(_srcChainId, _from, borrowParams.amount);
+    }
+
+    function _checkCredited(
+        uint256 amount,
+        uint16 _srcChainId,
+        bytes memory _srcAddress,
+        uint64 _nonce
+    ) private {
+        bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
+        if (!credited) {
+            _creditTo(_srcChainId, address(this), amount);
+            creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
+        }
     }
 
     function _storeAndSend(
@@ -131,7 +147,6 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         bytes32 _to,
         ITapiocaOFT.IBorrowParams memory borrowParams,
         ICommonData.IWithdrawParams memory withdrawParams,
-        ICommonData.IApproval[] memory approvals,
         uint256 airdropAmount
     ) public payable {
         require(
@@ -139,9 +154,6 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
                 _moduleAddresses[Module.MarketDestination] == module,
             "TOFT_CALLER"
         );
-        if (approvals.length > 0) {
-            _callApproval(approvals, PT_YB_SEND_SGL_BORROW);
-        }
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
@@ -174,6 +186,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
             ITapiocaOFT.IRemoveParams memory removeParams,
             ICommonData.IWithdrawParams memory withdrawParams,
             ICommonData.IApproval[] memory approvals,
+            ICommonData.IApproval[] memory revokes,
             uint256 airdropAmount
         ) = abi.decode(
                 _payload,
@@ -184,6 +197,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
                     uint64,
                     ITapiocaOFT.IRemoveParams,
                     ICommonData.IWithdrawParams,
+                    ICommonData.IApproval[],
                     ICommonData.IApproval[],
                     uint256
                 )
@@ -237,6 +251,10 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
                 withdrawParams.withdrawLzFeeAmount,
                 withdrawParams.unwrap
             );
+        }
+
+        if (revokes.length > 0) {
+            _callApproval(revokes, PT_MARKET_REMOVE_COLLATERAL);
         }
     }
 }

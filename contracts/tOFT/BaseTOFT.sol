@@ -241,6 +241,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ICommonData.IWithdrawParams calldata withdrawParams,
         ITapiocaOFT.IRemoveParams calldata removeParams,
         ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes,
         bytes calldata adapterParams
     ) external payable {
         _executeModule(
@@ -254,6 +255,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 withdrawParams,
                 removeParams,
                 approvals,
+                revokes,
                 adapterParams
             ),
             false
@@ -269,6 +271,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param withdrawParams the withdraw operation data
     /// @param options the cross chain send operation data
     /// @param approvals the cross chain approval operation data
+    /// @param revokes the cross chain revoke operations data
     function sendToYBAndBorrow(
         address from,
         address to,
@@ -277,7 +280,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ITapiocaOFT.IBorrowParams calldata borrowParams,
         ICommonData.IWithdrawParams calldata withdrawParams,
         ICommonData.ISendOptions calldata options,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
     ) external payable {
         _executeModule(
             Module.Market,
@@ -290,7 +294,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 borrowParams,
                 withdrawParams,
                 options,
-                approvals
+                approvals,
+                revokes
             ),
             false
         );
@@ -309,6 +314,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
         ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes,
         bytes calldata adapterParams
     ) external payable {
         _executeModule(
@@ -319,6 +325,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 lzData,
                 tapSendData,
                 approvals,
+                revokes,
                 adapterParams
             ),
             false
@@ -394,7 +401,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param amount amount to send back
     /// @param callParams LZ send call params
     /// @param unwrap unwrap or not on destination
-    /// @param approvals approvals array
+    /// @param approvals the cross chain approval operation data
+    /// @param revokes the cross chain revoke operations data
     function triggerSendFromWithParams(
         address from,
         uint16 lzDstChainId,
@@ -402,7 +410,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         uint256 amount,
         ICommonOFT.LzCallParams calldata callParams,
         bool unwrap,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
     ) external payable {
         _executeModule(
             Module.Options,
@@ -414,7 +423,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 amount,
                 callParams,
                 unwrap,
-                approvals
+                approvals,
+                revokes
             ),
             false
         );
@@ -448,14 +458,16 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param zroPaymentAddress ZRO payment address
     /// @param amount amount to send back
     /// @param sendFromData data needed to trigger sendFrom on destination
-    /// @param approvals approvals array
+    /// @param approvals the cross chain approval operation data
+    /// @param revokes the cross chain revoke operations data
     function triggerSendFrom(
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,
         address zroPaymentAddress,
         uint256 amount,
         ICommonOFT.LzCallParams calldata sendFromData,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
     ) external payable {
         _executeModule(
             Module.Options,
@@ -466,7 +478,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 zroPaymentAddress,
                 amount,
                 sendFromData,
-                approvals
+                approvals,
+                revokes
             ),
             false
         );

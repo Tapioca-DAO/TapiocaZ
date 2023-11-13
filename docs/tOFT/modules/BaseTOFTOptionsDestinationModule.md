@@ -380,7 +380,7 @@ function exercise(address module, uint16 _srcChainId, bytes _srcAddress, uint64 
 ### exerciseInternal
 
 ```solidity
-function exerciseInternal(address module, address from, uint256 oTAPTokenID, address paymentToken, uint256 tapAmount, address target, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, uint256 paymentTokenAmount, ICommonData.IApproval[] approvals, uint256 airdropAmount) external nonpayable
+function exerciseInternal(address module, address from, uint256 oTAPTokenID, address paymentToken, uint256 tapAmount, address target, ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData tapSendData, uint256 paymentTokenAmount, ICommonData.IApproval[] approvals, ICommonData.IApproval[] revokes, uint256 airdropAmount) external nonpayable
 ```
 
 
@@ -400,6 +400,7 @@ function exerciseInternal(address module, address from, uint256 oTAPTokenID, add
 | tapSendData | ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData | undefined |
 | paymentTokenAmount | uint256 | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| revokes | ICommonData.IApproval[] | undefined |
 | airdropAmount | uint256 | undefined |
 
 ### failedMessages

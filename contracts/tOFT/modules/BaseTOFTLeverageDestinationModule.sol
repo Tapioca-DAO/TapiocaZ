@@ -190,6 +190,7 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
                 })
             }),
             approvals,
+            approvals,
             ICommonData.IWithdrawParams({
                 withdraw: false,
                 withdrawLzFeeAmount: 0,
