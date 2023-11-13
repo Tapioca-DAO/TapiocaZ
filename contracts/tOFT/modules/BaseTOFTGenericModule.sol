@@ -97,7 +97,14 @@ contract BaseTOFTGenericModule is TOFTCommon {
             ICommonData.IApproval[] memory revokes
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, uint64, bool, ICommonData.IApproval[], ICommonData.IApproval[])
+                (
+                    uint16,
+                    bytes32,
+                    uint64,
+                    bool,
+                    ICommonData.IApproval[],
+                    ICommonData.IApproval[]
+                )
             );
         if (approvals.length > 0) {
             _callApproval(approvals, PT_SEND_FROM_PARAMS);
