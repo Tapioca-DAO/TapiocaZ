@@ -1074,6 +1074,22 @@ function setSendVersion(uint16 _version) external nonpayable
 |---|---|---|
 | _version | uint16 | undefined |
 
+### setStargateRouter
+
+```solidity
+function setStargateRouter(address _router) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _router | address | undefined |
+
 ### setTrustedRemote
 
 ```solidity
