@@ -51,6 +51,9 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @notice returns the amount of total wrapped native coins
     uint256 wrappedNativeAmount;
 
+    /// @notice returns the Stargate router address
+    address private _stargateRouter;
+
     TOFTVault public vault;
 
     struct DestinationCall {
@@ -494,6 +497,10 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         uint amountLD,
         bytes memory
     ) external override {
+        if (_stargateRouter != address(0)) {
+            require(msg.sender == _stargateRouter, "TOFT_CALLER");
+        }
+
         if (erc20 == address(0)) {
             vault.depositNative{value: amountLD}();
         } else {
@@ -518,6 +525,10 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     function rescueEth(uint256 amount, address to) external onlyOwner {
         (bool success, ) = to.call{value: amount}("");
         require(success, "TOFT_Failed");
+    }
+
+    function setStargateRouter(address _router) external onlyOwner {
+        _stargateRouter = _router;
     }
 
     // ************************* //
