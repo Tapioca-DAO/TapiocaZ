@@ -186,7 +186,7 @@ function borrow(address module, uint16 _srcChainId, bytes _srcAddress, uint64 _n
 ### borrowInternal
 
 ```solidity
-function borrowInternal(address module, bytes32 _to, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.IApproval[] approvals, uint256 airdropAmount) external payable
+function borrowInternal(address module, bytes32 _to, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, uint256 airdropAmount) external payable
 ```
 
 
@@ -201,7 +201,6 @@ function borrowInternal(address module, bytes32 _to, ITapiocaOFT.IBorrowParams b
 | _to | bytes32 | undefined |
 | borrowParams | ITapiocaOFT.IBorrowParams | undefined |
 | withdrawParams | ICommonData.IWithdrawParams | undefined |
-| approvals | ICommonData.IApproval[] | undefined |
 | airdropAmount | uint256 | undefined |
 
 ### callOnOFTReceived

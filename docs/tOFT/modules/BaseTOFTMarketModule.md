@@ -662,7 +662,7 @@ function precrime() external view returns (address)
 ### removeCollateral
 
 ```solidity
-function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ICommonData.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ICommonData.IApproval[] approvals, bytes adapterParams) external payable
+function removeCollateral(address from, address to, uint16 lzDstChainId, address zroPaymentAddress, ICommonData.IWithdrawParams withdrawParams, ITapiocaOFT.IRemoveParams removeParams, ICommonData.IApproval[] approvals, ICommonData.IApproval[] revokes, bytes adapterParams) external payable
 ```
 
 
@@ -680,6 +680,7 @@ function removeCollateral(address from, address to, uint16 lzDstChainId, address
 | withdrawParams | ICommonData.IWithdrawParams | undefined |
 | removeParams | ITapiocaOFT.IRemoveParams | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| revokes | ICommonData.IApproval[] | undefined |
 | adapterParams | bytes | undefined |
 
 ### renounceOwnership
@@ -757,7 +758,7 @@ function sendFrom(address _from, uint16 _dstChainId, bytes32 _toAddress, uint256
 ### sendToYBAndBorrow
 
 ```solidity
-function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.ISendOptions options, ICommonData.IApproval[] approvals) external payable
+function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, bytes airdropAdapterParams, ITapiocaOFT.IBorrowParams borrowParams, ICommonData.IWithdrawParams withdrawParams, ICommonData.ISendOptions options, ICommonData.IApproval[] approvals, ICommonData.IApproval[] revokes) external payable
 ```
 
 
@@ -776,6 +777,7 @@ function sendToYBAndBorrow(address _from, address _to, uint16 lzDstChainId, byte
 | withdrawParams | ICommonData.IWithdrawParams | undefined |
 | options | ICommonData.ISendOptions | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
+| revokes | ICommonData.IApproval[] | undefined |
 
 ### setConfig
 

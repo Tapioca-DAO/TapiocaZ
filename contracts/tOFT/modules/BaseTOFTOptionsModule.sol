@@ -42,6 +42,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
             calldata tapSendData,
         ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes,
         bytes calldata adapterParams
     ) external payable {
         if (tapSendData.tapOftAddress != address(0)) {
@@ -91,6 +92,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             optionsData,
             tapSendData,
             approvals,
+            revokes,
             airdropAmount
         );
 

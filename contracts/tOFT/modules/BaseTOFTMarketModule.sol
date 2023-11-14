@@ -44,6 +44,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ICommonData.IWithdrawParams calldata withdrawParams,
         ITapiocaOFT.IRemoveParams memory removeParams,
         ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes,
         bytes calldata adapterParams
     ) external payable {
         //allowance is also checked on market
@@ -69,6 +70,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
             removeParams,
             withdrawParams,
             approvals,
+            revokes,
             airdropAmount
         );
 
@@ -120,7 +122,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ITapiocaOFT.IBorrowParams calldata borrowParams,
         ICommonData.IWithdrawParams calldata withdrawParams,
         ICommonData.ISendOptions calldata options,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
     ) external payable {
         if (_from != msg.sender) {
             require(
@@ -147,6 +150,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
             borrowParams,
             withdrawParams,
             approvals,
+            revokes,
             airdropAmount
         );
 

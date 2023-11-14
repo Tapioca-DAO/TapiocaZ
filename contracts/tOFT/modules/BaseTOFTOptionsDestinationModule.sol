@@ -56,6 +56,7 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
             ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData
                 memory tapSendData,
             ICommonData.IApproval[] memory approvals,
+            ICommonData.IApproval[] memory revokes,
             uint256 airdropAmount
         ) = abi.decode(
                 _payload,
@@ -64,6 +65,7 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
                     uint64,
                     ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData,
                     ITapiocaOptionsBrokerCrossChain.IExerciseLZSendTapData,
+                    ICommonData.IApproval[],
                     ICommonData.IApproval[],
                     uint256
                 )
@@ -101,6 +103,7 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
                 tapSendData,
                 optionsData.paymentTokenAmount,
                 approvals,
+                revokes,
                 airdropAmount
             )
         );
@@ -141,6 +144,7 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
             memory tapSendData,
         uint256 paymentTokenAmount,
         ICommonData.IApproval[] memory approvals,
+        ICommonData.IApproval[] memory revokes,
         uint256 airdropAmount
     ) public {
         require(
@@ -188,6 +192,10 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
             );
         } else {
             IERC20(tapSendData.tapOftAddress).safeTransfer(from, tapAmount);
+        }
+
+        if (revokes.length > 0) {
+            _callApproval(revokes, PT_TAP_EXERCISE);
         }
     }
 }

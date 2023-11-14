@@ -42,7 +42,8 @@ contract BaseTOFTGenericModule is TOFTCommon {
         uint256 amount,
         ICommonOFT.LzCallParams calldata callParams,
         bool unwrap,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
     ) external payable {
         if (from != msg.sender) {
             require(allowance(from, msg.sender) >= amount, "TOFT_UNAUTHORIZED");
@@ -63,7 +64,8 @@ contract BaseTOFTGenericModule is TOFTCommon {
             toAddress,
             _ld2sd(amount),
             unwrap,
-            approvals
+            approvals,
+            revokes
         );
         _lzSend(
             lzDstChainId,
@@ -91,10 +93,18 @@ contract BaseTOFTGenericModule is TOFTCommon {
             bytes32 to,
             uint64 amountSD,
             bool unwrap,
-            ICommonData.IApproval[] memory approvals
+            ICommonData.IApproval[] memory approvals,
+            ICommonData.IApproval[] memory revokes
         ) = abi.decode(
                 _payload,
-                (uint16, bytes32, uint64, bool, ICommonData.IApproval[])
+                (
+                    uint16,
+                    bytes32,
+                    uint64,
+                    bool,
+                    ICommonData.IApproval[],
+                    ICommonData.IApproval[]
+                )
             );
         if (approvals.length > 0) {
             _callApproval(approvals, PT_SEND_FROM_PARAMS);
@@ -120,6 +130,10 @@ contract BaseTOFTGenericModule is TOFTCommon {
                 (bool sent, ) = toAddress.call{value: amount}("");
                 require(sent, "TOFT_FAILED");
             }
+        }
+
+        if (revokes.length > 0) {
+            _callApproval(revokes, PT_SEND_FROM_PARAMS);
         }
 
         emit ReceiveFromChain(lzSrcChainId, toAddress, amount);
@@ -183,7 +197,8 @@ contract BaseTOFTGenericModule is TOFTCommon {
         address zroPaymentAddress,
         uint256 amount,
         ICommonOFT.LzCallParams calldata sendFromData,
-        ICommonData.IApproval[] calldata approvals
+        ICommonData.IApproval[] calldata approvals,
+        ICommonData.IApproval[] calldata revokes
     ) external payable {
         (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
             airdropAdapterParams
@@ -197,6 +212,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
             sendFromData,
             lzEndpoint.getChainId(),
             approvals,
+            revokes,
             airdropAmount
         );
 
@@ -234,6 +250,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
             ICommonOFT.LzCallParams memory callParams,
             uint16 lzDstChainId,
             ICommonData.IApproval[] memory approvals,
+            ICommonData.IApproval[] memory revokes,
             uint256 airdropAmount
         ) = abi.decode(
                 _payload,
@@ -243,6 +260,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
                     uint64,
                     ICommonOFT.LzCallParams,
                     uint16,
+                    ICommonData.IApproval[],
                     ICommonData.IApproval[],
                     uint256
                 )
@@ -259,6 +277,10 @@ contract BaseTOFTGenericModule is TOFTCommon {
             _sd2ld(amount),
             callParams
         );
+
+        if (revokes.length > 0) {
+            _callApproval(revokes, PT_TRIGGER_SEND_FROM);
+        }
 
         emit ReceiveFromChain(lzDstChainId, from, 0);
     }
