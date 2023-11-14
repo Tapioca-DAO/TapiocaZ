@@ -155,12 +155,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
             module: Module.MarketDestination,
             functionSelector: BaseTOFTMarketDestinationModule.borrow.selector
         });
-        _destinationMappings[PT_MARKET_MULTIHOP_SELL] = DestinationCall({
-            module: Module.LeverageDestination,
-            functionSelector: BaseTOFTLeverageDestinationModule
-                .multiHop
-                .selector
-        });
         _destinationMappings[PT_LEVERAGE_MARKET_DOWN] = DestinationCall({
             module: Module.LeverageDestination,
             functionSelector: BaseTOFTLeverageDestinationModule
@@ -174,6 +168,10 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         _destinationMappings[PT_SEND_FROM] = DestinationCall({
             module: Module.Generic,
             functionSelector: BaseTOFTGenericModule.sendFromDestination.selector
+        });
+        _destinationMappings[PT_APPROVE] = DestinationCall({
+            module: Module.Generic,
+            functionSelector: BaseTOFTGenericModule.executeApproval.selector
         });
 
         vault = new TOFTVault(_erc20);
@@ -193,39 +191,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     // ************************ //
 
     //----Leverage---
-    /// @notice inits a multiHopSellCollateral call
-    /// @param from The user who sells
-    /// @param share Collateral YieldBox-shares to sell
-    /// @param swapData Swap data used on destination chain for swapping USDO to the underlying TOFT token
-    /// @param lzData LayerZero specific data
-    /// @param externalData External contracts used for the cross chain operation
-    /// @param airdropAdapterParams default or airdrop adapter params
-    /// @param approvals array
-    function initMultiSell(
-        address from,
-        uint256 share,
-        IUSDOBase.ILeverageSwapData calldata swapData,
-        IUSDOBase.ILeverageLZData calldata lzData,
-        IUSDOBase.ILeverageExternalContractsData calldata externalData,
-        bytes calldata airdropAdapterParams,
-        ICommonData.IApproval[] memory approvals
-    ) external payable {
-        _executeModule(
-            Module.Leverage,
-            abi.encodeWithSelector(
-                BaseTOFTLeverageModule.initMultiSell.selector,
-                from,
-                share,
-                swapData,
-                lzData,
-                externalData,
-                airdropAdapterParams,
-                approvals
-            ),
-            false
-        );
-    }
-
     /// @notice sends TOFT to a specific chain and performs a leverage down operation
     /// @param amount the amount to use
     /// @param leverageFor the receiver address
@@ -417,6 +382,28 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     }
 
     //----Generic---
+    /// @notice triggers a cross-chain approval
+    /// @dev handled by BaseTOFTGenericModule
+    /// @param lzDstChainId LZ destination id
+    /// @param lzCallParams data needed to trigger triggerApproveOrRevoke on destination
+    /// @param approvals approvals array
+    function triggerApproveOrRevoke(
+        uint16 lzDstChainId,
+        ISendFrom.LzCallParams calldata lzCallParams,
+        ICommonData.IApproval[] calldata approvals
+    ) external payable {
+        _executeModule(
+            Module.Generic,
+            abi.encodeWithSelector(
+                BaseTOFTGenericModule.triggerApproveOrRevoke.selector,
+                lzDstChainId,
+                lzCallParams,
+                approvals
+            ),
+            false
+        );
+    }
+
     /// @notice triggers a sendFrom to another layer from destination
     /// @param lzDstChainId LZ destination id
     /// @param airdropAdapterParams airdrop params

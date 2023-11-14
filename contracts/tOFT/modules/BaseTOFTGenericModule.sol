@@ -34,6 +34,56 @@ contract BaseTOFTGenericModule is TOFTCommon {
         )
     {}
 
+    function triggerApproveOrRevoke(
+        uint16 lzDstChainId,
+        ISendFrom.LzCallParams calldata lzCallParams,
+        ICommonData.IApproval[] calldata approvals
+    ) external payable {
+        bytes memory lzPayload = abi.encode(PT_APPROVE, msg.sender, approvals);
+
+        _checkGasLimit(
+            lzDstChainId,
+            PT_APPROVE,
+            lzCallParams.adapterParams,
+            NO_EXTRA_GAS
+        );
+        _lzSend(
+            lzDstChainId,
+            lzPayload,
+            payable(msg.sender),
+            lzCallParams.zroPaymentAddress,
+            lzCallParams.adapterParams,
+            msg.value
+        );
+
+        emit SendToChain(
+            lzDstChainId,
+            msg.sender,
+            LzLib.addressToBytes32(msg.sender),
+            0
+        );
+    }
+
+    function executeApproval(
+        address,
+        uint16 lzSrcChainId,
+        bytes memory,
+        uint64,
+        bytes memory _payload
+    ) public {
+        require(msg.sender == address(this), "TOFT_CALLER");
+        (, address from, ICommonData.IApproval[] memory approvals) = abi.decode(
+            _payload,
+            (uint16, address, ICommonData.IApproval[])
+        );
+
+        if (approvals.length > 0) {
+            _callApproval(approvals, PT_APPROVE);
+        }
+
+        emit ReceiveFromChain(lzSrcChainId, from, 0);
+    }
+
     function triggerSendFrom(
         uint16 lzDstChainId,
         bytes calldata airdropAdapterParams,

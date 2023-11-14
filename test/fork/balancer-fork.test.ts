@@ -191,11 +191,9 @@ describe.skip('Balancer fork', () => {
                     idealBalance: amount.mul(4),
                 });
 
-            hre.tracer.enabled = true;
             await balancer.rebalance(tOft1.address, 101, 1e3, amount, data, {
                 value: amount.div(2),
             });
-            hre.tracer.enabled = false;
             const balanceOft2After = await ethers.provider.getBalance(
                 tOft2.address,
             );

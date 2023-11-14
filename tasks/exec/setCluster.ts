@@ -10,5 +10,4 @@ export const setCluster__task = async (
     );
 
     await (await toftContract.setCluster(args.cluster)).wait(3);
-
-}
+};
