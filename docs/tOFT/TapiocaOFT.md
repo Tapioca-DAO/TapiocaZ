@@ -1298,7 +1298,7 @@ function transferOwnership(address newOwner) external nonpayable
 ### triggerApproveOrRevoke
 
 ```solidity
-function triggerApproveOrRevoke(uint16 lzDstChainId, ISendFrom.LzCallParams lzCallParams, ICommonData.IApproval[] approvals) external payable
+function triggerApproveOrRevoke(uint16 lzDstChainId, ICommonOFT.LzCallParams lzCallParams, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -1310,13 +1310,13 @@ function triggerApproveOrRevoke(uint16 lzDstChainId, ISendFrom.LzCallParams lzCa
 | Name | Type | Description |
 |---|---|---|
 | lzDstChainId | uint16 | undefined |
-| lzCallParams | ISendFrom.LzCallParams | undefined |
+| lzCallParams | ICommonOFT.LzCallParams | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
 
 ### triggerSendFrom
 
 ```solidity
-function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, address zroPaymentAddress, uint256 amount, ISendFrom.LzCallParams sendFromData, ICommonData.IApproval[] approvals) external payable
+function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, address zroPaymentAddress, uint256 amount, ICommonOFT.LzCallParams sendFromData, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -1331,7 +1331,29 @@ function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, addres
 | airdropAdapterParams | bytes | undefined |
 | zroPaymentAddress | address | undefined |
 | amount | uint256 | undefined |
-| sendFromData | ISendFrom.LzCallParams | undefined |
+| sendFromData | ICommonOFT.LzCallParams | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
+
+### triggerSendFromWithParams
+
+```solidity
+function triggerSendFromWithParams(address from, uint16 lzDstChainId, bytes32 to, uint256 amount, ICommonOFT.LzCallParams callParams, bool unwrap, ICommonData.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| to | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+| unwrap | bool | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
 
 ### trustedRemoteLookup

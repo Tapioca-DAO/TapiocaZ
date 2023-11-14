@@ -234,7 +234,8 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
                 removeParams.amount,
                 withdrawParams.withdrawAdapterParams,
                 payable(to),
-                withdrawParams.withdrawLzFeeAmount
+                withdrawParams.withdrawLzFeeAmount,
+                withdrawParams.unwrap
             );
         }
     }

@@ -178,7 +178,7 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
                 tapSendData.lzDstChainId,
                 LzLib.addressToBytes32(from),
                 tapAmount,
-                ISendFrom.LzCallParams({
+                LzCallParams({
                     refundAddress: payable(from),
                     zroPaymentAddress: tapSendData.zroPaymentAddress,
                     adapterParams: LzLib.buildDefaultAdapterParams(

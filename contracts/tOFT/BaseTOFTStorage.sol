@@ -38,8 +38,9 @@ contract BaseTOFTStorage is OFTV2 {
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 775;
     uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 776;
     uint16 internal constant PT_TAP_EXERCISE = 777;
-    uint16 internal constant PT_SEND_FROM = 778;
+    uint16 internal constant PT_TRIGGER_SEND_FROM = 778;
     uint16 internal constant PT_APPROVE = 779;
+    uint16 internal constant PT_SEND_FROM_PARAMS = 780;
 
     uint256 public SWAP_MAX_SLIPPAGE = 500; //5%
     uint256 internal constant SLIPPAGE_PRECISION = 1e4;

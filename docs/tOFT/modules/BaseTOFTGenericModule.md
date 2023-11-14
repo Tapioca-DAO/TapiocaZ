@@ -357,6 +357,26 @@ function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint256 _amount
 | nativeFee | uint256 | undefined |
 | zroFee | uint256 | undefined |
 
+### executSendFromWithParams
+
+```solidity
+function executSendFromWithParams(address, uint16 lzSrcChainId, bytes, uint64, bytes _payload) external nonpayable
+```
+
+
+
+*destination call for BaseTOFTGenericModule.triggerSendFromWithParams*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+| lzSrcChainId | uint16 | undefined |
+| _2 | bytes | undefined |
+| _3 | uint64 | undefined |
+| _payload | bytes | undefined |
+
 ### executeApproval
 
 ```solidity
@@ -365,7 +385,7 @@ function executeApproval(address, uint16 lzSrcChainId, bytes, uint64, bytes _pay
 
 
 
-
+*destination call for `BaseTOFTGenericModule.triggerApproveOrRevoke`*
 
 #### Parameters
 
@@ -759,7 +779,7 @@ function sendFromDestination(bytes _payload) external nonpayable
 
 
 
-*destination call for USDOGenericModule.triggerSendFrom*
+*destination call for BaseTOFTGenericModule.triggerSendFrom*
 
 #### Parameters
 
@@ -1091,7 +1111,7 @@ function transferOwnership(address newOwner) external nonpayable
 ### triggerApproveOrRevoke
 
 ```solidity
-function triggerApproveOrRevoke(uint16 lzDstChainId, ISendFrom.LzCallParams lzCallParams, ICommonData.IApproval[] approvals) external payable
+function triggerApproveOrRevoke(uint16 lzDstChainId, ICommonOFT.LzCallParams lzCallParams, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -1103,13 +1123,13 @@ function triggerApproveOrRevoke(uint16 lzDstChainId, ISendFrom.LzCallParams lzCa
 | Name | Type | Description |
 |---|---|---|
 | lzDstChainId | uint16 | undefined |
-| lzCallParams | ISendFrom.LzCallParams | undefined |
+| lzCallParams | ICommonOFT.LzCallParams | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
 
 ### triggerSendFrom
 
 ```solidity
-function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, address zroPaymentAddress, uint256 amount, ISendFrom.LzCallParams sendFromData, ICommonData.IApproval[] approvals) external payable
+function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, address zroPaymentAddress, uint256 amount, ICommonOFT.LzCallParams sendFromData, ICommonData.IApproval[] approvals) external payable
 ```
 
 
@@ -1124,7 +1144,29 @@ function triggerSendFrom(uint16 lzDstChainId, bytes airdropAdapterParams, addres
 | airdropAdapterParams | bytes | undefined |
 | zroPaymentAddress | address | undefined |
 | amount | uint256 | undefined |
-| sendFromData | ISendFrom.LzCallParams | undefined |
+| sendFromData | ICommonOFT.LzCallParams | undefined |
+| approvals | ICommonData.IApproval[] | undefined |
+
+### triggerSendFromWithParams
+
+```solidity
+function triggerSendFromWithParams(address from, uint16 lzDstChainId, bytes32 toAddress, uint256 amount, ICommonOFT.LzCallParams callParams, bool unwrap, ICommonData.IApproval[] approvals) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+| lzDstChainId | uint16 | undefined |
+| toAddress | bytes32 | undefined |
+| amount | uint256 | undefined |
+| callParams | ICommonOFT.LzCallParams | undefined |
+| unwrap | bool | undefined |
 | approvals | ICommonData.IApproval[] | undefined |
 
 ### trustedRemoteLookup
