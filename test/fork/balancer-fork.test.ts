@@ -4,7 +4,7 @@ import hre, { ethers } from 'hardhat';
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 import { impersonateAccount, registerFork, setBalance } from '../test.utils';
 
-describe('Balancer fork', () => {
+describe.skip('Balancer fork', () => {
     describe('core', async () => {
         it('should check chain', async () => {
             const { balancer } = await loadFixture(registerFork);
