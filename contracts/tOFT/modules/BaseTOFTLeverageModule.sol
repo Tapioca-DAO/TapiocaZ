@@ -13,6 +13,12 @@ contract BaseTOFTLeverageModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error TokenNotValid();
+    error AllowanceNotValid();
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -43,27 +49,20 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
         if (leverageFor != msg.sender) {
-            require(
-                allowance(leverageFor, msg.sender) >= amount,
-                "TOFT_UNAUTHORIZED"
-            );
+            if (allowance(leverageFor, msg.sender) < amount)
+                revert AllowanceNotValid();
             _spendAllowance(leverageFor, msg.sender, amount);
         }
 
-        require(
-            swapData.tokenOut != address(this),
-            "USDO: token out not valid"
-        );
-        require(swapData.tokenOut != address(this), "TOFT_token_not_valid");
+        if (swapData.tokenOut == address(this)) revert TokenNotValid();
         _assureMaxSlippage(amount, swapData.amountOutMin);
         if (externalData.swapper != address(0)) {
-            require(
-                cluster.isWhitelisted(
+            if (
+                !cluster.isWhitelisted(
                     lzData.lzDstChainId,
                     externalData.swapper
-                ),
-                "TOFT_UNAUTHORIZED"
-            ); //fail fast
+                )
+            ) revert NotAuthorized(); //fail fast
         }
 
         bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);
@@ -75,7 +74,7 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             senderBytes,
             amount
         );
-        require(amount > 0, "TOFT_AMOUNT");
+        if (amount == 0) revert NotValid();
 
         (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
             lzData.dstAirdropAdapterParam

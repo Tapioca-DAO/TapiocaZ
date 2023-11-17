@@ -1422,3 +1422,50 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 
 
 
+## Errors
+
+### ActionTypeNotValid
+
+```solidity
+error ActionTypeNotValid()
+```
+
+
+
+
+
+
+### GasNotValid
+
+```solidity
+error GasNotValid()
+```
+
+
+
+
+
+
+### NotAuthorized
+
+```solidity
+error NotAuthorized()
+```
+
+
+
+
+
+
+### NotValid
+
+```solidity
+error NotValid()
+```
+
+
+
+
+
+
+

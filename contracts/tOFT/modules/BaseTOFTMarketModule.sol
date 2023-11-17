@@ -14,6 +14,11 @@ contract BaseTOFTMarketModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error AllowanceNotValid();
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -49,10 +54,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
     ) external payable {
         //allowance is also checked on market
         if (from != msg.sender) {
-            require(
-                allowance(from, msg.sender) >= removeParams.amount,
-                "TOFT_UNAUTHORIZED"
-            );
+            if (allowance(from, msg.sender) < removeParams.amount)
+                revert AllowanceNotValid();
             _spendAllowance(from, msg.sender, removeParams.amount);
         }
 
@@ -82,15 +85,11 @@ contract BaseTOFTMarketModule is TOFTCommon {
         );
 
         //fail fast
-        require(
-            cluster.isWhitelisted(lzDstChainId, removeParams.market),
-            "TOFT_INVALID"
-        );
+        if (!cluster.isWhitelisted(lzDstChainId, removeParams.market))
+            revert NotAuthorized();
         if (withdrawParams.withdraw) {
-            require(
-                cluster.isWhitelisted(lzDstChainId, removeParams.marketHelper),
-                "TOFT_INVALID"
-            );
+            if (!cluster.isWhitelisted(lzDstChainId, removeParams.marketHelper))
+                revert NotAuthorized();
         }
 
         _lzSend(
@@ -126,10 +125,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ICommonData.IApproval[] calldata revokes
     ) external payable {
         if (_from != msg.sender) {
-            require(
-                allowance(_from, msg.sender) >= borrowParams.amount,
-                "TOFT_UNAUTHORIZED"
-            );
+            if (allowance(_from, msg.sender) < borrowParams.amount)
+                revert AllowanceNotValid();
             _spendAllowance(_from, msg.sender, borrowParams.amount);
         }
 
@@ -137,7 +134,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         (uint256 amount, ) = _removeDust(borrowParams.amount);
         amount = _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
-        require(amount > 0, "TOFT_AMOUNT");
+        if (amount == 0) revert NotValid();
 
         (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
             airdropAdapterParams

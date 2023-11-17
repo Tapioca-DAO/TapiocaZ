@@ -9,6 +9,12 @@ import "tapioca-periph/contracts/interfaces/ICommonData.sol";
 import "../BaseTOFTStorage.sol";
 
 abstract contract TOFTCommon is BaseTOFTStorage {
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error ActionTypeNotValid();
+    error NotAuthorized();
+
     function _callApproval(
         ICommonData.IApproval[] memory approvals,
         uint16 actionType
@@ -21,7 +27,8 @@ abstract contract TOFTCommon is BaseTOFTStorage {
                     _permitOnYieldBox(approvals[i]);
                 }
             } else {
-                require(approvals[i].actionType == actionType, "TOFT_ACTION");
+                if (approvals[i].actionType != actionType)
+                    revert ActionTypeNotValid();
                 bytes memory sigData = abi.encode(
                     approvals[i].permitBorrow,
                     approvals[i].owner,

@@ -43,11 +43,10 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
         uint64 _nonce,
         bytes memory _payload
     ) public {
-        require(
-            msg.sender == address(this) &&
-                _moduleAddresses[Module.OptionsDestination] == module,
-            "TOFT_CALLER"
-        );
+        if (
+            msg.sender != address(this) ||
+            _moduleAddresses[Module.OptionsDestination] != module
+        ) revert NotAuthorized();
         (
             ,
             uint64 amountSD,
@@ -72,10 +71,8 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
             );
 
         if (tapSendData.tapOftAddress != address(0)) {
-            require(
-                cluster.isWhitelisted(0, tapSendData.tapOftAddress),
-                "TOFT_UNAUTHORIZED"
-            ); //fail fast
+            if (!cluster.isWhitelisted(0, tapSendData.tapOftAddress))
+                revert NotAuthorized(); //fail fast
         }
 
         optionsData.paymentTokenAmount = _sd2ld(amountSD);
@@ -147,11 +144,10 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
         ICommonData.IApproval[] memory revokes,
         uint256 airdropAmount
     ) public {
-        require(
-            msg.sender == address(this) &&
-                _moduleAddresses[Module.OptionsDestination] == module,
-            "TOFT_CALLER"
-        );
+        if (
+            msg.sender != address(this) ||
+            _moduleAddresses[Module.OptionsDestination] != module
+        ) revert NotAuthorized();
 
         if (approvals.length > 0) {
             _callApproval(approvals, PT_TAP_EXERCISE);

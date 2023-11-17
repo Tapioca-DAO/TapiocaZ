@@ -46,11 +46,10 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
         uint64 _nonce,
         bytes memory _payload
     ) public {
-        require(
-            msg.sender == address(this) &&
-                _moduleAddresses[Module.LeverageDestination] == module,
-            "TOFT_CALLER"
-        );
+        if (
+            msg.sender != address(this) ||
+            _moduleAddresses[Module.LeverageDestination] != module
+        ) revert NotAuthorized();
         (
             ,
             ,
@@ -135,19 +134,16 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
         address leverageFor,
         uint256 airdropAmount
     ) public payable {
-        require(
-            msg.sender == address(this) &&
-                _moduleAddresses[Module.LeverageDestination] == module,
-            "TOFT_CALLER"
-        );
+        if (
+            msg.sender != address(this) &&
+            _moduleAddresses[Module.LeverageDestination] != module
+        ) revert NotAuthorized();
         ITapiocaOFT(address(this)).unwrap(address(this), amount);
 
         //swap to USDO
         if (externalData.swapper != address(0)) {
-            require(
-                cluster.isWhitelisted(0, externalData.swapper),
-                "TOFT_UNAUTHORIZED"
-            );
+            if (!cluster.isWhitelisted(0, externalData.swapper))
+                revert NotAuthorized();
         }
 
         if (erc20 != address(0)) {

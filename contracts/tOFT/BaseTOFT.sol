@@ -63,12 +63,19 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     // Define a mapping from packetType to destination module and function selector.
     mapping(uint256 => DestinationCall) private _destinationMappings;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error AllowanceNotValid();
+    error Failed();
+    error NotAuthorized();
+
     // ******************//
     // *** MODIFIERS *** //
     // ***************** //
     /// @notice Require that the caller is on the host chain of the ERC20.
     modifier onlyHostChain() {
-        require(block.chainid == hostChainID, "TOFT_host");
+        if (block.chainid != hostChainID) revert NotAuthorized();
         _;
     }
 
@@ -498,7 +505,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         bytes memory
     ) external override {
         if (_stargateRouter != address(0)) {
-            require(msg.sender == _stargateRouter, "TOFT_CALLER");
+            if (msg.sender != _stargateRouter) revert NotAuthorized();
         }
 
         if (erc20 == address(0)) {
@@ -515,7 +522,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @dev can only be called by the owner
     /// @param _cluster the new address
     function setCluster(ICluster _cluster) external {
-        require(address(_cluster) != address(0), "TOFT_0");
+        if (address(_cluster) == address(0)) revert NotValid();
         cluster = _cluster;
     }
 
@@ -524,7 +531,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param to the recipient
     function rescueEth(uint256 amount, address to) external onlyOwner {
         (bool success, ) = to.call{value: amount}("");
-        require(success, "TOFT_Failed");
+        if (!success) revert Failed();
     }
 
     function setStargateRouter(address _router) external onlyOwner {
@@ -542,13 +549,11 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         uint256 _amount
     ) internal virtual {
         if (_fromAddress != msg.sender) {
-            require(
-                allowance(_fromAddress, msg.sender) >= _amount,
-                "TOFT_allowed"
-            );
+            if (allowance(_fromAddress, msg.sender) < _amount)
+                revert AllowanceNotValid();
             _spendAllowance(_fromAddress, msg.sender, _amount);
         }
-        require(_amount > 0, "TOFT_0");
+        if (_amount == 0) revert NotValid();
         IERC20(erc20).safeTransferFrom(_fromAddress, address(vault), _amount);
         _mint(_toAddress, _amount);
     }
@@ -566,7 +571,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     //---private---
     function _extractModule(Module _module) private view returns (address) {
         address module = _moduleAddresses[_module];
-        require(module != address(0), "TOFT_module");
+        if (module == address(0)) revert NotValid();
         return module;
     }
 

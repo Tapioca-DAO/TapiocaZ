@@ -59,6 +59,11 @@ contract BaseTOFTStorage is OFTV2 {
     }
     mapping(Module module => address moduleAddress) internal _moduleAddresses;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error NotValid();
+
     receive() external payable {}
 
     constructor(
@@ -95,7 +100,7 @@ contract BaseTOFTStorage is OFTV2 {
     ) internal view {
         uint256 slippageMinAmount = amount -
             ((SWAP_MAX_SLIPPAGE * amount) / SLIPPAGE_PRECISION);
-        require(minAmount >= slippageMinAmount, "TOFT_SLIPPAGE");
+        if (minAmount < slippageMinAmount) revert NotValid();
     }
 
     function _getRevertMsg(
