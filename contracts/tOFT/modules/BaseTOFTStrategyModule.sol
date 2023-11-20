@@ -13,6 +13,11 @@ contract BaseTOFTStrategyModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error AllowanceNotValid();
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -50,20 +55,18 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         uint16 lzDstChainId,
         ICommonData.ISendOptions calldata options
     ) external payable {
-        require(amount != 0, "TOFT_0");
+        if (amount == 0) revert NotValid();
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
         if (_from != msg.sender) {
-            require(
-                allowance(_from, msg.sender) >= amount,
-                "TOFT_UNAUTHORIZED"
-            );
+            if (allowance(_from, msg.sender) < amount)
+                revert AllowanceNotValid();
             _spendAllowance(_from, msg.sender, amount);
         }
 
         (amount, ) = _removeDust(amount);
         amount = _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
-        require(amount > 0, "TOFT_AMOUNT");
+        if (amount == 0) revert NotValid();
 
         bytes memory lzPayload = abi.encode(
             PT_YB_SEND_STRAT,
@@ -110,14 +113,12 @@ contract BaseTOFTStrategyModule is TOFTCommon {
     ) external payable {
         //allowance is also checked on market
         if (_from != msg.sender) {
-            require(
-                allowance(_from, msg.sender) >= amount,
-                "TOFT_UNAUTHORIZED"
-            );
+            if (allowance(_from, msg.sender) < amount)
+                revert AllowanceNotValid();
             _spendAllowance(_from, msg.sender, amount);
         }
 
-        require(amount != 0, "TOFT_0");
+        if (amount == 0) revert NotValid();
         bytes32 toAddress = LzLib.addressToBytes32(msg.sender);
         (amount, ) = _removeDust(amount);
 

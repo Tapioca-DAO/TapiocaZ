@@ -42,11 +42,10 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         uint64 _nonce,
         bytes memory _payload
     ) public {
-        require(
-            msg.sender == address(this) &&
-                _moduleAddresses[Module.StrategyDestination] == module,
-            "TOFT_CALLER"
-        );
+        if (
+            msg.sender != address(this) ||
+            _moduleAddresses[Module.StrategyDestination] != module
+        ) revert NotAuthorized();
         (, , bytes32 from, uint64 amountSD, uint256 assetId, ) = abi.decode(
             _payload,
             (uint16, bytes32, bytes32, uint64, uint256, address)
@@ -97,11 +96,10 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         address _from,
         address _to
     ) public {
-        require(
-            msg.sender == address(this) &&
-                _moduleAddresses[Module.StrategyDestination] == module,
-            "TOFT_CALLER"
-        );
+        if (
+            msg.sender != address(this) ||
+            _moduleAddresses[Module.StrategyDestination] != module
+        ) revert NotAuthorized();
         IERC20(address(this)).approve(address(_yieldBox), 0);
         IERC20(address(this)).approve(address(_yieldBox), _amount);
         uint256 share = _yieldBox.toShare(_assetId, _amount, false);
@@ -115,7 +113,7 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         uint64,
         bytes memory _payload
     ) public {
-        require(msg.sender == address(this), "TOFT_CALLER");
+        if (msg.sender != address(this)) revert NotAuthorized();
         (
             ,
             bytes32 from,
@@ -172,7 +170,7 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         address _to,
         IYieldBoxBase _yieldBox
     ) private returns (uint256 amountOut, uint256 shareOut) {
-        require(msg.sender == address(this), "TOFT_CALLER");
+        if (msg.sender != address(this)) revert NotAuthorized();
         (amountOut, shareOut) = _yieldBox.withdraw(
             _assetId,
             _from,

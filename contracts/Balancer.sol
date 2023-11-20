@@ -103,6 +103,7 @@ contract Balancer is Owned {
     error PoolInfoRequired();
     error RebalanceAmountNotSet();
     error DestinationOftNotValid();
+    error Failed();
 
     // *************************** //
     // *** MODIFIERS FUNCTIONS *** //
@@ -219,12 +220,9 @@ contract Balancer is Owned {
     ) external onlyOwner {
         if (_token == address(0)) {
             (bool sent, ) = msg.sender.call{value: _amount}("");
-            require(sent, "Balancer: ETH transfer failed");
+            if (!sent) revert Failed();
         } else {
-            require(
-                IERC20(_token).transfer(msg.sender, _amount),
-                "Balancer: token transfer failed"
-            );
+            if (!IERC20(_token).transfer(msg.sender, _amount)) revert Failed();
         }
     }
 

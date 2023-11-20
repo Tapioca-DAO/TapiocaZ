@@ -8,6 +8,13 @@ contract TOFTVault is Ownable {
     address private _token;
     bool private _isNative;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error NotValid();
+    error ZeroAmount();
+    error Failed();
+
     constructor(address token_) {
         _token = token_;
         _isNative = token_ == address(0);
@@ -21,19 +28,16 @@ contract TOFTVault is Ownable {
     }
 
     function depositNative() external payable onlyOwner {
-        require(_isNative, "TOFTVault: different token");
-        require(msg.value > 0, "TOFTVault: amount not valid");
+        if (!_isNative) revert NotValid();
+        if (msg.value == 0) revert ZeroAmount();
     }
 
     function withdraw(address to, uint256 amount) external onlyOwner {
         if (_isNative) {
             (bool success, ) = to.call{value: amount}("");
-            require(success, "TOFTVault: native transfer failed");
+            if (!success) revert Failed();
         } else {
-            require(
-                IERC20(_token).transfer(to, amount),
-                "TOFTVault: transfer failed"
-            );
+            if (!IERC20(_token).transfer(to, amount)) revert Failed();
         }
     }
 

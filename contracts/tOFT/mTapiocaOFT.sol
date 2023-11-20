@@ -40,6 +40,11 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         bool indexed _isNative
     );
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error NotHost();
+
     /// @notice creates a new mTapiocaOFT
     /// @param _lzEndpoint LayerZero endpoint address
     /// @param _erc20 true the underlying ERC20 address
@@ -104,7 +109,7 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         address _toAddress,
         uint256 _amount
     ) external payable onlyHostChain {
-        require(!balancers[msg.sender], "TOFT_auth");
+        if (balancers[msg.sender]) revert NotAuthorized();
         if (erc20 == address(0)) {
             _wrapNative(_toAddress);
         } else {
@@ -116,8 +121,8 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     /// @param _toAddress The address to unwrap the tokens to.
     /// @param _amount The amount of tokens to unwrap.
     function unwrap(address _toAddress, uint256 _amount) external {
-        require(connectedChains[block.chainid], "TOFT_host");
-        require(!balancers[msg.sender], "TOFT_auth");
+        if (!connectedChains[block.chainid]) revert NotHost();
+        if (balancers[msg.sender]) revert NotAuthorized();
         _unwrap(_toAddress, _amount);
     }
 
@@ -153,8 +158,8 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     /// @notice extracts the underlying token/native for rebalancing
     /// @param _amount the amount used for rebalancing
     function extractUnderlying(uint256 _amount) external nonReentrant {
-        require(balancers[msg.sender], "TOFT_auth");
-        require(_amount > 0, "TOFT_0");
+        if (!balancers[msg.sender]) revert NotAuthorized();
+        if (_amount == 0) revert NotValid();
 
         bool _isNative = erc20 == address(0);
         vault.withdraw(msg.sender, _amount);

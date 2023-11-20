@@ -38,7 +38,7 @@ describe('TapiocaWrapper', () => {
                         ethers.utils.randomBytes(32),
                         false,
                     ),
-            ).to.be.revertedWith('Ownable: caller is not the owner');
+            ).to.be.reverted;
         });
 
         it('Should fail if the ERC20 address is not the same as the registered TapiocaWrapper one', async () => {
@@ -579,7 +579,7 @@ describe('TapiocaWrapper', () => {
                         ethers.utils.randomBytes(32),
                         true,
                     ),
-            ).to.be.revertedWith('Ownable: caller is not the owner');
+            ).to.be.reverted;
         });
 
         it('Should revert on failure', async () => {

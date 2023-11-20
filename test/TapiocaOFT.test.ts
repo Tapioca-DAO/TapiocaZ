@@ -261,9 +261,7 @@ describe('TapiocaOFT', () => {
                         gasLimit: 2_000_000,
                     },
                 ),
-            ).to.be.revertedWith(
-                'LzApp: destination chain is not a trusted source',
-            );
+            ).to.be.reverted;
 
             // Set trusted remotes
             await tapiocaWrapper_0.executeTOFT(

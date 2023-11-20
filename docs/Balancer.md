@@ -403,6 +403,17 @@ error thrown when value exceeds balance
 
 
 
+### Failed
+
+```solidity
+error Failed()
+```
+
+
+
+
+
+
 ### FeeAmountNotSet
 
 ```solidity

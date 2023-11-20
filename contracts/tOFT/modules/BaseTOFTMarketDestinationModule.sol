@@ -16,6 +16,11 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error GasNotValid();
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -45,11 +50,10 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         uint64 _nonce,
         bytes memory _payload
     ) public payable {
-        require(
-            msg.sender == address(this) &&
-                _moduleAddresses[Module.MarketDestination] == module,
-            "TOFT_CALLER"
-        );
+        if (
+            msg.sender != address(this) ||
+            _moduleAddresses[Module.MarketDestination] != module
+        ) revert NotAuthorized();
         (
             ,
             address _from, //from
@@ -149,11 +153,10 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         ICommonData.IWithdrawParams memory withdrawParams,
         uint256 airdropAmount
     ) public payable {
-        require(
-            msg.sender == address(this) &&
-                _moduleAddresses[Module.MarketDestination] == module,
-            "TOFT_CALLER"
-        );
+        if (
+            msg.sender != address(this) ||
+            _moduleAddresses[Module.MarketDestination] != module
+        ) revert NotAuthorized();
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
@@ -177,7 +180,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         uint64,
         bytes memory _payload
     ) public {
-        require(msg.sender == address(this), "TOFT_CALLER");
+        if (msg.sender != address(this)) revert NotAuthorized();
         (
             ,
             address from,
@@ -221,22 +224,16 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
 
         //market whitelist status
         if (removeParams.market != address(0)) {
-            require(
-                cluster.isWhitelisted(0, removeParams.market),
-                "TOFT_INVALID"
-            );
+            if (!cluster.isWhitelisted(0, removeParams.market))
+                revert NotAuthorized();
         }
         approve(removeParams.market, share);
         IMarket(removeParams.market).removeCollateral(from, to, share);
         if (withdrawParams.withdraw) {
-            require(
-                airdropAmount >= withdrawParams.withdrawLzFeeAmount,
-                "TOFT_GAS"
-            );
-            require(
-                cluster.isWhitelisted(0, removeParams.marketHelper),
-                "TOFT_INVALID"
-            );
+            if (airdropAmount < withdrawParams.withdrawLzFeeAmount)
+                revert GasNotValid();
+            if (!cluster.isWhitelisted(0, removeParams.marketHelper))
+                revert NotAuthorized();
             IMagnetar(removeParams.marketHelper).withdrawToChain{
                 value: withdrawParams.withdrawLzFeeAmount
             }(

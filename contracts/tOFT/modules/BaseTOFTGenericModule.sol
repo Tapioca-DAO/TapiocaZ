@@ -13,6 +13,12 @@ import "./TOFTCommon.sol";
 contract BaseTOFTGenericModule is TOFTCommon {
     using SafeERC20 for IERC20;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error AllowanceNotValid();
+    error Failed();
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -46,7 +52,8 @@ contract BaseTOFTGenericModule is TOFTCommon {
         ICommonData.IApproval[] calldata revokes
     ) external payable {
         if (from != msg.sender) {
-            require(allowance(from, msg.sender) >= amount, "TOFT_UNAUTHORIZED");
+            if (allowance(from, msg.sender) < amount)
+                revert AllowanceNotValid();
             _spendAllowance(from, msg.sender, amount);
         }
         _checkAdapterParams(
@@ -58,7 +65,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
 
         (amount, ) = _removeDust(amount);
         amount = _debitFrom(from, lzDstChainId, toAddress, amount);
-        require(amount > 0, "TOFT_AMOUNT");
+        if (amount == 0) revert NotValid();
         bytes memory lzPayload = abi.encode(
             PT_SEND_FROM_PARAMS,
             toAddress,
@@ -87,7 +94,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         uint64,
         bytes memory _payload
     ) public {
-        require(msg.sender == address(this), "TOFT_CALLER");
+        if (msg.sender != address(this)) revert NotAuthorized();
         (
             ,
             bytes32 to,
@@ -128,7 +135,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
                 IERC20(toftERC20).safeTransfer(toAddress, amount);
             } else {
                 (bool sent, ) = toAddress.call{value: amount}("");
-                require(sent, "TOFT_FAILED");
+                if (!sent) revert Failed();
             }
         }
 
@@ -178,7 +185,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         uint64,
         bytes memory _payload
     ) public {
-        require(msg.sender == address(this), "TOFT_CALLER");
+        if (msg.sender != address(this)) revert NotAuthorized();
         (, address from, ICommonData.IApproval[] memory approvals) = abi.decode(
             _payload,
             (uint16, address, ICommonData.IApproval[])
@@ -242,7 +249,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
 
     /// @dev destination call for BaseTOFTGenericModule.triggerSendFrom
     function sendFromDestination(bytes memory _payload) public {
-        require(msg.sender == address(this), "TOFT_CALLER");
+        if (msg.sender != address(this)) revert NotAuthorized();
         (
             ,
             address from,

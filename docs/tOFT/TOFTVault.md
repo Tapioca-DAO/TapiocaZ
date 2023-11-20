@@ -122,3 +122,39 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 
 
 
+## Errors
+
+### Failed
+
+```solidity
+error Failed()
+```
+
+
+
+
+
+
+### NotValid
+
+```solidity
+error NotValid()
+```
+
+
+
+
+
+
+### ZeroAmount
+
+```solidity
+error ZeroAmount()
+```
+
+
+
+
+
+
+

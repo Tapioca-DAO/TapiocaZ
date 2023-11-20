@@ -1382,3 +1382,61 @@ event Transfer(address indexed from, address indexed to, uint256 value)
 
 
 
+## Errors
+
+### ActionTypeNotValid
+
+```solidity
+error ActionTypeNotValid()
+```
+
+
+
+
+
+
+### AllowanceNotValid
+
+```solidity
+error AllowanceNotValid()
+```
+
+
+
+
+
+
+### NotAuthorized
+
+```solidity
+error NotAuthorized()
+```
+
+
+
+
+
+
+### NotValid
+
+```solidity
+error NotValid()
+```
+
+
+
+
+
+
+### TokenNotValid
+
+```solidity
+error TokenNotValid()
+```
+
+
+
+
+
+
+

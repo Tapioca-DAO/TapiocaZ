@@ -14,6 +14,11 @@ import "./TOFTCommon.sol";
 contract BaseTOFTOptionsModule is TOFTCommon {
     using SafeERC20 for IERC20;
 
+    // ************** //
+    // *** ERRORS *** //
+    // ************** //
+    error AllowanceNotValid();
+
     constructor(
         address _lzEndpoint,
         address _erc20,
@@ -46,23 +51,21 @@ contract BaseTOFTOptionsModule is TOFTCommon {
         bytes calldata adapterParams
     ) external payable {
         if (tapSendData.tapOftAddress != address(0)) {
-            require(
-                cluster.isWhitelisted(
+            if (
+                !cluster.isWhitelisted(
                     lzData.lzDstChainId,
                     tapSendData.tapOftAddress
-                ),
-                "TOFT_UNAUTHORIZED"
-            ); //fail fast
+                )
+            ) revert NotAuthorized(); //fail fast
         }
 
         // allowance is also checked on SGL
         // check it here as well because tokens are moved over layers
         if (optionsData.from != msg.sender) {
-            require(
-                allowance(optionsData.from, msg.sender) >=
-                    optionsData.paymentTokenAmount,
-                "TOFT_UNAUTHORIZED"
-            );
+            if (
+                allowance(optionsData.from, msg.sender) <
+                optionsData.paymentTokenAmount
+            ) revert AllowanceNotValid();
             _spendAllowance(
                 optionsData.from,
                 msg.sender,
@@ -81,7 +84,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             toAddress,
             paymentTokenAmount
         );
-        require(paymentTokenAmount > 0, "TOFT_AMOUNT");
+        if (paymentTokenAmount == 0) revert NotValid();
 
         (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
             adapterParams
