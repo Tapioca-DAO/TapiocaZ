@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { useNetwork, useUtils } from '../../scripts/utils';
 import { TapiocaOFT, TapiocaWrapper } from '../../typechain';
 import { loadVM } from '../utils';
-import SDK from 'tapioca-sdk';
 
 export interface ITOFTDeployment extends TContract {
     meta: {
@@ -36,7 +35,6 @@ export const deployTOFT__task = async (
     checkIfExists(hre, tag, args.isMerged);
 
     const project = hre.SDK.config.TAPIOCA_PROJECTS[2];
-    const subrepo = hre.SDK.db.SUBREPO_GLOBAL_DB_PATH;
 
     const chainInfo = hre.SDK.utils.getChainBy(
         'chainId',

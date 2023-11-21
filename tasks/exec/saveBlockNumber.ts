@@ -13,7 +13,7 @@ export const saveBlockNumber__task = async (
         chainId: String(hre.network.config.chainId),
         contracts: [
             {
-                name: 'NonContract-BlocDetails',
+                name: 'NonContract-BlockDetails',
                 address: hre.ethers.constants.AddressZero,
                 meta: {
                     blockNumber: latestBlock.number,

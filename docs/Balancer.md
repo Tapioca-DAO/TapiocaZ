@@ -78,6 +78,23 @@ current OFT =&gt; chain =&gt; destination OFT
 | dstOft | address | undefined |
 | rebalanceable | uint256 | undefined |
 
+### disableEth
+
+```solidity
+function disableEth() external view returns (bool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### emergencySaveTokens
 
 ```solidity
@@ -288,6 +305,22 @@ function setOwner(address newOwner) external nonpayable
 |---|---|---|
 | newOwner | address | undefined |
 
+### setSwapEth
+
+```solidity
+function setSwapEth(bool _val) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _val | bool | undefined |
+
 
 
 ## Events
@@ -376,7 +409,7 @@ event emitted when a rebalance operation is performed
 error DestinationNotValid()
 ```
 
-error thrown when chain destination is not valid
+
 
 
 
@@ -398,7 +431,7 @@ error DestinationOftNotValid()
 error ExceedsBalance()
 ```
 
-error thrown when value exceeds balance
+
 
 
 
@@ -420,7 +453,7 @@ error Failed()
 error FeeAmountNotSet()
 ```
 
-error thrown when fee amount is not set
+
 
 
 
@@ -453,7 +486,7 @@ error RebalanceAmountNotSet()
 error RouterNotValid()
 ```
 
-error thrown when IStargetRouter address is not valid
+
 
 
 
@@ -464,7 +497,18 @@ error thrown when IStargetRouter address is not valid
 error SlippageNotValid()
 ```
 
-error thrown when dex slippage is not valid
+
+
+
+
+
+### SwapNotEnabled
+
+```solidity
+error SwapNotEnabled()
+```
+
+
 
 
 
