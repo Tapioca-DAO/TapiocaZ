@@ -34,6 +34,36 @@ export const STARGATE_ROUTERS: {
         routerETH: '0x150f94b44927f078737562f0fcf3c95c01cc2376',
         router: '0x8731d54E9D02c286767d56ac03e8037C07e01e98',
     },
+    [EChainID.ARBITRUM]: {
+        stargateChainId: '110',
+        routerETH: '0xbf22f0f184bCcbeA268dF387a49fF5238dD23E40',
+        router: '0x53Bf833A5d6c4ddA888F69c22C88C9f356a41614',
+    },
+    [EChainID.BSC]: {
+        stargateChainId: '102',
+        routerETH: '0x4a364f8c717cAAD9A442737Eb7b8A55cc6cf18D8',
+        router: '0x4a364f8c717cAAD9A442737Eb7b8A55cc6cf18D8',
+    },
+    [EChainID.AVALANCHE]: {
+        stargateChainId: '106',
+        routerETH: '0x45A01E4e04F14f7A4a6702c74187c5F6222033cd',
+        router: '0x45A01E4e04F14f7A4a6702c74187c5F6222033cd',
+    },
+    [EChainID.POLYGON]: {
+        stargateChainId: '109',
+        routerETH: '0x45A01E4e04F14f7A4a6702c74187c5F6222033cd',
+        router: '0x45A01E4e04F14f7A4a6702c74187c5F6222033cd',
+    },
+    [EChainID.OPTIMISM]: {
+        stargateChainId: '111',
+        routerETH: '0xB49c4e680174E331CB0A7fF3Ab58afC9738d5F8b',
+        router: '0xB0D502E938ed5f4df2E681fE6E419ff29631d62b',
+    },
+    [EChainID.FANTOM]: {
+        stargateChainId: '112',
+        routerETH: '0xAf5191B0De278C7286d6C7CC6ab6BB8A73bA2Cd6',
+        router: '0xAf5191B0De278C7286d6C7CC6ab6BB8A73bA2Cd6',
+    },
     // Testnet
     [EChainID.GOERLI]: {
         stargateChainId: '10121',

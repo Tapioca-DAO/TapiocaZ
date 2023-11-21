@@ -2,9 +2,8 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadVM } from '../utils';
 import inquirer from 'inquirer';
 
-//TODO: remove transferOwnership param after CU-85zrubh6u implementation
 export const deployTapiocaWrapper__task = async (
-    taskArgs: { overwrite?: boolean; transferOwnership?: boolean },
+    taskArgs: { overwrite?: boolean },
     hre: HardhatRuntimeEnvironment,
 ) => {
     console.log('[+] Deploying TapiocaWrapper...');
@@ -35,13 +34,9 @@ export const deployTapiocaWrapper__task = async (
 
     const deployerVM = await loadVM(hre, tag);
 
-    const _owner = taskArgs.transferOwnership
-        ? await deployerVM.getMultisig().address
-        : signer.address;
-
     deployerVM.add({
         contract: tapiocaWrapper,
-        args: [_owner],
+        args: [signer.address],
         deploymentName: 'TapiocaWrapper',
     });
     await deployerVM.execute(3);

@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+//periph
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IStargateRouter.sol";
 import "tapioca-periph/contracts/interfaces/IStargateEthVault.sol";
+
+//rari
 import "@rari-capital/solmate/src/auth/Owned.sol";
+
+//OZ
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 //
 //                 .(%%%%%%%%%%%%*       *
@@ -31,6 +37,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /// Transfers tokens to other layers through Stargate
 contract Balancer is Owned {
+    using SafeERC20 for IERC20;
+
     // ************ //
     // *** VARS *** //
     // ************ //
@@ -58,6 +66,9 @@ contract Balancer is Owned {
     IStargateRouter public immutable routerETH;
     /// @notice Stargate router address
     IStargateRouter public immutable router;
+
+    // @dev swapEth is not available on some chains
+    bool public disableEth;
 
     uint256 private constant SLIPPAGE_PRECISION = 1e5;
 
@@ -90,20 +101,16 @@ contract Balancer is Owned {
     // ************************ //
     // *** ERRORS FUNCTIONS *** //
     // ************************ //
-    /// @notice error thrown when IStargetRouter address is not valid
     error RouterNotValid();
-    /// @notice error thrown when value exceeds balance
     error ExceedsBalance();
-    /// @notice error thrown when chain destination is not valid
     error DestinationNotValid();
-    /// @notice error thrown when dex slippage is not valid
     error SlippageNotValid();
-    /// @notice error thrown when fee amount is not set
     error FeeAmountNotSet();
     error PoolInfoRequired();
     error RebalanceAmountNotSet();
     error DestinationOftNotValid();
     error Failed();
+    error SwapNotEnabled();
 
     // *************************** //
     // *** MODIFIERS FUNCTIONS *** //
@@ -162,6 +169,10 @@ contract Balancer is Owned {
     // *********************** //
     // *** OWNER FUNCTIONS *** //
     // *********************** //
+    function setSwapEth(bool _val) external onlyOwner {
+        disableEth = _val;
+    }
+
     /// @notice performs a rebalance operation
     /// @dev callable only by the owner
     /// @param _srcOft the source TOFT address
@@ -200,8 +211,8 @@ contract Balancer is Owned {
         //send
         bool _isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
         if (msg.value == 0) revert FeeAmountNotSet();
-
         if (_isNative) {
+            if (disableEth) revert SwapNotEnabled();
             _sendNative(_srcOft, _amount, _dstChainId, _slippage);
         } else {
             _sendToken(_srcOft, _amount, _dstChainId, _slippage, _ercData);
@@ -374,16 +385,16 @@ contract Balancer is Owned {
         uint256 _slippage,
         bytes memory _data
     ) private {
-        IERC20Metadata erc20 = IERC20Metadata(ITapiocaOFT(_oft).erc20());
-        if (erc20.balanceOf(address(this)) < _amount) revert ExceedsBalance();
+        address erc20 = ITapiocaOFT(_oft).erc20();
+        if (IERC20Metadata(erc20).balanceOf(address(this)) < _amount)
+            revert ExceedsBalance();
 
         (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(
             _data,
             (uint256, uint256)
         );
 
-        erc20.approve(address(router), 0);
-        erc20.approve(address(router), _amount);
+        IERC20(address(erc20)).safeApprove(address(router), _amount);
         router.swap{value: msg.value}(
             _dstChainId,
             _srcPoolId,
