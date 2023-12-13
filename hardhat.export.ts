@@ -56,6 +56,16 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     },
                 },
             },
+            {
+                version: '0.8.19',
+                settings: {
+                    viaIR: true,
+                    optimizer: {
+                        enabled: true,
+                        runs: 80,
+                    },
+                },
+            },
         ],
     },
     namedAccounts: {
