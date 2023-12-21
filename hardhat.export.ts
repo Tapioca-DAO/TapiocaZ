@@ -111,7 +111,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         enabled: false,
     },
     dodoc: {
-        runOnCompile: true,
+        runOnCompile: false,
     },
     mocha: {
         timeout: 4000000,
