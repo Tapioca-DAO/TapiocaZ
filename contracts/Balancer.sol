@@ -233,7 +233,7 @@ contract Balancer is Owned {
             (bool sent, ) = msg.sender.call{value: _amount}("");
             if (!sent) revert Failed();
         } else {
-            if (!IERC20(_token).transfer(msg.sender, _amount)) revert Failed();
+            IERC20(_token).safeTransfer(msg.sender, _amount);
         }
     }
 
