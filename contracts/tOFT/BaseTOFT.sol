@@ -433,7 +433,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ICommonData.IApproval[] calldata revokes
     ) external payable {
         _executeModule(
-            Module.Options,
+            Module.Generic,
             abi.encodeWithSelector(
                 BaseTOFTGenericModule.triggerSendFromWithParams.selector,
                 from,
@@ -489,7 +489,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ICommonData.IApproval[] calldata revokes
     ) external payable {
         _executeModule(
-            Module.Options,
+            Module.Generic,
             abi.encodeWithSelector(
                 BaseTOFTGenericModule.triggerSendFrom.selector,
                 lzDstChainId,
