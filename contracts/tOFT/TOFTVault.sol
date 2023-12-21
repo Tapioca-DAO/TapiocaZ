@@ -3,8 +3,11 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract TOFTVault is Ownable {
+    using SafeERC20 for IERC20;
+
     address private _token;
     bool private _isNative;
 
@@ -37,7 +40,7 @@ contract TOFTVault is Ownable {
             (bool success, ) = to.call{value: amount}("");
             if (!success) revert Failed();
         } else {
-            if (!IERC20(_token).transfer(to, amount)) revert Failed();
+            IERC20(_token).safeTransfer(to, amount);
         }
     }
 
