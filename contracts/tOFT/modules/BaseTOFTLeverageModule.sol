@@ -62,7 +62,7 @@ contract BaseTOFTLeverageModule is TOFTCommon {
                     lzData.lzDstChainId,
                     externalData.swapper
                 )
-            ) revert NotAuthorized(); //fail fast
+            ) revert NotAuthorized(externalData.swapper); //fail fast
         }
 
         bytes32 senderBytes = LzLib.addressToBytes32(msg.sender);

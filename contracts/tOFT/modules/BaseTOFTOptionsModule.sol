@@ -56,7 +56,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
                     lzData.lzDstChainId,
                     tapSendData.tapOftAddress
                 )
-            ) revert NotAuthorized(); //fail fast
+            ) revert NotAuthorized(tapSendData.tapOftAddress); //fail fast
         }
 
         // allowance is also checked on SGL
