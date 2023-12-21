@@ -49,7 +49,7 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
         if (
             msg.sender != address(this) ||
             _moduleAddresses[Module.LeverageDestination] != module
-        ) revert NotAuthorized();
+        ) revert ModuleNotAuthorized();
         (
             ,
             ,
@@ -137,14 +137,21 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
         if (
             msg.sender != address(this) &&
             _moduleAddresses[Module.LeverageDestination] != module
-        ) revert NotAuthorized();
+        ) revert ModuleNotAuthorized();
         ITapiocaOFT(address(this)).unwrap(address(this), amount);
 
         //swap to USDO
         if (externalData.swapper != address(0)) {
             if (!cluster.isWhitelisted(0, externalData.swapper))
-                revert NotAuthorized();
+                revert NotAuthorized(externalData.swapper);
         }
+
+        if (!cluster.isWhitelisted(0, externalData.tOft))
+            revert NotAuthorized(externalData.tOft);
+        if (!cluster.isWhitelisted(0, externalData.magnetar))
+            revert NotAuthorized(externalData.magnetar);
+        if (!cluster.isWhitelisted(0, externalData.srcMarket))
+            revert NotAuthorized(externalData.srcMarket);
 
         if (erc20 != address(0)) {
             //skip approvals for native gas

@@ -46,7 +46,7 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
         if (
             msg.sender != address(this) ||
             _moduleAddresses[Module.OptionsDestination] != module
-        ) revert NotAuthorized();
+        ) revert ModuleNotAuthorized();
         (
             ,
             uint64 amountSD,
@@ -72,7 +72,7 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
 
         if (tapSendData.tapOftAddress != address(0)) {
             if (!cluster.isWhitelisted(0, tapSendData.tapOftAddress))
-                revert NotAuthorized(); //fail fast
+                revert NotAuthorized(tapSendData.tapOftAddress); //fail fast
         }
 
         optionsData.paymentTokenAmount = _sd2ld(amountSD);
@@ -147,7 +147,7 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
         if (
             msg.sender != address(this) ||
             _moduleAddresses[Module.OptionsDestination] != module
-        ) revert NotAuthorized();
+        ) revert ModuleNotAuthorized();
 
         if (approvals.length > 0) {
             _callApproval(approvals, PT_TAP_EXERCISE);

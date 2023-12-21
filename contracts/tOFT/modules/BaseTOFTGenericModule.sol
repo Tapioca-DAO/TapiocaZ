@@ -89,7 +89,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         uint64,
         bytes memory _payload
     ) public {
-        if (msg.sender != address(this)) revert NotAuthorized();
+        if (msg.sender != address(this)) revert NotAuthorized(address(this));
         (
             ,
             bytes32 to,
@@ -180,7 +180,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         uint64,
         bytes memory _payload
     ) public {
-        if (msg.sender != address(this)) revert NotAuthorized();
+        if (msg.sender != address(this)) revert NotAuthorized(address(this));
         (, address from, ICommonData.IApproval[] memory approvals) = abi.decode(
             _payload,
             (uint16, address, ICommonData.IApproval[])
@@ -244,7 +244,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
 
     /// @dev destination call for BaseTOFTGenericModule.triggerSendFrom
     function sendFromDestination(bytes memory _payload) public {
-        if (msg.sender != address(this)) revert NotAuthorized();
+        if (msg.sender != address(this)) revert NotAuthorized(address(this));
         (
             ,
             address from,

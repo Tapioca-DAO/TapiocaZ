@@ -86,10 +86,10 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         //fail fast
         if (!cluster.isWhitelisted(lzDstChainId, removeParams.market))
-            revert NotAuthorized();
+            revert NotAuthorized(removeParams.market);
         if (withdrawParams.withdraw) {
             if (!cluster.isWhitelisted(lzDstChainId, removeParams.marketHelper))
-                revert NotAuthorized();
+                revert NotAuthorized(removeParams.marketHelper);
         }
 
         _lzSend(
