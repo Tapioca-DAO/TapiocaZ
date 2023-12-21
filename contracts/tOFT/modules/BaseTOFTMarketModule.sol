@@ -124,12 +124,6 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ICommonData.IApproval[] calldata approvals,
         ICommonData.IApproval[] calldata revokes
     ) external payable {
-        if (_from != msg.sender) {
-            if (allowance(_from, msg.sender) < borrowParams.amount)
-                revert AllowanceNotValid();
-            _spendAllowance(_from, msg.sender, borrowParams.amount);
-        }
-
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
         (uint256 amount, ) = _removeDust(borrowParams.amount);

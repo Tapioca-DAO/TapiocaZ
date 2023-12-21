@@ -48,12 +48,6 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         IUSDOBase.ILeverageSwapData calldata swapData,
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
-        if (leverageFor != msg.sender) {
-            if (allowance(leverageFor, msg.sender) < amount)
-                revert AllowanceNotValid();
-            _spendAllowance(leverageFor, msg.sender, amount);
-        }
-
         if (swapData.tokenOut == address(this)) revert TokenNotValid();
         _assureMaxSlippage(amount, swapData.amountOutMin);
         if (externalData.swapper != address(0)) {
@@ -69,7 +63,7 @@ contract BaseTOFTLeverageModule is TOFTCommon {
 
         (amount, ) = _removeDust(amount);
         amount = _debitFrom(
-            msg.sender,
+            leverageFor,
             lzEndpoint.getChainId(),
             senderBytes,
             amount

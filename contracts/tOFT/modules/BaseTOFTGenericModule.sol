@@ -51,11 +51,6 @@ contract BaseTOFTGenericModule is TOFTCommon {
         ICommonData.IApproval[] calldata approvals,
         ICommonData.IApproval[] calldata revokes
     ) external payable {
-        if (from != msg.sender) {
-            if (allowance(from, msg.sender) < amount)
-                revert AllowanceNotValid();
-            _spendAllowance(from, msg.sender, amount);
-        }
         _checkAdapterParams(
             lzDstChainId,
             PT_SEND_FROM_PARAMS,
