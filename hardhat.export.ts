@@ -9,6 +9,7 @@ import '@primitivefi/hardhat-dodoc';
 import SDK from 'tapioca-sdk';
 import 'hardhat-tracer';
 import { HttpNetworkConfig } from 'hardhat/types';
+import '@nomicfoundation/hardhat-foundry';
 
 dotenv.config();
 
