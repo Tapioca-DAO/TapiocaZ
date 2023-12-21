@@ -56,6 +56,16 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                     },
                 },
             },
+            {
+                version: '0.8.19',
+                settings: {
+                    viaIR: true,
+                    optimizer: {
+                        enabled: true,
+                        runs: 80,
+                    },
+                },
+            },
         ],
     },
     namedAccounts: {
@@ -101,7 +111,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
         enabled: false,
     },
     dodoc: {
-        runOnCompile: true,
+        runOnCompile: false,
     },
     mocha: {
         timeout: 4000000,

@@ -201,6 +201,15 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         return _decimalCache;
     }
 
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(BaseOFTV2) returns (bool) {
+        return
+            interfaceId == type(ITapiocaOFT).interfaceId ||
+            interfaceId == type(ISendFrom).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
@@ -424,7 +433,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ICommonData.IApproval[] calldata revokes
     ) external payable {
         _executeModule(
-            Module.Options,
+            Module.Generic,
             abi.encodeWithSelector(
                 BaseTOFTGenericModule.triggerSendFromWithParams.selector,
                 from,
@@ -480,7 +489,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ICommonData.IApproval[] calldata revokes
     ) external payable {
         _executeModule(
-            Module.Options,
+            Module.Generic,
             abi.encodeWithSelector(
                 BaseTOFTGenericModule.triggerSendFrom.selector,
                 lzDstChainId,
@@ -559,7 +568,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     }
 
     function _wrapNative(address _toAddress) internal virtual {
-        vault.depositNative();
+        vault.depositNative{value: msg.value}();
         _mint(_toAddress, msg.value);
     }
 

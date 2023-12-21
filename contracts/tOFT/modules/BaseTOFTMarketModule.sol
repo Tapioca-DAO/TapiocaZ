@@ -86,10 +86,10 @@ contract BaseTOFTMarketModule is TOFTCommon {
 
         //fail fast
         if (!cluster.isWhitelisted(lzDstChainId, removeParams.market))
-            revert NotAuthorized();
+            revert NotAuthorized(removeParams.market);
         if (withdrawParams.withdraw) {
             if (!cluster.isWhitelisted(lzDstChainId, removeParams.marketHelper))
-                revert NotAuthorized();
+                revert NotAuthorized(removeParams.marketHelper);
         }
 
         _lzSend(
@@ -131,10 +131,10 @@ contract BaseTOFTMarketModule is TOFTCommon {
         }
 
         if (!cluster.isWhitelisted(lzDstChainId, borrowParams.marketHelper))
-                revert NotAuthorized();
-                
+            revert NotAuthorized();
+
         if (!cluster.isWhitelisted(lzDstChainId, borrowParams.market))
-                revert NotAuthorized();
+            revert NotAuthorized();
 
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 

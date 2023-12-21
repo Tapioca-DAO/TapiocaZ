@@ -13,7 +13,8 @@ abstract contract TOFTCommon is BaseTOFTStorage {
     // *** ERRORS *** //
     // ************** //
     error ActionTypeNotValid();
-    error NotAuthorized();
+    error NotAuthorized(address invalidAddress);
+    error ModuleNotAuthorized();
 
     function _callApproval(
         ICommonData.IApproval[] memory approvals,

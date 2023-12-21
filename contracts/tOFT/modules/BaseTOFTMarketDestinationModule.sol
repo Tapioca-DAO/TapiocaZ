@@ -53,7 +53,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         if (
             msg.sender != address(this) ||
             _moduleAddresses[Module.MarketDestination] != module
-        ) revert NotAuthorized();
+        ) revert ModuleNotAuthorized();
         (
             ,
             address _from, //from
@@ -156,13 +156,13 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         if (
             msg.sender != address(this) ||
             _moduleAddresses[Module.MarketDestination] != module
-        ) revert NotAuthorized();
-        
+        ) revert ModuleNotAuthorized();
+
         if (!cluster.isWhitelisted(0, borrowParams.marketHelper))
-                revert NotAuthorized();
-                
+            revert NotAuthorized();
+
         if (!cluster.isWhitelisted(0, borrowParams.market))
-                revert NotAuthorized();
+            revert NotAuthorized();
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
@@ -186,7 +186,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         uint64,
         bytes memory _payload
     ) public {
-        if (msg.sender != address(this)) revert NotAuthorized();
+        if (msg.sender != address(this)) revert NotAuthorized(address(this));
         (
             ,
             address from,
@@ -231,7 +231,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         //market whitelist status
         if (removeParams.market != address(0)) {
             if (!cluster.isWhitelisted(0, removeParams.market))
-                revert NotAuthorized();
+                revert NotAuthorized(removeParams.market);
         }
         approve(removeParams.market, share);
         IMarket(removeParams.market).removeCollateral(from, to, share);
@@ -239,7 +239,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
             if (airdropAmount < withdrawParams.withdrawLzFeeAmount)
                 revert GasNotValid();
             if (!cluster.isWhitelisted(0, removeParams.marketHelper))
-                revert NotAuthorized();
+                revert NotAuthorized(removeParams.marketHelper);
             IMagnetar(removeParams.marketHelper).withdrawToChain{
                 value: withdrawParams.withdrawLzFeeAmount
             }(

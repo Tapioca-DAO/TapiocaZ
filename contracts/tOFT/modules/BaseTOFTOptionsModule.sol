@@ -56,21 +56,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
                     lzData.lzDstChainId,
                     tapSendData.tapOftAddress
                 )
-            ) revert NotAuthorized(); //fail fast
-        }
-
-        // allowance is also checked on SGL
-        // check it here as well because tokens are moved over layers
-        if (optionsData.from != msg.sender) {
-            if (
-                allowance(optionsData.from, msg.sender) <
-                optionsData.paymentTokenAmount
-            ) revert AllowanceNotValid();
-            _spendAllowance(
-                optionsData.from,
-                msg.sender,
-                optionsData.paymentTokenAmount
-            );
+            ) revert NotAuthorized(tapSendData.tapOftAddress); //fail fast
         }
 
         bytes32 toAddress = LzLib.addressToBytes32(optionsData.from);

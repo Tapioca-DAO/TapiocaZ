@@ -45,7 +45,7 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         if (
             msg.sender != address(this) ||
             _moduleAddresses[Module.StrategyDestination] != module
-        ) revert NotAuthorized();
+        ) revert ModuleNotAuthorized();
         (, , bytes32 from, uint64 amountSD, uint256 assetId, ) = abi.decode(
             _payload,
             (uint16, bytes32, bytes32, uint64, uint256, address)
@@ -99,7 +99,7 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         if (
             msg.sender != address(this) ||
             _moduleAddresses[Module.StrategyDestination] != module
-        ) revert NotAuthorized();
+        ) revert ModuleNotAuthorized();
         IERC20(address(this)).approve(address(_yieldBox), 0);
         IERC20(address(this)).approve(address(_yieldBox), _amount);
         uint256 share = _yieldBox.toShare(_assetId, _amount, false);
@@ -113,7 +113,7 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         uint64,
         bytes memory _payload
     ) public {
-        if (msg.sender != address(this)) revert NotAuthorized();
+        if (msg.sender != address(this)) revert NotAuthorized(address(this));
         (
             ,
             bytes32 from,
@@ -170,7 +170,7 @@ contract BaseTOFTStrategyDestinationModule is TOFTCommon {
         address _to,
         IYieldBoxBase _yieldBox
     ) private returns (uint256 amountOut, uint256 shareOut) {
-        if (msg.sender != address(this)) revert NotAuthorized();
+        if (msg.sender != address(this)) revert NotAuthorized(address(this));
         (amountOut, shareOut) = _yieldBox.withdraw(
             _assetId,
             _from,

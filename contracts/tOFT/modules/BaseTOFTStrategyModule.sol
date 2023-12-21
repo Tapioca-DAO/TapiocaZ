@@ -58,12 +58,6 @@ contract BaseTOFTStrategyModule is TOFTCommon {
         if (amount == 0) revert NotValid();
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
-        if (_from != msg.sender) {
-            if (allowance(_from, msg.sender) < amount)
-                revert AllowanceNotValid();
-            _spendAllowance(_from, msg.sender, amount);
-        }
-
         (amount, ) = _removeDust(amount);
         amount = _debitFrom(_from, lzEndpoint.getChainId(), toAddress, amount);
         if (amount == 0) revert NotValid();

@@ -44,6 +44,7 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     // *** ERRORS *** //
     // ************** //
     error NotHost();
+    error BalancerNotAuthorized();
 
     /// @notice creates a new mTapiocaOFT
     /// @param _lzEndpoint LayerZero endpoint address
@@ -109,7 +110,7 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         address _toAddress,
         uint256 _amount
     ) external payable onlyHostChain {
-        if (balancers[msg.sender]) revert NotAuthorized();
+        if (balancers[msg.sender]) revert BalancerNotAuthorized();
         if (erc20 == address(0)) {
             _wrapNative(_toAddress);
         } else {
@@ -122,7 +123,7 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     /// @param _amount The amount of tokens to unwrap.
     function unwrap(address _toAddress, uint256 _amount) external {
         if (!connectedChains[block.chainid]) revert NotHost();
-        if (balancers[msg.sender]) revert NotAuthorized();
+        if (balancers[msg.sender]) revert BalancerNotAuthorized();
         _unwrap(_toAddress, _amount);
     }
 
@@ -158,7 +159,7 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     /// @notice extracts the underlying token/native for rebalancing
     /// @param _amount the amount used for rebalancing
     function extractUnderlying(uint256 _amount) external nonReentrant {
-        if (!balancers[msg.sender]) revert NotAuthorized();
+        if (!balancers[msg.sender]) revert BalancerNotAuthorized();
         if (_amount == 0) revert NotValid();
 
         bool _isNative = erc20 == address(0);
