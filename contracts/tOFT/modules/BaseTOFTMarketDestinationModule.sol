@@ -157,6 +157,12 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
             msg.sender != address(this) ||
             _moduleAddresses[Module.MarketDestination] != module
         ) revert NotAuthorized();
+        
+        if (!cluster.isWhitelisted(0, borrowParams.marketHelper))
+                revert NotAuthorized();
+                
+        if (!cluster.isWhitelisted(0, borrowParams.market))
+                revert NotAuthorized();
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
