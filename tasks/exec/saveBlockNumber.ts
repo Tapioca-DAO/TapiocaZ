@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 export const saveBlockNumber__task = async (
     // eslint-disable-next-line @typescript-eslint/ban-types
-    _taskArgs: {},
+    {},
     hre: HardhatRuntimeEnvironment,
 ) => {
     console.log('Retrieving latest block');
