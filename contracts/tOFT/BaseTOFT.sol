@@ -568,7 +568,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     }
 
     function _wrapNative(address _toAddress) internal virtual {
-        vault.depositNative();
+        vault.depositNative{value: msg.value}();
         _mint(_toAddress, msg.value);
     }
 
