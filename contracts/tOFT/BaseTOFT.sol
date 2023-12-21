@@ -201,6 +201,15 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         return _decimalCache;
     }
 
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(BaseOFTV2) returns (bool) {
+        return
+            interfaceId == type(ITapiocaOFT).interfaceId ||
+            interfaceId == type(ISendFrom).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
     // ************************ //
     // *** PUBLIC FUNCTIONS *** //
     // ************************ //
