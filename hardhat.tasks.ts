@@ -9,6 +9,18 @@ import { deployTOFTMinter__task } from './tasks/deploy/testnet/deployTOFTMinter'
 import { setConnectedChain__task } from './tasks/exec/setConnectedChain';
 import { setCluster__task } from './tasks/exec/setCluster';
 import { saveBlockNumber__task } from './tasks/exec/saveBlockNumber';
+import { toggleSwapEth__task } from './tasks/exec/01-balancer-toggleSwapEth';
+import { emergencySaveTokens__task } from './tasks/exec/02-balancer-emergencySaveTokens';
+import { initConnectedOFT__task } from './tasks/exec/03-balancer-initConnectedOFT';
+import { addRebalanceAmount__task } from './tasks/exec/04-balancer-addRebalanceAmount';
+import { retryRevertOnBalancer__task } from './tasks/exec/05-balancer-retryRevert';
+import { instantRedeemLocalOnBalancer__task } from './tasks/exec/06-balancer-instantRedeemLocal';
+import { redeemLocalOnBalancer__task } from './tasks/exec/07-balancer-redeemLocal';
+import { redeemRemoteOnBalancer__task } from './tasks/exec/08-balancer-redeemRemote';
+import { updateConnectedChain__task } from './tasks/exec/09-mOft-updateConnectedChain';
+import { updateBalancerState__task } from './tasks/exec/10-mOft-updateBalancerState';
+import { rescueEthFromOft__task } from './tasks/exec/11-oft-rescueEth';
+import { setStargateRouterOnOft__task } from './tasks/exec/12-oft-setStargateRouter';
 
 task(
     'deployTapiocaWrapper',
@@ -51,3 +63,71 @@ task('setCluster', 'Set cluster', setCluster__task)
     .addParam('cluster', 'Cluster address');
 
 task('saveBlockNumber', 'adsadasda', saveBlockNumber__task);
+
+task(
+    'toggleSwapEth',
+    'Disable/Enable swap eth on balancer',
+    toggleSwapEth__task,
+);
+
+task(
+    'emergencySaveTokens',
+    'Emergency save tokens from Balancer',
+    emergencySaveTokens__task,
+);
+
+task(
+    'initConnectedOFT',
+    'Init a connected OFT on Balancer',
+    initConnectedOFT__task,
+);
+
+task(
+    'setRebalanceAmount',
+    'Set rebalanceable amount to Balancer',
+    addRebalanceAmount__task,
+);
+
+task(
+    'retryRevertOnBalancer',
+    'Retry revert on Balancer',
+    retryRevertOnBalancer__task,
+);
+
+task(
+    'instantRedeemLocalOnBalancer',
+    'Instant redeem on Balancer',
+    instantRedeemLocalOnBalancer__task,
+);
+
+task(
+    'redeemLocalOnBalancer',
+    'Redeem local on Balancer',
+    redeemLocalOnBalancer__task,
+);
+
+task(
+    'redeemRemoteOnBalancer',
+    'Redeem remote on Balancer',
+    redeemRemoteOnBalancer__task,
+);
+
+task(
+    'updateConnectedChain',
+    'Update a connected chain status for mTapiocaOFT contract',
+    updateConnectedChain__task,
+);
+
+task(
+    'updateBalancerState',
+    'Update a balancer status for mTapiocaOFT contract',
+    updateBalancerState__task,
+);
+
+task('rescueEthFromOft', 'Rescue ETH from OFT', rescueEthFromOft__task);
+
+task(
+    'setStargateRouterOnOft',
+    'Rescue ETH from OFT',
+    setStargateRouterOnOft__task,
+);
