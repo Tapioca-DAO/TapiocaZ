@@ -159,10 +159,10 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         ) revert ModuleNotAuthorized();
 
         if (!cluster.isWhitelisted(0, borrowParams.marketHelper))
-            revert NotAuthorized();
+            revert NotAuthorized(borrowParams.marketHelper);
 
         if (!cluster.isWhitelisted(0, borrowParams.market))
-            revert NotAuthorized();
+            revert NotAuthorized(borrowParams.market);
 
         // Use market helper to deposit, add collateral to market and withdrawTo
         approve(address(borrowParams.marketHelper), borrowParams.amount);
