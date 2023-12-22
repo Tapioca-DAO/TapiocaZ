@@ -131,10 +131,10 @@ contract BaseTOFTMarketModule is TOFTCommon {
         }
 
         if (!cluster.isWhitelisted(lzDstChainId, borrowParams.marketHelper))
-            revert NotAuthorized();
+            revert NotAuthorized(borrowParams.marketHelper);
 
         if (!cluster.isWhitelisted(lzDstChainId, borrowParams.market))
-            revert NotAuthorized();
+            revert NotAuthorized(borrowParams.market);
 
         bytes32 toAddress = LzLib.addressToBytes32(_to);
 
