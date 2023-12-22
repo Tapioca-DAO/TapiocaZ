@@ -59,6 +59,20 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             ) revert NotAuthorized(tapSendData.tapOftAddress); //fail fast
         }
 
+        if (optionsData.paymentToken != address(0)) {
+            if (
+                !cluster.isWhitelisted(
+                    lzData.lzDstChainId,
+                    optionsData.paymentToken
+                )
+            ) revert NotAuthorized(optionsData.paymentToken); //fail fast
+        }
+
+        if (optionsData.target != address(0)) {
+            if (!cluster.isWhitelisted(lzData.lzDstChainId, optionsData.target))
+                revert NotAuthorized(optionsData.target); //fail fast
+        }
+
         bytes32 toAddress = LzLib.addressToBytes32(optionsData.from);
 
         (uint256 paymentTokenAmount, ) = _removeDust(
