@@ -85,8 +85,8 @@ contract BaseTOFTGenericModule is TOFTCommon {
     function executSendFromWithParams(
         address,
         uint16 lzSrcChainId,
-        bytes memory,
-        uint64,
+        bytes memory _srcAddress,
+        uint64 _nonce,
         bytes memory _payload
     ) public {
         if (msg.sender != address(this)) revert NotAuthorized(address(this));
@@ -115,11 +115,16 @@ contract BaseTOFTGenericModule is TOFTCommon {
         address toAddress = LzLib.bytes32ToAddress(to);
         uint256 amount = _sd2ld(amountSD);
 
-        amount = _creditTo(
-            lzSrcChainId,
-            unwrap ? address(this) : toAddress,
-            amount
-        );
+        bool credited = creditedPackets[lzSrcChainId][_srcAddress][_nonce];
+        if (!credited) {
+            amount = _creditTo(
+                lzSrcChainId,
+                unwrap ? address(this) : toAddress,
+                amount
+            );
+            creditedPackets[lzSrcChainId][_srcAddress][_nonce] = true;
+        }
+
         if (unwrap) {
             ITapiocaOFTBase tOFT = ITapiocaOFTBase(address(this));
             address toftERC20 = tOFT.erc20();
