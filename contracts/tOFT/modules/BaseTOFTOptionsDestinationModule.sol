@@ -75,6 +75,16 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
                 revert NotAuthorized(tapSendData.tapOftAddress); //fail fast
         }
 
+        if (optionsData.paymentToken != address(0)) {
+            if (!cluster.isWhitelisted(0, optionsData.paymentToken))
+                revert NotAuthorized(optionsData.paymentToken); //fail fast
+        }
+
+        if (optionsData.target != address(0)) {
+            if (!cluster.isWhitelisted(0, optionsData.target))
+                revert NotAuthorized(optionsData.target); //fail fast
+        }
+
         optionsData.paymentTokenAmount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));
         bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
