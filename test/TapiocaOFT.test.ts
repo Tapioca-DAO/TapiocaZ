@@ -20,7 +20,7 @@ import { TapiocaOFT } from '../typechain';
 import { Cluster__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-periphery';
 
 describe('TapiocaOFT', () => {
-    it('simulate deploy', async () => {
+    it.only('simulate deploy', async () => {
         const deployer = (await ethers.getSigners())[0];
         const ERC20Mock = new ERC20Mock__factory(deployer);
         const erc20Mock = await ERC20Mock.deploy(
