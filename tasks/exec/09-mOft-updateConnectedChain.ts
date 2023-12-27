@@ -12,11 +12,16 @@ export const updateConnectedChain__task = async (
         'mTapiocaOFT',
         tag,
     );
-    const oft = await hre.ethers.getContractAt(
-        'mTapiocaOFT',
-        dep.contract.address,
+
+    const wrapperDeployment = await hre.SDK.hardhatUtils.getLocalContract(
+        hre,
+        'TapiocaWrapper',
+        tag,
     );
 
+    if (!wrapperDeployment) {
+        throw new Error('[-] TapiocaWrapper not found');
+    }
     const { chain } = await inquirer.prompt({
         type: 'input',
         name: 'chain',
@@ -30,5 +35,9 @@ export const updateConnectedChain__task = async (
         message: 'Enable?',
     });
 
-    await (await oft.updateConnectedChain(chain, status)).wait(3);
+    const txData = dep.contract.interface.encodeFunctionData(
+        'updateConnectedChain',
+        [chain, status],
+    );
+    await (await wrapperDeployment.contract.executeTOFT(dep.contract.address, txData, true)).wait(3);
 };
