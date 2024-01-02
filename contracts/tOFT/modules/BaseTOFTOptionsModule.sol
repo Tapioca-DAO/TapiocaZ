@@ -103,7 +103,7 @@ contract BaseTOFTOptionsModule is TOFTCommon {
             lzData.lzDstChainId,
             PT_TAP_EXERCISE,
             adapterParams,
-            NO_EXTRA_GAS
+            lzData.extraGas
         );
 
         _lzSend(

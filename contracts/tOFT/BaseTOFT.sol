@@ -252,6 +252,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param removeParams removeAsset specific params
     /// @param approvals approvals specific params
     /// @param adapterParams LZ adapter params
+    /// @param extraGas extra gas amount to be checked in `checkAdapterParams` call
     function removeCollateral(
         address from,
         address to,
@@ -261,7 +262,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         ITapiocaOFT.IRemoveParams calldata removeParams,
         ICommonData.IApproval[] calldata approvals,
         ICommonData.IApproval[] calldata revokes,
-        bytes calldata adapterParams
+        bytes calldata adapterParams,
+        uint256 extraGas
     ) external payable {
         _executeModule(
             Module.Market,
@@ -275,7 +277,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 removeParams,
                 approvals,
                 revokes,
-                adapterParams
+                adapterParams,
+                extraGas
             ),
             false
         );

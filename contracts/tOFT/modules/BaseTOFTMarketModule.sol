@@ -50,7 +50,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ITapiocaOFT.IRemoveParams memory removeParams,
         ICommonData.IApproval[] calldata approvals,
         ICommonData.IApproval[] calldata revokes,
-        bytes calldata adapterParams
+        bytes calldata adapterParams,
+        uint256 extraGas
     ) external payable {
         //allowance is also checked on market
         if (from != msg.sender) {
@@ -81,7 +82,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
             lzDstChainId,
             PT_MARKET_REMOVE_COLLATERAL,
             adapterParams,
-            NO_EXTRA_GAS
+            extraGas
         );
 
         //fail fast
@@ -161,7 +162,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
             lzDstChainId,
             PT_YB_SEND_SGL_BORROW,
             airdropAdapterParams,
-            NO_EXTRA_GAS
+            options.extraGasLimit
         );
 
         _lzSend(

@@ -87,7 +87,7 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             lzData.lzDstChainId,
             PT_LEVERAGE_MARKET_DOWN,
             lzData.dstAirdropAdapterParam,
-            NO_EXTRA_GAS
+            lzData.dstExtraGasLimit
         );
 
         _lzSend(
