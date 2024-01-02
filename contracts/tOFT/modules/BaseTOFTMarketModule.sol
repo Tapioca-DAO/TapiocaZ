@@ -50,8 +50,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
         ITapiocaOFT.IRemoveParams memory removeParams,
         ICommonData.IApproval[] calldata approvals,
         ICommonData.IApproval[] calldata revokes,
-        bytes calldata adapterParams,
-        uint256 extraGas
+        bytes calldata adapterParams
     ) external payable {
         //allowance is also checked on market
         if (from != msg.sender) {
@@ -63,9 +62,8 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes32 toAddress = LzLib.addressToBytes32(to);
         (removeParams.amount, ) = _removeDust(removeParams.amount);
 
-        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
-            adapterParams
-        );
+        (, uint256 extraGas, uint256 airdropAmount, ) = LzLib
+            .decodeAdapterParams(adapterParams);
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
             from,
