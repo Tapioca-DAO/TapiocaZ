@@ -60,6 +60,12 @@ contract BaseTOFTStorage is OFTV2 {
     mapping(Module module => address moduleAddress) internal _moduleAddresses;
 
     // ************** //
+    // *** EVENTS *** //
+    // ************** //
+    event StargateRouterUpdated(address indexed _old, address indexed _new);
+    event MaxSlippageUpdated(uint256 indexed _old, uint256 indexed _newVal);
+
+    // ************** //
     // *** ERRORS *** //
     // ************** //
     error NotValid();
@@ -91,6 +97,7 @@ contract BaseTOFTStorage is OFTV2 {
     }
 
     function setMaxSlippage(uint256 _slippage) external onlyOwner {
+        emit MaxSlippageUpdated(SWAP_MAX_SLIPPAGE, _slippage);
         SWAP_MAX_SLIPPAGE = _slippage;
     }
 

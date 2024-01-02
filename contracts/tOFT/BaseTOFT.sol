@@ -544,6 +544,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     }
 
     function setStargateRouter(address _router) external onlyOwner {
+        emit StargateRouterUpdated(_stargateRouter, _router);
         _stargateRouter = _router;
     }
 
