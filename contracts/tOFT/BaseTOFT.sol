@@ -413,7 +413,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     }
 
     //----Generic---
-    /// @notice triggers a sendFromWithParams to another layer from destination
+    /// @notice executes a sendFromWithParams to another layer
     /// @param from address to debit from
     /// @param lzDstChainId LZ destination id
     /// @param to address to credit to
@@ -422,7 +422,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     /// @param unwrap unwrap or not on destination
     /// @param approvals the cross chain approval operation data
     /// @param revokes the cross chain revoke operations data
-    function triggerSendFromWithParams(
+    function sendFromWithParams(
         address from,
         uint16 lzDstChainId,
         bytes32 to,
@@ -435,7 +435,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         _executeModule(
             Module.Generic,
             abi.encodeWithSelector(
-                BaseTOFTGenericModule.triggerSendFromWithParams.selector,
+                BaseTOFTGenericModule.sendFromWithParams.selector,
                 from,
                 lzDstChainId,
                 to,
@@ -472,17 +472,17 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     }
 
     /// @notice triggers a sendFrom to another layer from destination
+    /// @param from address to debit from
     /// @param lzDstChainId LZ destination id
-    /// @param airdropAdapterParams airdrop params
-    /// @param zroPaymentAddress ZRO payment address
+    /// @param to address to credit to
     /// @param amount amount to send back
     /// @param sendFromData data needed to trigger sendFrom on destination
     /// @param approvals the cross chain approval operation data
     /// @param revokes the cross chain revoke operations data
     function triggerSendFrom(
+        address from,
         uint16 lzDstChainId,
-        bytes calldata airdropAdapterParams,
-        address zroPaymentAddress,
+        bytes32 to,
         uint256 amount,
         ICommonOFT.LzCallParams calldata sendFromData,
         ICommonData.IApproval[] calldata approvals,
@@ -492,9 +492,9 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
             Module.Generic,
             abi.encodeWithSelector(
                 BaseTOFTGenericModule.triggerSendFrom.selector,
+                from,
                 lzDstChainId,
-                airdropAdapterParams,
-                zroPaymentAddress,
+                to,
                 amount,
                 sendFromData,
                 approvals,
