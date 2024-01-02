@@ -43,6 +43,4 @@ contract TOFTVault is Ownable {
             IERC20(_token).safeTransfer(to, amount);
         }
     }
-
-    receive() external payable {}
 }
