@@ -12,11 +12,16 @@ export const updateBalancerState__task = async (
         'mTapiocaOFT',
         tag,
     );
-    const oft = await hre.ethers.getContractAt(
-        'mTapiocaOFT',
-        dep.contract.address,
+
+    const wrapperDeployment = await hre.SDK.hardhatUtils.getLocalContract(
+        hre,
+        'TapiocaWrapper',
+        tag,
     );
 
+    if (!wrapperDeployment) {
+        throw new Error('[-] TapiocaWrapper not found');
+    }
     const { balancer } = await inquirer.prompt({
         type: 'input',
         name: 'balancer',
@@ -30,5 +35,15 @@ export const updateBalancerState__task = async (
         message: 'Enable?',
     });
 
-    await (await oft.updateBalancerState(balancer, status)).wait(3);
+    const txData = dep.contract.interface.encodeFunctionData(
+        'updateBalancerState',
+        [balancer, status],
+    );
+    await (
+        await wrapperDeployment.contract.executeTOFT(
+            dep.contract.address,
+            txData,
+            true,
+        )
+    ).wait(3);
 };

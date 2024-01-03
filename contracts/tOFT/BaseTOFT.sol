@@ -424,10 +424,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         address,
         uint amountLD,
         bytes memory
-    ) external payable override {
-        if (_stargateRouter != address(0)) {
-            if (msg.sender != _stargateRouter) revert NotAuthorized();
-        }
+    ) external payable {
+        if (msg.sender != _stargateRouter) revert NotAuthorized();
 
         if (erc20 == address(0)) {
             vault.depositNative{value: amountLD}();
