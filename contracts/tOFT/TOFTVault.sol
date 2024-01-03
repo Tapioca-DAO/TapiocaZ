@@ -44,6 +44,4 @@ contract TOFTVault is BoringOwnable {
             IERC20(_token).safeTransfer(to, amount);
         }
     }
-
-    receive() external payable {}
 }
