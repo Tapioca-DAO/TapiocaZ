@@ -2,10 +2,11 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract TOFTVault is Ownable {
+import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
+
+contract TOFTVault is BoringOwnable {
     using SafeERC20 for IERC20;
 
     address private _token;

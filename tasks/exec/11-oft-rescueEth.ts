@@ -9,14 +9,19 @@ export const rescueEthFromOft__task = async (
     const tag = await hre.SDK.hardhatUtils.askForTag(hre, 'local');
     const dep = await hre.SDK.hardhatUtils.getLocalContract(
         hre,
-        'TapiocaOFT',
+        'mTapiocaOFT',
         tag,
     );
-    const oft = await hre.ethers.getContractAt(
-        'TapiocaOFT',
-        dep.contract.address,
+
+    const wrapperDeployment = await hre.SDK.hardhatUtils.getLocalContract(
+        hre,
+        'TapiocaWrapper',
+        tag,
     );
 
+    if (!wrapperDeployment) {
+        throw new Error('[-] TapiocaWrapper not found');
+    }
     const { to } = await inquirer.prompt({
         type: 'input',
         name: 'to',
@@ -30,5 +35,15 @@ export const rescueEthFromOft__task = async (
         default: hre.ethers.constants.AddressZero,
     });
 
-    await (await oft.rescueEth(amount, to)).wait(3);
+    const txData = dep.contract.interface.encodeFunctionData('rescueEth', [
+        amount,
+        to,
+    ]);
+    await (
+        await wrapperDeployment.contract.executeTOFT(
+            dep.contract.address,
+            txData,
+            true,
+        )
+    ).wait(3);
 };

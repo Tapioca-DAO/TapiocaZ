@@ -50,8 +50,6 @@ contract BaseTOFTStorage is OFTV2 {
         Generic,
         Leverage,
         LeverageDestination,
-        Strategy,
-        StrategyDestination,
         Market,
         MarketDestination,
         Options,

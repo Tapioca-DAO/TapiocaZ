@@ -6,9 +6,10 @@ import "./tOFT/mTapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 
 import "@openzeppelin/contracts/utils/Create2.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TapiocaWrapper is Ownable {
+import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
+
+contract TapiocaWrapper is BoringOwnable {
     struct ExecutionCall {
         address toft;
         uint256 value;
@@ -51,7 +52,7 @@ contract TapiocaWrapper is Ownable {
     error TapiocaWrapper__NotEnough();
 
     constructor(address _owner) {
-        _transferOwnership(_owner);
+        owner = _owner;
     }
 
     // ********************** //

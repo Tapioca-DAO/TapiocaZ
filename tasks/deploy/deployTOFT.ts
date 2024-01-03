@@ -103,6 +103,33 @@ export const deployTOFT__task = async (
         args: toftDeployInfo.args,
     });
     console.log('[+] TOFT deployed successfully.');
+
+    console.log('[!] Setting stargate router...');
+    const wrapperDeployment = await hre.SDK.hardhatUtils.getLocalContract(
+        hre,
+        'TapiocaWrapper',
+        tag,
+    );
+
+    const { router } = await inquirer.prompt({
+        type: 'input',
+        name: 'router',
+        message: 'Stargate router address',
+        default: hre.ethers.constants.AddressZero,
+    });
+    const txData = deployedTOFT.interface.encodeFunctionData(
+        'setStargateRouter',
+        [router],
+    );
+    await (
+        await wrapperDeployment.contract.executeTOFT(
+            deployedTOFT.address,
+            txData,
+            true,
+        )
+    ).wait(3);
+    console.log('[+] Completed');
+
     if (isCurrentChainHost) {
         console.log(
             '[+] You can execute this task again on other networks to link them.',
