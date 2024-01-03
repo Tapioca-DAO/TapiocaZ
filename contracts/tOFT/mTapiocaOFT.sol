@@ -65,8 +65,6 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         uint256 _hostChainID,
         BaseTOFTLeverageModule __leverageModule,
         BaseTOFTLeverageDestinationModule __leverageDestinationModule,
-        BaseTOFTStrategyModule __strategyModule,
-        BaseTOFTStrategyDestinationModule __strategyDestinationModule,
         BaseTOFTMarketModule __marketModule,
         BaseTOFTMarketDestinationModule __marketDestinationModule,
         BaseTOFTOptionsModule __optionsModule,
@@ -84,8 +82,6 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
             _hostChainID,
             __leverageModule,
             __leverageDestinationModule,
-            __strategyModule,
-            __strategyDestinationModule,
             __marketModule,
             __marketDestinationModule,
             __optionsModule,
@@ -114,6 +110,7 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         if (erc20 == address(0)) {
             _wrapNative(_toAddress);
         } else {
+            if (msg.value > 0) revert NotNative();
             _wrap(_fromAddress, _toAddress, _amount);
         }
     }
