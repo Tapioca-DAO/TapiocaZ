@@ -70,9 +70,8 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         );
         if (amount == 0) revert NotValid();
 
-        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
-            lzData.dstAirdropAdapterParam
-        );
+        (, uint256 dstExtraGas, uint256 airdropAmount, ) = LzLib
+            .decodeAdapterParams(lzData.dstAirdropAdapterParam);
         bytes memory lzPayload = abi.encode(
             PT_LEVERAGE_MARKET_DOWN,
             senderBytes,
@@ -87,7 +86,7 @@ contract BaseTOFTLeverageModule is TOFTCommon {
             lzData.lzDstChainId,
             PT_LEVERAGE_MARKET_DOWN,
             lzData.dstAirdropAdapterParam,
-            NO_EXTRA_GAS
+            dstExtraGas
         );
 
         _lzSend(
