@@ -434,6 +434,55 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         }
     }
 
+    //----OFT---
+    function retryMessage(
+        uint16 _srcChainId,
+        bytes calldata _srcAddress,
+        uint64 _nonce,
+        bytes calldata _payload
+    ) public payable virtual override {
+        // assert there is message to retry
+        bytes32 payloadHash = failedMessages[_srcChainId][_srcAddress][_nonce];
+        require(
+            payloadHash != bytes32(0),
+            "NonblockingLzApp: no stored message"
+        );
+        require(
+            keccak256(_payload) == payloadHash,
+            "NonblockingLzApp: invalid payload"
+        );
+        // clear the stored message
+        failedMessages[_srcChainId][_srcAddress][_nonce] = bytes32(0);
+        // execute the message. revert if it fails again
+        _callSelfAndRevertOnError(_srcChainId, _srcAddress, _nonce, _payload);
+        emit RetryMessageSuccess(_srcChainId, _srcAddress, _nonce, payloadHash);
+    }
+
+    function retryMessageWithSafeCall(
+        uint16 _srcChainId,
+        bytes calldata _srcAddress,
+        uint64 _nonce,
+        bytes calldata _payload
+    ) external {
+        if (msg.sender != address(this)) revert NotAuthorized();
+        (bool success, bytes memory reason) = _excessivelySafeCall(
+            address(this),
+            gasleft(),
+            0,
+            150,
+            abi.encodeWithSelector(
+                this.nonblockingLzReceive.selector,
+                _srcChainId,
+                _srcAddress,
+                _nonce,
+                _payload
+            )
+        );
+        if (!success) {
+            revert(_getRevertMsg(reason));
+        }
+    }
+
     // ************************ //
     // *** OWNER FUNCTIONS *** //
     // ************************ //
@@ -453,6 +502,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         if (!success) revert Failed();
     }
 
+    /// @notice sets the StargateRouter address
+    /// @param _router the router address
     function setStargateRouter(address _router) external onlyOwner {
         _stargateRouter = _router;
     }
@@ -533,6 +584,30 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     }
 
     //---LZ---
+    function _callSelfAndRevertOnError(
+        uint16 _srcChainId,
+        bytes calldata _srcAddress,
+        uint64 _nonce,
+        bytes calldata _payload
+    ) internal {
+        (bool success, bytes memory reason) = _excessivelySafeCall(
+            address(this),
+            gasleft(),
+            0,
+            150,
+            abi.encodeWithSelector(
+                this.retryMessageWithSafeCall.selector,
+                _srcChainId,
+                _srcAddress,
+                _nonce,
+                _payload
+            )
+        );
+        if (!success) {
+            revert(_getRevertMsg(reason));
+        }
+    }
+
     function _nonblockingLzReceive(
         uint16 _srcChainId,
         bytes memory _srcAddress,
@@ -581,5 +656,59 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 revert("TOFT_packet");
             }
         }
+    }
+
+    /// @notice Use when you _really_ really _really_ don't trust the called
+    /// contract. This prevents the called contract from causing reversion of
+    /// the caller in as many ways as we can.
+    /// @dev The main difference between this and a solidity low-level call is
+    /// that we limit the number of bytes that the callee can cause to be
+    /// copied to caller memory. This prevents stupid things like malicious
+    /// contracts returning 10,000,000 bytes causing a local OOG when copying
+    /// to memory.
+    /// @param _target The address to call
+    /// @param _gas The amount of gas to forward to the remote contract
+    /// @param _value The value in wei to send to the remote contract
+    /// @param _maxCopy The maximum number of bytes of returndata to copy
+    /// to memory.
+    /// @param _calldata The data to send to the remote contract
+    /// @return success and returndata, as `.call()`. Returndata is capped to
+    /// `_maxCopy` bytes.
+    function _excessivelySafeCall(
+        address _target,
+        uint256 _gas,
+        uint256 _value,
+        uint16 _maxCopy,
+        bytes memory _calldata
+    ) private returns (bool, bytes memory) {
+        // set up for assembly call
+        uint256 _toCopy;
+        bool _success;
+        bytes memory _returnData = new bytes(_maxCopy);
+        // dispatch message to recipient
+        // by assembly calling "handle" function
+        // we call via assembly to avoid memcopying a very large returndata
+        // returned by a malicious contract
+        assembly {
+            _success := call(
+                _gas, // gas
+                _target, // recipient
+                _value, // ether value
+                add(_calldata, 0x20), // inloc
+                mload(_calldata), // inlen
+                0, // outloc
+                0 // outlen
+            )
+            // limit our copy to 256 bytes
+            _toCopy := returndatasize()
+            if gt(_toCopy, _maxCopy) {
+                _toCopy := _maxCopy
+            }
+            // Store the length of the copied bytes
+            mstore(_returnData, _toCopy)
+            // copy the bytes from returndata[0:_toCopy]
+            returndatacopy(add(_returnData, 0x20), 0, _toCopy)
+        }
+        return (_success, _returnData);
     }
 }
