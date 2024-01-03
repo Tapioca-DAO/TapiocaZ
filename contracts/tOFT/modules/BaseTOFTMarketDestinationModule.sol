@@ -252,7 +252,8 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
                 withdrawParams.withdrawAdapterParams,
                 payable(to),
                 withdrawParams.withdrawLzFeeAmount,
-                withdrawParams.unwrap
+                withdrawParams.unwrap,
+                withdrawParams.zroPaymentAddress
             );
         }
 
