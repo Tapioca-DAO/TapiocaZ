@@ -35,9 +35,15 @@ export const rescueEthFromOft__task = async (
         default: hre.ethers.constants.AddressZero,
     });
 
-    const txData = dep.contract.interface.encodeFunctionData(
-        'rescueEth',
-        [amount, to],
-    );
-    await (await wrapperDeployment.contract.executeTOFT(dep.contract.address, txData, true)).wait(3);
+    const txData = dep.contract.interface.encodeFunctionData('rescueEth', [
+        amount,
+        to,
+    ]);
+    await (
+        await wrapperDeployment.contract.executeTOFT(
+            dep.contract.address,
+            txData,
+            true,
+        )
+    ).wait(3);
 };

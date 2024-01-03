@@ -39,5 +39,11 @@ export const updateConnectedChain__task = async (
         'updateConnectedChain',
         [chain, status],
     );
-    await (await wrapperDeployment.contract.executeTOFT(dep.contract.address, txData, true)).wait(3);
+    await (
+        await wrapperDeployment.contract.executeTOFT(
+            dep.contract.address,
+            txData,
+            true,
+        )
+    ).wait(3);
 };

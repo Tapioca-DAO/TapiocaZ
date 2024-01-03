@@ -104,7 +104,6 @@ export const deployTOFT__task = async (
     });
     console.log('[+] TOFT deployed successfully.');
 
-
     console.log('[!] Setting stargate router...');
     const wrapperDeployment = await hre.SDK.hardhatUtils.getLocalContract(
         hre,
@@ -122,7 +121,13 @@ export const deployTOFT__task = async (
         'setStargateRouter',
         [router],
     );
-    await (await wrapperDeployment.contract.executeTOFT(deployedTOFT.address, txData, true)).wait(3);
+    await (
+        await wrapperDeployment.contract.executeTOFT(
+            deployedTOFT.address,
+            txData,
+            true,
+        )
+    ).wait(3);
     console.log('[+] Completed');
 
     if (isCurrentChainHost) {

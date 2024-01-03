@@ -39,5 +39,11 @@ export const updateBalancerState__task = async (
         'updateBalancerState',
         [balancer, status],
     );
-    await (await wrapperDeployment.contract.executeTOFT(dep.contract.address, txData, true)).wait(3);
+    await (
+        await wrapperDeployment.contract.executeTOFT(
+            dep.contract.address,
+            txData,
+            true,
+        )
+    ).wait(3);
 };

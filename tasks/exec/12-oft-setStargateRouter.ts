@@ -34,5 +34,11 @@ export const setStargateRouterOnOft__task = async (
         'setStargateRouter',
         [router],
     );
-    await (await wrapperDeployment.contract.executeTOFT(dep.contract.address, txData, true)).wait(3);
+    await (
+        await wrapperDeployment.contract.executeTOFT(
+            dep.contract.address,
+            txData,
+            true,
+        )
+    ).wait(3);
 };
