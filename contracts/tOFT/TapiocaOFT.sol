@@ -66,6 +66,7 @@ contract TapiocaOFT is BaseTOFT {
         if (erc20 == address(0)) {
             _wrapNative(_toAddress);
         } else {
+            if (msg.value > 0) revert NotNative();
             _wrap(_fromAddress, _toAddress, _amount);
         }
     }

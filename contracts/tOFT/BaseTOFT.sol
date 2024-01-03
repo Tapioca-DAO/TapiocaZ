@@ -62,6 +62,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     error AllowanceNotValid();
     error Failed();
     error NotAuthorized();
+    error NotNative();
 
     // ******************//
     // *** MODIFIERS *** //
