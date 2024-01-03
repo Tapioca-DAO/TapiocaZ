@@ -41,7 +41,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         )
     {}
 
-    function triggerSendFromWithParams(
+    function sendFromWithParams(
         address from,
         uint16 lzDstChainId,
         bytes32 toAddress,
@@ -72,7 +72,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         _lzSend(
             lzDstChainId,
             lzPayload,
-            payable(msg.sender),
+            callParams.refundAddress,
             callParams.zroPaymentAddress,
             callParams.adapterParams,
             msg.value
@@ -81,7 +81,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         emit SendToChain(lzDstChainId, from, toAddress, amount);
     }
 
-    /// @dev destination call for BaseTOFTGenericModule.triggerSendFromWithParams
+    /// @dev destination call for BaseTOFTGenericModule.sendFromWithParams
     function executSendFromWithParams(
         address,
         uint16 lzSrcChainId,
@@ -163,7 +163,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         _lzSend(
             lzDstChainId,
             lzPayload,
-            payable(msg.sender),
+            lzCallParams.refundAddress,
             lzCallParams.zroPaymentAddress,
             lzCallParams.adapterParams,
             msg.value
@@ -199,22 +199,38 @@ contract BaseTOFTGenericModule is TOFTCommon {
     }
 
     function triggerSendFrom(
+        address from,
         uint16 lzDstChainId,
-        bytes calldata airdropAdapterParams,
-        address zroPaymentAddress,
+        bytes32 to,
         uint256 amount,
         ICommonOFT.LzCallParams calldata sendFromData,
         ICommonData.IApproval[] calldata approvals,
         ICommonData.IApproval[] calldata revokes
     ) external payable {
-        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
-            airdropAdapterParams
+        if (from != msg.sender) {
+            if (allowance(from, msg.sender) < amount)
+                revert AllowanceNotValid();
+            _spendAllowance(from, msg.sender, amount);
+        }
+
+        _checkAdapterParams(
+            lzDstChainId,
+            PT_TRIGGER_SEND_FROM,
+            sendFromData.adapterParams,
+            NO_EXTRA_GAS
         );
 
         (amount, ) = _removeDust(amount);
+        if (amount == 0) revert NotValid();
+
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            sendFromData.adapterParams
+        );
+
         bytes memory lzPayload = abi.encode(
             PT_TRIGGER_SEND_FROM,
-            msg.sender,
+            from,
+            to,
             _ld2sd(amount),
             sendFromData,
             lzEndpoint.getChainId(),
@@ -223,19 +239,12 @@ contract BaseTOFTGenericModule is TOFTCommon {
             airdropAmount
         );
 
-        _checkAdapterParams(
-            lzDstChainId,
-            PT_TRIGGER_SEND_FROM,
-            airdropAdapterParams,
-            NO_EXTRA_GAS
-        );
-
         _lzSend(
             lzDstChainId,
             lzPayload,
-            payable(msg.sender),
-            zroPaymentAddress,
-            airdropAdapterParams,
+            sendFromData.refundAddress,
+            sendFromData.zroPaymentAddress,
+            sendFromData.adapterParams,
             msg.value
         );
 
@@ -253,6 +262,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         (
             ,
             address from,
+            bytes32 to,
             uint64 amount,
             ICommonOFT.LzCallParams memory callParams,
             uint16 lzDstChainId,
@@ -264,6 +274,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
                 (
                     uint16,
                     address,
+                    bytes32,
                     uint64,
                     ICommonOFT.LzCallParams,
                     uint16,
@@ -280,7 +291,7 @@ contract BaseTOFTGenericModule is TOFTCommon {
         ISendFrom(address(this)).sendFrom{value: airdropAmount}(
             from,
             lzDstChainId,
-            LzLib.addressToBytes32(from),
+            to,
             _sd2ld(amount),
             callParams
         );
