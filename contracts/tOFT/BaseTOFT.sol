@@ -6,8 +6,6 @@ import "./BaseTOFTStorage.sol";
 //TOFT MODULES
 import "./modules/BaseTOFTLeverageModule.sol";
 import "./modules/BaseTOFTLeverageDestinationModule.sol";
-import "./modules/BaseTOFTStrategyModule.sol";
-import "./modules/BaseTOFTStrategyDestinationModule.sol";
 import "./modules/BaseTOFTMarketModule.sol";
 import "./modules/BaseTOFTMarketDestinationModule.sol";
 import "./modules/BaseTOFTOptionsModule.sol";
@@ -29,11 +27,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     BaseTOFTLeverageModule private _leverageModule;
     /// @notice returns the leverage module
     BaseTOFTLeverageDestinationModule private _leverageDestinationModule;
-
-    /// @notice returns the Strategy module
-    BaseTOFTStrategyModule private _strategyModule;
-    /// @notice returns the Strategy module
-    BaseTOFTStrategyDestinationModule private _strategyDestinationModule;
 
     /// @notice returns the Market module
     BaseTOFTMarketModule private _marketModule;
@@ -90,8 +83,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         uint256 _hostChainID,
         BaseTOFTLeverageModule __leverageModule,
         BaseTOFTLeverageDestinationModule __leverageDestinationModule,
-        BaseTOFTStrategyModule __strategyModule,
-        BaseTOFTStrategyDestinationModule __strategyDestinationModule,
         BaseTOFTMarketModule __marketModule,
         BaseTOFTMarketDestinationModule __marketDestinationModule,
         BaseTOFTOptionsModule __optionsModule,
@@ -113,9 +104,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         //Set modules
         _leverageModule = __leverageModule;
         _leverageDestinationModule = __leverageDestinationModule;
-
-        _strategyModule = __strategyModule;
-        _strategyDestinationModule = __strategyDestinationModule;
 
         _marketModule = __marketModule;
         _marketDestinationModule = __marketDestinationModule;
@@ -139,24 +127,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         _moduleAddresses[Module.MarketDestination] = payable(
             __marketDestinationModule
         );
-        _moduleAddresses[Module.Strategy] = payable(__strategyModule);
-        _moduleAddresses[Module.StrategyDestination] = payable(
-            __strategyDestinationModule
-        );
 
         //Set destination mappings
-        _destinationMappings[PT_YB_SEND_STRAT] = DestinationCall({
-            module: Module.StrategyDestination,
-            functionSelector: BaseTOFTStrategyDestinationModule
-                .strategyDeposit
-                .selector
-        });
-        _destinationMappings[PT_YB_RETRIEVE_STRAT] = DestinationCall({
-            module: Module.StrategyDestination,
-            functionSelector: BaseTOFTStrategyDestinationModule
-                .strategyWithdraw
-                .selector
-        });
         _destinationMappings[PT_MARKET_REMOVE_COLLATERAL] = DestinationCall({
             module: Module.MarketDestination,
             functionSelector: BaseTOFTMarketDestinationModule.remove.selector
@@ -346,67 +318,6 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
                 approvals,
                 revokes,
                 adapterParams
-            ),
-            false
-        );
-    }
-
-    //----Strategy---
-    /// @notice sends TOFT to a specific strategy available on another layer
-    /// @param from the sender address
-    /// @param to the receiver address
-    /// @param amount the transferred amount
-    /// @param assetId the destination YieldBox asset id
-    /// @param lzDstChainId the destination LayerZero id
-    /// @param options the operation data
-    function sendToStrategy(
-        address from,
-        address to,
-        uint256 amount,
-        uint256 assetId,
-        uint16 lzDstChainId,
-        ICommonData.ISendOptions calldata options
-    ) external payable {
-        _executeModule(
-            Module.Strategy,
-            abi.encodeWithSelector(
-                BaseTOFTStrategyModule.sendToStrategy.selector,
-                from,
-                to,
-                amount,
-                assetId,
-                lzDstChainId,
-                options
-            ),
-            false
-        );
-    }
-
-    /// @notice extracts TOFT from a specific strategy available on another layer
-    /// @param from the sender address
-    /// @param amount the transferred amount
-    /// @param assetId the destination YieldBox asset id
-    /// @param lzDstChainId the destination LayerZero id
-    /// @param zroPaymentAddress LayerZero ZRO payment address
-    /// @param airdropAdapterParam the LayerZero aidrop adapter params
-    function retrieveFromStrategy(
-        address from,
-        uint256 amount,
-        uint256 assetId,
-        uint16 lzDstChainId,
-        address zroPaymentAddress,
-        bytes memory airdropAdapterParam
-    ) external payable {
-        _executeModule(
-            Module.Strategy,
-            abi.encodeWithSelector(
-                BaseTOFTStrategyModule.retrieveFromStrategy.selector,
-                from,
-                amount,
-                assetId,
-                lzDstChainId,
-                zroPaymentAddress,
-                airdropAdapterParam
             ),
             false
         );
@@ -634,9 +545,7 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         if (_destinationMappings[packetType].module != Module(0)) {
             DestinationCall memory callInfo = _destinationMappings[packetType];
             address targetModule;
-            if (callInfo.module == Module.StrategyDestination) {
-                targetModule = address(_strategyDestinationModule);
-            } else if (callInfo.module == Module.MarketDestination) {
+            if (callInfo.module == Module.MarketDestination) {
                 targetModule = address(_marketDestinationModule);
             } else if (callInfo.module == Module.LeverageDestination) {
                 targetModule = address(_leverageDestinationModule);
