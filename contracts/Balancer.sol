@@ -97,6 +97,14 @@ contract Balancer is Owned {
         uint256 indexed _amount,
         uint256 _totalAmount
     );
+    /// @notice event emitted when `disableSwapEth` is toggled
+    event ToggledSwapEth(bool indexed _old, bool indexed _new);
+    /// @notice event emitted when tokens are saved through `emergencySave`
+    event EmergencySaved(
+        address indexed _token,
+        uint256 indexed _amount,
+        bool indexed _native
+    );
 
     // ************************ //
     // *** ERRORS FUNCTIONS *** //
@@ -169,7 +177,9 @@ contract Balancer is Owned {
     // *********************** //
     // *** OWNER FUNCTIONS *** //
     // *********************** //
+
     function setSwapEth(bool _val) external onlyOwner {
+        emit ToggledSwapEth(disableEth, _val);
         disableEth = _val;
     }
 
@@ -232,8 +242,10 @@ contract Balancer is Owned {
         if (_token == address(0)) {
             (bool sent, ) = msg.sender.call{value: _amount}("");
             if (!sent) revert Failed();
+            emit EmergencySaved(_token, _amount, true);
         } else {
             IERC20(_token).safeTransfer(msg.sender, _amount);
+            emit EmergencySaved(_token, _amount, false);
         }
     }
 
