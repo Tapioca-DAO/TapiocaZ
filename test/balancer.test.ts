@@ -126,7 +126,10 @@ describe('Balancer', () => {
                 mtapiocaOFT10,
                 balancer,
                 tapiocaWrapper_0,
+                tapiocaWrapper_10,
                 mErc20Mock,
+                stargateRouterETHMock,
+                stargateRouterMock,
             } = await loadFixture(setupFixture);
 
             const path = hre.ethers.utils.solidityPack(
@@ -182,6 +185,18 @@ describe('Balancer', () => {
             expect(balanceOft10Before.eq(0)).to.be.true;
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
+
+            const setStargateTx = mtapiocaOFT10.interface.encodeFunctionData(
+                'setStargateRouter',
+                [stargateRouterMock.address],
+            );
+            await expect(
+                tapiocaWrapper_10.executeTOFT(
+                    mtapiocaOFT10.address,
+                    setStargateTx,
+                    true,
+                ),
+            ).to.not.be.reverted;
 
             const data = ethers.utils.defaultAbiCoder.encode(
                 ['uint256', 'uint256'],
@@ -254,8 +269,23 @@ describe('Balancer', () => {
                 mtapiocaOFT10,
                 balancer,
                 tapiocaWrapper_0,
+                tapiocaWrapper_10,
+                stargateRouterETHMock,
+                stargateRouterMock,
                 mErc20Mock,
             } = await loadFixture(setupFixture);
+
+            const setStargateTx = mtapiocaOFT10.interface.encodeFunctionData(
+                'setStargateRouter',
+                [stargateRouterMock.address],
+            );
+            await expect(
+                tapiocaWrapper_10.executeTOFT(
+                    mtapiocaOFT10.address,
+                    setStargateTx,
+                    true,
+                ),
+            ).to.not.be.reverted;
 
             const path = hre.ethers.utils.solidityPack(
                 ['address', 'address'],
