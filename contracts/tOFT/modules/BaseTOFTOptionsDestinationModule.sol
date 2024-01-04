@@ -183,11 +183,14 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
             }
         }
         if (tapSendData.withdrawOnAnotherChain) {
+            uint256 amountToSend = tapSendData.amount > tapAmount
+                ? tapAmount
+                : tapSendData.amount;
             ISendFrom(tapSendData.tapOftAddress).sendFrom{value: airdropAmount}(
                 address(this),
                 tapSendData.lzDstChainId,
                 LzLib.addressToBytes32(from),
-                tapAmount,
+                amountToSend,
                 LzCallParams({
                     refundAddress: payable(from),
                     zroPaymentAddress: tapSendData.zroPaymentAddress,
@@ -196,6 +199,12 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
                     )
                 })
             );
+            if (amountToSend - tapAmount > 0) {
+                IERC20(tapSendData.tapOftAddress).safeTransfer(
+                    from,
+                    amountToSend - tapAmount
+                );
+            }
         } else {
             IERC20(tapSendData.tapOftAddress).safeTransfer(from, tapAmount);
         }
