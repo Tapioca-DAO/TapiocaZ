@@ -199,10 +199,10 @@ contract BaseTOFTOptionsDestinationModule is TOFTCommon {
                     )
                 })
             );
-            if (amountToSend - tapAmount > 0) {
+            if (tapAmount - amountToSend > 0) {
                 IERC20(tapSendData.tapOftAddress).safeTransfer(
                     from,
-                    amountToSend - tapAmount
+                    tapAmount - amountToSend
                 );
             }
         } else {
