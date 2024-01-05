@@ -18,6 +18,7 @@ contract BaseTOFTLeverageModule is TOFTCommon {
     // ************** //
     error TokenNotValid();
     error AllowanceNotValid();
+    error AmountTooLow();
 
     constructor(
         address _lzEndpoint,
@@ -49,7 +50,7 @@ contract BaseTOFTLeverageModule is TOFTCommon {
         IUSDOBase.ILeverageExternalContractsData calldata externalData
     ) external payable {
         if (swapData.tokenOut == address(this)) revert TokenNotValid();
-        _assureMaxSlippage(amount, swapData.amountOutMin);
+        if (swapData.amountOutMin == 0) revert AmountTooLow();
         if (externalData.swapper != address(0)) {
             if (
                 !cluster.isWhitelisted(
