@@ -105,8 +105,9 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         address _fromAddress,
         address _toAddress,
         uint256 _amount
-    ) external payable onlyHostChain {
+    ) external payable {
         if (balancers[msg.sender]) revert BalancerNotAuthorized();
+        if (!connectedChains[block.chainid]) revert NotHost();
         if (erc20 == address(0)) {
             _wrapNative(_toAddress);
         } else {
