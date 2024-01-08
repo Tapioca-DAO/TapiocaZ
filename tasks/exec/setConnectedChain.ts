@@ -29,8 +29,8 @@ export const setConnectedChain__task = async (
         wrapperDeployment.address,
     );
     const txData = toftContract.interface.encodeFunctionData(
-        'updateConnectedChain',
-        [args.chain, args.status],
+        'setConnectedChain',
+        [args.chain],
     );
     await wrapperContract.executeTOFT(toftContract.address, txData, true);
     console.log('[+] Connected chain status updated');
