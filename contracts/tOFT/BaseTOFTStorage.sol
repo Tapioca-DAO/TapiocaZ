@@ -42,7 +42,6 @@ contract BaseTOFTStorage is OFTV2 {
     uint16 internal constant PT_APPROVE = 779;
     uint16 internal constant PT_SEND_FROM_PARAMS = 780;
 
-    uint256 public SWAP_MAX_SLIPPAGE = 500; //5%
     uint256 internal constant SLIPPAGE_PRECISION = 1e4;
 
     enum Module {
@@ -92,20 +91,6 @@ contract BaseTOFTStorage is OFTV2 {
         hostChainID = _hostChainID;
         yieldBox = _yieldBox;
         cluster = _cluster;
-    }
-
-    function setMaxSlippage(uint256 _slippage) external onlyOwner {
-        emit MaxSlippageUpdated(SWAP_MAX_SLIPPAGE, _slippage);
-        SWAP_MAX_SLIPPAGE = _slippage;
-    }
-
-    function _assureMaxSlippage(
-        uint256 amount,
-        uint256 minAmount
-    ) internal view {
-        uint256 slippageMinAmount = amount -
-            ((SWAP_MAX_SLIPPAGE * amount) / SLIPPAGE_PRECISION);
-        if (minAmount < slippageMinAmount) revert NotValid();
     }
 
     function _getRevertMsg(
