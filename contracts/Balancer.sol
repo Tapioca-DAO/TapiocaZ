@@ -119,6 +119,7 @@ contract Balancer is Owned {
     error DestinationOftNotValid();
     error Failed();
     error SwapNotEnabled();
+    error AlreadyInitialized();
 
     // *************************** //
     // *** MODIFIERS FUNCTIONS *** //
@@ -261,6 +262,8 @@ contract Balancer is Owned {
         address _dstOft,
         bytes memory _ercData
     ) external onlyOwner {
+        if (connectedOFTs[_srcOft][_dstChainId].rebalanceable > 0)
+            revert AlreadyInitialized();
         bool isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
         if (!isNative && _ercData.length == 0) revert PoolInfoRequired();
         if (!_isValidOft(_srcOft, _dstOft, _dstChainId))
