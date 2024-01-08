@@ -4909,10 +4909,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.5.11:
-  version "1.5.11"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.5.11.tgz#5208d87f7f9f154b5946f4f3ffc3b1c925f6506d"
-  integrity sha512-2kN3gmeKmu1Ivj0NdY+440LDm5XAWpdSrc7dNgbhv2mEukzlS3aixwWOZqN0/k/Gmh0jjV/bkc3EG5F8IhX8Ug==
+tapioca-sdk@^1.5.17:
+  version "1.5.17"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.5.17.tgz#391d5bb2dc861328980d6c20d5580c16880762fd"
+  integrity sha512-pvuvXgdxd/4XIjTYcKhbOjjJI0zcJPxX12fqkUbGdj9i2nUv3Mv4+wlemwRYqvEnGBpsOEz50KY3c4xRFZS7jg==
   dependencies:
     ethers "^5.4.7"
     fs-extra "^11.1.1"
