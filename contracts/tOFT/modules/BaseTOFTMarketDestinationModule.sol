@@ -181,7 +181,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
 
     function remove(
         address,
-        uint16,
+        uint16 _srcChainId,
         bytes memory,
         uint64,
         bytes memory _payload
@@ -236,6 +236,32 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         approve(removeParams.market, share);
         IMarket(removeParams.market).removeCollateral(from, to, share);
         if (withdrawParams.withdraw) {
+            _withdraw(
+                withdrawParams,
+                removeParams,
+                airdropAmount,
+                to,
+                assetId,
+                ybAddress
+            );
+        }
+
+        if (revokes.length > 0) {
+            _callApproval(revokes, PT_MARKET_REMOVE_COLLATERAL);
+        }
+
+        emit ReceiveFromChain(_srcChainId, from, removeParams.amount);
+    }
+
+    function _withdraw(
+        ICommonData.IWithdrawParams memory withdrawParams,
+        ITapiocaOFT.IRemoveParams memory removeParams,
+        uint256 airdropAmount,
+        address to,
+        uint256 assetId,
+        address ybAddress
+    ) private {
+        if (withdrawParams.withdraw) {
             if (airdropAmount < withdrawParams.withdrawLzFeeAmount)
                 revert GasNotValid();
             if (!cluster.isWhitelisted(0, removeParams.marketHelper))
@@ -255,10 +281,6 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
                 withdrawParams.unwrap,
                 withdrawParams.zroPaymentAddress
             );
-        }
-
-        if (revokes.length > 0) {
-            _callApproval(revokes, PT_MARKET_REMOVE_COLLATERAL);
         }
     }
 }
