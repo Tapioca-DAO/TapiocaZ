@@ -130,7 +130,8 @@ contract Balancer is Owned {
     }
 
     modifier onlyValidSlippage(uint256 _slippage) {
-        if (_slippage >= 1e5) revert SlippageNotValid();
+        // a slippage higher than 20% shouldn't be necessary
+        if (_slippage >= 2e4) revert SlippageNotValid();
         _;
     }
 
