@@ -22,8 +22,6 @@ contract TapiocaWrapper is BoringOwnable {
     // ************ //
     /// @notice Array of deployed TOFT contracts.
     ITapiocaOFT[] public tapiocaOFTs;
-    /// @notice Array of harvestable TOFT fees.
-    ITapiocaOFT[] private harvestableTapiocaOFTs;
     /// @notice Map of deployed TOFT contracts by ERC20.
     mapping(address => ITapiocaOFT) public tapiocaOFTsByErc20;
 
@@ -32,8 +30,6 @@ contract TapiocaWrapper is BoringOwnable {
     // ************** //
     /// @notice Called when a new OFT is deployed.
     event CreateOFT(ITapiocaOFT indexed _tapiocaOFT, address indexed _erc20);
-    /// @notice Called when fees are changed.
-    event SetFees(uint256 indexed _newFee);
     /// @notice Emitted when ETH refund fails in batch call
     event RefundFailed(uint256 indexed amount);
 
@@ -44,8 +40,7 @@ contract TapiocaWrapper is BoringOwnable {
     error TapiocaWrapper__AlreadyDeployed(address _erc20);
     /// @notice Failed to deploy the TapiocaWrapper contract.
     error TapiocaWrapper__FailedDeploy();
-    /// @notice The management fee is too high. Currently set to a max of 50 BPS or 0.5%.
-    error TapiocaWrapper__MngmtFeeTooHigh();
+
     /// @notice The TapiocaOFT execution failed.
     error TapiocaWrapper__TOFTExecutionFailed(bytes message);
     /// @notice No TOFT has been deployed yet.
@@ -63,11 +58,6 @@ contract TapiocaWrapper is BoringOwnable {
     /// @notice Return the number of TOFT contracts deployed on the current chain.
     function tapiocaOFTLength() external view returns (uint256) {
         return tapiocaOFTs.length;
-    }
-
-    /// @notice Return the number of harvestable TOFT contracts deployed on the current chain.
-    function harvestableTapiocaOFTsLength() external view returns (uint256) {
-        return harvestableTapiocaOFTs.length;
     }
 
     /// @notice Return the latest TOFT contract deployed on the current chain.
@@ -132,10 +122,10 @@ contract TapiocaWrapper is BoringOwnable {
         if (totalVal > valAccumulator) {
             //try to refund in ETH amount was bigger
             //nothing happens if this reverts
-            (bool success, ) = msg.sender.call{
+            (bool s, ) = msg.sender.call{
                 value: totalVal - valAccumulator
             }("");
-            if (!success) emit RefundFailed(totalVal - valAccumulator);
+            if (!s) emit RefundFailed(totalVal - valAccumulator);
         }
     }
 
@@ -163,9 +153,6 @@ contract TapiocaWrapper is BoringOwnable {
         tapiocaOFTs.push(iOFT);
         tapiocaOFTsByErc20[_erc20] = iOFT;
 
-        if (iOFT.hostChainID() == block.chainid) {
-            harvestableTapiocaOFTs.push(iOFT);
-        }
         emit CreateOFT(iOFT, _erc20);
     }
 

@@ -96,7 +96,7 @@ describe('TapiocaWrapper', () => {
             );
         });
 
-        it('Should create an OFT, add it to `tapiocaOFTs`, `harvestableTapiocaOFTs` array and `tapiocaOFTsByErc20` map', async () => {
+        it('Should create an OFT, add it to `tapiocaOFTs` array and `tapiocaOFTsByErc20` map', async () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
@@ -178,7 +178,7 @@ describe('TapiocaWrapper', () => {
             expect(await tapiocaOFT.name()).to.eq(`TapiocaOFT-${erc20Name}`);
         });
 
-        it('Should create an mOFT, add it to `tapiocaOFTs`, `harvestableTapiocaOFTs` array and `tapiocaOFTsByErc20` map', async () => {
+        it('Should create an mOFT, add it to `tapiocaOFTs` array and `tapiocaOFTsByErc20` map', async () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
@@ -260,7 +260,7 @@ describe('TapiocaWrapper', () => {
             expect(await tapiocaOFT.name()).to.eq(`TapiocaOFT-${erc20Name}`);
         });
 
-        it('Should create both an OFT and a mOFT, add it to `tapiocaOFTs`, `harvestableTapiocaOFTs` array and `tapiocaOFTsByErc20` map', async () => {
+        it('Should create both an OFT and a mOFT, add it to `tapiocaOFTs` array and `tapiocaOFTsByErc20` map', async () => {
             const { tapiocaWrapper_0, LZEndpointMock_chainID_0 } =
                 await loadFixture(setupFixture);
 
@@ -401,72 +401,6 @@ describe('TapiocaWrapper', () => {
                 false,
             );
             expect(await tapiocaWrapper.tapiocaOFTLength()).to.eq(1);
-        });
-    });
-
-    describe('harvestableTapiocaOFTsLength()', () => {
-        it('Should return the correct length of the `harvestableTapiocaOFTs` array', async () => {
-            const {
-                signer,
-                erc20Mock,
-                erc20Mock1,
-                LZEndpointMock_chainID_0,
-                LZEndpointMock_chainID_10,
-            } = await loadFixture(setupFixture);
-            const { Tx_deployTapiocaOFT, deployTapiocaWrapper } = useUtils(
-                hre,
-                signer,
-            );
-
-            const tapiocaWrapper = await deployTapiocaWrapper();
-
-            expect(await tapiocaWrapper.harvestableTapiocaOFTsLength()).to.eq(
-                0,
-            );
-
-            const Cluster = new Cluster__factory(signer);
-            const cluster = await Cluster.deploy(
-                LZEndpointMock_chainID_0.address,
-                signer.address,
-            );
-
-            // First TOFT on chain 0, should be added to the harvestable array
-            const { txData: bytecode } = await Tx_deployTapiocaOFT(
-                LZEndpointMock_chainID_0.address,
-                erc20Mock.address,
-                ethers.constants.AddressZero,
-                cluster.address,
-                31337,
-                signer,
-            );
-            await tapiocaWrapper.createTOFT(
-                erc20Mock.address,
-                bytecode,
-                generateSalt(),
-                false,
-            );
-            expect(await tapiocaWrapper.harvestableTapiocaOFTsLength()).to.eq(
-                1,
-            );
-
-            // Second TOFT on chain 10, should not be added to the harvestable array
-            const { txData: bytecode10 } = await Tx_deployTapiocaOFT(
-                LZEndpointMock_chainID_10.address,
-                erc20Mock1.address,
-                ethers.constants.AddressZero,
-                cluster.address,
-                10,
-                signer,
-            );
-            await tapiocaWrapper.createTOFT(
-                erc20Mock1.address,
-                bytecode10,
-                generateSalt(),
-                false,
-            );
-            expect(await tapiocaWrapper.harvestableTapiocaOFTsLength()).to.eq(
-                1,
-            );
         });
     });
 
