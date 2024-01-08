@@ -122,9 +122,7 @@ contract TapiocaWrapper is BoringOwnable {
         if (totalVal > valAccumulator) {
             //try to refund in ETH amount was bigger
             //nothing happens if this reverts
-            (bool s, ) = msg.sender.call{
-                value: totalVal - valAccumulator
-            }("");
+            (bool s, ) = msg.sender.call{value: totalVal - valAccumulator}("");
             if (!s) emit RefundFailed(totalVal - valAccumulator);
         }
     }

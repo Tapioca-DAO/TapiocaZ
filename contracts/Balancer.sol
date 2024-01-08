@@ -154,7 +154,7 @@ contract Balancer is Owned {
         uint16 _dstChainId
     ) external view returns (bool canExec, bytes memory execPayload) {
         bytes memory ercData;
-        if (ITapiocaOFT(_srcOft).erc20() == address(0)) {
+        if (ITapiocaOFT(_srcOft).erc20() != address(0)) {
             ercData = abi.encode(
                 connectedOFTs[_srcOft][_dstChainId].srcPoolId,
                 connectedOFTs[_srcOft][_dstChainId].dstPoolId
