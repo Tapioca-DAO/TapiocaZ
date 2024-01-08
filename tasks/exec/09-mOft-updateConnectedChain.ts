@@ -36,8 +36,8 @@ export const updateConnectedChain__task = async (
     });
 
     const txData = dep.contract.interface.encodeFunctionData(
-        'updateConnectedChain',
-        [chain, status],
+        'setConnectedChain',
+        [chain],
     );
     await (
         await wrapperDeployment.contract.executeTOFT(

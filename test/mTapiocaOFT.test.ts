@@ -199,8 +199,8 @@ describe('mTapiocaOFT', () => {
 
             const otherChainId = await mtapiocaOFT0.hostChainID();
             const txData = mtapiocaOFT10.interface.encodeFunctionData(
-                'updateConnectedChain',
-                [otherChainId, true],
+                'setConnectedChain',
+                [otherChainId],
             );
             await expect(
                 tapiocaWrapper_10.executeTOFT(

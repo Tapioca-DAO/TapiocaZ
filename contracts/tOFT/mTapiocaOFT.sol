@@ -130,17 +130,9 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     // *********************** //
     /// @notice updates a connected chain whitelist status
     /// @param _chain the block.chainid of that specific chain
-    /// @param _status the new whitelist status
-    function updateConnectedChain(
-        uint256 _chain,
-        bool _status
-    ) external onlyOwner {
-        emit ConnectedChainStatusUpdated(
-            _chain,
-            connectedChains[_chain],
-            _status
-        );
-        connectedChains[_chain] = _status;
+    function setConnectedChain(uint256 _chain) external onlyOwner {
+        emit ConnectedChainStatusUpdated(_chain, connectedChains[_chain], true);
+        connectedChains[_chain] = true;
     }
 
     /// @notice updates a Balancer whitelist status
