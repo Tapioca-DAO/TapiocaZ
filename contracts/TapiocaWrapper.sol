@@ -34,6 +34,8 @@ contract TapiocaWrapper is BoringOwnable {
     event CreateOFT(ITapiocaOFT indexed _tapiocaOFT, address indexed _erc20);
     /// @notice Called when fees are changed.
     event SetFees(uint256 indexed _newFee);
+    /// @notice Emitted when ETH refund fails in batch call
+    event RefundFailed(uint256 indexed amount);
 
     // ************** //
     // *** ERRORS *** //
@@ -126,6 +128,14 @@ contract TapiocaWrapper is BoringOwnable {
         }
         if (valAccumulator > totalVal) {
             revert TapiocaWrapper__NotEnough();
+        }
+        if (totalVal > valAccumulator) {
+            //try to refund in ETH amount was bigger
+            //nothing happens if this reverts
+            (bool success, ) = msg.sender.call{
+                value: totalVal - valAccumulator
+            }("");
+            if (!success) emit RefundFailed(totalVal - valAccumulator);
         }
     }
 
