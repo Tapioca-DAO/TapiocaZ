@@ -517,7 +517,8 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
     function _wrap(
         address _fromAddress,
         address _toAddress,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _feeAmount
     ) internal virtual {
         if (_fromAddress != msg.sender) {
             if (allowance(_fromAddress, msg.sender) < _amount)
@@ -526,12 +527,16 @@ contract BaseTOFT is BaseTOFTStorage, ERC20Permit, IStargateReceiver {
         }
         if (_amount == 0) revert NotValid();
         IERC20(erc20).safeTransferFrom(_fromAddress, address(vault), _amount);
-        _mint(_toAddress, _amount);
+        _mint(_toAddress, _amount - _feeAmount);
     }
 
-    function _wrapNative(address _toAddress) internal virtual {
-        vault.depositNative{value: msg.value}();
-        _mint(_toAddress, msg.value);
+    function _wrapNative(
+        address _toAddress,
+        uint256 _amount,
+        uint256 _feeAmount
+    ) internal virtual {
+        vault.depositNative{value: _amount}();
+        _mint(_toAddress, _amount - _feeAmount);
     }
 
     function _unwrap(address _toAddress, uint256 _amount) internal virtual {

@@ -10,13 +10,20 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     // ************ //
     // *** VARS *** //
     // ************ //
-
     /// @notice allowed chains where you can unwrap your TOFT
     mapping(uint256 => bool) public connectedChains;
 
     /// @notice map of approved balancers
     /// @dev a balancer can extract the underlying
     mapping(address => bool) public balancers;
+
+    /// @notice max mTOFT mintable
+    uint256 public mintCap;
+
+    /// @notice current non-host chain mint fee
+    uint256 public mintFee;
+
+    uint256 private constant _FEE_PRECISION = 1e5;
 
     // ************** //
     // *** EVENTS *** //
@@ -39,12 +46,19 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         uint256 indexed _amount,
         bool indexed _isNative
     );
+    /// @notice event emitted when mint cap is updated
+    event MintCapUpdated(uint256 indexed oldVal, uint256 indexed newVal);
+
+    /// @notice event emitted when mint fee is updated
+    event MintFeeUpdated(uint256 indexed oldVal, uint256 indexed newVal);
 
     // ************** //
     // *** ERRORS *** //
     // ************** //
     error NotHost();
     error BalancerNotAuthorized();
+    error CapNotValid();
+    error OverCap();
 
     /// @notice creates a new mTapiocaOFT
     /// @param _lzEndpoint LayerZero endpoint address
@@ -92,6 +106,10 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         if (block.chainid == _hostChainID) {
             connectedChains[_hostChainID] = true;
         }
+
+        hostChainID = _hostChainID;
+        mintCap = 1_000_000 * 1e18; // TOFT is always in 18 decimals
+        mintFee = 5e2; // 0.5%
     }
 
     // ************************ //
@@ -105,21 +123,27 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         address _fromAddress,
         address _toAddress,
         uint256 _amount
-    ) external payable {
+    ) external payable nonReentrant returns (uint256 minted) {
         if (balancers[msg.sender]) revert BalancerNotAuthorized();
         if (!connectedChains[block.chainid]) revert NotHost();
+        if (totalSupply() + _amount > mintCap) revert OverCap();
+
+        uint256 feeAmount = _checkAndExtractFees(_amount);
+
         if (erc20 == address(0)) {
-            _wrapNative(_toAddress);
+            _wrapNative(_toAddress, _amount, feeAmount);
         } else {
             if (msg.value > 0) revert NotNative();
-            _wrap(_fromAddress, _toAddress, _amount);
+            _wrap(_fromAddress, _toAddress, _amount, feeAmount);
         }
+
+        return _amount - feeAmount;
     }
 
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
     /// @param _toAddress The address to unwrap the tokens to.
     /// @param _amount The amount of tokens to unwrap.
-    function unwrap(address _toAddress, uint256 _amount) external {
+    function unwrap(address _toAddress, uint256 _amount) external nonReentrant {
         if (!connectedChains[block.chainid]) revert NotHost();
         if (balancers[msg.sender]) revert BalancerNotAuthorized();
         _unwrap(_toAddress, _amount);
@@ -128,6 +152,29 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
     // *********************** //
     // *** OWNER FUNCTIONS *** //
     // *********************** //
+    /// @notice withdraw fees from Vault
+    /// @param to receiver; usually Balancer.sol contract
+    /// @param amount the fees amount
+    function withdrawFees(address to, uint256 amount) external onlyOwner {
+        vault.transferFees(to, amount);
+    }
+
+    /// @notice sets the wrap fee for non host chains
+    /// @dev fee precision is 1e5; a fee of 1e4 is 10%
+    /// @param _fee the new fee amount
+    function setMintFee(uint256 _fee) external onlyOwner {
+        emit MintFeeUpdated(mintFee, _fee);
+        mintFee = _fee;
+    }
+
+    /// @notice sets the wrap cap
+    /// @param _cap the new cap amount
+    function setMintCap(uint256 _cap) external onlyOwner {
+        if (_cap < totalSupply()) revert CapNotValid();
+        emit MintCapUpdated(mintCap, _cap);
+        mintCap = _cap;
+    }
+
     /// @notice updates a connected chain whitelist status
     /// @param _chain the block.chainid of that specific chain
     function setConnectedChain(uint256 _chain) external onlyOwner {
@@ -156,5 +203,27 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         vault.withdraw(msg.sender, _amount);
 
         emit Rebalancing(msg.sender, _amount, _isNative);
+    }
+
+    // ************************* //
+    // *** PRIVATE FUNCTIONS *** //
+    // ************************* //
+    function _checkAndExtractFees(
+        uint256 _amount
+    ) private returns (uint256 feeAmount) {
+        feeAmount = 0;
+
+        // not on host chain; extract fee
+        // fees are used to rebalance liquidity to host chain
+        if (block.chainid != hostChainID && mintFee > 0) {
+            feeAmount = (_amount * mintFee) / _FEE_PRECISION;
+            if (feeAmount > 0) {
+                if (erc20 == address(0)) {
+                    vault.registerFees{value: feeAmount}(feeAmount);
+                } else {
+                    vault.registerFees(feeAmount);
+                }
+            }
+        }
     }
 }
