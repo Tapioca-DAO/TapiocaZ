@@ -62,7 +62,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes32 toAddress = LzLib.addressToBytes32(to);
         (removeParams.amount, ) = _removeDust(removeParams.amount);
 
-        (, uint256 extraGas, uint256 airdropAmount, ) = LzLib
+        (, , uint256 airdropAmount, ) = LzLib
             .decodeAdapterParams(adapterParams);
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
@@ -80,7 +80,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
             lzDstChainId,
             PT_MARKET_REMOVE_COLLATERAL,
             adapterParams,
-            extraGas
+            NO_EXTRA_GAS
         );
 
         //fail fast
@@ -160,7 +160,7 @@ contract BaseTOFTMarketModule is TOFTCommon {
             lzDstChainId,
             PT_YB_SEND_SGL_BORROW,
             airdropAdapterParams,
-            options.extraGasLimit
+            NO_EXTRA_GAS
         );
 
         _lzSend(
