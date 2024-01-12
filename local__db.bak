@@ -31,7 +31,7 @@
                 "name": "TapiocaOFT-FTMLPMock",
                 "address": "0xf4836eE2E30C89a13CB60f739bc7d47dd1115fe6",
                 "meta": {
-                    "isToftHost": false,
+                    "isToftHost": true,
                     "isMerged": false,
                     "isToft": true,
                     "args": [
