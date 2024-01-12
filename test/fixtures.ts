@@ -139,6 +139,16 @@ export const setupFixture = async () => {
         true,
     )) as MTapiocaOFT;
 
+    const setMintFeeFn = mtapiocaOFT0.interface.encodeFunctionData(
+        'setMintFee',
+        [0],
+    );
+    await tapiocaWrapper_0.executeTOFT(
+        mtapiocaOFT0.address,
+        setMintFeeFn,
+        true,
+    );
+
     // Deploy mTapiocaOFT10
     {
         const txData = await tapiocaWrapper_10.populateTransaction.createTOFT(
@@ -166,6 +176,12 @@ export const setupFixture = async () => {
         ),
         true,
     )) as MTapiocaOFT;
+
+    await tapiocaWrapper_10.executeTOFT(
+        mtapiocaOFT10.address,
+        setMintFeeFn,
+        true,
+    );
 
     // Deploy TapiocaOFT0
     {

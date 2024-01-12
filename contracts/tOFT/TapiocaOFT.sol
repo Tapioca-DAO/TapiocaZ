@@ -64,10 +64,10 @@ contract TapiocaOFT is BaseTOFT, ReentrancyGuard {
         uint256 _amount
     ) external payable nonReentrant onlyHostChain returns (uint256 minted) {
         if (erc20 == address(0)) {
-            _wrapNative(_toAddress);
+            _wrapNative(_toAddress, _amount, 0);
         } else {
             if (msg.value > 0) revert NotNative();
-            _wrap(_fromAddress, _toAddress, _amount);
+            _wrap(_fromAddress, _toAddress, _amount, 0);
         }
 
         return _amount; //no fee for TOFT

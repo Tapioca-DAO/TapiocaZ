@@ -9,6 +9,136 @@ import { BN, getERC20PermitSignature } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 
 describe('mTapiocaOFT', () => {
+    describe('extractFees()', () => {
+        it('should extract fees', async () => {
+            const {
+                signer,
+                mtapiocaOFT0,
+                mtapiocaOFT10,
+                tapiocaWrapper_10,
+                mErc20Mock,
+                mintAndApprove,
+                dummyAmount,
+            } = await loadFixture(setupFixture);
+
+            const fee = 1e4;
+            const setMintFeeFn = mtapiocaOFT10.interface.encodeFunctionData(
+                'setMintFee',
+                [fee], //10%
+            );
+            await tapiocaWrapper_10.executeTOFT(
+                mtapiocaOFT10.address,
+                setMintFeeFn,
+                true,
+            );
+
+            const setConnectedChainFn =
+                mtapiocaOFT10.interface.encodeFunctionData(
+                    'setConnectedChain',
+                    [await mtapiocaOFT0.hostChainID()],
+                );
+            await tapiocaWrapper_10.executeTOFT(
+                mtapiocaOFT10.address,
+                setConnectedChainFn,
+                true,
+            );
+
+            await mintAndApprove(
+                mErc20Mock,
+                mtapiocaOFT10,
+                signer,
+                dummyAmount,
+            );
+
+            const balTOFTSignerBefore = await mtapiocaOFT10.balanceOf(
+                signer.address,
+            );
+            const vault = await ethers.getContractAt(
+                'TOFTVault',
+                await mtapiocaOFT10.vault(),
+            );
+            const balERC20ContractBefore = await mErc20Mock.balanceOf(
+                vault.address,
+            );
+
+            await mtapiocaOFT10.wrap(
+                signer.address,
+                signer.address,
+                dummyAmount,
+            );
+
+            const balTOFTSignerAfter = await mtapiocaOFT10.balanceOf(
+                signer.address,
+            );
+            const balERC20ContractAfter = await mErc20Mock.balanceOf(
+                vault.address,
+            );
+            const dummyAmountMinusFee = dummyAmount.sub(
+                dummyAmount.mul(fee).div(1e5),
+            );
+            expect(balTOFTSignerAfter).eq(
+                balTOFTSignerBefore.add(dummyAmountMinusFee),
+            );
+            expect(balERC20ContractAfter).eq(
+                balERC20ContractBefore.add(dummyAmount),
+            );
+
+            const vaultActiveSupply = await vault.viewSupply();
+            const vaultFeeSupply = await vault.viewFees();
+            const vaultTotalSupply = await vault.viewTotalSupply();
+            const toftTotalSupply = await mtapiocaOFT10.totalSupply();
+            expect(vaultActiveSupply.eq(dummyAmountMinusFee)).to.be.true;
+            expect(vaultFeeSupply.eq(dummyAmount.mul(fee).div(1e5))).to.be.true;
+            expect(vaultTotalSupply.eq(dummyAmount)).to.be.true;
+            expect(toftTotalSupply.eq(dummyAmountMinusFee)).to.be.true;
+
+            const setMintCapWrongFn =
+                mtapiocaOFT10.interface.encodeFunctionData('setMintCap', [
+                    dummyAmount.div(2),
+                ]);
+            const setMintCapRightFn =
+                mtapiocaOFT10.interface.encodeFunctionData('setMintCap', [
+                    dummyAmount.add(1),
+                ]);
+            await expect(
+                tapiocaWrapper_10.executeTOFT(
+                    mtapiocaOFT10.address,
+                    setMintCapWrongFn,
+                    true,
+                ),
+            ).to.be.reverted;
+            await expect(
+                tapiocaWrapper_10.executeTOFT(
+                    mtapiocaOFT10.address,
+                    setMintCapRightFn,
+                    true,
+                ),
+            ).to.not.be.reverted;
+
+            await mintAndApprove(
+                mErc20Mock,
+                mtapiocaOFT10,
+                signer,
+                dummyAmount,
+            );
+            await expect(
+                mtapiocaOFT10.wrap(signer.address, signer.address, dummyAmount),
+            ).to.be.revertedWithCustomError(mtapiocaOFT10, 'OverCap');
+
+            const withdrawFeesFn = mtapiocaOFT10.interface.encodeFunctionData(
+                'withdrawFees',
+                [signer.address, await vault.viewFees()],
+            );
+            await tapiocaWrapper_10.executeTOFT(
+                mtapiocaOFT10.address,
+                withdrawFeesFn,
+                true,
+            );
+
+            const viewFees = await vault.viewFees();
+            expect(viewFees.eq(0)).to.be.true;
+        });
+    });
     describe('extractUnderlying()', () => {
         it('should fail for unknown balance', async () => {
             const { signer, mtapiocaOFT0, tapiocaWrapper_0, mErc20Mock } =
