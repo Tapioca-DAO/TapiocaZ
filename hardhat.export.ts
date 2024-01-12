@@ -69,7 +69,7 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
             {
                 version: '0.8.22',
                 settings: {
-                    viaIR: true,
+                    // viaIR: true,
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
@@ -78,6 +78,9 @@ const config: HardhatUserConfig & { dodoc?: any; typechain?: any } = {
                 },
             },
         ],
+    },
+    paths: {
+        sources: './contracts/LZV2', // TODO remove. For test LZv2 WIP only
     },
     namedAccounts: {
         deployer: 0,

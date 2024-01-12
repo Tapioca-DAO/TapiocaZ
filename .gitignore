@@ -11,5 +11,9 @@ docs
 cache
 artifacts
 
+# Forge files
+out
+cache_forge
+
 #Others
 .DS_Store
