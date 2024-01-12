@@ -5,6 +5,7 @@ pragma solidity ^0.8.18;
 import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import "tapioca-periph/contracts/interfaces/IStargateRouter.sol";
 import "tapioca-periph/contracts/interfaces/IStargateEthVault.sol";
+import "tapioca-periph/contracts/interfaces/ITOFTVault.sol";
 
 //rari
 import "@rari-capital/solmate/src/auth/Owned.sol";
@@ -120,6 +121,7 @@ contract Balancer is Owned {
     error Failed();
     error SwapNotEnabled();
     error AlreadyInitialized();
+    error RebalanceAmountNotValid();
 
     // *************************** //
     // *** MODIFIERS FUNCTIONS *** //
@@ -295,6 +297,10 @@ contract Balancer is Owned {
         uint256 _amount
     ) external onlyValidDestination(_srcOft, _dstChainId) onlyOwner {
         connectedOFTs[_srcOft][_dstChainId].rebalanceable += _amount;
+        uint256 totalToftSupply = ITOFTVault(ITapiocaOFT(_srcOft).vault())
+            .viewSupply();
+        if (connectedOFTs[_srcOft][_dstChainId].rebalanceable > totalToftSupply)
+            revert RebalanceAmountNotValid();
         emit RebalanceAmountUpdated(
             _srcOft,
             _dstChainId,
