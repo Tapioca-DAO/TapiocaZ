@@ -72,11 +72,11 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
                     uint256
                 )
             );
-
+        uint256 amount = _sd2ld(amountSD);
         uint256 balanceBefore = balanceOf(address(this));
         bool credited = creditedPackets[_srcChainId][_srcAddress][_nonce];
         if (!credited) {
-            _creditTo(_srcChainId, address(this), _sd2ld(amountSD));
+            _creditTo(_srcChainId, address(this), amount);
             creditedPackets[_srcChainId][_srcAddress][_nonce] = true;
         }
 
@@ -84,7 +84,7 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
             abi.encodeWithSelector(
                 this.leverageDownInternal.selector,
                 module,
-                _sd2ld(amountSD),
+                amount,
                 swapData,
                 externalData,
                 lzData,
@@ -95,8 +95,8 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
 
         if (!success) {
             _storeAndSend(
-                balanceOf(address(this)) - balanceBefore >= _sd2ld(amountSD),
-                _sd2ld(amountSD),
+                balanceOf(address(this)) - balanceBefore >= amount,
+                amount,
                 leverageFor,
                 reason,
                 _srcChainId,
@@ -106,7 +106,7 @@ contract BaseTOFTLeverageDestinationModule is TOFTCommon {
             );
         }
 
-        emit ReceiveFromChain(_srcChainId, leverageFor, _sd2ld(amountSD));
+        emit ReceiveFromChain(_srcChainId, leverageFor, amount);
     }
 
     function _storeAndSend(
