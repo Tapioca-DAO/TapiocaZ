@@ -62,8 +62,9 @@ contract BaseTOFTMarketModule is TOFTCommon {
         bytes32 toAddress = LzLib.addressToBytes32(to);
         (removeParams.amount, ) = _removeDust(removeParams.amount);
 
-        (, , uint256 airdropAmount, ) = LzLib
-            .decodeAdapterParams(adapterParams);
+        (, , uint256 airdropAmount, ) = LzLib.decodeAdapterParams(
+            adapterParams
+        );
         bytes memory lzPayload = abi.encode(
             PT_MARKET_REMOVE_COLLATERAL,
             from,
