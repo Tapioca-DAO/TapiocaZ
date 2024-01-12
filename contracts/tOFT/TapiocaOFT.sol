@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 import "./BaseTOFT.sol";
 
-contract TapiocaOFT is BaseTOFT {
+contract TapiocaOFT is BaseTOFT, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -62,13 +62,15 @@ contract TapiocaOFT is BaseTOFT {
         address _fromAddress,
         address _toAddress,
         uint256 _amount
-    ) external payable onlyHostChain {
+    ) external payable nonReentrant onlyHostChain returns (uint256 minted) {
         if (erc20 == address(0)) {
             _wrapNative(_toAddress);
         } else {
             if (msg.value > 0) revert NotNative();
             _wrap(_fromAddress, _toAddress, _amount);
         }
+
+        return _amount; //no fee for TOFT
     }
 
     /// @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.

@@ -125,22 +125,24 @@ contract BaseTOFTGenericModule is TOFTCommon {
             creditedPackets[lzSrcChainId][_srcAddress][_nonce] = true;
         }
 
+        ITapiocaOFTBase tOFT = ITapiocaOFTBase(address(this));
+        address toftERC20 = tOFT.erc20();
         if (unwrap) {
-            ITapiocaOFTBase tOFT = ITapiocaOFTBase(address(this));
-            address toftERC20 = tOFT.erc20();
-
             tOFT.unwrap(address(this), amount);
+        }
 
+        if (revokes.length > 0) {
+            _callApproval(revokes, PT_SEND_FROM_PARAMS);
+        }
+
+        // moved here to respect CEI and protect from a re-entrancy attack
+        if (unwrap) {
             if (toftERC20 != address(0)) {
                 IERC20(toftERC20).safeTransfer(toAddress, amount);
             } else {
                 (bool sent, ) = toAddress.call{value: amount}("");
                 if (!sent) revert Failed();
             }
-        }
-
-        if (revokes.length > 0) {
-            _callApproval(revokes, PT_SEND_FROM_PARAMS);
         }
 
         emit ReceiveFromChain(lzSrcChainId, toAddress, amount);

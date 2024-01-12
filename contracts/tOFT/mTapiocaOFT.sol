@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./BaseTOFT.sol";
 
 contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
