@@ -225,7 +225,7 @@ contract BaseTOFTMarketDestinationModule is TOFTCommon {
         uint256 share = IYieldBoxBase(ybAddress).toShare(
             assetId,
             removeParams.amount,
-            false
+            true
         );
 
         //market whitelist status

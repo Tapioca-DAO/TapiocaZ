@@ -34,7 +34,7 @@ export const deployTOFT__task = async (
 
     checkIfExists(hre, tag, args.isMerged);
 
-    const project = hre.SDK.config.TAPIOCA_PROJECTS[2];
+    const project = hre.SDK.config.TAPIOCA_PROJECTS[8];
 
     const chainInfo = hre.SDK.utils.getChainBy(
         'chainId',
