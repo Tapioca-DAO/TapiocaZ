@@ -44,6 +44,20 @@ struct TOFTInitStruct {
 /// ============================
 
 /**
+ * @notice Encodes the message for the ercPermitApproval() operation.
+ */
+struct ERC20PermitApprovalMsg {
+    address token;
+    address owner;
+    address spender;
+    uint256 value;
+    uint256 deadline;
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
+}
+
+/**
  * Structure of an ERC20 permit message.
  */
 struct ERC20PermitStruct {
@@ -52,4 +66,27 @@ struct ERC20PermitStruct {
     uint256 value;
     uint256 nonce;
     uint256 deadline;
+}
+
+/**
+ * Structure of an ERC721 permit message.
+ */
+struct ERC721PermitStruct {
+    address spender;
+    uint256 tokenId;
+    uint256 nonce;
+    uint256 deadline;
+}
+
+/**
+ * @notice Encodes the message for the ercPermitApproval() operation.
+ */
+struct ERC721PermitApprovalMsg {
+    address token;
+    address spender;
+    uint256 tokenId;
+    uint256 deadline;
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
 }

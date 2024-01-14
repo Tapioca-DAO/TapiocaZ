@@ -93,6 +93,7 @@ contract BaseTOFTStorage is OFTV2 {
         cluster = _cluster;
     }
 
+    //TODO: see if we need this for v2
     function _getRevertMsg(
         bytes memory _returnData
     ) internal pure returns (string memory) {

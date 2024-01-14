@@ -13,9 +13,11 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {TOFTInitStruct} from "./ITOFTv2.sol";
 import {IYieldBoxBase} from "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import {ICluster} from "tapioca-periph/contracts/interfaces/ICluster.sol";
+import {TOFTv2ExtExec} from "./extensions/TOFTv2ExtExec.sol";
+import {CommonOFTv2} from "./CommonOFTv2.sol";
+import {TOFTInitStruct} from "./ITOFTv2.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -30,24 +32,32 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract BaseTOFTv2 is OFT {
+/**
+ * @title BaseTOFTv2
+ * @author TapiocaDAO
+ * @notice Base TOFT contract for LZ V2
+ */
+contract BaseTOFTv2 is CommonOFTv2 {
     using BytesLib for bytes;
     using SafeERC20 for IERC20;
     using OFTMsgCodec for bytes;
     using OFTMsgCodec for bytes32;
 
     // LZ packets
-    uint16 internal constant PT_YB_SEND_STRAT = 770;
-    uint16 internal constant PT_YB_RETRIEVE_STRAT = 771;
-    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 772;
-    uint16 internal constant PT_YB_SEND_SGL_BORROW = 775;
-    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 776;
-    uint16 internal constant PT_TAP_EXERCISE = 777;
-    uint16 internal constant PT_TRIGGER_SEND_FROM = 778;
-    uint16 internal constant PT_APPROVE = 779;
-    uint16 internal constant PT_SEND_FROM_PARAMS = 780;
+    uint16 internal constant PT_APPROVALS = 500; // Use for ERC20Permit approvals
+    uint16 internal constant PT_NFT_APPROVALS = 501; // Use for ERC721Permit approvals; TODO: check if we need this
+
+    uint16 internal constant PT_REMOTE_TRANSFER = 700; // Use for transferring tokens from the contract from another chain
+
+    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 801; // Use for remove collateral from a market available on another chain
+    uint16 internal constant PT_YB_SEND_SGL_BORROW = 802; // Use fror send to YB and/or borrow from a market available on another chain
+    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 803; // Use for leverage sell on a market available on another chain
+    uint16 internal constant PT_TAP_EXERCISE = 804; // Use for exercise options on tOB available on another chain
+    uint16 internal constant PT_SEND_PARAMS = 805; // Use for perform a normal OFT send but with a custom payload
 
     // VARS
+    /// @dev Used to execute certain extern calls from the TOFTv2 contract, such as ERC20Permit approvals.
+    TOFTv2ExtExec public toftV2ExtExec;
 
     IYieldBoxBase public immutable yieldBox;
     ICluster public cluster;
@@ -56,15 +66,19 @@ contract BaseTOFTv2 is OFT {
 
     uint256 internal constant SLIPPAGE_PRECISION = 1e4;
 
-    // ERRORS
-    error NotValid();
-
     constructor(
-        TOFTInitStruct memory data
-    ) OFT(data.name, data.symbol, data.endpoint, data.owner) {
-        yieldBox = IYieldBoxBase(data.yieldBox);
-        cluster = ICluster(data.cluster);
-        erc20 = data.erc20;
-        hostEid = data.hostEid;
+        TOFTInitStruct memory _data
+    ) CommonOFTv2(_data.name, _data.symbol, _data.endpoint, _data.owner) {
+        yieldBox = IYieldBoxBase(_data.yieldBox);
+        cluster = ICluster(_data.cluster);
+        erc20 = _data.erc20;
+        hostEid = _data.hostEid;
+
+        toftV2ExtExec = new TOFTv2ExtExec();
     }
+
+    /**
+     * @notice set the Cluster address, can be done only once.
+     */
+    function setCluster(address _cluster) external virtual {}
 }
