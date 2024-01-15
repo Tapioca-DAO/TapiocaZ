@@ -13,14 +13,14 @@ import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
+import {TOFTv2MarketReceiverModule} from "./modules/TOFTv2MarketReceiverModule.sol";
 import {ERC20PermitStruct, ITOFTv2, LZSendParam} from "./ITOFTv2.sol";
 import {ModuleManager} from "./modules/ModuleManager.sol";
 import {BaseTOFTv2} from "./BaseTOFTv2.sol";
 
 contract TOFTV2 is BaseTOFTv2, ModuleManager, ERC20Permit, Pausable {
-    // ==========
-    // *VARS*
-    // ==========
+    TOFTv2MarketReceiverModule public marketReceiverModule;
+   
 
     // ==========
     // *ERRORS*
@@ -33,6 +33,8 @@ contract TOFTV2 is BaseTOFTv2, ModuleManager, ERC20Permit, Pausable {
     /// =====================
     /// Module setup
     /// =====================
+
+    constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
 
     /**
      * @dev Fallback function should handle calls made by endpoint, which should go to the receiver module.

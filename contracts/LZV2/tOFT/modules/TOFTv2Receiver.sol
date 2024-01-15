@@ -11,10 +11,10 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
-import {TOFTv2MsgCoder} from "./libraries/TOFTv2MsgCoder.sol";
+import {TOFTMsgCoder} from "../libraries/TOFTMsgCoder.sol";
+import {ITOFTv2, TOFTInitStruct} from "../ITOFTv2.sol";
 import {TOFTv2Sender} from "./TOFTv2Sender.sol";
-import {TOFTInitStruct} from "./ITOFTv2.sol";
-import {BaseTOFTv2} from "./BaseTOFTv2.sol";
+import {BaseTOFTv2} from "../BaseTOFTv2.sol";
 
 /*
 
@@ -41,8 +41,6 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     error InvalidComposer(address composer);
     error InvalidCaller(address caller); // Should be the endpoint address
     error InsufficientAllowance(address owner, uint256 amount); // See `this.__internalTransferWithAllowance()`
-    // See `this._claimTwpTapRewardsReceiver()`. Triggered if the length of the claimed rewards are not equal to the length of the lzSendParam array.
-    error InvalidSendParamLength(uint256 expectedLength, uint256 actualLength);
 
     /// @dev Compose received.
     event ComposeReceived(
@@ -138,7 +136,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         }
 
         // Decode LZ compose message.
-        (address composeSender_, bytes memory oftComposeMsg_) = TOFTv2MsgCoder
+        (address composeSender_, bytes memory oftComposeMsg_) = TOFTMsgCoder
             .decodeLzComposeMsg(_message);
 
         // Decode OFT compose message.
@@ -148,24 +146,19 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             uint16 msgIndex_,
             bytes memory tOFTComposeMsg_,
             bytes memory nextMsg_
-        ) = TOFTv2MsgCoder.decodeTOFTComposeMsg(oftComposeMsg_);
+        ) = TOFTMsgCoder.decodeTOFTComposeMsg(oftComposeMsg_);
 
-        //TODO: implement custom packets
-        // if (msgType_ == PT_APPROVALS) {
-        //     _erc20PermitApprovalReceiver(tapComposeMsg_);
-        // } else if (msgType_ == PT_NFT_APPROVALS) {
-        //     _erc721PermitApprovalReceiver(tapComposeMsg_);
-        // } else if (msgType_ == PT_LOCK_TWTAP) {
-        //     _lockTwTapPositionReceiver(tapComposeMsg_);
-        // } else if (msgType_ == PT_UNLOCK_TWTAP) {
-        //     _unlockTwTapPositionReceiver(tapComposeMsg_);
-        // } else if (msgType_ == PT_CLAIM_REWARDS) {
-        //     _claimTwpTapRewardsReceiver(tapComposeMsg_);
-        // } else if (msgType_ == PT_REMOTE_TRANSFER) {
-        //     _remoteTransferReceiver(tapComposeMsg_);
-        // } else {
-        //     revert InvalidMsgType(msgType_);
-        // }
+        //TODO: add all custom packets
+        if (msgType_ == PT_YB_SEND_SGL_BORROW) {
+            //TODO:???? this call doesn't look right?! check how tOFTComposeMsg_ was created; does it include the method call ?
+            _executeModule(
+                uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
+                tOFTComposeMsg_,
+                false
+            );
+        } else {
+            revert InvalidMsgType(msgType_);
+        }
 
         emit ComposeReceived(msgType_, _guid, _message);
 

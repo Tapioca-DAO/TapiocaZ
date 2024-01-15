@@ -16,8 +16,9 @@ import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.s
 import {IYieldBoxBase} from "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import {ICluster} from "tapioca-periph/contracts/interfaces/ICluster.sol";
 import {TOFTv2ExtExec} from "./extensions/TOFTv2ExtExec.sol";
+import {ModuleManager} from "./modules/ModuleManager.sol";
+import {ITOFTv2, TOFTInitStruct} from "./ITOFTv2.sol";
 import {CommonOFTv2} from "./CommonOFTv2.sol";
-import {TOFTInitStruct} from "./ITOFTv2.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -37,7 +38,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  * @author TapiocaDAO
  * @notice Base TOFT contract for LZ V2
  */
-contract BaseTOFTv2 is CommonOFTv2 {
+contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
     using BytesLib for bytes;
     using SafeERC20 for IERC20;
     using OFTMsgCodec for bytes;
@@ -55,30 +56,39 @@ contract BaseTOFTv2 is CommonOFTv2 {
     uint16 internal constant PT_TAP_EXERCISE = 804; // Use for exercise options on tOB available on another chain
     uint16 internal constant PT_SEND_PARAMS = 805; // Use for perform a normal OFT send but with a custom payload
 
-    // VARS
     /// @dev Used to execute certain extern calls from the TOFTv2 contract, such as ERC20Permit approvals.
+    // TODO: check if we need this
     TOFTv2ExtExec public toftV2ExtExec;
 
     IYieldBoxBase public immutable yieldBox;
     ICluster public cluster;
-    address public erc20;
     uint256 public hostEid;
+    address public erc20;
 
     uint256 internal constant SLIPPAGE_PRECISION = 1e4;
+
+    error InvalidMsgType(uint16 msgType); // Triggered if the msgType is invalid on an `_lzCompose`.
 
     constructor(
         TOFTInitStruct memory _data
     ) CommonOFTv2(_data.name, _data.symbol, _data.endpoint, _data.owner) {
         yieldBox = IYieldBoxBase(_data.yieldBox);
         cluster = ICluster(_data.cluster);
-        erc20 = _data.erc20;
         hostEid = _data.hostEid;
+        erc20 = _data.erc20;
 
         toftV2ExtExec = new TOFTv2ExtExec();
+
+        // Set TOFTv2 execution modules
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
+            _data.marketReceiverModule
+        );
     }
 
     /**
-     * @notice set the Cluster address, can be done only once.
+     * @notice set the Cluster address.
+     * @param _cluster the new Cluster address
      */
     function setCluster(address _cluster) external virtual {}
 }

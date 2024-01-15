@@ -3,7 +3,38 @@ pragma solidity 0.8.22;
 
 import {SendParam, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
-interface ITOFTv2 {}
+interface ITOFTv2 {
+    enum Module {
+        NonModule, //0
+        TOFTv2Sender,
+        TOFTv2Receiver,
+        TOFTv2MarketReceiver
+    }
+
+    /**
+     * =======================
+     * LZ functions
+     * =======================
+     */
+    function combineOptions(
+        uint32 _eid,
+        uint16 _msgType,
+        bytes calldata _extraOptions
+    ) external view returns (bytes memory);
+
+    /**
+     * =======================
+     * Tapioca added functions
+     * =======================
+     */
+    function quoteSendPacket(
+        SendParam calldata _sendParam,
+        bytes calldata _extraOptions,
+        bool _payInLzToken,
+        bytes calldata _composeMsg,
+        bytes calldata /*_oftCmd*/ // @dev unused in the default implementation.
+    ) external view returns (MessagingFee memory msgFee);
+}
 
 /// =======================
 /// ========= LZ ==========
@@ -37,11 +68,18 @@ struct TOFTInitStruct {
     address cluster;
     address erc20;
     uint256 hostEid;
+    //modules
+    address marketReceiverModule;
 }
 
 /// ============================
 /// ========= COMPOSE ==========
 /// ============================
+
+struct YieldBoxPermitApprovalMsg {
+    bool permitAll;
+    bool revokeYieldBox;
+}
 
 /**
  * @notice Encodes the message for the ercPermitApproval() operation.

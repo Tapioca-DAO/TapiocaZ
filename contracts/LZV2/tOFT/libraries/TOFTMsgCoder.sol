@@ -9,8 +9,11 @@ import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.s
 
 // Tapioca
 import {ITOFTv2, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam} from "../ITOFTv2.sol"; // TODO: add custom packets
+import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
+import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
+import {MarketBorrowMsg} from "../modules/ITOFTv2Module.sol";
 
-library TOFTv2MsgCoder {
+library TOFTMsgCoder {
     /**
      * @dev Option Builder offsets
      *
@@ -369,4 +372,16 @@ library TOFTv2MsgCoder {
     // ***************************************
 
     //TODO: fill with custom packets decoding & encoding
+
+    function buildMarketBorrow(
+        MarketBorrowMsg memory _marketBorrowMsg
+    ) internal pure returns (bytes memory) {
+        return abi.encode(_marketBorrowMsg);
+    }
+
+    function decodeMarketBorrowMsg(
+        bytes memory _msg
+    ) internal pure returns (MarketBorrowMsg memory marketBorrowMsg_) {
+        return abi.decode(_msg, (MarketBorrowMsg));
+    }
 }
