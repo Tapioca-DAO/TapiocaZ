@@ -18,7 +18,4 @@ struct MarketBorrowMsg {
     address to;
     ITapiocaOFT.IBorrowParams borrowParams;
     ICommonData.IWithdrawParams withdrawParams;
-    ICommonData.ISendOptions options;
-    ICommonData.IApproval[] approvals;
-    ICommonData.IApproval[] revokes;
 }

@@ -11,7 +11,7 @@ import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.s
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {MarketBorrowMsg} from "../modules/ITOFTv2Module.sol";
 import {TOFTMsgCoder} from "../libraries/TOFTMsgCoder.sol";
-import {ITOFTv2, LZSendParam} from "../ITOFTv2.sol";
+import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "../ITOFTv2.sol";
 
 // Tapioca
 
@@ -73,16 +73,23 @@ contract TOFTv2Helper {
     // LZ
     uint16 public constant SEND = 1;
 
+    // LZ packets
+    uint16 internal constant PT_REMOTE_TRANSFER = 400; // Use for transferring tokens from the contract from another chain
+
     uint16 internal constant PT_APPROVALS = 500; // Use for ERC20Permit approvals
     uint16 internal constant PT_NFT_APPROVALS = 501; // Use for ERC721Permit approvals; TODO: check if we need this
+    uint16 internal constant PT_YB_APROVE_ASSET = 502; // Use for YieldBox 'setApprovalForAsset(true)' operation
+    uint16 internal constant PT_YB_APPROVE_ALL = 503; // Use for YieldBox 'setApprovalForAll(true)' operation
+    uint16 internal constant PT_YB_REVOKE_ASSET = 504; // Use for YieldBox 'setApprovalForAsset(false)' operation
+    uint16 internal constant PT_YB_REVOKE_ALL = 505; // Use for YieldBox 'setApprovalForAll(false)' operation
+    uint16 internal constant PT_MARKET_PERMIT_LEND = 506; // Use for market.permitLend() operation
+    uint16 internal constant PT_MARKET_PERMIT_BORROW = 506; // Use for market.permitBorrow() operation
 
-    uint16 internal constant PT_REMOTE_TRANSFER = 700; // Use for transferring tokens from the contract from another chain
-
-    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 801; // Use for remove collateral from a market available on another chain
-    uint16 internal constant PT_YB_SEND_SGL_BORROW = 802; // Use fror send to YB and/or borrow from a market available on another chain
-    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 803; // Use for leverage sell on a market available on another chain
-    uint16 internal constant PT_TAP_EXERCISE = 804; // Use for exercise options on tOB available on another chain
-    uint16 internal constant PT_SEND_PARAMS = 805; // Use for perform a normal OFT send but with a custom payload
+    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 700; // Use for remove collateral from a market available on another chain
+    uint16 internal constant PT_YB_SEND_SGL_BORROW = 701; // Use fror send to YB and/or borrow from a market available on another chain
+    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 702; // Use for leverage sell on a market available on another chain
+    uint16 internal constant PT_TAP_EXERCISE = 703; // Use for exercise options on tOB available on another chain
+    uint16 internal constant PT_SEND_PARAMS = 704; // Use for perform a normal OFT send but with a custom payload
 
     error InvalidMsgType(uint16 msgType); // Triggered if the msgType is invalid on an `_lzCompose`.
     error InvalidMsgIndex(uint16 msgIndex, uint16 expectedIndex); // The msgIndex does not follow the sequence of indexes in the `_tOFTv2ComposeMsg`
@@ -259,7 +266,20 @@ contract TOFTv2Helper {
             // LZ
             _msgType == SEND ||
             // Tapioca msg types
-            _msgType == PT_YB_SEND_SGL_BORROW
+            _msgType == PT_REMOTE_TRANSFER ||
+            _msgType == PT_APPROVALS ||
+            _msgType == PT_NFT_APPROVALS ||
+            _msgType == PT_YB_APROVE_ASSET ||
+            _msgType == PT_YB_APPROVE_ALL ||
+            _msgType == PT_YB_REVOKE_ASSET ||
+            _msgType == PT_YB_REVOKE_ALL ||
+            _msgType == PT_MARKET_PERMIT_LEND ||
+            _msgType == PT_MARKET_PERMIT_BORROW ||
+            _msgType == PT_MARKET_REMOVE_COLLATERAL ||
+            _msgType == PT_YB_SEND_SGL_BORROW ||
+            _msgType == PT_LEVERAGE_MARKET_DOWN ||
+            _msgType == PT_TAP_EXERCISE ||
+            _msgType == PT_SEND_PARAMS
             //TODO: add rest of PT_ types
         ) {
             return;
@@ -299,5 +319,67 @@ contract TOFTv2Helper {
         }
 
         revert InvalidMsgIndex(_msgIndex, expectedMsgIndex_);
+    }
+
+    /// =======================
+    /// Builder functions
+    /// =======================
+
+    /**
+     * @notice Encode the message for the _marketPermitBorrowReceiver() & _marketPermitLendReceiver operations.
+     * @param _marketPermitActionMsg The Market permit lend/borrow approval message.
+     */
+    function buildMarketPermitApprovalMsg(
+        MarketPermitActionMsg memory _marketPermitActionMsg
+    ) public pure returns (bytes memory msg_) {
+        msg_ = abi.encodePacked(
+            msg_,
+            TOFTMsgCoder.buildMarketPermitApprovalMsg(_marketPermitActionMsg)
+        );
+    }
+
+    /**
+     * @notice Encode the message for the _yieldBoxPermitAllReceiver() & _yieldBoxRevokeAllReceiver operations.
+     * @param _yieldBoxApprovalAllMsg The YieldBox permit/revoke approval message.
+     */
+    function buildYieldBoxApproveAllMsg(
+        YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg
+    ) public pure returns (bytes memory msg_) {
+        msg_ = abi.encodePacked(
+            msg_,
+            TOFTMsgCoder.buildYieldBoxApproveAllMsg(_yieldBoxApprovalAllMsg)
+        );
+    }
+
+    /**
+     * @notice Encode the message for the _erc20PermitApprovalReceiver(),
+     *   _yieldBoxRevokeAssetReceiver() & _yieldBoxApproveAssetReceiver operations.
+     * @param _erc20PermitApprovalMsg The ERC20 permit approval messages.
+     */
+    function buildPermitApprovalMsg(
+        ERC20PermitApprovalMsg[] memory _erc20PermitApprovalMsg
+    ) public pure returns (bytes memory msg_) {
+        uint256 approvalsLength = _erc20PermitApprovalMsg.length;
+        for (uint256 i; i < approvalsLength; ) {
+            msg_ = abi.encodePacked(
+                msg_,
+                TOFTMsgCoder.buildERC20PermitApprovalMsg(
+                    _erc20PermitApprovalMsg[i]
+                )
+            );
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /**
+     * @notice Encode the message for the _erc721PermitApprovalReceiver() operation.
+     * @param _erc721PermitApprovalMsg The ERC721 permit approval messages.
+     */
+    function buildNftPermitApprovalMsg(
+        ERC721PermitApprovalMsg[] memory _erc721PermitApprovalMsg
+    ) public pure returns (bytes memory msg_) {
+        return abi.encode(_erc721PermitApprovalMsg);
     }
 }

@@ -11,8 +11,8 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
+import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "../ITOFTv2.sol";
 import {TOFTMsgCoder} from "../libraries/TOFTMsgCoder.sol";
-import {ITOFTv2, TOFTInitStruct} from "../ITOFTv2.sol";
 import {TOFTv2Sender} from "./TOFTv2Sender.sol";
 import {BaseTOFTv2} from "../BaseTOFTv2.sol";
 
@@ -41,6 +41,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     error InvalidComposer(address composer);
     error InvalidCaller(address caller); // Should be the endpoint address
     error InsufficientAllowance(address owner, uint256 amount); // See `this.__internalTransferWithAllowance()`
+    error InvalidApprovalTarget(address target); // Should be a whitelisted address available on the Cluster contract
 
     /// @dev Compose received.
     event ComposeReceived(
@@ -148,12 +149,31 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             bytes memory nextMsg_
         ) = TOFTMsgCoder.decodeTOFTComposeMsg(oftComposeMsg_);
 
-        //TODO: add all custom packets
-        if (msgType_ == PT_YB_SEND_SGL_BORROW) {
-            //TODO:???? this call doesn't look right?! check how tOFTComposeMsg_ was created; does it include the method call ?
+        if (msgType_ == PT_APPROVALS) {
+            _erc20PermitApprovalReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_NFT_APPROVALS) {
+            _erc721PermitApprovalReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_YB_APPROVE_ALL) {
+            _yieldBoxPermitAllReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_YB_REVOKE_ALL) {
+            _yieldBoxRevokeAllReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_YB_APROVE_ASSET) {
+            _yieldBoxPermitAssetReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_YB_REVOKE_ASSET) {
+            _yieldBoxRevokeAssetReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_MARKET_PERMIT_LEND) {
+            _marketPermitLendReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_MARKET_PERMIT_BORROW) {
+            _marketPermitBorrowReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_YB_SEND_SGL_BORROW) {
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
                 tOFTComposeMsg_,
+                // TODO: replace with the following
+                // abi.encodeWithSelector(
+                //     TOFTv2MarketReceiverModule.marketBorrowReceiver.selector,
+                //     tOFTComposeMsg_
+                // ),
                 false
             );
         } else {
@@ -173,5 +193,190 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
                 ) // Re encode the compose msg with the composeSender
             );
         }
+    }
+
+    // ********************* //
+    // ***** RECEIVERS ***** //
+    // ********************* //
+
+    /**
+     * @notice Approves Market borrow via permit.
+     * @param _data The call data containing info about the approval.
+     *      - token::address: Address of the YieldBox to approve.
+     *      - owner::address: Address of the owner of the tokens.
+     *      - spender::address: Address of the spender.
+     *      - value::uint256: Amount of tokens to approve.
+     *      - deadline::uint256: Deadline for the approval.
+     *      - v::uint8: v value of the signature.
+     *      - r::bytes32: r value of the signature.
+     *      - s::bytes32: s value of the signature.
+     */
+    function _marketPermitBorrowReceiver(bytes memory _data) internal virtual {
+        MarketPermitActionMsg memory approval = TOFTMsgCoder
+            .decodeMarketPermitApprovalMsg(_data);
+
+        _sanitizeTarget(approval.target);
+
+        toftV2ExtExec.marketPermitBorrowApproval(approval);
+    }
+
+    /**
+     * @notice Approves Market lend via permit.
+     * @param _data The call data containing info about the approval.
+     *      - token::address: Address of the YieldBox to approve.
+     *      - owner::address: Address of the owner of the tokens.
+     *      - spender::address: Address of the spender.
+     *      - value::uint256: Amount of tokens to approve.
+     *      - deadline::uint256: Deadline for the approval.
+     *      - v::uint8: v value of the signature.
+     *      - r::bytes32: r value of the signature.
+     *      - s::bytes32: s value of the signature.
+     */
+    function _marketPermitLendReceiver(bytes memory _data) internal virtual {
+        MarketPermitActionMsg memory approval = TOFTMsgCoder
+            .decodeMarketPermitApprovalMsg(_data);
+
+        _sanitizeTarget(approval.target);
+
+        toftV2ExtExec.marketPermitLendApproval(approval);
+    }
+
+    /**
+     * @notice Approves YieldBox asset via permit.
+     * @param _data The call data containing info about the approvals.
+     *      - token::address: Address of the YieldBox to approve.
+     *      - owner::address: Address of the owner of the tokens.
+     *      - spender::address: Address of the spender.
+     *      - value::uint256: Amount of tokens to approve.
+     *      - deadline::uint256: Deadline for the approval.
+     *      - v::uint8: v value of the signature.
+     *      - r::bytes32: r value of the signature.
+     *      - s::bytes32: s value of the signature.
+     */
+    function _yieldBoxPermitAssetReceiver(bytes memory _data) internal virtual {
+        ERC20PermitApprovalMsg[] memory approvals = TOFTMsgCoder
+            .decodeArrayOfERC20PermitApprovalMsg(_data);
+
+        uint256 approvalsLength = approvals.length;
+        for (uint256 i = 0; i < approvalsLength; ) {
+            _sanitizeTarget(approvals[i].token);
+            unchecked {
+                ++i;
+            }
+        }
+
+        toftV2ExtExec.yieldBoxPermitApproveAsset(approvals);
+    }
+
+    /**
+     * @notice Revokes an approval for YieldBox asset via permit.
+     * @param _data The call data containing info about the approvals.
+     *      - token::address: Address of the YieldBox to approve.
+     *      - owner::address: Address of the owner of the tokens.
+     *      - spender::address: Address of the spender.
+     *      - value::uint256: Amount of tokens to approve.
+     *      - deadline::uint256: Deadline for the approval.
+     *      - v::uint8: v value of the signature.
+     *      - r::bytes32: r value of the signature.
+     *      - s::bytes32: s value of the signature.
+     */
+    function _yieldBoxRevokeAssetReceiver(bytes memory _data) internal virtual {
+        ERC20PermitApprovalMsg[] memory approvals = TOFTMsgCoder
+            .decodeArrayOfERC20PermitApprovalMsg(_data);
+
+        uint256 approvalsLength = approvals.length;
+        for (uint256 i = 0; i < approvalsLength; ) {
+            _sanitizeTarget(approvals[i].token);
+            unchecked {
+                ++i;
+            }
+        }
+
+        toftV2ExtExec.yieldBoxPermitRevokeAsset(approvals);
+    }
+
+    /**
+     * @notice Revokes all assets approval on YieldBox.
+     * @param _data The call data containing info about the approval.
+     *      - target::address: Address of the YieldBox contract.
+     *      - owner::address: Address of the owner of the tokens.
+     *      - spender::address: Address of the spender.
+     *      - deadline::uint256: Deadline for the approval.
+     *      - v::uint8: v value of the signature.
+     *      - r::bytes32: r value of the signature.
+     *      - s::bytes32: s value of the signature.
+     */
+    function _yieldBoxRevokeAllReceiver(bytes memory _data) internal virtual {
+        YieldBoxApproveAllMsg memory approval = TOFTMsgCoder
+            .decodeYieldBoxApproveAllMsg(_data);
+
+        _sanitizeTarget(approval.target);
+
+        toftV2ExtExec.yieldBoxPermitRevokeAll(approval);
+    }
+
+    /**
+     * @notice Approves all assets on YieldBox.
+     * @param _data The call data containing info about the approval.
+     *      - target::address: Address of the YieldBox contract.
+     *      - owner::address: Address of the owner of the tokens.
+     *      - spender::address: Address of the spender.
+     *      - deadline::uint256: Deadline for the approval.
+     *      - v::uint8: v value of the signature.
+     *      - r::bytes32: r value of the signature.
+     *      - s::bytes32: s value of the signature.
+     */
+    function _yieldBoxPermitAllReceiver(bytes memory _data) internal virtual {
+        YieldBoxApproveAllMsg memory approval = TOFTMsgCoder
+            .decodeYieldBoxApproveAllMsg(_data);
+
+        _sanitizeTarget(approval.target);
+
+        toftV2ExtExec.yieldBoxPermitApproveAll(approval);
+    }
+
+    /**
+     * @notice Approves tokens via permit.
+     * @param _data The call data containing info about the approvals.
+     *      - token::address: Address of the token to approve.
+     *      - owner::address: Address of the owner of the tokens.
+     *      - spender::address: Address of the spender.
+     *      - value::uint256: Amount of tokens to approve.
+     *      - deadline::uint256: Deadline for the approval.
+     *      - v::uint8: v value of the signature.
+     *      - r::bytes32: r value of the signature.
+     *      - s::bytes32: s value of the signature.
+     */
+    function _erc20PermitApprovalReceiver(bytes memory _data) internal virtual {
+        ERC20PermitApprovalMsg[] memory approvals = TOFTMsgCoder
+            .decodeArrayOfERC20PermitApprovalMsg(_data);
+
+        toftV2ExtExec.erc20PermitApproval(approvals);
+    }
+
+    /**
+     * @notice Approves NFT tokens via permit.
+     * @param _data The call data containing info about the approvals.
+     *      - token::address: Address of the token to approve.
+     *      - spender::address: Address of the spender.
+     *      - tokenId::uint256: TokenId of the token to approve.
+     *      - deadline::uint256: Deadline for the approval.
+     *      - v::uint8: v value of the signature.
+     *      - r::bytes32: r value of the signature.
+     *      - s::bytes32: s value of the signature.
+     */
+    function _erc721PermitApprovalReceiver(
+        bytes memory _data
+    ) internal virtual {
+        // TODO: encode and decode packed data to save gas
+        ERC721PermitApprovalMsg[] memory approvals = TOFTMsgCoder
+            .decodeArrayOfERC721PermitApprovalMsg(_data);
+
+        toftV2ExtExec.erc721PermitApproval(approvals);
+    }
+
+    function _sanitizeTarget(address target) private view {
+        if (!cluster.isWhitelisted(0, target))
+            revert InvalidApprovalTarget(target);
     }
 }

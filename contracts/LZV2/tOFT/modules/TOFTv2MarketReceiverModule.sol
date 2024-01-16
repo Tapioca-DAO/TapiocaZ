@@ -46,28 +46,21 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2, TOFTv2CommonReceiverModule {
 
     constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
 
+    /**
+     * @notice Calls depositAddCollateralAndBorrowFromMarket on Magnetar
+     * @param _data The call data containing info about the operation.
+     *      - from::address: Address to debit tokens from.
+     *      - to::address: Address to execute operations on.
+     *      - borrowParams::struct: Borrow operation related params.
+     *      - withdrawParams::struct: Withdraw related params.
+     */
     function marketBorrowReceiver(bytes memory _data) public payable {
-        //TODO:???? what sanitization should we use here? below code is from v1
-        // if (
-        //     msg.sender != address(this) ||
-        //     _moduleAddresses[Module.MarketDestination] != module
-        // ) revert ModuleNotAuthorized();
+        if (msg.sender != address(this))
+            revert TOFTv2MarketReceiverModule_NotAuthorized(msg.sender);
 
         // @dev decode received message
         MarketBorrowMsg memory marketBorrowMsg_ = TOFTMsgCoder
             .decodeMarketBorrowMsg(_data);
-
-        // @dev execute approvals
-        if (marketBorrowMsg_.approvals.length > 0) {
-            _callApproval(marketBorrowMsg_.approvals, PT_YB_SEND_SGL_BORROW);
-            //TODO:???? check/refactor this? see TOFTv2CommonReceiverModule
-        }
-
-        // @dev execute revoke approvals
-        if (marketBorrowMsg_.revokes.length > 0) {
-            _callApproval(marketBorrowMsg_.revokes, PT_YB_SEND_SGL_BORROW);
-            //TODO:???? check/refactor this? TOFTv2CommonReceiverModule
-        }
 
         // @dev sanitize 'borrowParams.marketHelper' and 'borrowParams.market'
         if (
@@ -92,7 +85,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2, TOFTv2CommonReceiverModule {
             marketBorrowMsg_.borrowParams.amount
         );
         IMagnetar(marketBorrowMsg_.borrowParams.marketHelper)
-            .depositAddCollateralAndBorrowFromMarket{value: msg.value}( //TODO: do we use msg.value here?
+            .depositAddCollateralAndBorrowFromMarket{value: msg.value}(
             marketBorrowMsg_.borrowParams.market,
             marketBorrowMsg_.to,
             marketBorrowMsg_.borrowParams.amount,

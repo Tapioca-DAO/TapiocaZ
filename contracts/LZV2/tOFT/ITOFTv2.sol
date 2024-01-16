@@ -76,9 +76,32 @@ struct TOFTInitStruct {
 /// ========= COMPOSE ==========
 /// ============================
 
-struct YieldBoxPermitApprovalMsg {
-    bool permitAll;
-    bool revokeYieldBox;
+/**
+ * @notice Encodes the message for the ybPermitAll() operation.
+ */
+struct YieldBoxApproveAllMsg {
+    address target;
+    address owner;
+    address spender;
+    uint256 deadline;
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
+}
+
+/**
+ * @notice Encodes the message for the market.permitAction() or market.permitBorrow() operations.
+ */
+struct MarketPermitActionMsg {
+    address target;
+    uint16 actionType;
+    address owner;
+    address spender;
+    uint256 value;
+    uint256 deadline;
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
 }
 
 /**

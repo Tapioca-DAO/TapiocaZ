@@ -8,7 +8,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {ITOFTv2, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam} from "../ITOFTv2.sol"; // TODO: add custom packets
+import {ITOFTv2, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "../ITOFTv2.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
 import {MarketBorrowMsg} from "../modules/ITOFTv2Module.sol";
@@ -373,12 +373,444 @@ library TOFTMsgCoder {
 
     //TODO: fill with custom packets decoding & encoding
 
+    /**
+     * @notice Encodes the message for the `TOFTv2Receiver._erc20PermitApprovalReceiver()` operation.
+     */
+    function buildERC20PermitApprovalMsg(
+        ERC20PermitApprovalMsg memory _erc20PermitApprovalMsg
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                _erc20PermitApprovalMsg.token,
+                _erc20PermitApprovalMsg.owner,
+                _erc20PermitApprovalMsg.spender,
+                _erc20PermitApprovalMsg.value,
+                _erc20PermitApprovalMsg.deadline,
+                _erc20PermitApprovalMsg.v,
+                _erc20PermitApprovalMsg.r,
+                _erc20PermitApprovalMsg.s
+            );
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2Receiver.erc721PermitApprovalReceiver()` operation.
+     */
+    function decodeArrayOfERC721PermitApprovalMsg(
+        bytes memory _msg
+    ) internal pure returns (ERC721PermitApprovalMsg[] memory) {
+        return abi.decode(_msg, (ERC721PermitApprovalMsg[]));
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2Receiver.erc20PermitApprovalReceiver()` operation.
+     *
+     *                    *   message packet   *
+     * ------------------------------------------------------------- *
+     * Name          | type      | start | end                       *
+     * ------------------------------------------------------------- *
+     * token         | address   | 0     | 20                        *
+     * ------------------------------------------------------------- *
+     * owner         | address   | 20    | 40                        *
+     * ------------------------------------------------------------- *
+     * spender       | address   | 40    | 60                        *
+     * ------------------------------------------------------------- *
+     * value         | uint256   | 60    | 92                        *
+     * ------------------------------------------------------------- *
+     * deadline      | uint256   | 92    | 124                       *
+     * ------------------------------------------------------------- *
+     * v             | uint8     | 124   | 125                       *
+     * ------------------------------------------------------------- *
+     * r             | bytes32   | 125   | 157                       *
+     * ------------------------------------------------------------- *
+     * s             | bytes32   | 157   | 189                       *
+     * ------------------------------------------------------------- *
+     *
+     * @param _msg The encoded message. see `TOFTMsgCoder.buildERC20PermitApprovalMsg()`
+     */
+    struct __offsets {
+        uint8 tokenOffset;
+        uint8 ownerOffset;
+        uint8 spenderOffset;
+        uint8 valueOffset;
+        uint8 deadlineOffset;
+        uint8 vOffset;
+        uint8 rOffset;
+        uint8 sOffset;
+    }
+
+    function decodeERC20PermitApprovalMsg(
+        bytes memory _msg
+    )
+        internal
+        pure
+        returns (ERC20PermitApprovalMsg memory erc20PermitApprovalMsg_)
+    {
+        // TODO bitwise operators ?
+        __offsets memory offsets_ = __offsets({
+            tokenOffset: 20,
+            ownerOffset: 40,
+            spenderOffset: 60,
+            valueOffset: 92,
+            deadlineOffset: 124,
+            vOffset: 125,
+            rOffset: 157,
+            sOffset: 189
+        });
+
+        // Decoded data
+        address token = BytesLib.toAddress(
+            BytesLib.slice(_msg, 0, offsets_.tokenOffset),
+            0
+        );
+
+        address owner = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.tokenOffset, 20),
+            0
+        );
+
+        address spender = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.ownerOffset, 20),
+            0
+        );
+
+        uint256 value = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.spenderOffset, 32),
+            0
+        );
+
+        uint256 deadline = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.valueOffset, 32),
+            0
+        );
+
+        uint8 v = uint8(
+            BytesLib.toUint8(
+                BytesLib.slice(_msg, offsets_.deadlineOffset, 1),
+                0
+            )
+        );
+
+        bytes32 r = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.vOffset, 32),
+            0
+        );
+
+        bytes32 s = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.rOffset, 32),
+            0
+        );
+
+        // Return structured data
+        erc20PermitApprovalMsg_ = ERC20PermitApprovalMsg(
+            token,
+            owner,
+            spender,
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
+    }
+
+    /**
+     * @dev Decode an array of encoded messages for the `TOFTReceiver.erc20PermitApprovalReceiver()` operation.
+     * @dev The message length must be a multiple of 189.
+     *
+     * @param _msg The encoded message. see `TOFTReceiver.buildERC20PermitApprovalMsg()`
+     */
+    function decodeArrayOfERC20PermitApprovalMsg(
+        bytes memory _msg
+    ) internal pure returns (ERC20PermitApprovalMsg[] memory) {
+        /// @dev see `this.decodeERC20PermitApprovalMsg()`, token + owner + spender + value + deadline + v + r + s length = 189.
+        uint256 msgCount_ = _msg.length / 189;
+
+        ERC20PermitApprovalMsg[]
+            memory erc20PermitApprovalMsgs_ = new ERC20PermitApprovalMsg[](
+                msgCount_
+            );
+
+        uint256 msgIndex_;
+        for (uint256 i; i < msgCount_; ) {
+            erc20PermitApprovalMsgs_[i] = decodeERC20PermitApprovalMsg(
+                BytesLib.slice(_msg, msgIndex_, 189)
+            );
+            unchecked {
+                msgIndex_ += 189;
+                ++i;
+            }
+        }
+
+        return erc20PermitApprovalMsgs_;
+    }
+
+    /**
+     * @notice Encodes the message for the `TOFTv2Receiver._yieldBoxRevokeAllReceiver()` operation.
+     */
+    function buildYieldBoxApproveAllMsg(
+        YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                _yieldBoxApprovalAllMsg.target,
+                _yieldBoxApprovalAllMsg.owner,
+                _yieldBoxApprovalAllMsg.spender,
+                _yieldBoxApprovalAllMsg.deadline,
+                _yieldBoxApprovalAllMsg.v,
+                _yieldBoxApprovalAllMsg.r,
+                _yieldBoxApprovalAllMsg.s
+            );
+    }
+
+    /**
+     * @notice Encodes the message for the `TOFTv2Receiver._yieldBoxMarketPermitActionReceiver()` operation.
+     */
+    function buildMarketPermitApprovalMsg(
+        MarketPermitActionMsg memory _marketApprovalMsg
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                _marketApprovalMsg.target,
+                _marketApprovalMsg.actionType,
+                _marketApprovalMsg.owner,
+                _marketApprovalMsg.spender,
+                _marketApprovalMsg.value,
+                _marketApprovalMsg.deadline,
+                _marketApprovalMsg.v,
+                _marketApprovalMsg.r,
+                _marketApprovalMsg.s
+            );
+    }
+
+    struct __marketOffsets {
+        uint8 targetOffset;
+        uint8 actionTypeOffset;
+        uint8 ownerOffset;
+        uint8 spenderOffset;
+        uint8 valueOffset;
+        uint8 deadlineOffset;
+        uint8 vOffset;
+        uint8 rOffset;
+        uint8 sOffset;
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2Receiver.marketPermitActionReceiver()` operation.
+     *
+     *                    *   message packet   *
+     * ------------------------------------------------------------- *
+     * Name          | type      | start | end                       *
+     * ------------------------------------------------------------- *
+     * target        | address   | 0     | 20                        *
+     * ------------------------------------------------------------- *
+     * actionType    | address   | 20    | 22                       *
+     * ------------------------------------------------------------- *
+     * owner         | address   | 22    | 42                        *
+     * ------------------------------------------------------------- *
+     * spender       | address   | 42    | 62                        *
+     * ------------------------------------------------------------- *
+     * value         | address   | 62    | 94                        *
+     * ------------------------------------------------------------- *
+     * deadline      | uint256   | 94   | 126                        *
+     * ------------------------------------------------------------- *
+     * v             | uint8     | 126  | 127                        *
+     * ------------------------------------------------------------- *
+     * r             | bytes32   | 127  | 159                        *
+     * ------------------------------------------------------------- *
+     * s             | bytes32   | 159  | 191                       *
+     * ------------------------------------------------------------- *
+     *
+     * @param _msg The encoded message. see `TOFTMsgCoder.buildMarketPermitApprovalMsg()`
+     */
+    function decodeMarketPermitApprovalMsg(
+        bytes memory _msg
+    )
+        internal
+        pure
+        returns (MarketPermitActionMsg memory marketPermitActionMsg_)
+    {
+        __marketOffsets memory offsets_ = __marketOffsets({
+            targetOffset: 20,
+            actionTypeOffset: 22,
+            ownerOffset: 42,
+            spenderOffset: 62,
+            valueOffset: 94,
+            deadlineOffset: 126,
+            vOffset: 127,
+            rOffset: 159,
+            sOffset: 191
+        });
+
+        // Decoded data
+        address target = BytesLib.toAddress(
+            BytesLib.slice(_msg, 0, offsets_.targetOffset),
+            0
+        );
+
+        uint16 actionType = uint16(
+            BytesLib.toUint16(BytesLib.slice(_msg, offsets_.targetOffset, 2), 0)
+        );
+
+        address owner = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.actionTypeOffset, 20),
+            0
+        );
+
+        address spender = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.ownerOffset, 20),
+            0
+        );
+
+        uint256 value = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.spenderOffset, 32),
+            0
+        );
+
+        uint256 deadline = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.valueOffset, 32),
+            0
+        );
+
+        uint8 v = uint8(
+            BytesLib.toUint8(
+                BytesLib.slice(_msg, offsets_.deadlineOffset, 1),
+                0
+            )
+        );
+
+        bytes32 r = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.vOffset, 32),
+            0
+        );
+
+        bytes32 s = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.rOffset, 32),
+            0
+        );
+
+        // Return structured data
+        marketPermitActionMsg_ = MarketPermitActionMsg(
+            target,
+            actionType,
+            owner,
+            spender,
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
+    }
+
+    struct __ybOffsets {
+        uint8 targetOffset;
+        uint8 ownerOffset;
+        uint8 spenderOffset;
+        uint8 deadlineOffset;
+        uint8 vOffset;
+        uint8 rOffset;
+        uint8 sOffset;
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2Receiver.ybPermitAll()` operation.
+     *
+     *                    *   message packet   *
+     * ------------------------------------------------------------- *
+     * Name          | type      | start | end                       *
+     * ------------------------------------------------------------- *
+     * target        | address   | 0     | 20                        *
+     * ------------------------------------------------------------- *
+     * owner         | address   | 20    | 40                        *
+     * ------------------------------------------------------------- *
+     * spender       | address   | 40    | 60                        *
+     * ------------------------------------------------------------- *
+     * deadline      | uint256   | 60   | 92                         *
+     * ------------------------------------------------------------- *
+     * v             | uint8     | 92   | 93                         *
+     * ------------------------------------------------------------- *
+     * r             | bytes32   | 93   | 125                        *
+     * ------------------------------------------------------------- *
+     * s             | bytes32   | 125   | 157                       *
+     * ------------------------------------------------------------- *
+     *
+     * @param _msg The encoded message. see `TOFTMsgCoder.buildYieldBoxPermitAll()`
+     */
+    function decodeYieldBoxApproveAllMsg(
+        bytes memory _msg
+    ) internal pure returns (YieldBoxApproveAllMsg memory ybPermitAllMsg_) {
+        __ybOffsets memory offsets_ = __ybOffsets({
+            targetOffset: 20,
+            ownerOffset: 72,
+            spenderOffset: 92,
+            deadlineOffset: 124,
+            vOffset: 125,
+            rOffset: 157,
+            sOffset: 189
+        });
+
+        // Decoded data
+        address target = BytesLib.toAddress(
+            BytesLib.slice(_msg, 0, offsets_.targetOffset),
+            0
+        );
+
+        address owner = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.targetOffset, 20),
+            0
+        );
+
+        address spender = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.ownerOffset, 20),
+            0
+        );
+
+        uint256 deadline = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.spenderOffset, 32),
+            0
+        );
+
+        uint8 v = uint8(
+            BytesLib.toUint8(
+                BytesLib.slice(_msg, offsets_.deadlineOffset, 1),
+                0
+            )
+        );
+
+        bytes32 r = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.vOffset, 32),
+            0
+        );
+
+        bytes32 s = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.rOffset, 32),
+            0
+        );
+
+        // Return structured data
+        ybPermitAllMsg_ = YieldBoxApproveAllMsg(
+            target,
+            owner,
+            spender,
+            deadline,
+            v,
+            r,
+            s
+        );
+    }
+
+    /**
+     * @notice Encodes the message for the `TOFTv2MarketReceiverModule.borrow()` operation.
+     */
     function buildMarketBorrow(
         MarketBorrowMsg memory _marketBorrowMsg
     ) internal pure returns (bytes memory) {
         return abi.encode(_marketBorrowMsg);
     }
 
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.borrow()` operation.
+     */
     function decodeMarketBorrowMsg(
         bytes memory _msg
     ) internal pure returns (MarketBorrowMsg memory marketBorrowMsg_) {
