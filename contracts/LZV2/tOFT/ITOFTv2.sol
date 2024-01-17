@@ -68,7 +68,10 @@ struct TOFTInitStruct {
     address cluster;
     address erc20;
     uint256 hostEid;
+    address tOFTVault;
     //modules
+    address tOFTSenderModule;
+    address tOFTReceiverModule;
     address marketReceiverModule;
 }
 
@@ -150,4 +153,13 @@ struct ERC721PermitApprovalMsg {
     uint8 v;
     bytes32 r;
     bytes32 s;
+}
+
+/**
+ * @dev Used in TOFTv2Helper.
+ */
+struct RemoteTransferMsg {
+    address owner;
+    LZSendParam lzSendParam;
+    bytes composeMsg;
 }

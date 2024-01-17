@@ -8,7 +8,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {ITOFTv2, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "../ITOFTv2.sol";
+import {ITOFTv2, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg} from "../ITOFTv2.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
 import {MarketBorrowMsg} from "../modules/ITOFTv2Module.sol";
@@ -371,7 +371,25 @@ library TOFTMsgCoder {
     // * Encoding & Decoding TOFTv2 messages *
     // ***************************************
 
-    //TODO: fill with custom packets decoding & encoding
+    /**
+     * @notice Encodes the message for the `remoteTransfer` operation.
+     * @param _remoteTransferMsg The owner + LZ send param to pass on the remote chain. (B->A)
+     */
+    function buildRemoteTransferMsg(
+        RemoteTransferMsg memory _remoteTransferMsg
+    ) internal pure returns (bytes memory) {
+        return abi.encode(_remoteTransferMsg);
+    }
+
+    /**
+     * @notice Decode the message for the `remoteTransfer` operation.
+     * @param _msg The owner + LZ send param to pass on the remote chain. (B->A)
+     */
+    function decodeRemoteTransferMsg(
+        bytes memory _msg
+    ) internal pure returns (RemoteTransferMsg memory remoteTransferMsg_) {
+        return abi.decode(_msg, (RemoteTransferMsg));
+    }
 
     /**
      * @notice Encodes the message for the `TOFTv2Receiver._erc20PermitApprovalReceiver()` operation.

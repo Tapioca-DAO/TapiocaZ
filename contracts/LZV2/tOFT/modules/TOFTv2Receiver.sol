@@ -2,6 +2,8 @@
 pragma solidity 0.8.22;
 
 // LZ
+import {MessagingReceipt, OFTReceipt, SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {IOAppMsgInspector} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppMsgInspector.sol";
 import {IOAppComposer} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppComposer.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
@@ -11,7 +13,7 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "../ITOFTv2.sol";
+import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg} from "../ITOFTv2.sol";
 import {TOFTMsgCoder} from "../libraries/TOFTMsgCoder.sol";
 import {TOFTv2Sender} from "./TOFTv2Sender.sol";
 import {BaseTOFTv2} from "../BaseTOFTv2.sol";
@@ -42,6 +44,13 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     error InvalidCaller(address caller); // Should be the endpoint address
     error InsufficientAllowance(address owner, uint256 amount); // See `this.__internalTransferWithAllowance()`
     error InvalidApprovalTarget(address target); // Should be a whitelisted address available on the Cluster contract
+
+    event RemoteTransferReceived(
+        address indexed owner,
+        uint256 indexed dstEid,
+        address indexed to,
+        uint256 amount
+    );
 
     /// @dev Compose received.
     event ComposeReceived(
@@ -105,7 +114,6 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         emit OFTReceived(_guid, toAddress, amountToCreditLD, amountReceivedLD);
     }
 
-    // TODO - SANITIZE MSG TYPE
     /**
      * @dev !!! SECOND ENTRYPOINT, CALLER NEEDS TO BE VERIFIED !!!
      *
@@ -137,7 +145,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         }
 
         // Decode LZ compose message.
-        (address composeSender_, bytes memory oftComposeMsg_) = TOFTMsgCoder
+        (address srcChainSender_, bytes memory oftComposeMsg_) = TOFTMsgCoder
             .decodeLzComposeMsg(_message);
 
         // Decode OFT compose message.
@@ -149,7 +157,9 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             bytes memory nextMsg_
         ) = TOFTMsgCoder.decodeTOFTComposeMsg(oftComposeMsg_);
 
-        if (msgType_ == PT_APPROVALS) {
+        if (msgType_ == PT_REMOTE_TRANSFER) {
+            _remoteTransferReceiver(srcChainSender_, tOFTComposeMsg_);
+        } else if (msgType_ == PT_APPROVALS) {
             _erc20PermitApprovalReceiver(tOFTComposeMsg_);
         } else if (msgType_ == PT_NFT_APPROVALS) {
             _erc721PermitApprovalReceiver(tOFTComposeMsg_);
@@ -188,7 +198,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
                 _guid,
                 msgIndex_ + 1, // Increment the index
                 abi.encodePacked(
-                    OFTMsgCodec.addressToBytes32(composeSender_),
+                    OFTMsgCodec.addressToBytes32(srcChainSender_),
                     nextMsg_
                 ) // Re encode the compose msg with the composeSender
             );
@@ -198,6 +208,116 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     // ********************* //
     // ***** RECEIVERS ***** //
     // ********************* //
+    /**
+     * // TODO Check if it's safe to send composed messages too.
+     * // TODO Write test for composed messages call. A->B->A-B/C?
+     * @dev Transfers tokens AND composed messages from this contract to the recipient on the chain A. Flow of calls is: A->B->A.
+     * @dev The user needs to have approved the TapOFTv2 contract to spend the TAP.
+     *
+     * @param _srcChainSender The address of the sender on the source chain.
+     * @param _data The call data containing info about the transfer (LZSendParam).
+     */
+    function _remoteTransferReceiver(
+        address _srcChainSender,
+        bytes memory _data
+    ) internal virtual {
+        RemoteTransferMsg memory remoteTransferMsg_ = TOFTMsgCoder
+            .decodeRemoteTransferMsg(_data);
+
+        /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
+        _internalTransferWithAllowance(
+            remoteTransferMsg_.owner,
+            _srcChainSender,
+            remoteTransferMsg_.lzSendParam.sendParam.amountToSendLD
+        );
+
+        // Make the internal transfer, burn the tokens from this contract and send them to the recipient on the other chain.
+        _internalRemoteTransferSendPacket(
+            remoteTransferMsg_.owner,
+            remoteTransferMsg_.lzSendParam,
+            remoteTransferMsg_.composeMsg
+        );
+
+        emit RemoteTransferReceived(
+            remoteTransferMsg_.owner,
+            remoteTransferMsg_.lzSendParam.sendParam.dstEid,
+            OFTMsgCodec.bytes32ToAddress(
+                remoteTransferMsg_.lzSendParam.sendParam.to
+            ),
+            remoteTransferMsg_.lzSendParam.sendParam.amountToSendLD
+        );
+    }
+
+    /**
+     * // TODO review this function.
+     *
+     * @dev Slightly modified version of the OFT _sendPacket() operation. To accommodate the `srcChainSender` parameter and potential dust.
+     * @dev !!! IMPORTANT !!! made ONLY for the `_remoteTransferReceiver()` operation.
+     */
+    function _internalRemoteTransferSendPacket(
+        address _srcChainSender,
+        LZSendParam memory _lzSendParam,
+        bytes memory _composeMsg
+    )
+        internal
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt
+        )
+    {
+        // Burn tokens from this contract
+        (uint256 amountDebitedLD_, uint256 amountToCreditLD_) = _debitThis(
+            _lzSendParam.sendParam.minAmountToCreditLD,
+            _lzSendParam.sendParam.dstEid
+        );
+
+        _lzSendParam.sendParam.amountToSendLD = amountToCreditLD_;
+        _lzSendParam.sendParam.minAmountToCreditLD = amountToCreditLD_;
+
+        // If the srcChain amount request is bigger than the debited one, overwrite the amount to credit with the amount debited and send the difference back to the user.
+        if (_lzSendParam.sendParam.amountToSendLD > amountDebitedLD_) {
+            // Overwrite the amount to credit with the amount debited
+            _lzSendParam.sendParam.amountToSendLD = amountDebitedLD_;
+            _lzSendParam.sendParam.minAmountToCreditLD = amountDebitedLD_;
+            // Send the difference back to the user
+            _transfer(
+                address(this),
+                _srcChainSender,
+                _lzSendParam.sendParam.amountToSendLD - amountDebitedLD_
+            );
+        }
+
+        // Builds the options and OFT message to quote in the endpoint.
+        (
+            bytes memory message,
+            bytes memory options
+        ) = _buildOFTMsgAndOptionsMemory(
+                _lzSendParam.sendParam,
+                _lzSendParam.extraOptions,
+                _composeMsg,
+                amountToCreditLD_,
+                _srcChainSender
+            ); // msgSender is the sender of the composed message. We keep context by passing `_srcChainSender`.
+
+        // Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
+        msgReceipt = _lzSend(
+            _lzSendParam.sendParam.dstEid,
+            message,
+            options,
+            _lzSendParam.fee,
+            _lzSendParam.refundAddress
+        );
+        // Formulate the OFT receipt.
+        oftReceipt = OFTReceipt(amountDebitedLD_, amountToCreditLD_);
+
+        emit OFTSent(
+            msgReceipt.guid,
+            _srcChainSender,
+            amountDebitedLD_,
+            amountToCreditLD_,
+            _composeMsg
+        );
+    }
 
     /**
      * @notice Approves Market borrow via permit.
@@ -378,5 +498,56 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     function _sanitizeTarget(address target) private view {
         if (!cluster.isWhitelisted(0, target))
             revert InvalidApprovalTarget(target);
+    }
+
+    /**
+     * @dev For details about this function, check `BaseTOFTv2._buildOFTMsgAndOptions()`.
+     * @dev !!!! IMPORTANT !!!! The differences are:
+     *      - memory instead of calldata for parameters.
+     *      - `_msgSender` is used instead of using context `msg.sender`, to preserve context of the OFT call and use `msg.sender` of the source chain.
+     *      - Does NOT combine options, make sure to pass valid options to cover gas costs/value transfers.
+     */
+    function _buildOFTMsgAndOptionsMemory(
+        SendParam memory _sendParam,
+        bytes memory _extraOptions,
+        bytes memory _composeMsg,
+        uint256 _amountToCreditLD,
+        address _msgSender
+    ) internal view returns (bytes memory message, bytes memory options) {
+        bool hasCompose = _composeMsg.length > 0;
+
+        message = hasCompose
+            ? abi.encodePacked(
+                _sendParam.to,
+                _toSD(_amountToCreditLD),
+                OFTMsgCodec.addressToBytes32(_msgSender),
+                _composeMsg
+            )
+            : abi.encodePacked(_sendParam.to, _toSD(_amountToCreditLD));
+        options = _extraOptions;
+
+        if (msgInspector != address(0)) {
+            IOAppMsgInspector(msgInspector).inspect(message, options);
+        }
+    }
+
+    /**
+     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
+     * @dev Can only transfer to this address.
+     *
+     * @param _owner The account to transfer from.
+     * @param srcChainSender The address of the sender on the source chain.
+     * @param _amount The amount to transfer
+     */
+    function _internalTransferWithAllowance(
+        address _owner,
+        address srcChainSender,
+        uint256 _amount
+    ) internal {
+        if (_owner != srcChainSender) {
+            _spendAllowance(_owner, srcChainSender, _amount);
+        }
+
+        _transfer(_owner, address(this), _amount);
     }
 }

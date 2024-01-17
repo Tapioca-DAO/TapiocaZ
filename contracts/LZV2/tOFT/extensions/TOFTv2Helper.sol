@@ -47,6 +47,7 @@ struct ComposeMsgData {
  */
 struct PrepareLzCallData {
     uint32 dstEid; // The destination endpoint ID.
+    address refundAddress; // The refund address;
     bytes32 recipient; // The recipient address. Receiver of the OFT send if any, and refund address for the LZ send.
     uint256 amountToSendLD; // The amount to send in the OFT send. If any.
     uint256 minAmountToCreditLD; // The min amount to credit in the OFT send. If any.
@@ -186,7 +187,7 @@ contract TOFTv2Helper {
             sendParam: sendParam_,
             fee: msgFee_,
             extraOptions: oftMsgOptions_,
-            refundAddress: address(this)
+            refundAddress: _prepareLzCallData.refundAddress
         });
 
         prepareLzCallReturn_ = PrepareLzCallReturn({
