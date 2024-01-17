@@ -93,7 +93,7 @@ contract TapiocaWrapper is BoringOwnable {
     /// @notice Execute the `_bytecode` against the `_toft`. Callable only by the owner.
     /// @dev Used to call derived OFT functions to a TOFT contract.
     /// @param _call The array calls to do.
-    /// @return success If the execution was successful.
+    /// @return successes If the execution was successful.
     /// @return results The message of the execution, could be an error message.
     function executeCalls(
         ExecutionCall[] calldata _call
@@ -101,18 +101,19 @@ contract TapiocaWrapper is BoringOwnable {
         external
         payable
         onlyOwner
-        returns (bool success, bytes[] memory results)
+        returns (bool[] memory successes, bytes[] memory results)
     {
         uint256 valAccumulator = 0;
         uint256 totalVal = msg.value;
         results = new bytes[](_call.length);
+        successes = new bool[](_call.length);
         for (uint256 i = 0; i < _call.length; i++) {
             valAccumulator += _call[i].value;
 
-            (success, results[i]) = payable(_call[i].toft).call{
+            (successes[i], results[i]) = payable(_call[i].toft).call{
                 value: _call[i].value
             }(_call[i].bytecode);
-            if (_call[i].revertOnFailure && !success) {
+            if (_call[i].revertOnFailure && !successes[i]) {
                 revert TapiocaWrapper__TOFTExecutionFailed(results[i]);
             }
         }
