@@ -9,9 +9,8 @@ import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.s
 
 // External
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
-import {MarketBorrowMsg} from "../modules/ITOFTv2Module.sol";
-import {TOFTMsgCoder} from "../libraries/TOFTMsgCoder.sol";
-import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "../ITOFTv2.sol";
+import {TOFTMsgCoder} from "@contracts/libraries/TOFTMsgCoder.sol";
+import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, MarketBorrowMsg} from "@contracts/ITOFTv2.sol";
 
 // Tapioca
 

@@ -13,10 +13,10 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, LZSendParam} from "./ITOFTv2.sol";
-import {TOFTv2Receiver} from "./modules/TOFTv2Receiver.sol";
-import {TOFTv2Sender} from "./modules/TOFTv2Sender.sol";
-import {BaseTOFTv2} from "./BaseTOFTv2.sol";
+import {ITOFTv2, TOFTInitStruct, LZSendParam} from "@contracts/ITOFTv2.sol";
+import {TOFTv2Receiver} from "@contracts/modules/TOFTv2Receiver.sol";
+import {TOFTv2Sender} from "@contracts/modules/TOFTv2Sender.sol";
+import {BaseTOFTv2} from "@contracts/BaseTOFTv2.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

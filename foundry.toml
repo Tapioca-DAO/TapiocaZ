@@ -9,3 +9,18 @@ solc_version='0.8.22'
 evm_version='paris'
 optimizer = true
 optimizer_runs = 9999
+
+
+remappings = [
+    "@contracts/=contracts/LZV2/tOFT",
+	'forge-deploy/=node_modules/forge-deploy/contracts',
+]
+
+# forge-dpeloy
+fs_permissions = [
+	{ access = "read-write", path = "./deployments"},
+	{ access = "read", path = "./out"}
+]
+
+[etherscan]
+arbitrum-sepolia = { key = "${ARBITRUM_SEPOLIA_API_KEY}", url = "https://api-sepolia.arbiscan.io/api"}

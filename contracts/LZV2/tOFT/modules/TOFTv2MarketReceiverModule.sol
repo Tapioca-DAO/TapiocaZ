@@ -14,10 +14,9 @@ import {IMagnetar} from "tapioca-periph/contracts/interfaces/IMagnetar.sol";
 import {TOFTv2CommonReceiverModule} from "./TOFTv2CommonReceiverModule.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import {IMarket} from "tapioca-periph/contracts/interfaces/IMarket.sol";
-import {TOFTMsgCoder} from "../libraries/TOFTMsgCoder.sol";
-import {MarketBorrowMsg} from "./ITOFTv2Module.sol";
-import {TOFTInitStruct} from "../ITOFTv2.sol";
-import {BaseTOFTv2} from "../BaseTOFTv2.sol";
+import {TOFTMsgCoder} from "@contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTInitStruct, MarketBorrowMsg} from "@contracts/ITOFTv2.sol";
+import {BaseTOFTv2} from "@contracts/BaseTOFTv2.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

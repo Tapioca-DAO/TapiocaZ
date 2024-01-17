@@ -13,10 +13,10 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg} from "../ITOFTv2.sol";
-import {TOFTMsgCoder} from "../libraries/TOFTMsgCoder.sol";
-import {TOFTv2Sender} from "./TOFTv2Sender.sol";
-import {BaseTOFTv2} from "../BaseTOFTv2.sol";
+import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg} from "@contracts/ITOFTv2.sol";
+import {TOFTMsgCoder} from "@contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTv2Sender} from "@contracts/modules/TOFTv2Sender.sol";
+import {BaseTOFTv2} from "@contracts/BaseTOFTv2.sol";
 
 /*
 

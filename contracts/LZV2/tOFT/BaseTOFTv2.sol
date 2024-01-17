@@ -16,11 +16,11 @@ import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.s
 // Tapioca
 import {IYieldBoxBase} from "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import {ICluster} from "tapioca-periph/contracts/interfaces/ICluster.sol";
-import {TOFTv2ExtExec} from "./extensions/TOFTv2ExtExec.sol";
-import {ModuleManager} from "./modules/ModuleManager.sol";
-import {ITOFTv2, TOFTInitStruct} from "./ITOFTv2.sol";
-import {CommonOFTv2} from "./CommonOFTv2.sol";
-import {TOFTVault} from "../../tOFT/TOFTVault.sol";
+import {TOFTv2ExtExec} from "@contracts/extensions/TOFTv2ExtExec.sol";
+import {ModuleManager} from "@contracts/modules/ModuleManager.sol";
+import {ITOFTv2, TOFTInitStruct} from "@contracts/ITOFTv2.sol";
+import {CommonOFTv2} from "@contracts/CommonOFTv2.sol";
+import {TOFTVault} from "../../tOFT/TOFTVault.sol"; //TODO replace after removing v1 contracts
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

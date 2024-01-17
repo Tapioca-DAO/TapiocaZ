@@ -9,7 +9,7 @@ import {IPermitAction} from "tapioca-periph/contracts/interfaces/IPermitAction.s
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
 import {IPermitAll} from "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 import {IPermit} from "tapioca-periph/contracts/interfaces/IPermit.sol";
-import {RevertMsgDecoder} from "../libraries/RevertMsgDecoder.sol";
+import {RevertMsgDecoder} from "@contracts//libraries/RevertMsgDecoder.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
