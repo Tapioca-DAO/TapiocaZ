@@ -32,12 +32,12 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 /**
- * @title mTOFTV2
+ * @title mTOFTv2
  * @author TapiocaDAO
  * @notice Tapioca OFT wrapper contract that is connected with multiple chains
  * @dev It can be wrapped and unwrapped on multiple connected chains
  */
-contract mTOFTV2 is BaseTOFTv2, Pausable, ReentrancyGuard {
+contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard {
     /**
      * @notice allowed chains where you can unwrap your TOFT
      */

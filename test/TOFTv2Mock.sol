@@ -5,8 +5,8 @@ pragma solidity 0.8.22;
 import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
-import {TOFTv2} from "contracts/TOFTv2.sol";
-import {TOFTInitStruct, TOFTModulesInitStruct} from "contracts/ITOFTv2.sol";
+import {TOFTv2} from "../contracts/TOFTv2.sol";
+import {TOFTInitStruct, TOFTModulesInitStruct} from "../contracts/ITOFTv2.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -24,5 +24,5 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 
 contract TOFTv2Mock is TOFTv2 {
-    constructor(TOFTInitStruct calldata _tOFTData, TOFTModulesInitStruct calldata _moduleData) TOFTv2(_tOFTData, _moduleData) {}
+    constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _moduleData) TOFTv2(_tOFTData, _moduleData) {}
 }

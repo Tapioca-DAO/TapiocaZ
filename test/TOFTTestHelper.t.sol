@@ -6,20 +6,21 @@ pragma solidity 0.8.22;
 import {TestHelper} from "./LZSetup/TestHelper.sol";
 
 // Tapioca
+import {IWrappedNative} from "tapioca-sdk/src/contracts/YieldBox/contracts/interfaces/IWrappedNative.sol";
 import {YieldBoxURIBuilder} from "tapioca-sdk/dist/contracts/YieldBox/contracts/YieldBoxURIBuilder.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
-import {TOFTInitStruct} from "contracts/ITOFTv2.sol";
-import {Cluster} from "@tapioca-periph/Cluster/Cluster.sol";
+import {TOFTInitStruct, TOFTModulesInitStruct} from "../contracts/ITOFTv2.sol";
+import {Cluster} from "../tapioca-periph/contracts/Cluster/Cluster.sol";
 import {TestUtils} from "./TestUtils.t.sol";
 
-contract TOFTTestHelper.t is TestHelper, TestUtils {
-    function createYieldBox() public returns (YieldBox memory) {
+contract TOFTTestHelper is TestHelper, TestUtils {
+    function createYieldBox() public returns (YieldBox) {
         YieldBoxURIBuilder uriBuilder = new YieldBoxURIBuilder();
 
         return new YieldBox(IWrappedNative(address(0)), uriBuilder);
     }
 
-    function createCluster(address endpoint, address owner) public returns (Cluster memory) {
+    function createCluster(address endpoint, address owner) public returns (Cluster) {
         return new Cluster(endpoint, owner);
     }
 
@@ -28,12 +29,12 @@ contract TOFTTestHelper.t is TestHelper, TestUtils {
             {
                 name: name,
                 symbol: symbol,
-                endpoint: endpoint
+                endpoint: endpoint,
                 owner: owner,
                 yieldBox: yieldBox,
                 cluster: cluster,
-                erc20: aERC20,
-                hostEid: aEid
+                erc20: erc20,
+                hostEid: hostEid
             }
         );
     }
@@ -45,7 +46,6 @@ contract TOFTTestHelper.t is TestHelper, TestUtils {
                 tOFTReceiverModule: tOFTReceiverModule,
                 marketReceiverModule: marketReceiverModule
             }
-        )
+        );
     }
-
 }

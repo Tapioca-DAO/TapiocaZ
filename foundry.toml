@@ -15,8 +15,7 @@ remappings = [
     "contracts/=contracts/LZV2/tOFT/",
     "contractsV1/=contracts/",
 	'forge-deploy/=node_modules/forge-deploy/contracts/',
-	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
-	"forge-std/=lib/forge-std/"
+	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/"
 ]
 
 # forge-dpeloy

@@ -14,6 +14,7 @@ artifacts
 # Forge files
 out
 cache_forge
+lib/forge-std
 
 #Others
 .DS_Store

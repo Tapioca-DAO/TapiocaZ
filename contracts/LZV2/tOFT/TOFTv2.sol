@@ -32,12 +32,12 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 /**
- * @title TOFTV2
+ * @title TOFTv2
  * @author TapiocaDAO
  * @notice Tapioca OFT wrapper contract
  * @dev It can be wrapped and unwrapped only on host chain
  */
-contract TOFTV2 is BaseTOFTv2, Pausable, ReentrancyGuard {
+contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard {
     error TOFTV2_OnlyHostChain();
     error TOFTV2_NotNative();
 

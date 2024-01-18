@@ -29,20 +29,21 @@ import {
     ERC20PermitApprovalMsg,
     ERC721PermitApprovalMsg,
     RemoteTransferMsg,
-    TOFTInitStruct
-} from "contracts//ITOFTv2.sol";
+    TOFTInitStruct,
+    TOFTModulesInitStruct
+} from "../contracts//ITOFTv2.sol";
 import {
     TOFTv2Helper,
     PrepareLzCallData,
     PrepareLzCallReturn,
     ComposeMsgData
-} from "contracts/extensions/TOFTv2Helper.sol";
-import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
+} from "../contracts/extensions/TOFTv2Helper.sol";
+import {TOFTv2MarketReceiverModule} from "../contracts/modules/TOFTv2MarketReceiverModule.sol";
 import {YieldBox} from "tapioca-sdk/dist/contracts/YieldBox/contracts/YieldBox.sol";
-import {TOFTv2Receiver} from "contracts/modules/TOFTv2Receiver.sol";
-import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
-import {Cluster} from "@tapioca-periph/Cluster/Cluster.sol";
+import {TOFTv2Receiver} from "../contracts/modules/TOFTv2Receiver.sol";
+import {TOFTMsgCoder} from "../contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTv2Sender} from "../contracts/modules/TOFTv2Sender.sol";
+import {Cluster} from "../tapioca-periph/contracts/Cluster/Cluster.sol";
 
 // Tapioca Tests
 import {TOFTTestHelper} from "./TOFTTestHelper.t.sol";
@@ -53,7 +54,7 @@ import {ERC20Mock} from "./ERC20Mock.sol";
 import "forge-std/Test.sol";
 
 
-contract TOFTv2Test is TOFTTestHelper, IERC721Receiver {
+contract TOFTv2Test is TOFTTestHelper {
     using OptionsBuilder for bytes;
     using OFTMsgCodec for bytes32;
     using OFTMsgCodec for bytes;
@@ -123,13 +124,13 @@ contract TOFTv2Test is TOFTTestHelper, IERC721Receiver {
         cluster = createCluster(address(endpoints[aEid]), __owner);
         
         TOFTInitStruct memory aTOFTInitStruct = createInitStruct("Token A", "TNKA", address(endpoints[aEid]), __owner, address(yieldBox), address(cluster), address(aERC20), aEid);
-        TOFTv2Sender memory aTOFTv2Sender = new TOFTv2Sender(aTOFTInitStruct);
-        TOFTv2Receiver memory aTOFTv2Receiver = new TOFTv2Receiver(aTOFTInitStruct);
-        TOFTv2MarketReceiverModule memory aTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
+        TOFTv2Sender aTOFTv2Sender = new TOFTv2Sender(aTOFTInitStruct);
+        TOFTv2Receiver aTOFTv2Receiver = new TOFTv2Receiver(aTOFTInitStruct);
+        TOFTv2MarketReceiverModule aTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
         TOFTModulesInitStruct memory aTOFTModulesInitStruct = createModulesInitStruct(address(aTOFTv2Sender), address(aTOFTv2Receiver), address(aTOFTv2MarketReceiverModule));
         aTOFT = TOFTv2Mock(
             payable(
-                _deployOapp(
+                _deployOApp(
                     type(TOFTv2Mock).creationCode,
                     abi.encode(aTOFTInitStruct, aTOFTModulesInitStruct)
                 )
@@ -138,13 +139,13 @@ contract TOFTv2Test is TOFTTestHelper, IERC721Receiver {
         vm.label(address(aTOFT), "aTOFT");
 
         TOFTInitStruct memory bTOFTInitStruct = createInitStruct("Token B", "TNKB", address(endpoints[bEid]), __owner, address(yieldBox), address(cluster), address(bERC20), bEid);
-        TOFTv2Sender memory bTOFTv2Sender = new TOFTv2Sender(bTOFTInitStruct);
-        TOFTv2Receiver memory bTOFTv2Receiver = new TOFTv2Receiver(bTOFTInitStruct);
-        TOFTv2MarketReceiverModule memory bTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
+        TOFTv2Sender bTOFTv2Sender = new TOFTv2Sender(bTOFTInitStruct);
+        TOFTv2Receiver bTOFTv2Receiver = new TOFTv2Receiver(bTOFTInitStruct);
+        TOFTv2MarketReceiverModule bTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
         TOFTModulesInitStruct memory bTOFTModulesInitStruct = createModulesInitStruct(address(bTOFTv2Sender), address(bTOFTv2Receiver), address(bTOFTv2MarketReceiverModule));
         bTOFT = TOFTv2Mock(
             payable(
-                _deployOapp(
+                _deployOApp(
                     type(TOFTv2Mock).creationCode,
                     abi.encode(bTOFTInitStruct, bTOFTModulesInitStruct)
                 )
