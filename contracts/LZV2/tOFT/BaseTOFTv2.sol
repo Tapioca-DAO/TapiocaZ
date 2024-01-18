@@ -11,16 +11,16 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.sol";
+import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
 import {IYieldBoxBase} from "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
 import {ICluster} from "tapioca-periph/contracts/interfaces/ICluster.sol";
-import {TOFTv2ExtExec} from "@contracts/extensions/TOFTv2ExtExec.sol";
-import {ModuleManager} from "@contracts/modules/ModuleManager.sol";
-import {ITOFTv2, TOFTInitStruct} from "@contracts/ITOFTv2.sol";
-import {CommonOFTv2} from "@contracts/CommonOFTv2.sol";
-import {TOFTVault} from "../../tOFT/TOFTVault.sol"; //TODO replace after removing v1 contracts
+import {TOFTv2ExtExec} from "contracts/extensions/TOFTv2ExtExec.sol";
+import {ModuleManager} from "contracts/modules/ModuleManager.sol";
+import {ITOFTv2, TOFTInitStruct} from "contracts/ITOFTv2.sol";
+import {CommonOFTv2} from "contracts/CommonOFTv2.sol";
+import {TOFTVault} from "contractsV1/tOFT/TOFTVault.sol"; //TODO replace after removing v1 contracts
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -85,24 +85,9 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
-        vault = TOFTVault(_data.tOFTVault);
+        vault = new TOFTVault(_data.erc20);
 
         toftV2ExtExec = new TOFTv2ExtExec();
-
-        // Set TOFTv2 execution modules
-        if (_data.tOFTSenderModule == address(0)) revert TOFT_NotValid();
-        if (_data.tOFTReceiverModule == address(0)) revert TOFT_NotValid();
-        if (_data.marketReceiverModule == address(0)) revert TOFT_NotValid();
-
-        _setModule(uint8(ITOFTv2.Module.TOFTv2Sender), _data.tOFTSenderModule);
-        _setModule(
-            uint8(ITOFTv2.Module.TOFTv2Receiver),
-            _data.tOFTReceiverModule
-        );
-        _setModule(
-            uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
-            _data.marketReceiverModule
-        );
     }
 
     /**

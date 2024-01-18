@@ -5,12 +5,12 @@ pragma solidity 0.8.22;
 import {SendParam, MessagingFee, MessagingReceipt, OFTReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.sol";
+import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // External
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
-import {TOFTMsgCoder} from "@contracts/libraries/TOFTMsgCoder.sol";
-import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, MarketBorrowMsg} from "@contracts/ITOFTv2.sol";
+import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, MarketBorrowMsg} from "contracts/ITOFTv2.sol";
 
 // Tapioca
 

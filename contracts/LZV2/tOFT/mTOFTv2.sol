@@ -13,10 +13,10 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, LZSendParam} from "@contracts/ITOFTv2.sol";
-import {TOFTv2Receiver} from "@contracts/modules/TOFTv2Receiver.sol";
-import {TOFTv2Sender} from "@contracts/modules/TOFTv2Sender.sol";
-import {BaseTOFTv2} from "@contracts/BaseTOFTv2.sol";
+import {ITOFTv2, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam} from "contracts/ITOFTv2.sol";
+import {TOFTv2Receiver} from "contracts/modules/TOFTv2Receiver.sol";
+import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
+import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -104,13 +104,36 @@ contract mTOFTV2 is BaseTOFTv2, Pausable, ReentrancyGuard {
     error mTOFTV2_CapNotValid();
     error mTOFTV2_OverCap();
 
-    constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {
+    constructor(
+        TOFTInitStruct memory _tOFTData,
+        TOFTModulesInitStruct memory _modulesData
+    ) BaseTOFTv2(_tOFTData) {
         if (_getChainId() == hostEid) {
             connectedChains[hostEid] = true;
         }
 
         mintCap = 1_000_000 * 1e18; // TOFT is always in 18 decimals
         mintFee = 5e2; // 0.5%
+
+        // Set TOFTv2 execution modules
+        if (_modulesData.tOFTSenderModule == address(0)) revert TOFT_NotValid();
+        if (_modulesData.tOFTReceiverModule == address(0))
+            revert TOFT_NotValid();
+        if (_modulesData.marketReceiverModule == address(0))
+            revert TOFT_NotValid();
+
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2Sender),
+            _modulesData.tOFTSenderModule
+        );
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2Receiver),
+            _modulesData.tOFTReceiverModule
+        );
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
+            _modulesData.marketReceiverModule
+        );
     }
 
     /**

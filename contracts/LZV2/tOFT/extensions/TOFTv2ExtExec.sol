@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 
 // Tapioca
-import {ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "../ITOFTv2.sol";
+import {ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "contracts/ITOFTv2.sol";
 import {ERC721Permit} from "tapioca-sdk/dist/contracts/util/ERC4494.sol";
 import {IPermit} from "tapioca-periph/contracts/interfaces/IPermit.sol";
 import {IPermitAll} from "tapioca-periph/contracts/interfaces/IPermitAll.sol";

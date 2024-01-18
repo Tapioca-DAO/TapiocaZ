@@ -6,17 +6,17 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.sol";
+import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {IMagnetar} from "tapioca-periph/contracts/interfaces/IMagnetar.sol";
-import {TOFTv2CommonReceiverModule} from "./TOFTv2CommonReceiverModule.sol";
+import {TOFTv2CommonReceiverModule} from "contracts/modules/TOFTv2CommonReceiverModule.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import {IMarket} from "tapioca-periph/contracts/interfaces/IMarket.sol";
-import {TOFTMsgCoder} from "@contracts/libraries/TOFTMsgCoder.sol";
-import {TOFTInitStruct, MarketBorrowMsg} from "@contracts/ITOFTv2.sol";
-import {BaseTOFTv2} from "@contracts/BaseTOFTv2.sol";
+import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTInitStruct, MarketBorrowMsg} from "contracts/ITOFTv2.sol";
+import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

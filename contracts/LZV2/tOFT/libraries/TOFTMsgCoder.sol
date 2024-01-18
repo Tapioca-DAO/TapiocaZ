@@ -5,10 +5,10 @@ pragma solidity ^0.8.22;
 // LZ
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-import {BytesLib} from "@layerzerolabs/solidity-bytes-utils/contracts/BytesLib.sol";
+import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {ITOFTv2, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketBorrowMsg} from "@contracts/ITOFTv2.sol";
+import {ITOFTv2, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketBorrowMsg} from "contracts/ITOFTv2.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
 

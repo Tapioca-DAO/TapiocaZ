@@ -73,7 +73,8 @@ struct TOFTInitStruct {
     address cluster;
     address erc20;
     uint256 hostEid;
-    address tOFTVault;
+}
+struct TOFTModulesInitStruct {
     //modules
     address tOFTSenderModule;
     address tOFTReceiverModule;
