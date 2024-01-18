@@ -7,9 +7,9 @@ import {TestHelper} from "./LZSetup/TestHelper.sol";
 
 // Tapioca
 import {IWrappedNative} from "tapioca-sdk/src/contracts/YieldBox/contracts/interfaces/IWrappedNative.sol";
-import {YieldBoxURIBuilder} from "tapioca-sdk/dist/contracts/YieldBox/contracts/YieldBoxURIBuilder.sol";
+import {YieldBoxURIBuilder} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBoxURIBuilder.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
-import {TOFTInitStruct, TOFTModulesInitStruct} from "../contracts/ITOFTv2.sol";
+import {TOFTInitStruct, TOFTModulesInitStruct} from "contracts/ITOFTv2.sol";
 import {Cluster} from "../tapioca-periph/contracts/Cluster/Cluster.sol";
 import {TestUtils} from "./TestUtils.t.sol";
 
@@ -24,7 +24,7 @@ contract TOFTTestHelper is TestHelper, TestUtils {
         return new Cluster(endpoint, owner);
     }
 
-    function createInitStruct(string memory name, string memory symbol, address endpoint, address owner, address yieldBox, address cluster, address erc20, uint256 hostEid) public returns(TOFTInitStruct memory) {
+    function createInitStruct(string memory name, string memory symbol, address endpoint, address owner, address yieldBox, address cluster, address erc20, uint256 hostEid) public pure returns(TOFTInitStruct memory) {
         return TOFTInitStruct(
             {
                 name: name,
@@ -39,7 +39,7 @@ contract TOFTTestHelper is TestHelper, TestUtils {
         );
     }
 
-    function createModulesInitStruct(address tOFTSenderModule, address tOFTReceiverModule, address marketReceiverModule) public returns (TOFTModulesInitStruct memory) {
+    function createModulesInitStruct(address tOFTSenderModule, address tOFTReceiverModule, address marketReceiverModule) public pure returns (TOFTModulesInitStruct memory) {
         return TOFTModulesInitStruct(
             {
                 tOFTSenderModule: tOFTSenderModule,

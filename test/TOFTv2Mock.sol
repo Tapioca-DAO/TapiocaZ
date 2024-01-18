@@ -5,8 +5,8 @@ pragma solidity 0.8.22;
 import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
-import {TOFTv2} from "../contracts/TOFTv2.sol";
-import {TOFTInitStruct, TOFTModulesInitStruct} from "../contracts/ITOFTv2.sol";
+import {TOFTv2} from "contracts/TOFTv2.sol";
+import {TOFTInitStruct, TOFTModulesInitStruct} from "contracts/ITOFTv2.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

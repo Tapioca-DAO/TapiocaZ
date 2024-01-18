@@ -31,18 +31,18 @@ import {
     RemoteTransferMsg,
     TOFTInitStruct,
     TOFTModulesInitStruct
-} from "../contracts//ITOFTv2.sol";
+} from "contracts/ITOFTv2.sol";
 import {
     TOFTv2Helper,
     PrepareLzCallData,
     PrepareLzCallReturn,
     ComposeMsgData
-} from "../contracts/extensions/TOFTv2Helper.sol";
-import {TOFTv2MarketReceiverModule} from "../contracts/modules/TOFTv2MarketReceiverModule.sol";
-import {YieldBox} from "tapioca-sdk/dist/contracts/YieldBox/contracts/YieldBox.sol";
-import {TOFTv2Receiver} from "../contracts/modules/TOFTv2Receiver.sol";
-import {TOFTMsgCoder} from "../contracts/libraries/TOFTMsgCoder.sol";
-import {TOFTv2Sender} from "../contracts/modules/TOFTv2Sender.sol";
+} from "contracts/extensions/TOFTv2Helper.sol";
+import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
+import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
+import {TOFTv2Receiver} from "contracts/modules/TOFTv2Receiver.sol";
+import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
 import {Cluster} from "../tapioca-periph/contracts/Cluster/Cluster.sol";
 
 // Tapioca Tests
