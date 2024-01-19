@@ -8,7 +8,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {ITOFTv2, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketBorrowMsg} from "contracts/ITOFTv2.sol";
+import {ITOFTv2, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketBorrowMsg} from "contracts/ITOFTv2.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
 
@@ -407,15 +407,6 @@ library TOFTMsgCoder {
                 _erc20PermitApprovalMsg.r,
                 _erc20PermitApprovalMsg.s
             );
-    }
-
-    /**
-     * @notice Decodes an encoded message for the `TOFTv2Receiver.erc721PermitApprovalReceiver()` operation.
-     */
-    function decodeArrayOfERC721PermitApprovalMsg(
-        bytes memory _msg
-    ) internal pure returns (ERC721PermitApprovalMsg[] memory) {
-        return abi.decode(_msg, (ERC721PermitApprovalMsg[]));
     }
 
     /**

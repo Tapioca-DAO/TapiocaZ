@@ -10,7 +10,7 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 // External
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, MarketBorrowMsg} from "contracts/ITOFTv2.sol";
+import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, MarketBorrowMsg, RemoteTransferMsg} from "contracts/ITOFTv2.sol";
 
 // Tapioca
 
@@ -77,12 +77,11 @@ contract TOFTv2Helper {
     uint16 internal constant PT_REMOTE_TRANSFER = 400; // Use for transferring tokens from the contract from another chain
 
     uint16 internal constant PT_APPROVALS = 500; // Use for ERC20Permit approvals
-    uint16 internal constant PT_NFT_APPROVALS = 501; // Use for ERC721Permit approvals; TODO: check if we need this
-    uint16 internal constant PT_YB_APROVE_ASSET = 502; // Use for YieldBox 'setApprovalForAsset(true)' operation
-    uint16 internal constant PT_YB_APPROVE_ALL = 503; // Use for YieldBox 'setApprovalForAll(true)' operation
-    uint16 internal constant PT_YB_REVOKE_ASSET = 504; // Use for YieldBox 'setApprovalForAsset(false)' operation
-    uint16 internal constant PT_YB_REVOKE_ALL = 505; // Use for YieldBox 'setApprovalForAll(false)' operation
-    uint16 internal constant PT_MARKET_PERMIT_LEND = 506; // Use for market.permitLend() operation
+    uint16 internal constant PT_YB_APROVE_ASSET = 501; // Use for YieldBox 'setApprovalForAsset(true)' operation
+    uint16 internal constant PT_YB_APPROVE_ALL = 502; // Use for YieldBox 'setApprovalForAll(true)' operation
+    uint16 internal constant PT_YB_REVOKE_ASSET = 503; // Use for YieldBox 'setApprovalForAsset(false)' operation
+    uint16 internal constant PT_YB_REVOKE_ALL = 504; // Use for YieldBox 'setApprovalForAll(false)' operation
+    uint16 internal constant PT_MARKET_PERMIT_LEND = 505; // Use for market.permitLend() operation
     uint16 internal constant PT_MARKET_PERMIT_BORROW = 506; // Use for market.permitBorrow() operation
 
     uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 700; // Use for remove collateral from a market available on another chain
@@ -268,7 +267,6 @@ contract TOFTv2Helper {
             // Tapioca msg types
             _msgType == PT_REMOTE_TRANSFER ||
             _msgType == PT_APPROVALS ||
-            _msgType == PT_NFT_APPROVALS ||
             _msgType == PT_YB_APROVE_ASSET ||
             _msgType == PT_YB_APPROVE_ALL ||
             _msgType == PT_YB_REVOKE_ASSET ||
@@ -326,6 +324,16 @@ contract TOFTv2Helper {
     /// =======================
 
     /**
+     * @notice Encodes the message for the `remoteTransfer` operation.
+     * @param _remoteTransferMsg The owner + LZ send param to pass on the remote chain. (B->A)
+     */
+    function buildRemoteTransferMsg(
+        RemoteTransferMsg memory _remoteTransferMsg
+    ) public pure returns (bytes memory) {
+        return TOFTMsgCoder.buildRemoteTransferMsg(_remoteTransferMsg);
+    }
+
+    /**
      * @notice Encode the message for the _marketPermitBorrowReceiver() & _marketPermitLendReceiver operations.
      * @param _marketPermitActionMsg The Market permit lend/borrow approval message.
      */
@@ -371,15 +379,5 @@ contract TOFTv2Helper {
                 ++i;
             }
         }
-    }
-
-    /**
-     * @notice Encode the message for the _erc721PermitApprovalReceiver() operation.
-     * @param _erc721PermitApprovalMsg The ERC721 permit approval messages.
-     */
-    function buildNftPermitApprovalMsg(
-        ERC721PermitApprovalMsg[] memory _erc721PermitApprovalMsg
-    ) public pure returns (bytes memory msg_) {
-        return abi.encode(_erc721PermitApprovalMsg);
     }
 }

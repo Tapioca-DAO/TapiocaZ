@@ -5,8 +5,7 @@ pragma solidity 0.8.22;
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 
 // Tapioca
-import {ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg} from "contracts/ITOFTv2.sol";
-import {ERC721Permit} from "tapioca-sdk/dist/contracts/util/ERC4494.sol";
+import {ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, ERC20PermitStruct} from "contracts/ITOFTv2.sol";
 import {IPermit} from "tapioca-periph/contracts/interfaces/IPermit.sol";
 import {IPermitAll} from "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 import {IPermitAction} from "tapioca-periph/contracts/interfaces/IPermitAction.sol";
@@ -176,30 +175,6 @@ contract TOFTv2ExtExec {
                 _approvals[i].owner,
                 _approvals[i].spender,
                 _approvals[i].value,
-                _approvals[i].deadline,
-                _approvals[i].v,
-                _approvals[i].r,
-                _approvals[i].s
-            );
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /**
-     * @notice Executes an ERC721 permit approval.
-     * @param _approvals The ERC721 permit approval messages.
-     */
-
-    function erc721PermitApproval(
-        ERC721PermitApprovalMsg[] calldata _approvals
-    ) public {
-        uint256 approvalsLength = _approvals.length;
-        for (uint256 i = 0; i < approvalsLength; ) {
-            ERC721Permit(_approvals[i].token).permit(
-                _approvals[i].spender,
-                _approvals[i].tokenId,
                 _approvals[i].deadline,
                 _approvals[i].v,
                 _approvals[i].r,

@@ -148,29 +148,6 @@ struct ERC20PermitStruct {
 }
 
 /**
- * Structure of an ERC721 permit message.
- */
-struct ERC721PermitStruct {
-    address spender;
-    uint256 tokenId;
-    uint256 nonce;
-    uint256 deadline;
-}
-
-/**
- * @notice Encodes the message for the ercPermitApproval() operation.
- */
-struct ERC721PermitApprovalMsg {
-    address token;
-    address spender;
-    uint256 tokenId;
-    uint256 deadline;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-}
-
-/**
  * @dev Used in TOFTv2Helper.
  */
 struct RemoteTransferMsg {

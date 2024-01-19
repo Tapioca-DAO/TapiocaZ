@@ -13,7 +13,8 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, ERC20PermitApprovalMsg, ERC721PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg} from "contracts/ITOFTv2.sol";
+import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg} from "contracts/ITOFTv2.sol";
+import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
 import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
 import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
@@ -161,8 +162,6 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             _remoteTransferReceiver(srcChainSender_, tOFTComposeMsg_);
         } else if (msgType_ == PT_APPROVALS) {
             _erc20PermitApprovalReceiver(tOFTComposeMsg_);
-        } else if (msgType_ == PT_NFT_APPROVALS) {
-            _erc721PermitApprovalReceiver(tOFTComposeMsg_);
         } else if (msgType_ == PT_YB_APPROVE_ALL) {
             _yieldBoxPermitAllReceiver(tOFTComposeMsg_);
         } else if (msgType_ == PT_YB_REVOKE_ALL) {
@@ -178,12 +177,10 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         } else if (msgType_ == PT_YB_SEND_SGL_BORROW) {
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
-                tOFTComposeMsg_,
-                // TODO: replace with the following
-                // abi.encodeWithSelector(
-                //     TOFTv2MarketReceiverModule.marketBorrowReceiver.selector,
-                //     tOFTComposeMsg_
-                // ),
+                abi.encodeWithSelector(
+                    TOFTv2MarketReceiverModule.marketBorrowReceiver.selector,
+                    tOFTComposeMsg_
+                ),
                 false
             );
         } else {
@@ -472,27 +469,6 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             .decodeArrayOfERC20PermitApprovalMsg(_data);
 
         toftV2ExtExec.erc20PermitApproval(approvals);
-    }
-
-    /**
-     * @notice Approves NFT tokens via permit.
-     * @param _data The call data containing info about the approvals.
-     *      - token::address: Address of the token to approve.
-     *      - spender::address: Address of the spender.
-     *      - tokenId::uint256: TokenId of the token to approve.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
-     */
-    function _erc721PermitApprovalReceiver(
-        bytes memory _data
-    ) internal virtual {
-        // TODO: encode and decode packed data to save gas
-        ERC721PermitApprovalMsg[] memory approvals = TOFTMsgCoder
-            .decodeArrayOfERC721PermitApprovalMsg(_data);
-
-        toftV2ExtExec.erc721PermitApproval(approvals);
     }
 
     function _sanitizeTarget(address target) private view {

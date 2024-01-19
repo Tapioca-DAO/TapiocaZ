@@ -13,7 +13,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam} from "contracts/ITOFTv2.sol";
+import {ITOFTv2, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "contracts/ITOFTv2.sol";
 import {TOFTv2Receiver} from "contracts/modules/TOFTv2Receiver.sol";
 import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
 import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
@@ -37,7 +37,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  * @notice Tapioca OFT wrapper contract that is connected with multiple chains
  * @dev It can be wrapped and unwrapped on multiple connected chains
  */
-contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard {
+contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
     /**
      * @notice allowed chains where you can unwrap your TOFT
      */
@@ -107,7 +107,7 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard {
     constructor(
         TOFTInitStruct memory _tOFTData,
         TOFTModulesInitStruct memory _modulesData
-    ) BaseTOFTv2(_tOFTData) {
+    ) BaseTOFTv2(_tOFTData) ERC20Permit(_tOFTData.name) {
         if (_getChainId() == hostEid) {
             connectedChains[hostEid] = true;
         }
@@ -265,6 +265,30 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard {
      */
     function decimals() public pure override returns (uint8) {
         return 18;
+    }
+
+    /**
+     * @dev Returns the hash of the struct used by the permit function.
+     * @param _permitData Struct containing permit data.
+     */
+    function getTypedDataHash(
+        ERC20PermitStruct calldata _permitData
+    ) public view returns (bytes32) {
+        bytes32 permitTypeHash_ = keccak256(
+            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+        );
+
+        bytes32 structHash_ = keccak256(
+            abi.encode(
+                permitTypeHash_,
+                _permitData.owner,
+                _permitData.spender,
+                _permitData.value,
+                _permitData.nonce,
+                _permitData.deadline
+            )
+        );
+        return _hashTypedDataV4(structHash_);
     }
 
     /// =====================
