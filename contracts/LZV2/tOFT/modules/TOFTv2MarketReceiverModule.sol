@@ -11,7 +11,6 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 // Tapioca
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {IMagnetar} from "tapioca-periph/contracts/interfaces/IMagnetar.sol";
-import {TOFTv2CommonReceiverModule} from "contracts/modules/TOFTv2CommonReceiverModule.sol";
 import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 import {IMarket} from "tapioca-periph/contracts/interfaces/IMarket.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
@@ -36,7 +35,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  * @author TapiocaDAO
  * @notice TOFTv2 Market module
  */
-contract TOFTv2MarketReceiverModule is BaseTOFTv2, TOFTv2CommonReceiverModule {
+contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
@@ -54,7 +53,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2, TOFTv2CommonReceiverModule {
      *      - withdrawParams::struct: Withdraw related params.
      */
     function marketBorrowReceiver(bytes memory _data) public payable {
-        if (msg.sender != address(this))
+        if (msg.sender != address(endpoint))
             revert TOFTv2MarketReceiverModule_NotAuthorized(msg.sender);
 
         // @dev decode received message
@@ -89,7 +88,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2, TOFTv2CommonReceiverModule {
             marketBorrowMsg_.to,
             marketBorrowMsg_.borrowParams.amount,
             marketBorrowMsg_.borrowParams.borrowAmount,
-            true,
+            false, //extract from user; he needs to approve magnetar
             true,
             marketBorrowMsg_.withdrawParams
         );

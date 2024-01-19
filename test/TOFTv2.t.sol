@@ -134,11 +134,22 @@ contract TOFTv2Test is TOFTTestHelper {
         yieldBox = createYieldBox();
         cluster = createCluster(aEid, __owner);
         magnetar = createMagnetar(address(cluster));
+
+        {
+            vm.label(address(endpoints[aEid]), "aEndpoint");
+            vm.label(address(endpoints[bEid]), "bEndpoint");
+            vm.label(address(yieldBox), "YieldBox");
+            vm.label(address(cluster), "Cluster");
+            vm.label(address(magnetar), "Magnetar");
+        }
         
         TOFTInitStruct memory aTOFTInitStruct = createInitStruct("Token A", "TNKA", address(endpoints[aEid]), __owner, address(yieldBox), address(cluster), address(aERC20), aEid);
         TOFTv2Sender aTOFTv2Sender = new TOFTv2Sender(aTOFTInitStruct);
         TOFTv2Receiver aTOFTv2Receiver = new TOFTv2Receiver(aTOFTInitStruct);
         TOFTv2MarketReceiverModule aTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
+        vm.label(address(aTOFTv2Sender), "aTOFTv2Sender");
+        vm.label(address(aTOFTv2Receiver), "aTOFTv2Receiver");
+        vm.label(address(aTOFTv2MarketReceiverModule), "aTOFTv2MarketReceiverModule");
         TOFTModulesInitStruct memory aTOFTModulesInitStruct = createModulesInitStruct(address(aTOFTv2Sender), address(aTOFTv2Receiver), address(aTOFTv2MarketReceiverModule));
         aTOFT = TOFTv2Mock(
             payable(
@@ -153,7 +164,10 @@ contract TOFTv2Test is TOFTTestHelper {
         TOFTInitStruct memory bTOFTInitStruct = createInitStruct("Token B", "TNKB", address(endpoints[bEid]), __owner, address(yieldBox), address(cluster), address(bERC20), bEid);
         TOFTv2Sender bTOFTv2Sender = new TOFTv2Sender(bTOFTInitStruct);
         TOFTv2Receiver bTOFTv2Receiver = new TOFTv2Receiver(bTOFTInitStruct);
-        TOFTv2MarketReceiverModule bTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
+        TOFTv2MarketReceiverModule bTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(bTOFTInitStruct);
+        vm.label(address(bTOFTv2Sender), "bTOFTv2Sender");
+        vm.label(address(bTOFTv2Receiver), "bTOFTv2Receiver");
+        vm.label(address(bTOFTv2MarketReceiverModule), "bTOFTv2MarketReceiverModule");
         TOFTModulesInitStruct memory bTOFTModulesInitStruct = createModulesInitStruct(address(bTOFTv2Sender), address(bTOFTv2Receiver), address(bTOFTv2MarketReceiverModule));
         bTOFT = TOFTv2Mock(
             payable(
@@ -166,6 +180,8 @@ contract TOFTv2Test is TOFTTestHelper {
         vm.label(address(bTOFT), "bTOFT");
 
         tOFTv2Helper = new TOFTv2Helper();
+        vm.label(address(tOFTv2Helper), "TOFTv2Helper");
+
         // config and wire the ofts
         address[] memory ofts = new address[](2);
         ofts[0] = address(aTOFT);
@@ -176,10 +192,16 @@ contract TOFTv2Test is TOFTTestHelper {
         ERC20WithoutStrategy aTOFTStrategy = createYieldBoxEmptyStrategy(address(yieldBox), address(aTOFT));
         ERC20WithoutStrategy bTOFTStrategy = createYieldBoxEmptyStrategy(address(yieldBox), address(bTOFT));
 
-        aTOFTYieldBoxId = registerYieldBoxAsset(address(yieldBox), address(aTOFT), address(aTOFTStrategy)); //we assume this is the collateral Id
-        bTOFTYieldBoxId = registerYieldBoxAsset(address(yieldBox), address(bTOFT), address(bTOFTStrategy)); //we assume this is the asset Id
+        aTOFTYieldBoxId = registerYieldBoxAsset(address(yieldBox), address(aTOFT), address(aTOFTStrategy)); //we assume this is the asset Id
+        bTOFTYieldBoxId = registerYieldBoxAsset(address(yieldBox), address(bTOFT), address(bTOFTStrategy)); //we assume this is the collateral Id
 
-        singularity = createSingularity(address(yieldBox), aTOFTYieldBoxId, bTOFTYieldBoxId, address(aTOFT), address(bTOFT));
+        singularity = createSingularity(address(yieldBox), bTOFTYieldBoxId, aTOFTYieldBoxId, address(bTOFT), address(aTOFT));
+        vm.label(address(singularity), "Singularity");
+
+        cluster.updateContract(aEid, address(singularity), true);
+        cluster.updateContract(aEid, address(magnetar), true);
+        cluster.updateContract(bEid, address(singularity), true);
+        cluster.updateContract(bEid, address(magnetar), true);
     }
 
        /**
@@ -478,11 +500,13 @@ contract TOFTv2Test is TOFTTestHelper {
             assertEq(aTOFT.balanceOf(address(this)), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
 
-            bTOFT.approve(address(yieldBox), erc20Amount_);
-            yieldBox.depositAsset(bTOFTYieldBoxId, address(this), address(singularity), erc20Amount_, 0);
-            assertGt(yieldBox.balanceOf(address(singularity), bTOFTYieldBoxId), 0);
+            aTOFT.approve(address(yieldBox), erc20Amount_);
+            yieldBox.depositAsset(aTOFTYieldBoxId, address(this), address(singularity), erc20Amount_, 0);
+            assertGt(yieldBox.balanceOf(address(singularity), aTOFTYieldBoxId), 0);
 
-            assertEq(bTOFT.balanceOf(address(this)), 0);
+            assertEq(aTOFT.balanceOf(address(this)), 0);
+            deal(address(aTOFT), address(this), erc20Amount_);
+            assertEq(aTOFT.balanceOf(address(this)), erc20Amount_);
         }
         
 
@@ -523,6 +547,10 @@ contract TOFTv2Test is TOFTTestHelper {
         /**
          * Actions
          */
+
+        //approve magnetar
+        bTOFT.approve(address(magnetar), type(uint256).max);
+
         MarketBorrowMsg memory marketBorrowMsg =
             MarketBorrowMsg({
                 from: address(this),
@@ -575,6 +603,8 @@ contract TOFTv2Test is TOFTTestHelper {
         (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
 
         {
+            verifyPackets(uint32(bEid), address(bTOFT));
+
             __callLzCompose(
                 LzOFTComposedData(
                     PT_YB_SEND_SGL_BORROW,
@@ -589,11 +619,13 @@ contract TOFTv2Test is TOFTTestHelper {
             );
         }
 
-        // // Check arrival
-        // {
-        //     assertEq(aTOFT.balanceOf(address(this)), erc20Amount_ - tokenAmount_);
-        //     assertEq(bTOFT.balanceOf(address(this)), tokenAmount_);
-        // }
+        // Check execution
+        {
+            assertEq(aTOFT.balanceOf(address(this)), erc20Amount_ - tokenAmount_);
+            assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
+            assertEq(yieldBox.toAmount(aTOFTYieldBoxId, yieldBox.balanceOf(address(this), aTOFTYieldBoxId), false), tokenAmount_);
+
+        }
     }
 
 }

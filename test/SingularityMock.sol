@@ -6,12 +6,14 @@ import {IYieldBoxBase} from "../tapioca-periph/contracts/interfaces/IYieldBoxBas
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import "forge-std/console.sol";
+
 contract SingularityMock {
     IYieldBoxBase public yieldBox;
-    uint256 collateralId;
-    uint256 assetId;
-    IERC20 collateral;
-    IERC20 asset;
+    uint256 public collateralId;
+    uint256 public assetId;
+    IERC20 public collateral;
+    IERC20 public asset;
 
        /// @notice total collateral supplied
     uint256 public totalCollateralShare;
@@ -43,6 +45,7 @@ contract SingularityMock {
         userBorrowPart[from] += amount;
 
         share = yieldBox.toShare(assetId, amount, true);
+
         yieldBox.transfer(address(this), to, assetId, share);
 
     }

@@ -12,6 +12,7 @@ import {ICommonData} from "../tapioca-periph/contracts/interfaces/ICommonData.so
 import {ICluster} from "../tapioca-periph/contracts/interfaces/ICluster.sol";
 import {IMarket} from "../tapioca-periph/contracts/interfaces/IMarket.sol";
 
+import "forge-std/console.sol";
 
 /*
 * @dev need this because of via-ir: true error on original Magnetar
@@ -41,6 +42,7 @@ contract MagnetarMock {
 
          IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
 
+    
         uint256 collateralId = market.collateralId();
         (, address collateralAddress, , ) = yieldBox.assets(collateralId);
 
@@ -95,7 +97,7 @@ contract MagnetarMock {
                 : user;
             market.borrow(user, borrowReceiver, borrowAmount);
 
-            if (withdrawParams.withdraw) {
+            // if (withdrawParams.withdraw) {
                 // bytes memory withdrawAssetBytes = abi.encode(
                 //     withdrawParams.withdrawOnOtherChain,
                 //     withdrawParams.withdrawLzChainId,
@@ -114,7 +116,7 @@ contract MagnetarMock {
                 //     withdrawParams.refundAddress,
                 //     withdrawParams.zroPaymentAddress
                 // );
-            }
+            // }
         }
 
         yieldBox.setApprovalForAll(address(market), false);
