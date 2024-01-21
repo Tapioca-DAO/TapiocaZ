@@ -74,45 +74,33 @@ contract TOFTv2ExtExec {
         uint256 approvalsLength = _approvals.length;
         for (uint256 i = 0; i < approvalsLength; ) {
             // @dev token is YieldBox
-            IPermit(_approvals[i].token).permit(
-                _approvals[i].owner,
-                _approvals[i].spender,
-                _approvals[i].value,
-                _approvals[i].deadline,
-                _approvals[i].v,
-                _approvals[i].r,
-                _approvals[i].s
-            );
+            if (_approvals[i].value == 0) {
+                IPermit(_approvals[i].token).revoke(
+                    _approvals[i].owner,
+                    _approvals[i].spender,
+                    _approvals[i].value,
+                    _approvals[i].deadline,
+                    _approvals[i].v,
+                    _approvals[i].r,
+                    _approvals[i].s
+                );
+            } else {
+                IPermit(_approvals[i].token).permit(
+                    _approvals[i].owner,
+                    _approvals[i].spender,
+                    _approvals[i].value,
+                    _approvals[i].deadline,
+                    _approvals[i].v,
+                    _approvals[i].r,
+                    _approvals[i].s
+                );
+            }
             unchecked {
                 ++i;
             }
         }
     }
 
-    /**
-     * @notice Executes YieldBox setApprovalForAsset(false) operations.
-     * @param _approvals The approvals message.
-     */
-    function yieldBoxPermitRevokeAsset(
-        ERC20PermitApprovalMsg[] calldata _approvals
-    ) public {
-        uint256 approvalsLength = _approvals.length;
-        for (uint256 i = 0; i < approvalsLength; ) {
-            // @dev token is YieldBox
-            IPermit(_approvals[i].token).revoke(
-                _approvals[i].owner,
-                _approvals[i].spender,
-                _approvals[i].value,
-                _approvals[i].deadline,
-                _approvals[i].v,
-                _approvals[i].r,
-                _approvals[i].s
-            );
-            unchecked {
-                ++i;
-            }
-        }
-    }
 
     /**
      * @notice Executes SGL/BB permitLend operation.

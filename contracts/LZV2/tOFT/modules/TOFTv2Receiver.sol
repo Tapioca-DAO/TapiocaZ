@@ -164,16 +164,10 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             _erc20PermitApprovalReceiver(tOFTComposeMsg_);
         } else if (msgType_ == PT_YB_APPROVE_ALL) {
             _yieldBoxPermitAllReceiver(tOFTComposeMsg_);
-        } else if (msgType_ == PT_YB_REVOKE_ALL) {
-            _yieldBoxRevokeAllReceiver(tOFTComposeMsg_);
         } else if (msgType_ == PT_YB_APROVE_ASSET) {
             _yieldBoxPermitAssetReceiver(tOFTComposeMsg_);
-        } else if (msgType_ == PT_YB_REVOKE_ASSET) {
-            _yieldBoxRevokeAssetReceiver(tOFTComposeMsg_);
-        } else if (msgType_ == PT_MARKET_PERMIT_LEND) {
-            _marketPermitLendReceiver(tOFTComposeMsg_);
-        } else if (msgType_ == PT_MARKET_PERMIT_BORROW) {
-            _marketPermitBorrowReceiver(tOFTComposeMsg_);
+        } else if (msgType_ == PT_MARKET_PERMIT) {
+            _marketPermitReceiver(tOFTComposeMsg_);
         } else if (msgType_ == PT_YB_SEND_SGL_BORROW) {
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
@@ -317,7 +311,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     }
 
     /**
-     * @notice Approves Market borrow via permit.
+     * @notice Approves Market lend/borrow via permit.
      * @param _data The call data containing info about the approval.
      *      - token::address: Address of the YieldBox to approve.
      *      - owner::address: Address of the owner of the tokens.
@@ -328,34 +322,17 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
      *      - r::bytes32: r value of the signature.
      *      - s::bytes32: s value of the signature.
      */
-    function _marketPermitBorrowReceiver(bytes memory _data) internal virtual {
+    function _marketPermitReceiver(bytes memory _data) internal virtual {
         MarketPermitActionMsg memory approval = TOFTMsgCoder
             .decodeMarketPermitApprovalMsg(_data);
 
         _sanitizeTarget(approval.target);
-
-        toftV2ExtExec.marketPermitBorrowApproval(approval);
-    }
-
-    /**
-     * @notice Approves Market lend via permit.
-     * @param _data The call data containing info about the approval.
-     *      - token::address: Address of the YieldBox to approve.
-     *      - owner::address: Address of the owner of the tokens.
-     *      - spender::address: Address of the spender.
-     *      - value::uint256: Amount of tokens to approve.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
-     */
-    function _marketPermitLendReceiver(bytes memory _data) internal virtual {
-        MarketPermitActionMsg memory approval = TOFTMsgCoder
-            .decodeMarketPermitApprovalMsg(_data);
-
-        _sanitizeTarget(approval.target);
-
-        toftV2ExtExec.marketPermitLendApproval(approval);
+        
+        if (approval.permitLend) {
+            toftV2ExtExec.marketPermitLendApproval(approval);
+        } else {
+            toftV2ExtExec._marketPermitBorrowReceiver(approval);
+        }
     }
 
     /**
@@ -386,53 +363,6 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     }
 
     /**
-     * @notice Revokes an approval for YieldBox asset via permit.
-     * @param _data The call data containing info about the approvals.
-     *      - token::address: Address of the YieldBox to approve.
-     *      - owner::address: Address of the owner of the tokens.
-     *      - spender::address: Address of the spender.
-     *      - value::uint256: Amount of tokens to approve.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
-     */
-    function _yieldBoxRevokeAssetReceiver(bytes memory _data) internal virtual {
-        ERC20PermitApprovalMsg[] memory approvals = TOFTMsgCoder
-            .decodeArrayOfERC20PermitApprovalMsg(_data);
-
-        uint256 approvalsLength = approvals.length;
-        for (uint256 i = 0; i < approvalsLength; ) {
-            _sanitizeTarget(approvals[i].token);
-            unchecked {
-                ++i;
-            }
-        }
-
-        toftV2ExtExec.yieldBoxPermitRevokeAsset(approvals);
-    }
-
-    /**
-     * @notice Revokes all assets approval on YieldBox.
-     * @param _data The call data containing info about the approval.
-     *      - target::address: Address of the YieldBox contract.
-     *      - owner::address: Address of the owner of the tokens.
-     *      - spender::address: Address of the spender.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
-     */
-    function _yieldBoxRevokeAllReceiver(bytes memory _data) internal virtual {
-        YieldBoxApproveAllMsg memory approval = TOFTMsgCoder
-            .decodeYieldBoxApproveAllMsg(_data);
-
-        _sanitizeTarget(approval.target);
-
-        toftV2ExtExec.yieldBoxPermitRevokeAll(approval);
-    }
-
-    /**
      * @notice Approves all assets on YieldBox.
      * @param _data The call data containing info about the approval.
      *      - target::address: Address of the YieldBox contract.
@@ -449,7 +379,11 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
 
         _sanitizeTarget(approval.target);
 
-        toftV2ExtExec.yieldBoxPermitApproveAll(approval);
+        if (approval.permit) {
+            toftV2ExtExec.yieldBoxPermitApproveAll(approval);
+        } else {
+            toftV2ExtExec.yieldBoxPermitRevokeAll(approval);
+        }
     }
 
     /**
