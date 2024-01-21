@@ -99,12 +99,9 @@ contract TOFTv2Test is TOFTTestHelper {
     uint16 internal constant SEND = 1; // Send LZ message type
     uint16 internal constant PT_REMOTE_TRANSFER = 400; // Use for transferring tokens from the contract from another chain
     uint16 internal constant PT_APPROVALS = 500; // Use for ERC20Permit approvals
-    uint16 internal constant PT_YB_APROVE_ASSET = 501; // Use for YieldBox 'setApprovalForAsset(true)' operation
+    uint16 internal constant PT_YB_APPROVE_ASSET = 501; // Use for YieldBox 'setApprovalForAsset(true)' operation
     uint16 internal constant PT_YB_APPROVE_ALL = 502; // Use for YieldBox 'setApprovalForAll(true)' operation
-    uint16 internal constant PT_YB_REVOKE_ASSET = 503; // Use for YieldBox 'setApprovalForAsset(false)' operation
-    uint16 internal constant PT_YB_REVOKE_ALL = 504; // Use for YieldBox 'setApprovalForAll(false)' operation
-    uint16 internal constant PT_MARKET_PERMIT_LEND = 505; // Use for market.permitLend() operation
-    uint16 internal constant PT_MARKET_PERMIT_BORROW = 506; // Use for market.permitBorrow() operation
+    uint16 internal constant PT_MARKET_PERMIT = 503; // Use for market.permitLend() operation
     uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 700; // Use for remove collateral from a market available on another chain
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 701; // Use fror send to YB and/or borrow from a market available on another chain
     uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 702; // Use for leverage sell on a market available on another chain

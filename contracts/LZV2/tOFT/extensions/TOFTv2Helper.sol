@@ -264,7 +264,7 @@ contract TOFTv2Helper {
             // Tapioca msg types
             _msgType == PT_REMOTE_TRANSFER ||
             _msgType == PT_APPROVALS ||
-            _msgType == PT_YB_APROVE_ASSET ||
+            _msgType == PT_YB_APPROVE_ASSET ||
             _msgType == PT_YB_APPROVE_ALL ||
             _msgType == PT_MARKET_PERMIT ||
             _msgType == PT_MARKET_REMOVE_COLLATERAL ||

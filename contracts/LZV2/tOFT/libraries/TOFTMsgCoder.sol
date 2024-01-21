@@ -566,7 +566,8 @@ library TOFTMsgCoder {
                 _yieldBoxApprovalAllMsg.deadline,
                 _yieldBoxApprovalAllMsg.v,
                 _yieldBoxApprovalAllMsg.r,
-                _yieldBoxApprovalAllMsg.s
+                _yieldBoxApprovalAllMsg.s,
+                _yieldBoxApprovalAllMsg.permit
             );
     }
 
@@ -586,7 +587,8 @@ library TOFTMsgCoder {
                 _marketApprovalMsg.deadline,
                 _marketApprovalMsg.v,
                 _marketApprovalMsg.r,
-                _marketApprovalMsg.s
+                _marketApprovalMsg.s,
+                _marketApprovalMsg.permitLend
             );
     }
 
@@ -611,7 +613,7 @@ library TOFTMsgCoder {
      * ------------------------------------------------------------- *
      * target        | address   | 0     | 20                        *
      * ------------------------------------------------------------- *
-     * actionType    | address   | 20    | 22                       *
+     * actionType    | address   | 20    | 22                        *
      * ------------------------------------------------------------- *
      * owner         | address   | 22    | 42                        *
      * ------------------------------------------------------------- *
@@ -625,7 +627,10 @@ library TOFTMsgCoder {
      * ------------------------------------------------------------- *
      * r             | bytes32   | 127  | 159                        *
      * ------------------------------------------------------------- *
-     * s             | bytes32   | 159  | 191                       *
+     * s             | bytes32   | 159  | 191                        *
+     * ------------------------------------------------------------- *
+     * ------------------------------------------------------------- *
+     * permitLend    | bool      | 191  | 192                        *
      * ------------------------------------------------------------- *
      *
      * @param _msg The encoded message. see `TOFTMsgCoder.buildMarketPermitApprovalMsg()`
@@ -696,6 +701,8 @@ library TOFTMsgCoder {
             0
         );
 
+        bool permitLend = _msg[offsets_.rOffset] != 0;
+
         // Return structured data
         marketPermitActionMsg_ = MarketPermitActionMsg(
             target,
@@ -706,7 +713,8 @@ library TOFTMsgCoder {
             deadline,
             v,
             r,
-            s
+            s,
+            permitLend
         );
     }
 
@@ -740,6 +748,8 @@ library TOFTMsgCoder {
      * r             | bytes32   | 93   | 125                        *
      * ------------------------------------------------------------- *
      * s             | bytes32   | 125   | 157                       *
+     * ------------------------------------------------------------- *
+     * permit        | bool      | 157   | 158                       *
      * ------------------------------------------------------------- *
      *
      * @param _msg The encoded message. see `TOFTMsgCoder.buildYieldBoxPermitAll()`
@@ -795,6 +805,8 @@ library TOFTMsgCoder {
             0
         );
 
+        bool permit = _msg[offsets_.sOffset] != 0;
+
         // Return structured data
         ybPermitAllMsg_ = YieldBoxApproveAllMsg(
             target,
@@ -803,7 +815,8 @@ library TOFTMsgCoder {
             deadline,
             v,
             r,
-            s
+            s,
+            permit
         );
     }
 

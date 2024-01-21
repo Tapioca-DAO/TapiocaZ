@@ -164,7 +164,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             _erc20PermitApprovalReceiver(tOFTComposeMsg_);
         } else if (msgType_ == PT_YB_APPROVE_ALL) {
             _yieldBoxPermitAllReceiver(tOFTComposeMsg_);
-        } else if (msgType_ == PT_YB_APROVE_ASSET) {
+        } else if (msgType_ == PT_YB_APPROVE_ASSET) {
             _yieldBoxPermitAssetReceiver(tOFTComposeMsg_);
         } else if (msgType_ == PT_MARKET_PERMIT) {
             _marketPermitReceiver(tOFTComposeMsg_);
@@ -331,7 +331,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         if (approval.permitLend) {
             toftV2ExtExec.marketPermitLendApproval(approval);
         } else {
-            toftV2ExtExec._marketPermitBorrowReceiver(approval);
+            toftV2ExtExec.marketPermitBorrowApproval(approval);
         }
     }
 
