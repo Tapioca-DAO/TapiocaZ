@@ -101,7 +101,6 @@ contract TOFTv2ExtExec {
         }
     }
 
-
     /**
      * @notice Executes SGL/BB permitLend operation.
      * @param _approval The approval message.

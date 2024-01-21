@@ -105,7 +105,6 @@ struct YieldBoxApproveAllMsg {
     uint8 v;
     bytes32 r;
     bytes32 s;
-
     bool permit;
 }
 
@@ -122,7 +121,6 @@ struct MarketPermitActionMsg {
     uint8 v;
     bytes32 r;
     bytes32 s;
-
     bool permitLend;
 }
 

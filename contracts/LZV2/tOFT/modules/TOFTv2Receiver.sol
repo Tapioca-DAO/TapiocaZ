@@ -327,7 +327,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             .decodeMarketPermitApprovalMsg(_data);
 
         _sanitizeTarget(approval.target);
-        
+
         if (approval.permitLend) {
             toftV2ExtExec.marketPermitLendApproval(approval);
         } else {
