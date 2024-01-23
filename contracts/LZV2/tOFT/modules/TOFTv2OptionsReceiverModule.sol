@@ -55,7 +55,6 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
      *      - composeMsg::bytes: Further compose data.
      */
     function exerciseOptionsReceiver(bytes memory _data) public payable {
-
         // @dev decode received message
         ExerciseOptionsMsg memory msg_ = TOFTMsgCoder.decodeExerciseOptionsMsg(
             _data
