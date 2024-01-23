@@ -72,9 +72,7 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
     error TOFT_AllowanceNotValid();
     error TOFT_NotValid();
 
-    constructor(
-        TOFTInitStruct memory _data
-    ) CommonOFTv2(_data.name, _data.symbol, _data.endpoint, _data.owner) {
+    constructor(TOFTInitStruct memory _data) CommonOFTv2(_data.name, _data.symbol, _data.endpoint, _data.owner) {
         yieldBox = IYieldBoxBase(_data.yieldBox);
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
@@ -97,12 +95,7 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
         return IMessagingChannel(endpoint).eid();
     }
 
-    function _wrap(
-        address _fromAddress,
-        address _toAddress,
-        uint256 _amount,
-        uint256 _feeAmount
-    ) internal virtual {
+    function _wrap(address _fromAddress, address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {
         if (_fromAddress != msg.sender) {
             if (allowance(_fromAddress, msg.sender) < _amount) {
                 revert TOFT_AllowanceNotValid();
@@ -114,11 +107,7 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
         _mint(_toAddress, _amount - _feeAmount);
     }
 
-    function _wrapNative(
-        address _toAddress,
-        uint256 _amount,
-        uint256 _feeAmount
-    ) internal virtual {
+    function _wrapNative(address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {
         vault.depositNative{value: _amount}();
         _mint(_toAddress, _amount - _feeAmount);
     }
