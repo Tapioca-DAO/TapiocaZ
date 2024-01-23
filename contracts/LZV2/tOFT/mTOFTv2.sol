@@ -117,14 +117,18 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
 
         // Set TOFTv2 execution modules
         if (_modulesData.tOFTSenderModule == address(0)) revert TOFT_NotValid();
-        if (_modulesData.tOFTReceiverModule == address(0))
+        if (_modulesData.tOFTReceiverModule == address(0)) {
             revert TOFT_NotValid();
-        if (_modulesData.marketReceiverModule == address(0))
+        }
+        if (_modulesData.marketReceiverModule == address(0)) {
             revert TOFT_NotValid();
-        if (_modulesData.optionsReceiverModule == address(0))
+        }
+        if (_modulesData.optionsReceiverModule == address(0)) {
             revert TOFT_NotValid();
-        if (_modulesData.genericReceiverModule == address(0))
+        }
+        if (_modulesData.genericReceiverModule == address(0)) {
             revert TOFT_NotValid();
+        }
 
         _setModule(
             uint8(ITOFTv2.Module.TOFTv2Sender),

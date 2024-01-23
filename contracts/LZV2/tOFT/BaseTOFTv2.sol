@@ -104,8 +104,9 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
         uint256 _feeAmount
     ) internal virtual {
         if (_fromAddress != msg.sender) {
-            if (allowance(_fromAddress, msg.sender) < _amount)
+            if (allowance(_fromAddress, msg.sender) < _amount) {
                 revert TOFT_AllowanceNotValid();
+            }
             _spendAllowance(_fromAddress, msg.sender, _amount);
         }
         if (_amount == 0) revert TOFT_NotValid();

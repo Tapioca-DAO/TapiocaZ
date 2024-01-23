@@ -8,19 +8,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {
-    ITOFTv2,
-    ERC20PermitApprovalMsg,
-    LZSendParam,
-    YieldBoxApproveAllMsg,
-    MarketPermitActionMsg,
-    RemoteTransferMsg,
-    MarketBorrowMsg,
-    MarketRemoveCollateralMsg,
-    MarketLeverageDownMsg,
-    ExerciseOptionsMsg,
-    SendParamsMsg
-} from "contracts/ITOFTv2.sol";
+import {ITOFTv2, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg, ExerciseOptionsMsg, SendParamsMsg} from "contracts/ITOFTv2.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
 
@@ -75,12 +63,20 @@ library TOFTMsgCoder {
      * @param _msgIndex The index of the compose message to encode.
      * @param _msg The Tap composed message.
      */
-    function encodeTOFTComposeMsg(bytes memory _msg, uint16 _msgType, uint16 _msgIndex, bytes memory _toftComposeMsg)
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodePacked(_toftComposeMsg, _msgType, uint16(_msg.length), _msgIndex, _msg);
+    function encodeTOFTComposeMsg(
+        bytes memory _msg,
+        uint16 _msgType,
+        uint16 _msgIndex,
+        bytes memory _toftComposeMsg
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                _toftComposeMsg,
+                _msgType,
+                uint16(_msg.length),
+                _msgIndex,
+                _msg
+            );
     }
 
     /**
@@ -106,7 +102,9 @@ library TOFTMsgCoder {
      * @return tOFTComposeMsg_ The TOFT composed message, which is the actual message.
      * @return nextMsg_ The next composed message. If the message is not composed, it'll be empty.
      */
-    function decodeTOFTComposeMsg(bytes memory _msg)
+    function decodeTOFTComposeMsg(
+        bytes memory _msg
+    )
         internal
         pure
         returns (
@@ -119,13 +117,23 @@ library TOFTMsgCoder {
     {
         // TODO use bitwise operators?
         msgType_ = BytesLib.toUint16(BytesLib.slice(_msg, 0, 2), 0);
-        msgLength_ = BytesLib.toUint16(BytesLib.slice(_msg, MSG_TYPE_OFFSET, 2), 0);
+        msgLength_ = BytesLib.toUint16(
+            BytesLib.slice(_msg, MSG_TYPE_OFFSET, 2),
+            0
+        );
 
-        msgIndex_ = BytesLib.toUint16(BytesLib.slice(_msg, MSG_LENGTH_OFFSET, 2), 0);
+        msgIndex_ = BytesLib.toUint16(
+            BytesLib.slice(_msg, MSG_LENGTH_OFFSET, 2),
+            0
+        );
         tOFTComposeMsg_ = BytesLib.slice(_msg, MSG_INDEX_OFFSET, msgLength_);
 
         uint256 tOFTComposeOffset_ = MSG_INDEX_OFFSET + msgLength_;
-        nextMsg_ = BytesLib.slice(_msg, tOFTComposeOffset_, _msg.length - (tOFTComposeOffset_));
+        nextMsg_ = BytesLib.slice(
+            _msg,
+            tOFTComposeOffset_,
+            _msg.length - (tOFTComposeOffset_)
+        );
     }
 
     /**
@@ -134,7 +142,9 @@ library TOFTMsgCoder {
      * @param _msg The composed message for the send() operation.
      * @return msgIndex_ The index of the current message.
      */
-    function decodeIndexOfTOFTComposeMsg(bytes memory _msg) internal pure returns (uint16 msgIndex_) {
+    function decodeIndexOfTOFTComposeMsg(
+        bytes memory _msg
+    ) internal pure returns (uint16 msgIndex_) {
         return BytesLib.toUint16(BytesLib.slice(_msg, MSG_LENGTH_OFFSET, 2), 0);
     }
 
@@ -143,11 +153,20 @@ library TOFTMsgCoder {
      * @param _msg The composed message for the send() operation.
      * @return nextMsg_ The next composed message. If the message is not composed, it'll be empty.
      */
-    function decodeNextMsgOfTOFTCompose(bytes memory _msg) internal pure returns (bytes memory nextMsg_) {
-        uint16 msgLength_ = BytesLib.toUint16(BytesLib.slice(_msg, MSG_TYPE_OFFSET, 2), 0);
+    function decodeNextMsgOfTOFTCompose(
+        bytes memory _msg
+    ) internal pure returns (bytes memory nextMsg_) {
+        uint16 msgLength_ = BytesLib.toUint16(
+            BytesLib.slice(_msg, MSG_TYPE_OFFSET, 2),
+            0
+        );
 
         uint256 tOFTComposeOffset_ = MSG_INDEX_OFFSET + msgLength_;
-        nextMsg_ = BytesLib.slice(_msg, tOFTComposeOffset_, _msg.length - (tOFTComposeOffset_));
+        nextMsg_ = BytesLib.slice(
+            _msg,
+            tOFTComposeOffset_,
+            _msg.length - (tOFTComposeOffset_)
+        );
     }
 
     /**
@@ -180,7 +199,9 @@ library TOFTMsgCoder {
      *
      * @param _options The extra options to be sanitized.
      */
-    function decodeExtraOptions(bytes memory _options)
+    function decodeExtraOptions(
+        bytes memory _options
+    )
         internal
         pure
         returns (
@@ -193,7 +214,10 @@ library TOFTMsgCoder {
             bytes memory nextMsg_
         )
     {
-        workerId_ = BytesLib.toUint8(BytesLib.slice(_options, OP_BLDR_WORKER_ID_OFFSETS, 1), 0);
+        workerId_ = BytesLib.toUint8(
+            BytesLib.slice(_options, OP_BLDR_WORKER_ID_OFFSETS, 1),
+            0
+        );
         // If the workerId is not decoded correctly, it means option index != 0.
         if (workerId_ != OP_BLDR_EXECUTOR_WORKER_ID_) {
             // add the new options prefix
@@ -203,10 +227,22 @@ library TOFTMsgCoder {
 
         /// @dev Option length is not the size of the actual `_options`, but the size of the option
         /// starting from `OPTION_TYPE`.
-        optionLength_ = BytesLib.toUint16(BytesLib.slice(_options, OP_BLDR_OPTION_LENGTH_OFFSET, 2), 0);
-        optionType_ = BytesLib.toUint8(BytesLib.slice(_options, OP_BLDR_OPTIONS_TYPE_OFFSET, 1), 0);
-        index_ = BytesLib.toUint16(BytesLib.slice(_options, OP_BLDR_INDEX_OFFSET, 2), 0);
-        gas_ = BytesLib.toUint128(BytesLib.slice(_options, OP_BLDR_GAS_OFFSET, 16), 0);
+        optionLength_ = BytesLib.toUint16(
+            BytesLib.slice(_options, OP_BLDR_OPTION_LENGTH_OFFSET, 2),
+            0
+        );
+        optionType_ = BytesLib.toUint8(
+            BytesLib.slice(_options, OP_BLDR_OPTIONS_TYPE_OFFSET, 1),
+            0
+        );
+        index_ = BytesLib.toUint16(
+            BytesLib.slice(_options, OP_BLDR_INDEX_OFFSET, 2),
+            0
+        );
+        gas_ = BytesLib.toUint128(
+            BytesLib.slice(_options, OP_BLDR_GAS_OFFSET, 16),
+            0
+        );
 
         /// @dev `value_` is not encoded if it's 0, check LZ `OptionBuilder.addExecutorLzComposeOption()`
         /// and `ExecutorOptions.encodeLzComposeOption()` for more info.
@@ -214,16 +250,27 @@ library TOFTMsgCoder {
         if (optionLength_ == 19) {
             uint16 nextMsgOffset = OP_BLDR_VALUE_OFFSET; // 24
             if (_options.length > nextMsgOffset) {
-                nextMsg_ = BytesLib.slice(_options, nextMsgOffset, _options.length - nextMsgOffset);
+                nextMsg_ = BytesLib.slice(
+                    _options,
+                    nextMsgOffset,
+                    _options.length - nextMsgOffset
+                );
             }
         }
         /// 35 = OptionType (1) + Index (8) + Gas (16) + Value (16)
         if (optionLength_ == 35) {
-            value_ = BytesLib.toUint128(BytesLib.slice(_options, OP_BLDR_VALUE_OFFSET, 16), 0);
+            value_ = BytesLib.toUint128(
+                BytesLib.slice(_options, OP_BLDR_VALUE_OFFSET, 16),
+                0
+            );
 
             uint16 nextMsgOffset = OP_BLDR_VALUE_OFFSET + 16; // 24 + 16 = 40
             if (_options.length > nextMsgOffset) {
-                nextMsg_ = BytesLib.slice(_options, nextMsgOffset, _options.length - nextMsgOffset);
+                nextMsg_ = BytesLib.slice(
+                    _options,
+                    nextMsgOffset,
+                    _options.length - nextMsgOffset
+                );
             }
         }
     }
@@ -233,16 +280,26 @@ library TOFTMsgCoder {
      *  @dev Option length is not the size of the actual `_options`, but the size of the option
      *  starting from `OPTION_TYPE`.
      */
-    function decodeLengthOfExtraOptions(bytes memory _options) internal pure returns (uint16 length_) {
-        length_ = BytesLib.toUint16(BytesLib.slice(_options, OP_BLDR_OPTION_LENGTH_OFFSET, 2), 0);
+    function decodeLengthOfExtraOptions(
+        bytes memory _options
+    ) internal pure returns (uint16 length_) {
+        length_ = BytesLib.toUint16(
+            BytesLib.slice(_options, OP_BLDR_OPTION_LENGTH_OFFSET, 2),
+            0
+        );
     }
 
     /**
      * @notice Decodes the index of extra options.
      */
-    function decodeIndexOfExtraOptions(bytes memory _options) internal pure returns (uint16 index_) {
+    function decodeIndexOfExtraOptions(
+        bytes memory _options
+    ) internal pure returns (uint16 index_) {
         uint16 INDEX_OFFSET = 6;
-        index_ = BytesLib.toUint16(BytesLib.slice(_options, INDEX_OFFSET, 2), 0);
+        index_ = BytesLib.toUint16(
+            BytesLib.slice(_options, INDEX_OFFSET, 2),
+            0
+        );
     }
 
     // /**
@@ -290,14 +347,22 @@ library TOFTMsgCoder {
      * @return composeSender_ The address of the compose sender. (dst OApp).
      * @return oftComposeMsg_ The TapOFT composed message, which is the actual message.
      */
-    function decodeLzComposeMsg(bytes calldata _msg)
+    function decodeLzComposeMsg(
+        bytes calldata _msg
+    )
         internal
         pure
         returns (address composeSender_, bytes memory oftComposeMsg_)
     {
-        composeSender_ = OFTMsgCodec.bytes32ToAddress(bytes32(BytesLib.slice(_msg, 0, LZ_COMPOSE_SENDER)));
+        composeSender_ = OFTMsgCodec.bytes32ToAddress(
+            bytes32(BytesLib.slice(_msg, 0, LZ_COMPOSE_SENDER))
+        );
 
-        oftComposeMsg_ = BytesLib.slice(_msg, LZ_COMPOSE_SENDER, _msg.length - LZ_COMPOSE_SENDER);
+        oftComposeMsg_ = BytesLib.slice(
+            _msg,
+            LZ_COMPOSE_SENDER,
+            _msg.length - LZ_COMPOSE_SENDER
+        );
     }
 
     // ***************************************
@@ -308,7 +373,9 @@ library TOFTMsgCoder {
      * @notice Encodes the message for the `remoteTransfer` operation.
      * @param _remoteTransferMsg The owner + LZ send param to pass on the remote chain. (B->A)
      */
-    function buildRemoteTransferMsg(RemoteTransferMsg memory _remoteTransferMsg) internal pure returns (bytes memory) {
+    function buildRemoteTransferMsg(
+        RemoteTransferMsg memory _remoteTransferMsg
+    ) internal pure returns (bytes memory) {
         return abi.encode(_remoteTransferMsg);
     }
 
@@ -316,32 +383,29 @@ library TOFTMsgCoder {
      * @notice Decode the message for the `remoteTransfer` operation.
      * @param _msg The owner + LZ send param to pass on the remote chain. (B->A)
      */
-    function decodeRemoteTransferMsg(bytes memory _msg)
-        internal
-        pure
-        returns (RemoteTransferMsg memory remoteTransferMsg_)
-    {
+    function decodeRemoteTransferMsg(
+        bytes memory _msg
+    ) internal pure returns (RemoteTransferMsg memory remoteTransferMsg_) {
         return abi.decode(_msg, (RemoteTransferMsg));
     }
 
     /**
      * @notice Encodes the message for the `TOFTv2Receiver._erc20PermitApprovalReceiver()` operation.
      */
-    function buildERC20PermitApprovalMsg(ERC20PermitApprovalMsg memory _erc20PermitApprovalMsg)
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodePacked(
-            _erc20PermitApprovalMsg.token,
-            _erc20PermitApprovalMsg.owner,
-            _erc20PermitApprovalMsg.spender,
-            _erc20PermitApprovalMsg.value,
-            _erc20PermitApprovalMsg.deadline,
-            _erc20PermitApprovalMsg.v,
-            _erc20PermitApprovalMsg.r,
-            _erc20PermitApprovalMsg.s
-        );
+    function buildERC20PermitApprovalMsg(
+        ERC20PermitApprovalMsg memory _erc20PermitApprovalMsg
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                _erc20PermitApprovalMsg.token,
+                _erc20PermitApprovalMsg.owner,
+                _erc20PermitApprovalMsg.spender,
+                _erc20PermitApprovalMsg.value,
+                _erc20PermitApprovalMsg.deadline,
+                _erc20PermitApprovalMsg.v,
+                _erc20PermitApprovalMsg.r,
+                _erc20PermitApprovalMsg.s
+            );
     }
 
     /**
@@ -381,7 +445,9 @@ library TOFTMsgCoder {
         uint8 sOffset;
     }
 
-    function decodeERC20PermitApprovalMsg(bytes memory _msg)
+    function decodeERC20PermitApprovalMsg(
+        bytes memory _msg
+    )
         internal
         pure
         returns (ERC20PermitApprovalMsg memory erc20PermitApprovalMsg_)
@@ -399,24 +465,59 @@ library TOFTMsgCoder {
         });
 
         // Decoded data
-        address token = BytesLib.toAddress(BytesLib.slice(_msg, 0, offsets_.tokenOffset), 0);
+        address token = BytesLib.toAddress(
+            BytesLib.slice(_msg, 0, offsets_.tokenOffset),
+            0
+        );
 
-        address owner = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.tokenOffset, 20), 0);
+        address owner = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.tokenOffset, 20),
+            0
+        );
 
-        address spender = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.ownerOffset, 20), 0);
+        address spender = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.ownerOffset, 20),
+            0
+        );
 
-        uint256 value = BytesLib.toUint256(BytesLib.slice(_msg, offsets_.spenderOffset, 32), 0);
+        uint256 value = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.spenderOffset, 32),
+            0
+        );
 
-        uint256 deadline = BytesLib.toUint256(BytesLib.slice(_msg, offsets_.valueOffset, 32), 0);
+        uint256 deadline = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.valueOffset, 32),
+            0
+        );
 
-        uint8 v = uint8(BytesLib.toUint8(BytesLib.slice(_msg, offsets_.deadlineOffset, 1), 0));
+        uint8 v = uint8(
+            BytesLib.toUint8(
+                BytesLib.slice(_msg, offsets_.deadlineOffset, 1),
+                0
+            )
+        );
 
-        bytes32 r = BytesLib.toBytes32(BytesLib.slice(_msg, offsets_.vOffset, 32), 0);
+        bytes32 r = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.vOffset, 32),
+            0
+        );
 
-        bytes32 s = BytesLib.toBytes32(BytesLib.slice(_msg, offsets_.rOffset, 32), 0);
+        bytes32 s = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.rOffset, 32),
+            0
+        );
 
         // Return structured data
-        erc20PermitApprovalMsg_ = ERC20PermitApprovalMsg(token, owner, spender, value, deadline, v, r, s);
+        erc20PermitApprovalMsg_ = ERC20PermitApprovalMsg(
+            token,
+            owner,
+            spender,
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
     }
 
     /**
@@ -425,19 +526,22 @@ library TOFTMsgCoder {
      *
      * @param _msg The encoded message. see `TOFTReceiver.buildERC20PermitApprovalMsg()`
      */
-    function decodeArrayOfERC20PermitApprovalMsg(bytes memory _msg)
-        internal
-        pure
-        returns (ERC20PermitApprovalMsg[] memory)
-    {
+    function decodeArrayOfERC20PermitApprovalMsg(
+        bytes memory _msg
+    ) internal pure returns (ERC20PermitApprovalMsg[] memory) {
         /// @dev see `this.decodeERC20PermitApprovalMsg()`, token + owner + spender + value + deadline + v + r + s length = 189.
         uint256 msgCount_ = _msg.length / 189;
 
-        ERC20PermitApprovalMsg[] memory erc20PermitApprovalMsgs_ = new ERC20PermitApprovalMsg[](msgCount_);
+        ERC20PermitApprovalMsg[]
+            memory erc20PermitApprovalMsgs_ = new ERC20PermitApprovalMsg[](
+                msgCount_
+            );
 
         uint256 msgIndex_;
-        for (uint256 i; i < msgCount_;) {
-            erc20PermitApprovalMsgs_[i] = decodeERC20PermitApprovalMsg(BytesLib.slice(_msg, msgIndex_, 189));
+        for (uint256 i; i < msgCount_; ) {
+            erc20PermitApprovalMsgs_[i] = decodeERC20PermitApprovalMsg(
+                BytesLib.slice(_msg, msgIndex_, 189)
+            );
             unchecked {
                 msgIndex_ += 189;
                 ++i;
@@ -450,43 +554,41 @@ library TOFTMsgCoder {
     /**
      * @notice Encodes the message for the `TOFTv2Receiver._yieldBoxRevokeAllReceiver()` operation.
      */
-    function buildYieldBoxApproveAllMsg(YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg)
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodePacked(
-            _yieldBoxApprovalAllMsg.target,
-            _yieldBoxApprovalAllMsg.owner,
-            _yieldBoxApprovalAllMsg.spender,
-            _yieldBoxApprovalAllMsg.deadline,
-            _yieldBoxApprovalAllMsg.v,
-            _yieldBoxApprovalAllMsg.r,
-            _yieldBoxApprovalAllMsg.s,
-            _yieldBoxApprovalAllMsg.permit
-        );
+    function buildYieldBoxApproveAllMsg(
+        YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                _yieldBoxApprovalAllMsg.target,
+                _yieldBoxApprovalAllMsg.owner,
+                _yieldBoxApprovalAllMsg.spender,
+                _yieldBoxApprovalAllMsg.deadline,
+                _yieldBoxApprovalAllMsg.v,
+                _yieldBoxApprovalAllMsg.r,
+                _yieldBoxApprovalAllMsg.s,
+                _yieldBoxApprovalAllMsg.permit
+            );
     }
 
     /**
      * @notice Encodes the message for the `TOFTv2Receiver._yieldBoxMarketPermitActionReceiver()` operation.
      */
-    function buildMarketPermitApprovalMsg(MarketPermitActionMsg memory _marketApprovalMsg)
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodePacked(
-            _marketApprovalMsg.target,
-            _marketApprovalMsg.actionType,
-            _marketApprovalMsg.owner,
-            _marketApprovalMsg.spender,
-            _marketApprovalMsg.value,
-            _marketApprovalMsg.deadline,
-            _marketApprovalMsg.v,
-            _marketApprovalMsg.r,
-            _marketApprovalMsg.s,
-            _marketApprovalMsg.permitLend
-        );
+    function buildMarketPermitApprovalMsg(
+        MarketPermitActionMsg memory _marketApprovalMsg
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                _marketApprovalMsg.target,
+                _marketApprovalMsg.actionType,
+                _marketApprovalMsg.owner,
+                _marketApprovalMsg.spender,
+                _marketApprovalMsg.value,
+                _marketApprovalMsg.deadline,
+                _marketApprovalMsg.v,
+                _marketApprovalMsg.r,
+                _marketApprovalMsg.s,
+                _marketApprovalMsg.permitLend
+            );
     }
 
     struct __marketOffsets {
@@ -532,7 +634,9 @@ library TOFTMsgCoder {
      *
      * @param _msg The encoded message. see `TOFTMsgCoder.buildMarketPermitApprovalMsg()`
      */
-    function decodeMarketPermitApprovalMsg(bytes memory _msg)
+    function decodeMarketPermitApprovalMsg(
+        bytes memory _msg
+    )
         internal
         pure
         returns (MarketPermitActionMsg memory marketPermitActionMsg_)
@@ -550,29 +654,67 @@ library TOFTMsgCoder {
         });
 
         // Decoded data
-        address target = BytesLib.toAddress(BytesLib.slice(_msg, 0, offsets_.targetOffset), 0);
+        address target = BytesLib.toAddress(
+            BytesLib.slice(_msg, 0, offsets_.targetOffset),
+            0
+        );
 
-        uint16 actionType = uint16(BytesLib.toUint16(BytesLib.slice(_msg, offsets_.targetOffset, 2), 0));
+        uint16 actionType = uint16(
+            BytesLib.toUint16(BytesLib.slice(_msg, offsets_.targetOffset, 2), 0)
+        );
 
-        address owner = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.actionTypeOffset, 20), 0);
+        address owner = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.actionTypeOffset, 20),
+            0
+        );
 
-        address spender = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.ownerOffset, 20), 0);
+        address spender = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.ownerOffset, 20),
+            0
+        );
 
-        uint256 value = BytesLib.toUint256(BytesLib.slice(_msg, offsets_.spenderOffset, 32), 0);
+        uint256 value = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.spenderOffset, 32),
+            0
+        );
 
-        uint256 deadline = BytesLib.toUint256(BytesLib.slice(_msg, offsets_.valueOffset, 32), 0);
+        uint256 deadline = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.valueOffset, 32),
+            0
+        );
 
-        uint8 v = uint8(BytesLib.toUint8(BytesLib.slice(_msg, offsets_.deadlineOffset, 1), 0));
+        uint8 v = uint8(
+            BytesLib.toUint8(
+                BytesLib.slice(_msg, offsets_.deadlineOffset, 1),
+                0
+            )
+        );
 
-        bytes32 r = BytesLib.toBytes32(BytesLib.slice(_msg, offsets_.vOffset, 32), 0);
+        bytes32 r = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.vOffset, 32),
+            0
+        );
 
-        bytes32 s = BytesLib.toBytes32(BytesLib.slice(_msg, offsets_.rOffset, 32), 0);
+        bytes32 s = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.rOffset, 32),
+            0
+        );
 
         bool permitLend = _msg[offsets_.rOffset] != 0;
 
         // Return structured data
-        marketPermitActionMsg_ =
-            MarketPermitActionMsg(target, actionType, owner, spender, value, deadline, v, r, s, permitLend);
+        marketPermitActionMsg_ = MarketPermitActionMsg(
+            target,
+            actionType,
+            owner,
+            spender,
+            value,
+            deadline,
+            v,
+            r,
+            s,
+            permitLend
+        );
     }
 
     struct __ybOffsets {
@@ -611,11 +753,9 @@ library TOFTMsgCoder {
      *
      * @param _msg The encoded message. see `TOFTMsgCoder.buildYieldBoxPermitAll()`
      */
-    function decodeYieldBoxApproveAllMsg(bytes memory _msg)
-        internal
-        pure
-        returns (YieldBoxApproveAllMsg memory ybPermitAllMsg_)
-    {
+    function decodeYieldBoxApproveAllMsg(
+        bytes memory _msg
+    ) internal pure returns (YieldBoxApproveAllMsg memory ybPermitAllMsg_) {
         __ybOffsets memory offsets_ = __ybOffsets({
             targetOffset: 20,
             ownerOffset: 72,
@@ -627,105 +767,145 @@ library TOFTMsgCoder {
         });
 
         // Decoded data
-        address target = BytesLib.toAddress(BytesLib.slice(_msg, 0, offsets_.targetOffset), 0);
+        address target = BytesLib.toAddress(
+            BytesLib.slice(_msg, 0, offsets_.targetOffset),
+            0
+        );
 
-        address owner = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.targetOffset, 20), 0);
+        address owner = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.targetOffset, 20),
+            0
+        );
 
-        address spender = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.ownerOffset, 20), 0);
+        address spender = BytesLib.toAddress(
+            BytesLib.slice(_msg, offsets_.ownerOffset, 20),
+            0
+        );
 
-        uint256 deadline = BytesLib.toUint256(BytesLib.slice(_msg, offsets_.spenderOffset, 32), 0);
+        uint256 deadline = BytesLib.toUint256(
+            BytesLib.slice(_msg, offsets_.spenderOffset, 32),
+            0
+        );
 
-        uint8 v = uint8(BytesLib.toUint8(BytesLib.slice(_msg, offsets_.deadlineOffset, 1), 0));
+        uint8 v = uint8(
+            BytesLib.toUint8(
+                BytesLib.slice(_msg, offsets_.deadlineOffset, 1),
+                0
+            )
+        );
 
-        bytes32 r = BytesLib.toBytes32(BytesLib.slice(_msg, offsets_.vOffset, 32), 0);
+        bytes32 r = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.vOffset, 32),
+            0
+        );
 
-        bytes32 s = BytesLib.toBytes32(BytesLib.slice(_msg, offsets_.rOffset, 32), 0);
+        bytes32 s = BytesLib.toBytes32(
+            BytesLib.slice(_msg, offsets_.rOffset, 32),
+            0
+        );
 
         bool permit = _msg[offsets_.sOffset] != 0;
 
         // Return structured data
-        ybPermitAllMsg_ = YieldBoxApproveAllMsg(target, owner, spender, deadline, v, r, s, permit);
+        ybPermitAllMsg_ = YieldBoxApproveAllMsg(
+            target,
+            owner,
+            spender,
+            deadline,
+            v,
+            r,
+            s,
+            permit
+        );
     }
 
     /**
      * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketBorrowReceiver()` operation.
      */
-    function buildMarketBorrow(MarketBorrowMsg memory _marketBorrowMsg) internal pure returns (bytes memory) {
+    function buildMarketBorrow(
+        MarketBorrowMsg memory _marketBorrowMsg
+    ) internal pure returns (bytes memory) {
         return abi.encode(_marketBorrowMsg);
     }
 
     /**
      * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketBorrowReceiver()` operation.
      */
-    function decodeMarketBorrowMsg(bytes memory _msg) internal pure returns (MarketBorrowMsg memory marketBorrowMsg_) {
+    function decodeMarketBorrowMsg(
+        bytes memory _msg
+    ) internal pure returns (MarketBorrowMsg memory marketBorrowMsg_) {
         return abi.decode(_msg, (MarketBorrowMsg));
     }
 
     /**
      * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketRemoveCollateralReceiver()` operation.
      */
-    function buildMarketRemoveCollateralMsg(MarketRemoveCollateralMsg memory _marketMsg)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function buildMarketRemoveCollateralMsg(
+        MarketRemoveCollateralMsg memory _marketMsg
+    ) internal pure returns (bytes memory) {
         return abi.encode(_marketMsg);
     }
 
     /**
      * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketRemoveCollateralReceiver()` operation.
      */
-    function decodeMarketRemoveCollateralMsg(bytes memory _msg)
-        internal
-        pure
-        returns (MarketRemoveCollateralMsg memory marketMsg_)
-    {
+    function decodeMarketRemoveCollateralMsg(
+        bytes memory _msg
+    ) internal pure returns (MarketRemoveCollateralMsg memory marketMsg_) {
         return abi.decode(_msg, (MarketRemoveCollateralMsg));
     }
 
     /**
      * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketLeverageDownReceiver()` operation.
      */
-    function buildMarketLeverageDownMsg(MarketLeverageDownMsg memory _marketMsg) internal pure returns (bytes memory) {
+    function buildMarketLeverageDownMsg(
+        MarketLeverageDownMsg memory _marketMsg
+    ) internal pure returns (bytes memory) {
         return abi.encode(_marketMsg);
     }
 
     /**
      * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketLeverageDownReceiver()` operation.
      */
-    function decodeMarketLeverageDownMsg(bytes memory _msg)
-        internal
-        pure
-        returns (MarketLeverageDownMsg memory marketMsg_)
-    {
+    function decodeMarketLeverageDownMsg(
+        bytes memory _msg
+    ) internal pure returns (MarketLeverageDownMsg memory marketMsg_) {
         return abi.decode(_msg, (MarketLeverageDownMsg));
     }
 
     /**
      * @notice Encodes the message for the `TOFTv2OptionsReceiverModule.exerciseOptionsReceiver()` operation.
      */
-    function buildExerciseOptionsMsg(ExerciseOptionsMsg memory _marketMsg) internal pure returns (bytes memory) {
+    function buildExerciseOptionsMsg(
+        ExerciseOptionsMsg memory _marketMsg
+    ) internal pure returns (bytes memory) {
         return abi.encode(_marketMsg);
     }
 
     /**
      * @notice Decodes an encoded message for the `TOFTv2OptionsReceiverModule.exerciseOptionsReceiver()` operation.
      */
-    function decodeExerciseOptionsMsg(bytes memory _msg) internal pure returns (ExerciseOptionsMsg memory marketMsg_) {
+    function decodeExerciseOptionsMsg(
+        bytes memory _msg
+    ) internal pure returns (ExerciseOptionsMsg memory marketMsg_) {
         return abi.decode(_msg, (ExerciseOptionsMsg));
     }
 
     /**
      * @notice Encodes the message for the `TOFTv2Receiver._receiveWithParams()` operation.
      */
-    function buildSendParamsMsg(SendParamsMsg memory _msg) internal pure returns (bytes memory) {
+    function buildSendParamsMsg(
+        SendParamsMsg memory _msg
+    ) internal pure returns (bytes memory) {
         return abi.encode(_msg);
     }
 
     /**
      * @notice Decodes an encoded message for the `TOFTv2Receiver._receiveWithParams()` operation.
      */
-    function decodeSendParamsMsg(bytes memory _msg) internal pure returns (SendParamsMsg memory sendMsg_) {
+    function decodeSendParamsMsg(
+        bytes memory _msg
+    ) internal pure returns (SendParamsMsg memory sendMsg_) {
         return abi.decode(_msg, (SendParamsMsg));
     }
 }

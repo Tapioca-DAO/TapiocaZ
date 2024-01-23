@@ -183,8 +183,9 @@ contract CommonOFTv2 is OFT {
                 BytesLib.slice(_extraOptions, 0, 2),
                 0
             );
-            if (optionsType != OPTION_TYPE_3)
+            if (optionsType != OPTION_TYPE_3) {
                 revert InvalidOptions(_extraOptions);
+            }
 
             // @dev Remove the first 2 bytes containing the type from the _extraOptions and combine with enforced.
             return

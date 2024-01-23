@@ -3,10 +3,7 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {
-    ERC20PermitApprovalMsg,
-    ERC20PermitStruct
-} from "contracts/ITOFTv2.sol";
+import {ERC20PermitApprovalMsg, ERC20PermitStruct} from "contracts/ITOFTv2.sol";
 
 import "forge-std/Test.sol";
 

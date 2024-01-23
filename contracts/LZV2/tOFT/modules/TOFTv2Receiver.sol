@@ -453,8 +453,9 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     }
 
     function _sanitizeTarget(address target) private view {
-        if (!cluster.isWhitelisted(0, target))
+        if (!cluster.isWhitelisted(0, target)) {
             revert InvalidApprovalTarget(target);
+        }
     }
 
     /**
