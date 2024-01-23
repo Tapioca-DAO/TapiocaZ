@@ -66,8 +66,6 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
     address public immutable erc20;
     ICluster public cluster;
 
-    uint256 internal constant SLIPPAGE_PRECISION = 1e4;
-
     error InvalidMsgType(uint16 msgType); // Triggered if the msgType is invalid on an `_lzCompose`.
     error TOFT_AllowanceNotValid();
     error TOFT_NotValid();
@@ -86,7 +84,9 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
      * @notice set the Cluster address.
      * @param _cluster the new Cluster address
      */
-    function setCluster(address _cluster) external virtual {}
+    function setCluster(address _cluster) external virtual {
+        cluster = ICluster(_cluster);
+    }
 
     /**
      * @notice Return the current chain EID.

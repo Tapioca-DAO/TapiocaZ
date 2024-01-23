@@ -57,10 +57,11 @@ contract TOFTv2GenericReceiverModule is BaseTOFTv2 {
      *      - amount::uint256: Amount to unwrap.
      */
     function receiveWithParamsReceiver(address srcChainSender, bytes memory _data) public {
-        /// @dev always sanitize on a module call.
         _sanitizeSender();
 
         SendParamsMsg memory msg_ = TOFTMsgCoder.decodeSendParamsMsg(_data);
+
+        msg_.amount = _toLD(uint64(msg_.amount));
 
         if (msg_.unwrap) {
             ITapiocaOFTBase tOFT = ITapiocaOFTBase(address(this));

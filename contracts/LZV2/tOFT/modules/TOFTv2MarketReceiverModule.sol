@@ -58,7 +58,6 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
 
     constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
 
-    //TODO: debit from 'from' or remove 'from' and use sender
     /**
      * @notice Calls depositAddCollateralAndBorrowFromMarket on Magnetar
      * @param _data The call data containing info about the operation.
@@ -82,7 +81,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         approve(address(marketBorrowMsg_.borrowParams.marketHelper), marketBorrowMsg_.borrowParams.amount);
         IMagnetar(marketBorrowMsg_.borrowParams.marketHelper).depositAddCollateralAndBorrowFromMarket{value: msg.value}(
             marketBorrowMsg_.borrowParams.market,
-            marketBorrowMsg_.to,
+            marketBorrowMsg_.user,
             marketBorrowMsg_.borrowParams.amount,
             marketBorrowMsg_.borrowParams.borrowAmount,
             false, //extract from user; he needs to approve magnetar
@@ -91,7 +90,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         );
 
         emit BorrowReceived(
-            marketBorrowMsg_.to,
+            marketBorrowMsg_.user,
             marketBorrowMsg_.borrowParams.market,
             marketBorrowMsg_.borrowParams.amount,
             marketBorrowMsg_.borrowParams.deposit,
@@ -121,7 +120,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         {
             uint256 share = IYieldBoxBase(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
             approve(msg_.removeParams.market, share);
-            IMarket(msg_.removeParams.market).removeCollateral(msg_.from, msg_.to, share);
+            IMarket(msg_.removeParams.market).removeCollateral(msg_.user, msg_.user, share);
         }
 
         {
@@ -133,13 +132,13 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
                     value: msg_.withdrawParams.withdrawLzFeeAmount
                 }(
                     ybAddress,
-                    msg_.to,
+                    msg_.user,
                     assetId,
                     msg_.withdrawParams.withdrawLzChainId,
-                    LzLib.addressToBytes32(msg_.to),
+                    LzLib.addressToBytes32(msg_.user),
                     msg_.removeParams.amount,
                     msg_.withdrawParams.withdrawAdapterParams,
-                    payable(msg_.to),
+                    payable(msg_.user),
                     msg_.withdrawParams.withdrawLzFeeAmount,
                     msg_.withdrawParams.unwrap,
                     msg_.withdrawParams.zroPaymentAddress
@@ -148,14 +147,14 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         }
 
         emit RemoveCollateralReceived(
-            msg_.to, msg_.removeParams.market, msg_.removeParams.amount, msg_.withdrawParams.withdraw
+            msg_.user, msg_.removeParams.market, msg_.removeParams.amount, msg_.withdrawParams.withdraw
         );
     }
 
     /**
      * @notice Performs market.leverageDown()
      * @param _data The call data containing info about the operation.
-     *      - leverageFor::address: Address to leverage for.
+     *      - user::address: Address to leverage for.
      *      - amount::uint256: Address to debit tokens from.
      *      - swapData::struct: Swap operation related params
      *      - externalData::struct: Struct containing addresses used by this operation.
@@ -183,7 +182,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
             );
         }
 
-        emit LeverageDownReceived(msg_.leverageFor, msg_.externalData.srcMarket, msg_.amount);
+        emit LeverageDownReceived(msg_.user, msg_.externalData.srcMarket, msg_.amount);
 
         //repay for leverage down
         /// @dev TODO: refactor after USDO is migrated to V2
@@ -192,7 +191,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         // ICommonData.IApproval[] memory approvals;
         // IUSDOBase(swapData.tokenOut).sendAndLendOrRepay{value: airdropAmount}(
         //     address(this),
-        //     msg_.leverageFor,
+        //     msg_.user,
         //     lzData.lzSrcChainId,
         //     lzData.zroPaymentAddress,
         //     IUSDOBase.ILendOrRepayParams({

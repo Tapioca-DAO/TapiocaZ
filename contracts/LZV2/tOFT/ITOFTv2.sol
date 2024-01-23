@@ -114,7 +114,7 @@ struct ExerciseOptionsMsg {
  * @notice Encodes the message for the PT_LEVERAGE_MARKET_DOWN operation.
  */
 struct MarketLeverageDownMsg {
-    address leverageFor;
+    address user;
     uint256 amount;
     IUSDOBase.ILeverageSwapData swapData;
     IUSDOBase.ILeverageExternalContractsData externalData;
@@ -127,8 +127,7 @@ struct MarketLeverageDownMsg {
  * @notice Encodes the message for the PT_MARKET_REMOVE_COLLATERAL operation.
  */
 struct MarketRemoveCollateralMsg {
-    address from;
-    address to;
+    address user;
     ITapiocaOFT.IRemoveParams removeParams;
     ICommonData.IWithdrawParams withdrawParams;
 }
@@ -137,9 +136,7 @@ struct MarketRemoveCollateralMsg {
  * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
  */
 struct MarketBorrowMsg {
-    // TODO; debit from 'from'
-    address from;
-    address to;
+    address user;
     ITapiocaOFT.IBorrowParams borrowParams;
     ICommonData.IWithdrawParams withdrawParams;
 }

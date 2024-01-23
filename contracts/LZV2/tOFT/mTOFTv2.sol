@@ -59,8 +59,6 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      */
     uint256 public mintFee;
 
-    uint256 private constant _FEE_PRECISION = 1e5;
-
     /**
      * @notice event emitted when a connected chain is reigstered or unregistered
      */
@@ -90,7 +88,6 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
     error mTOFTV2_NotHost();
     error mTOFTV2_BalancerNotAuthorized();
     error mTOFTV2_CapNotValid();
-    error mTOFTV2_OverCap();
 
     constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _modulesData)
         BaseTOFTv2(_tOFTData)
@@ -281,7 +278,7 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
     {
         if (balancers[msg.sender]) revert mTOFTV2_BalancerNotAuthorized();
         if (!connectedChains[_getChainId()]) revert mTOFTV2_NotHost();
-        if (totalSupply() + _amount > mintCap) revert mTOFTV2_OverCap();
+        if (totalSupply() + _amount > mintCap) revert mTOFTV2_CapNotValid();
 
         uint256 feeAmount = _checkAndExtractFees(_amount);
 
@@ -381,7 +378,7 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
         // not on host chain; extract fee
         // fees are used to rebalance liquidity to host chain
         if (_getChainId() != hostEid && mintFee > 0) {
-            feeAmount = (_amount * mintFee) / _FEE_PRECISION;
+            feeAmount = (_amount * mintFee) / 1e5;
             if (feeAmount > 0) {
                 if (erc20 == address(0)) {
                     vault.registerFees{value: feeAmount}(feeAmount);

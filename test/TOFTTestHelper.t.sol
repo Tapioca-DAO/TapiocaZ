@@ -87,14 +87,15 @@ contract TOFTTestHelper is TestHelper, TestUtils {
         address tOFTSenderModule,
         address tOFTReceiverModule,
         address marketReceiverModule,
-        address optionsReceiverModule
+        address optionsReceiverModule,
+        address genericReceiverModule
     ) public pure returns (TOFTModulesInitStruct memory) {
         return TOFTModulesInitStruct({
             tOFTSenderModule: tOFTSenderModule,
             tOFTReceiverModule: tOFTReceiverModule,
             marketReceiverModule: marketReceiverModule,
             optionsReceiverModule: optionsReceiverModule,
-            genericReceiverModule: address(0) //TODO fill it with generic receiver
+            genericReceiverModule: genericReceiverModule
         });
     }
 }

@@ -27,6 +27,7 @@ import {
     MarketRemoveCollateralMsg,
     MarketLeverageDownMsg
 } from "contracts/ITOFTv2.sol";
+import {ComposeMsgData, PrepareLzCallData, PrepareLzCallReturn} from "contracts/extensions/CommonData.sol";
 
 // Tapioca
 
@@ -42,48 +43,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
         _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 
 */
-
-//TODO:???? common
-/**
- * @notice Used to build the TAP compose messages.
- */
-struct ComposeMsgData {
-    uint8 index; // The index of the message.
-    uint128 gas; // The gasLimit used on the compose() function in the OApp for this message.
-    uint128 value; // The msg.value passed to the compose() function in the OApp for this message.
-    bytes data; // The data of the message.
-    bytes prevData; // The previous compose msg data, if any. Used to aggregate the compose msg data.
-    bytes prevOptionsData; // The previous compose msg options data, if any. Used to aggregate  the compose msg options.
-}
-
-//TODO:???? common
-/**
- * @notice Used to prepare an LZ call. See `TapOFTv2Helper.prepareLzCall()`.
- */
-struct PrepareLzCallData {
-    uint32 dstEid; // The destination endpoint ID.
-    address refundAddress; // The refund address;
-    bytes32 recipient; // The recipient address. Receiver of the OFT send if any, and refund address for the LZ send.
-    uint256 amountToSendLD; // The amount to send in the OFT send. If any.
-    uint256 minAmountToCreditLD; // The min amount to credit in the OFT send. If any.
-    uint16 msgType; // The message type, TAP custom ones, with `PT_` as a prefix.
-    ComposeMsgData composeMsgData; // The compose msg data.
-    uint128 lzReceiveGas; // The gasLimit used on the lzReceive() function in the OApp.
-    uint128 lzReceiveValue; // The msg.value passed to the lzReceive() function in the OApp.
-}
-
-//TODO:???? common
-/**
- * @notice Used to return the result of the `TapOFTv2Helper.prepareLzCall()` function.
- */
-struct PrepareLzCallReturn {
-    bytes composeMsg; // The composed message. Can include previous composeMsg if any.
-    bytes composeOptions; // The options of the composeMsg. Single option container, not aggregated with previous composeMsgOptions.
-    SendParam sendParam; // OFT basic Tx params.
-    MessagingFee msgFee; // OFT msg fee, include aggregation of previous composeMsgOptions.
-    LZSendParam lzSendParam; // LZ Tx params. contains multiple information for the Tapioca `sendPacket()` call.
-    bytes oftMsgOptions; // OFT msg options, include aggregation of previous composeMsgOptions.
-}
 
 contract TOFTv2Helper {
     // LZ
@@ -108,6 +67,26 @@ contract TOFTv2Helper {
     error InvalidExtraOptionsIndex(uint16 msgIndex, uint16 expectedIndex); // The option index does not follow the sequence of indexes in the `_tOFTv2ComposeMsg`
 
     // TODO Refactor it into `TapiocaOmnichainEngine`.
+    /**
+     * @dev Convert an amount from shared decimals into local decimals.
+     * @param _amountSD The amount in shared decimals.
+     * @param _decimalConversionRate The OFT decimal conversion rate
+     * @return amountLD The amount in local decimals.
+     */
+    function toLD(uint64 _amountSD, uint256 _decimalConversionRate) internal view returns (uint256 amountLD) {
+        return _amountSD * _decimalConversionRate;
+    }
+
+    /**
+     * @dev Convert an amount from local decimals into shared decimals.
+     * @param _amountLD The amount in local decimals.
+     * @param _decimalConversionRate The OFT decimal conversion rate
+     * @return amountSD The amount in shared decimals.
+     */
+    function toSD(uint256 _amountLD, uint256 _decimalConversionRate) internal view virtual returns (uint64 amountSD) {
+        return uint64(_amountLD / _decimalConversionRate);
+    }
+
     /**
      * @dev Helper to prepare an LZ call.
      * @return prepareLzCallReturn_ The result of the `prepareLzCall()` function. See `PrepareLzCallReturn`.
