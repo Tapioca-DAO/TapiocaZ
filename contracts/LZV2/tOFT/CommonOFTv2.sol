@@ -15,12 +15,9 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 contract CommonOFTv2 is OFT {
     using BytesLib for bytes;
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address _endpoint,
-        address _owner
-    ) OFT(_name, _symbol, _endpoint, _owner) {}
+    constructor(string memory _name, string memory _symbol, address _endpoint, address _owner)
+        OFT(_name, _symbol, _endpoint, _owner)
+    {}
 
     /**
      * @dev public function to remove dust from the given local decimal amount.
@@ -30,9 +27,7 @@ contract CommonOFTv2 is OFT {
      * @dev Prevents the loss of dust when moving amounts between chains with different decimals.
      * @dev eg. uint(123) with a conversion rate of 100 becomes uint(100).
      */
-    function removeDust(
-        uint256 _amountLD
-    ) public view virtual returns (uint256 amountLD) {
+    function removeDust(uint256 _amountLD) public view virtual returns (uint256 amountLD) {
         return _removeDust(_amountLD);
     }
 
@@ -60,21 +55,12 @@ contract CommonOFTv2 is OFT {
     ) external view virtual returns (MessagingFee memory msgFee) {
         // @dev mock the amount to credit, this is the same operation used in the send().
         // The quote is as similar as possible to the actual send() operation.
-        (, uint256 amountToCreditLD) = _debitView(
-            _sendParam.amountToSendLD,
-            _sendParam.minAmountToCreditLD,
-            _sendParam.dstEid
-        );
+        (, uint256 amountToCreditLD) =
+            _debitView(_sendParam.amountToSendLD, _sendParam.minAmountToCreditLD, _sendParam.dstEid);
 
         // @dev Builds the options and OFT message to quote in the endpoint.
-        (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
-            _sendParam,
-            _extraOptions,
-            _composeMsg,
-            amountToCreditLD,
-            address(0),
-            false
-        );
+        (bytes memory message, bytes memory options) =
+            _buildOFTMsgAndOptions(_sendParam, _extraOptions, _composeMsg, amountToCreditLD, address(0), false);
 
         // @dev Calculates the LayerZero fee for the send() operation.
         return _quote(_sendParam.dstEid, message, options, _payInLzToken);
@@ -124,10 +110,7 @@ contract CommonOFTv2 is OFT {
             // @dev `_msgSender` is used instead of using context `msg.sender`, to preserve context of the OFT call and use `msg.sender` of the source chain.
             message = hasCompose
                 ? abi.encodePacked(
-                    _sendParam.to,
-                    _toSD(_amountToCreditLD),
-                    OFTMsgCodec.addressToBytes32(_msgSender),
-                    _composeMsg
+                    _sendParam.to, _toSD(_amountToCreditLD), OFTMsgCodec.addressToBytes32(_msgSender), _composeMsg
                 )
                 : abi.encodePacked(_sendParam.to, _toSD(_amountToCreditLD));
         }
@@ -138,11 +121,7 @@ contract CommonOFTv2 is OFT {
             options = _extraOptions;
         } else {
             // @dev Combine the callers _extraOptions with the enforced options via the OAppOptionsType3.
-            options = _combineOptions(
-                _sendParam.dstEid,
-                _msgType,
-                _extraOptions
-            );
+            options = _combineOptions(_sendParam.dstEid, _msgType, _extraOptions);
         }
 
         // @dev Optionally inspect the message and options depending if the OApp owner has set a msg inspector.
@@ -164,11 +143,12 @@ contract CommonOFTv2 is OFT {
      * - The resulting options will be {gasLimit: 300k, msg.value: 1.5 ether} when the message is executed on the remote lzReceive() function.
      * @dev This presence of duplicated options is handled off-chain in the verifier/executor.
      */
-    function _combineOptions(
-        uint32 _eid,
-        uint16 _msgType,
-        bytes memory _extraOptions
-    ) internal view virtual returns (bytes memory) {
+    function _combineOptions(uint32 _eid, uint16 _msgType, bytes memory _extraOptions)
+        internal
+        view
+        virtual
+        returns (bytes memory)
+    {
         bytes memory enforced = enforcedOptions[_eid][_msgType];
 
         // No enforced options, pass whatever the caller supplied, even if it's empty or legacy type 1/2 options.
@@ -179,20 +159,13 @@ contract CommonOFTv2 is OFT {
 
         // @dev If caller provided _extraOptions, must be type 3 as its the ONLY type that can be combined.
         if (_extraOptions.length >= 2) {
-            uint16 optionsType = BytesLib.toUint16(
-                BytesLib.slice(_extraOptions, 0, 2),
-                0
-            );
+            uint16 optionsType = BytesLib.toUint16(BytesLib.slice(_extraOptions, 0, 2), 0);
             if (optionsType != OPTION_TYPE_3) {
                 revert InvalidOptions(_extraOptions);
             }
 
             // @dev Remove the first 2 bytes containing the type from the _extraOptions and combine with enforced.
-            return
-                bytes.concat(
-                    enforced,
-                    BytesLib.slice(_extraOptions, 2, _extraOptions.length - 2)
-                );
+            return bytes.concat(enforced, BytesLib.slice(_extraOptions, 2, _extraOptions.length - 2));
         }
 
         // No valid set of options was found.
