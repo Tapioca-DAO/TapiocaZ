@@ -5,15 +5,19 @@ pragma solidity 0.8.22;
 import {SendParam, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
+import {ITapiocaOptionsBrokerCrossChain} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
+import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
 
 interface ITOFTv2 {
     enum Module {
         NonModule, //0
         TOFTv2Sender,
         TOFTv2Receiver,
-        TOFTv2MarketReceiver
+        TOFTv2MarketReceiver,
+        TOFTv2OptionsReceiver,
+        TOFTv2GenericReceiver
     }
 
     /**
@@ -79,15 +83,61 @@ struct TOFTModulesInitStruct {
     address tOFTSenderModule;
     address tOFTReceiverModule;
     address marketReceiverModule;
+    address optionsReceiverModule;
+    address genericReceiverModule;
 }
 
 /// ============================
 /// ========= COMPOSE ==========
 /// ============================
 /**
+ * @notice Encodes the message for the PT_SEND_PARAMS operation.
+ */
+struct SendParamsMsg {
+    address receiver; //TODO: decide if we should use `srcChainSender_`
+    bool unwrap;
+    uint256 amount; //TODO: use the amount credited by lzReceive directly
+}
+
+/**
+ * @notice Encodes the message for the PT_TAP_EXERCISE operation.
+ */
+struct ExerciseOptionsMsg {
+    ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData;
+    bool withdrawOnOtherChain;
+    //@dev send back to source message params
+    LZSendParam lzSendParams;
+    bytes composeMsg;
+}
+
+/**
+ * @notice Encodes the message for the PT_LEVERAGE_MARKET_DOWN operation.
+ */
+struct MarketLeverageDownMsg {
+    address leverageFor;
+    uint256 amount;
+    IUSDOBase.ILeverageSwapData swapData;
+    IUSDOBase.ILeverageExternalContractsData externalData;
+    //@dev send back to source message params
+    LZSendParam lzSendParams;
+    bytes composeMsg;
+}
+
+/**
+ * @notice Encodes the message for the PT_MARKET_REMOVE_COLLATERAL operation.
+ */
+struct MarketRemoveCollateralMsg {
+    address from;
+    address to;
+    ITapiocaOFT.IRemoveParams removeParams;
+    ICommonData.IWithdrawParams withdrawParams;
+}
+
+/**
  * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
  */
 struct MarketBorrowMsg {
+    // TODO; debit from 'from'
     address from;
     address to;
     ITapiocaOFT.IBorrowParams borrowParams;

@@ -68,12 +68,14 @@ contract TOFTTestHelper is TestHelper, TestUtils {
         );
     }
 
-    function createModulesInitStruct(address tOFTSenderModule, address tOFTReceiverModule, address marketReceiverModule) public pure returns (TOFTModulesInitStruct memory) {
+    function createModulesInitStruct(address tOFTSenderModule, address tOFTReceiverModule, address marketReceiverModule, address optionsReceiverModule) public pure returns (TOFTModulesInitStruct memory) {
         return TOFTModulesInitStruct(
             {
                 tOFTSenderModule: tOFTSenderModule,
                 tOFTReceiverModule: tOFTReceiverModule,
-                marketReceiverModule: marketReceiverModule
+                marketReceiverModule: marketReceiverModule,
+                optionsReceiverModule: optionsReceiverModule,
+                genericReceiverModule: address(0) //TODO fill it with generic receiver
             }
         );
     }

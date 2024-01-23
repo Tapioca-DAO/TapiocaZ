@@ -8,7 +8,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
-import {ITOFTv2, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketBorrowMsg} from "contracts/ITOFTv2.sol";
+import {ITOFTv2, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg, ExerciseOptionsMsg, SendParamsMsg} from "contracts/ITOFTv2.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
 
@@ -821,7 +821,7 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Encodes the message for the `TOFTv2MarketReceiverModule.borrow()` operation.
+     * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketBorrowReceiver()` operation.
      */
     function buildMarketBorrow(
         MarketBorrowMsg memory _marketBorrowMsg
@@ -830,11 +830,83 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.borrow()` operation.
+     * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketBorrowReceiver()` operation.
      */
     function decodeMarketBorrowMsg(
         bytes memory _msg
     ) internal pure returns (MarketBorrowMsg memory marketBorrowMsg_) {
         return abi.decode(_msg, (MarketBorrowMsg));
+    }
+
+    /**
+     * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketRemoveCollateralReceiver()` operation.
+     */
+    function buildMarketRemoveCollateralMsg(
+        MarketRemoveCollateralMsg memory _marketMsg
+    ) internal pure returns (bytes memory) {
+        return abi.encode(_marketMsg);
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketRemoveCollateralReceiver()` operation.
+     */
+    function decodeMarketRemoveCollateralMsg(
+        bytes memory _msg
+    ) internal pure returns (MarketRemoveCollateralMsg memory marketMsg_) {
+        return abi.decode(_msg, (MarketRemoveCollateralMsg));
+    }
+
+    /**
+     * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketLeverageDownReceiver()` operation.
+     */
+    function buildMarketLeverageDownMsg(
+        MarketLeverageDownMsg memory _marketMsg
+    ) internal pure returns (bytes memory) {
+        return abi.encode(_marketMsg);
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketLeverageDownReceiver()` operation.
+     */
+    function decodeMarketLeverageDownMsg(
+        bytes memory _msg
+    ) internal pure returns (MarketLeverageDownMsg memory marketMsg_) {
+        return abi.decode(_msg, (MarketLeverageDownMsg));
+    }
+
+    /**
+     * @notice Encodes the message for the `TOFTv2OptionsReceiverModule.exerciseOptionsReceiver()` operation.
+     */
+    function buildExerciseOptionsMsg(
+        ExerciseOptionsMsg memory _marketMsg
+    ) internal pure returns (bytes memory) {
+        return abi.encode(_marketMsg);
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2OptionsReceiverModule.exerciseOptionsReceiver()` operation.
+     */
+    function decodeExerciseOptionsMsg(
+        bytes memory _msg
+    ) internal pure returns (ExerciseOptionsMsg memory marketMsg_) {
+        return abi.decode(_msg, (ExerciseOptionsMsg));
+    }
+
+    /**
+     * @notice Encodes the message for the `TOFTv2Receiver._receiveWithParams()` operation.
+     */
+    function buildSendParamsMsg(
+        SendParamsMsg memory _msg
+    ) internal pure returns (bytes memory) {
+        return abi.encode(_msg);
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTv2Receiver._receiveWithParams()` operation.
+     */
+    function decodeSendParamsMsg(
+        bytes memory _msg
+    ) internal pure returns (SendParamsMsg memory sendMsg_) {
+        return abi.decode(_msg, (SendParamsMsg));
     }
 }

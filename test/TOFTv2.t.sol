@@ -39,6 +39,7 @@ import {
 } from "contracts/extensions/TOFTv2Helper.sol";
 import {ERC20WithoutStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
 import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
+import {TOFTv2OptionsReceiverModule} from "contracts/modules/TOFTv2OptionsReceiverModule.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
@@ -144,10 +145,12 @@ contract TOFTv2Test is TOFTTestHelper {
         TOFTv2Sender aTOFTv2Sender = new TOFTv2Sender(aTOFTInitStruct);
         TOFTv2Receiver aTOFTv2Receiver = new TOFTv2Receiver(aTOFTInitStruct);
         TOFTv2MarketReceiverModule aTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
+        TOFTv2OptionsReceiverModule aTOFTv2OptionsReceiverModule = new TOFTv2OptionsReceiverModule(aTOFTInitStruct);
         vm.label(address(aTOFTv2Sender), "aTOFTv2Sender");
         vm.label(address(aTOFTv2Receiver), "aTOFTv2Receiver");
         vm.label(address(aTOFTv2MarketReceiverModule), "aTOFTv2MarketReceiverModule");
-        TOFTModulesInitStruct memory aTOFTModulesInitStruct = createModulesInitStruct(address(aTOFTv2Sender), address(aTOFTv2Receiver), address(aTOFTv2MarketReceiverModule));
+        vm.label(address(aTOFTv2OptionsReceiverModule), "aTOFTv2OptionsReceiverModule");
+        TOFTModulesInitStruct memory aTOFTModulesInitStruct = createModulesInitStruct(address(aTOFTv2Sender), address(aTOFTv2Receiver), address(aTOFTv2MarketReceiverModule), address(aTOFTv2MarketReceiverModule));
         aTOFT = TOFTv2Mock(
             payable(
                 _deployOApp(
@@ -162,10 +165,12 @@ contract TOFTv2Test is TOFTTestHelper {
         TOFTv2Sender bTOFTv2Sender = new TOFTv2Sender(bTOFTInitStruct);
         TOFTv2Receiver bTOFTv2Receiver = new TOFTv2Receiver(bTOFTInitStruct);
         TOFTv2MarketReceiverModule bTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(bTOFTInitStruct);
+        TOFTv2OptionsReceiverModule bTOFTv2OptionsReceiverModule = new TOFTv2OptionsReceiverModule(bTOFTInitStruct);
         vm.label(address(bTOFTv2Sender), "bTOFTv2Sender");
         vm.label(address(bTOFTv2Receiver), "bTOFTv2Receiver");
         vm.label(address(bTOFTv2MarketReceiverModule), "bTOFTv2MarketReceiverModule");
-        TOFTModulesInitStruct memory bTOFTModulesInitStruct = createModulesInitStruct(address(bTOFTv2Sender), address(bTOFTv2Receiver), address(bTOFTv2MarketReceiverModule));
+        vm.label(address(bTOFTv2OptionsReceiverModule), "bTOFTv2OptionsReceiverModule");
+        TOFTModulesInitStruct memory bTOFTModulesInitStruct = createModulesInitStruct(address(bTOFTv2Sender), address(bTOFTv2Receiver), address(bTOFTv2MarketReceiverModule), address(bTOFTv2OptionsReceiverModule));
         bTOFT = TOFTv2Mock(
             payable(
                 _deployOApp(
@@ -556,14 +561,15 @@ contract TOFTv2Test is TOFTTestHelper {
                     amount: tokenAmount_,
                     borrowAmount: tokenAmount_,
                     marketHelper: address(magnetar),
-                    market: address(singularity)
+                    market: address(singularity),
+                    deposit: true
                 }),
                 withdrawParams: ICommonData.IWithdrawParams({
                     withdraw: false,
                     withdrawLzFeeAmount: 0,
                     withdrawOnOtherChain: false,
                     withdrawLzChainId: 0,
-                    withdrawAdapterParams: '0x',
+                    withdrawAdapterParams: "0x",
                     unwrap: false,
                     refundAddress: payable(0),
                     zroPaymentAddress: address(0)

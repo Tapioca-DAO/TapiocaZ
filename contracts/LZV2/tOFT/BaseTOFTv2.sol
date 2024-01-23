@@ -11,7 +11,6 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // Tapioca
 import {IYieldBoxBase} from "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
@@ -41,7 +40,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  * @notice Base TOFT contract for LZ V2
  */
 contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
-    using BytesLib for bytes;
     using SafeERC20 for IERC20;
     using OFTMsgCodec for bytes;
     using OFTMsgCodec for bytes32;

@@ -5,12 +5,11 @@ pragma solidity 0.8.22;
 import {SendParam, MessagingFee, MessagingReceipt, OFTReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 
 // External
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, MarketBorrowMsg, RemoteTransferMsg} from "contracts/ITOFTv2.sol";
+import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, MarketBorrowMsg, RemoteTransferMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg} from "contracts/ITOFTv2.sol";
 
 // Tapioca
 
@@ -198,6 +197,25 @@ contract TOFTv2Helper {
     /// =======================
     /// Builder functions
     /// =======================
+    /**
+     * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
+     *
+     */
+    function buildMarketLeverageDownMsg(
+        MarketLeverageDownMsg calldata _marketMsg
+    ) public pure returns (bytes memory) {
+        return TOFTMsgCoder.buildMarketLeverageDownMsg(_marketMsg);
+    }
+
+    /**
+     * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
+     *
+     */
+    function buildMarketRemoveCollateralMsg(
+        MarketRemoveCollateralMsg calldata _marketMsg
+    ) public pure returns (bytes memory) {
+        return TOFTMsgCoder.buildMarketRemoveCollateralMsg(_marketMsg);
+    }
 
     /**
      * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.

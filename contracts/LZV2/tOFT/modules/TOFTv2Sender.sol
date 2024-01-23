@@ -79,7 +79,9 @@ contract TOFTv2Sender is BaseTOFTv2 {
             _lzSendParam.sendParam,
             _lzSendParam.extraOptions,
             _composeMsg,
-            amountToCreditLD
+            amountToCreditLD,
+            address(0),
+            false
         );
 
         // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.

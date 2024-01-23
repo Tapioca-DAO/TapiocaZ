@@ -10,11 +10,13 @@ import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg} from "contracts/ITOFTv2.sol";
+import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketRemoveCollateralMsg, SendParamsMsg} from "contracts/ITOFTv2.sol";
 import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
+import {TOFTv2OptionsReceiverModule} from "contracts/modules/TOFTv2OptionsReceiverModule.sol";
+import {TOFTv2GenericReceiverModule} from "contracts/modules/TOFTv2GenericReceiverModule.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
 import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
 import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
@@ -36,6 +38,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     using OFTMsgCodec for bytes;
     using OFTMsgCodec for bytes32;
+    using SafeERC20 for IERC20;
 
     /**
      *  @dev Triggered if the address of the composer doesn't match current contract in `lzCompose`.
@@ -45,6 +48,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     error InvalidCaller(address caller); // Should be the endpoint address
     error InsufficientAllowance(address owner, uint256 amount); // See `this.__internalTransferWithAllowance()`
     error InvalidApprovalTarget(address target); // Should be a whitelisted address available on the Cluster contract
+    error TransferFailed();
 
     event RemoteTransferReceived(
         address indexed owner,
@@ -177,6 +181,51 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
                 ),
                 false
             );
+        } else if (msgType_ == PT_MARKET_REMOVE_COLLATERAL) {
+            _executeModule(
+                uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
+                abi.encodeWithSelector(
+                    TOFTv2MarketReceiverModule
+                        .marketRemoveCollateralReceiver
+                        .selector,
+                    tOFTComposeMsg_
+                ),
+                false
+            );
+        } else if (msgType_ == PT_LEVERAGE_MARKET_DOWN) {
+            _executeModule(
+                uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
+                abi.encodeWithSelector(
+                    TOFTv2MarketReceiverModule
+                        .marketLeverageDownReceiver
+                        .selector,
+                    tOFTComposeMsg_
+                ),
+                false
+            );
+        } else if (msgType_ == PT_TAP_EXERCISE) {
+            _executeModule(
+                uint8(ITOFTv2.Module.TOFTv2OptionsReceiver),
+                abi.encodeWithSelector(
+                    TOFTv2OptionsReceiverModule
+                        .exerciseOptionsReceiver
+                        .selector,
+                    tOFTComposeMsg_
+                ),
+                false
+            );
+        } else if (msgType_ == PT_SEND_PARAMS) {
+            _executeModule(
+                uint8(ITOFTv2.Module.TOFTv2GenericReceiver),
+                abi.encodeWithSelector(
+                    TOFTv2GenericReceiverModule
+                        .receiveWithParamsReceiver
+                        .selector,
+                    srcChainSender_,
+                    tOFTComposeMsg_
+                ),
+                false
+            );
         } else {
             revert InvalidMsgType(msgType_);
         }
@@ -279,16 +328,14 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         }
 
         // Builds the options and OFT message to quote in the endpoint.
-        (
-            bytes memory message,
-            bytes memory options
-        ) = _buildOFTMsgAndOptionsMemory(
-                _lzSendParam.sendParam,
-                _lzSendParam.extraOptions,
-                _composeMsg,
-                amountToCreditLD_,
-                _srcChainSender
-            ); // msgSender is the sender of the composed message. We keep context by passing `_srcChainSender`.
+        (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
+            _lzSendParam.sendParam,
+            _lzSendParam.extraOptions,
+            _composeMsg,
+            amountToCreditLD_,
+            _srcChainSender,
+            true
+        ); // msgSender is the sender of the composed message. We keep context by passing `_srcChainSender`.
 
         // Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
         msgReceipt = _lzSend(
@@ -408,37 +455,6 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     function _sanitizeTarget(address target) private view {
         if (!cluster.isWhitelisted(0, target))
             revert InvalidApprovalTarget(target);
-    }
-
-    /**
-     * @dev For details about this function, check `BaseTOFTv2._buildOFTMsgAndOptions()`.
-     * @dev !!!! IMPORTANT !!!! The differences are:
-     *      - memory instead of calldata for parameters.
-     *      - `_msgSender` is used instead of using context `msg.sender`, to preserve context of the OFT call and use `msg.sender` of the source chain.
-     *      - Does NOT combine options, make sure to pass valid options to cover gas costs/value transfers.
-     */
-    function _buildOFTMsgAndOptionsMemory(
-        SendParam memory _sendParam,
-        bytes memory _extraOptions,
-        bytes memory _composeMsg,
-        uint256 _amountToCreditLD,
-        address _msgSender
-    ) internal view returns (bytes memory message, bytes memory options) {
-        bool hasCompose = _composeMsg.length > 0;
-
-        message = hasCompose
-            ? abi.encodePacked(
-                _sendParam.to,
-                _toSD(_amountToCreditLD),
-                OFTMsgCodec.addressToBytes32(_msgSender),
-                _composeMsg
-            )
-            : abi.encodePacked(_sendParam.to, _toSD(_amountToCreditLD));
-        options = _extraOptions;
-
-        if (msgInspector != address(0)) {
-            IOAppMsgInspector(msgInspector).inspect(message, options);
-        }
     }
 
     /**
