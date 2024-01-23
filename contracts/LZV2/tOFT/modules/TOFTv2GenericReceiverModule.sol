@@ -2,14 +2,19 @@
 pragma solidity 0.8.22;
 
 // LZ
-import {MessagingReceipt, OFTReceipt, SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {
+    MessagingReceipt, OFTReceipt, SendParam
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 
 // Tapioca
-import {ITapiocaOptionsBroker, ITapiocaOptionsBrokerCrossChain} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
+import {
+    ITapiocaOptionsBroker,
+    ITapiocaOptionsBrokerCrossChain
+} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
 import {ITapiocaOFTBase} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {TOFTInitStruct, SendParamsMsg} from "contracts/ITOFTv2.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
@@ -49,40 +54,31 @@ contract TOFTv2GenericReceiverModule is BaseTOFTv2 {
      *      - unwrap::bool: Unwrap TOFT.
      *      - amount::uint256: Amount to unwrap.
      */
-    function receiveWithParamsReceiver(
-        address srcChainSender,
-        bytes memory _data
-    ) public {
+    function receiveWithParamsReceiver(address srcChainSender, bytes memory _data) public {
         _sanitizeSender();
 
         SendParamsMsg memory msg_ = TOFTMsgCoder.decodeSendParamsMsg(_data);
+
+        msg_.amount = _toLD(uint64(msg_.amount));
 
         if (msg_.unwrap) {
             ITapiocaOFTBase tOFT = ITapiocaOFTBase(address(this));
             address toftERC20 = tOFT.erc20();
 
             /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
-            _internalTransferWithAllowance(
-                msg_.receiver,
-                srcChainSender,
-                msg_.amount
-            );
+            _internalTransferWithAllowance(msg_.receiver, srcChainSender, msg_.amount);
             tOFT.unwrap(address(this), msg_.amount);
 
             if (toftERC20 != address(0)) {
                 IERC20(toftERC20).safeTransfer(msg_.receiver, msg_.amount);
             } else {
-                (bool sent, ) = msg_.receiver.call{value: msg_.amount}("");
+                (bool sent,) = msg_.receiver.call{value: msg_.amount}("");
                 if (!sent) revert TOFTv2GenericReceiverModule_TransferFailed();
             }
         }
     }
 
-    function _internalTransferWithAllowance(
-        address _owner,
-        address srcChainSender,
-        uint256 _amount
-    ) internal {
+    function _internalTransferWithAllowance(address _owner, address srcChainSender, uint256 _amount) internal {
         if (_owner != srcChainSender) {
             _spendAllowance(_owner, srcChainSender, _amount);
         }
@@ -91,7 +87,8 @@ contract TOFTv2GenericReceiverModule is BaseTOFTv2 {
     }
 
     function _sanitizeSender() private view {
-        if (msg.sender != address(endpoint))
+        if (msg.sender != address(endpoint)) {
             revert TOFTv2GenericReceiverModule_NotAuthorized(msg.sender);
+        }
     }
 }

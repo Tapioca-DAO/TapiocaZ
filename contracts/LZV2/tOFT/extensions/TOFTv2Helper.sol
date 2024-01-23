@@ -2,14 +2,32 @@
 pragma solidity 0.8.22;
 
 // LZ
-import {SendParam, MessagingFee, MessagingReceipt, OFTReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {
+    SendParam,
+    MessagingFee,
+    MessagingReceipt,
+    OFTReceipt
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 
 // External
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {ITOFTv2, LZSendParam, ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, MarketBorrowMsg, RemoteTransferMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg} from "contracts/ITOFTv2.sol";
+import {
+    ITOFTv2,
+    LZSendParam,
+    ERC20PermitApprovalMsg,
+    ERC20PermitApprovalMsg,
+    LZSendParam,
+    YieldBoxApproveAllMsg,
+    MarketPermitActionMsg,
+    MarketBorrowMsg,
+    RemoteTransferMsg,
+    MarketRemoveCollateralMsg,
+    MarketLeverageDownMsg
+} from "contracts/ITOFTv2.sol";
+import {ComposeMsgData, PrepareLzCallData, PrepareLzCallReturn} from "contracts/extensions/CommonData.sol";
 
 // Tapioca
 
@@ -25,48 +43,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
         _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 
 */
-
-//TODO:???? common
-/**
- * @notice Used to build the TAP compose messages.
- */
-struct ComposeMsgData {
-    uint8 index; // The index of the message.
-    uint128 gas; // The gasLimit used on the compose() function in the OApp for this message.
-    uint128 value; // The msg.value passed to the compose() function in the OApp for this message.
-    bytes data; // The data of the message.
-    bytes prevData; // The previous compose msg data, if any. Used to aggregate the compose msg data.
-    bytes prevOptionsData; // The previous compose msg options data, if any. Used to aggregate  the compose msg options.
-}
-
-//TODO:???? common
-/**
- * @notice Used to prepare an LZ call. See `TapOFTv2Helper.prepareLzCall()`.
- */
-struct PrepareLzCallData {
-    uint32 dstEid; // The destination endpoint ID.
-    address refundAddress; // The refund address;
-    bytes32 recipient; // The recipient address. Receiver of the OFT send if any, and refund address for the LZ send.
-    uint256 amountToSendLD; // The amount to send in the OFT send. If any.
-    uint256 minAmountToCreditLD; // The min amount to credit in the OFT send. If any.
-    uint16 msgType; // The message type, TAP custom ones, with `PT_` as a prefix.
-    ComposeMsgData composeMsgData; // The compose msg data.
-    uint128 lzReceiveGas; // The gasLimit used on the lzReceive() function in the OApp.
-    uint128 lzReceiveValue; // The msg.value passed to the lzReceive() function in the OApp.
-}
-
-//TODO:???? common
-/**
- * @notice Used to return the result of the `TapOFTv2Helper.prepareLzCall()` function.
- */
-struct PrepareLzCallReturn {
-    bytes composeMsg; // The composed message. Can include previous composeMsg if any.
-    bytes composeOptions; // The options of the composeMsg. Single option container, not aggregated with previous composeMsgOptions.
-    SendParam sendParam; // OFT basic Tx params.
-    MessagingFee msgFee; // OFT msg fee, include aggregation of previous composeMsgOptions.
-    LZSendParam lzSendParam; // LZ Tx params. contains multiple information for the Tapioca `sendPacket()` call.
-    bytes oftMsgOptions; // OFT msg options, include aggregation of previous composeMsgOptions.
-}
 
 contract TOFTv2Helper {
     // LZ
@@ -91,13 +67,34 @@ contract TOFTv2Helper {
     error InvalidExtraOptionsIndex(uint16 msgIndex, uint16 expectedIndex); // The option index does not follow the sequence of indexes in the `_tOFTv2ComposeMsg`
 
     /**
+     * @dev Convert an amount from shared decimals into local decimals.
+     * @param _amountSD The amount in shared decimals.
+     * @param _decimalConversionRate The OFT decimal conversion rate
+     * @return amountLD The amount in local decimals.
+     */
+    function toLD(uint64 _amountSD, uint256 _decimalConversionRate) internal view returns (uint256 amountLD) {
+        return _amountSD * _decimalConversionRate;
+    }
+
+    /**
+     * @dev Convert an amount from local decimals into shared decimals.
+     * @param _amountLD The amount in local decimals.
+     * @param _decimalConversionRate The OFT decimal conversion rate
+     * @return amountSD The amount in shared decimals.
+     */
+    function toSD(uint256 _amountLD, uint256 _decimalConversionRate) internal view virtual returns (uint64 amountSD) {
+        return uint64(_amountLD / _decimalConversionRate);
+    }
+
+    /**
      * @dev Helper to prepare an LZ call.
      * @return prepareLzCallReturn_ The result of the `prepareLzCall()` function. See `PrepareLzCallReturn`.
      */
-    function prepareLzCall(
-        ITOFTv2 tOFTToken,
-        PrepareLzCallData memory _prepareLzCallData
-    ) public view returns (PrepareLzCallReturn memory prepareLzCallReturn_) {
+    function prepareLzCall(ITOFTv2 tOFTToken, PrepareLzCallData memory _prepareLzCallData)
+        public
+        view
+        returns (PrepareLzCallReturn memory prepareLzCallReturn_)
+    {
         SendParam memory sendParam_;
         bytes memory composeOptions_;
         bytes memory composeMsg_;
@@ -137,8 +134,7 @@ contract TOFTv2Helper {
         // Append previous option container if any.
         if (_prepareLzCallData.composeMsgData.prevOptionsData.length > 0) {
             require(
-                _prepareLzCallData.composeMsgData.prevOptionsData.length > 0,
-                "_prepareLzCall: invalid prevOptionsData"
+                _prepareLzCallData.composeMsgData.prevOptionsData.length > 0, "_prepareLzCall: invalid prevOptionsData"
             );
             oftMsgOptions_ = _prepareLzCallData.composeMsgData.prevOptionsData;
         } else {
@@ -147,14 +143,9 @@ contract TOFTv2Helper {
         }
 
         // Start by appending the lzReceiveOption if lzReceiveGas or lzReceiveValue is > 0.
-        if (
-            _prepareLzCallData.lzReceiveValue > 0 ||
-            _prepareLzCallData.lzReceiveGas > 0
-        ) {
+        if (_prepareLzCallData.lzReceiveValue > 0 || _prepareLzCallData.lzReceiveGas > 0) {
             oftMsgOptions_ = OptionsBuilder.addExecutorLzReceiveOption(
-                oftMsgOptions_,
-                _prepareLzCallData.lzReceiveGas,
-                _prepareLzCallData.lzReceiveValue
+                oftMsgOptions_, _prepareLzCallData.lzReceiveGas, _prepareLzCallData.lzReceiveValue
             );
         }
 
@@ -169,13 +160,7 @@ contract TOFTv2Helper {
             );
         }
 
-        msgFee_ = tOFTToken.quoteSendPacket(
-            sendParam_,
-            oftMsgOptions_,
-            false,
-            composeMsg_,
-            ""
-        );
+        msgFee_ = tOFTToken.quoteSendPacket(sendParam_, oftMsgOptions_, false, composeMsg_, "");
 
         lzSendParam_ = LZSendParam({
             sendParam: sendParam_,
@@ -201,9 +186,7 @@ contract TOFTv2Helper {
      * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
      *
      */
-    function buildMarketLeverageDownMsg(
-        MarketLeverageDownMsg calldata _marketMsg
-    ) public pure returns (bytes memory) {
+    function buildMarketLeverageDownMsg(MarketLeverageDownMsg calldata _marketMsg) public pure returns (bytes memory) {
         return TOFTMsgCoder.buildMarketLeverageDownMsg(_marketMsg);
     }
 
@@ -211,9 +194,11 @@ contract TOFTv2Helper {
      * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
      *
      */
-    function buildMarketRemoveCollateralMsg(
-        MarketRemoveCollateralMsg calldata _marketMsg
-    ) public pure returns (bytes memory) {
+    function buildMarketRemoveCollateralMsg(MarketRemoveCollateralMsg calldata _marketMsg)
+        public
+        pure
+        returns (bytes memory)
+    {
         return TOFTMsgCoder.buildMarketRemoveCollateralMsg(_marketMsg);
     }
 
@@ -221,9 +206,7 @@ contract TOFTv2Helper {
      * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
      *
      */
-    function buildMarketBorrowMsg(
-        MarketBorrowMsg calldata _marketBorrowMsg
-    ) public pure returns (bytes memory) {
+    function buildMarketBorrowMsg(MarketBorrowMsg calldata _marketBorrowMsg) public pure returns (bytes memory) {
         return TOFTMsgCoder.buildMarketBorrow(_marketBorrowMsg);
     }
 
@@ -256,12 +239,7 @@ contract TOFTv2Helper {
         _sanitizeMsgType(_msgType);
         _sanitizeMsgIndex(_msgIndex, _tapComposedMsg);
 
-        message = TOFTMsgCoder.encodeTOFTComposeMsg(
-            _msg,
-            _msgType,
-            _msgIndex,
-            _tapComposedMsg
-        );
+        message = TOFTMsgCoder.encodeTOFTComposeMsg(_msg, _msgType, _msgIndex, _tapComposedMsg);
 
         // TODO fix
         // _sanitizeExtraOptionsIndex(_msgIndex, _extraOptions);
@@ -278,19 +256,12 @@ contract TOFTv2Helper {
     function _sanitizeMsgType(uint16 _msgType) internal pure {
         if (
             // LZ
-            _msgType == SEND ||
+            _msgType == SEND
             // Tapioca msg types
-            _msgType == PT_REMOTE_TRANSFER ||
-            _msgType == PT_APPROVALS ||
-            _msgType == PT_YB_APPROVE_ASSET ||
-            _msgType == PT_YB_APPROVE_ALL ||
-            _msgType == PT_MARKET_PERMIT ||
-            _msgType == PT_MARKET_REMOVE_COLLATERAL ||
-            _msgType == PT_YB_SEND_SGL_BORROW ||
-            _msgType == PT_LEVERAGE_MARKET_DOWN ||
-            _msgType == PT_TAP_EXERCISE ||
-            _msgType == PT_SEND_PARAMS
-            //TODO: add rest of PT_ types
+            || _msgType == PT_REMOTE_TRANSFER || _msgType == PT_APPROVALS || _msgType == PT_YB_APPROVE_ASSET
+                || _msgType == PT_YB_APPROVE_ALL || _msgType == PT_MARKET_PERMIT || _msgType == PT_MARKET_REMOVE_COLLATERAL
+                || _msgType == PT_YB_SEND_SGL_BORROW || _msgType == PT_LEVERAGE_MARKET_DOWN || _msgType == PT_TAP_EXERCISE
+                || _msgType == PT_SEND_PARAMS
         ) {
             return;
         }
@@ -304,10 +275,7 @@ contract TOFTv2Helper {
      * @param _msgIndex The current message index.
      * @param _tOFTComposeMsg The previous TAP compose messages. Empty if this is the first message.
      */
-    function _sanitizeMsgIndex(
-        uint16 _msgIndex,
-        bytes memory _tOFTComposeMsg
-    ) internal pure {
+    function _sanitizeMsgIndex(uint16 _msgIndex, bytes memory _tOFTComposeMsg) internal pure {
         // If the msgIndex is 0 and there's no composeMsg, then it's the first message.
         if (_tOFTComposeMsg.length == 0 && _msgIndex == 0) {
             return;
@@ -339,9 +307,7 @@ contract TOFTv2Helper {
      * @notice Encodes the message for the `remoteTransfer` operation.
      * @param _remoteTransferMsg The owner + LZ send param to pass on the remote chain. (B->A)
      */
-    function buildRemoteTransferMsg(
-        RemoteTransferMsg memory _remoteTransferMsg
-    ) public pure returns (bytes memory) {
+    function buildRemoteTransferMsg(RemoteTransferMsg memory _remoteTransferMsg) public pure returns (bytes memory) {
         return TOFTMsgCoder.buildRemoteTransferMsg(_remoteTransferMsg);
     }
 
@@ -349,26 +315,24 @@ contract TOFTv2Helper {
      * @notice Encode the message for the _marketPermitBorrowReceiver() & _marketPermitLendReceiver operations.
      * @param _marketPermitActionMsg The Market permit lend/borrow approval message.
      */
-    function buildMarketPermitApprovalMsg(
-        MarketPermitActionMsg memory _marketPermitActionMsg
-    ) public pure returns (bytes memory msg_) {
-        msg_ = abi.encodePacked(
-            msg_,
-            TOFTMsgCoder.buildMarketPermitApprovalMsg(_marketPermitActionMsg)
-        );
+    function buildMarketPermitApprovalMsg(MarketPermitActionMsg memory _marketPermitActionMsg)
+        public
+        pure
+        returns (bytes memory msg_)
+    {
+        msg_ = abi.encodePacked(msg_, TOFTMsgCoder.buildMarketPermitApprovalMsg(_marketPermitActionMsg));
     }
 
     /**
      * @notice Encode the message for the _yieldBoxPermitAllReceiver() & _yieldBoxRevokeAllReceiver operations.
      * @param _yieldBoxApprovalAllMsg The YieldBox permit/revoke approval message.
      */
-    function buildYieldBoxApproveAllMsg(
-        YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg
-    ) public pure returns (bytes memory msg_) {
-        msg_ = abi.encodePacked(
-            msg_,
-            TOFTMsgCoder.buildYieldBoxApproveAllMsg(_yieldBoxApprovalAllMsg)
-        );
+    function buildYieldBoxApproveAllMsg(YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg)
+        public
+        pure
+        returns (bytes memory msg_)
+    {
+        msg_ = abi.encodePacked(msg_, TOFTMsgCoder.buildYieldBoxApproveAllMsg(_yieldBoxApprovalAllMsg));
     }
 
     /**
@@ -376,17 +340,14 @@ contract TOFTv2Helper {
      *   _yieldBoxRevokeAssetReceiver() & _yieldBoxApproveAssetReceiver operations.
      * @param _erc20PermitApprovalMsg The ERC20 permit approval messages.
      */
-    function buildPermitApprovalMsg(
-        ERC20PermitApprovalMsg[] memory _erc20PermitApprovalMsg
-    ) public pure returns (bytes memory msg_) {
+    function buildPermitApprovalMsg(ERC20PermitApprovalMsg[] memory _erc20PermitApprovalMsg)
+        public
+        pure
+        returns (bytes memory msg_)
+    {
         uint256 approvalsLength = _erc20PermitApprovalMsg.length;
-        for (uint256 i; i < approvalsLength; ) {
-            msg_ = abi.encodePacked(
-                msg_,
-                TOFTMsgCoder.buildERC20PermitApprovalMsg(
-                    _erc20PermitApprovalMsg[i]
-                )
-            );
+        for (uint256 i; i < approvalsLength;) {
+            msg_ = abi.encodePacked(msg_, TOFTMsgCoder.buildERC20PermitApprovalMsg(_erc20PermitApprovalMsg[i]));
             unchecked {
                 ++i;
             }

@@ -2,7 +2,9 @@
 pragma solidity 0.8.22;
 
 // LZ
-import {MessagingReceipt, OFTReceipt, SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {
+    MessagingReceipt, OFTReceipt, SendParam
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {IOAppMsgInspector} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppMsgInspector.sol";
 import {IOAppComposer} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppComposer.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
@@ -13,7 +15,18 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, RemoteTransferMsg, MarketRemoveCollateralMsg, SendParamsMsg} from "contracts/ITOFTv2.sol";
+import {
+    ITOFTv2,
+    TOFTInitStruct,
+    ERC20PermitApprovalMsg,
+    ERC20PermitApprovalMsg,
+    LZSendParam,
+    YieldBoxApproveAllMsg,
+    MarketPermitActionMsg,
+    RemoteTransferMsg,
+    MarketRemoveCollateralMsg,
+    SendParamsMsg
+} from "contracts/ITOFTv2.sol";
 import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
 import {TOFTv2OptionsReceiverModule} from "contracts/modules/TOFTv2OptionsReceiverModule.sol";
 import {TOFTv2GenericReceiverModule} from "contracts/modules/TOFTv2GenericReceiverModule.sol";
@@ -50,19 +63,10 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
     error InvalidApprovalTarget(address target); // Should be a whitelisted address available on the Cluster contract
     error TransferFailed();
 
-    event RemoteTransferReceived(
-        address indexed owner,
-        uint256 indexed dstEid,
-        address indexed to,
-        uint256 amount
-    );
+    event RemoteTransferReceived(address indexed owner, uint256 indexed dstEid, address indexed to, uint256 amount);
 
     /// @dev Compose received.
-    event ComposeReceived(
-        uint16 indexed msgType,
-        bytes32 indexed guid,
-        bytes composeMsg
-    );
+    event ComposeReceived(uint16 indexed msgType, bytes32 indexed guid, bytes composeMsg);
 
     constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
 
@@ -87,7 +91,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         Origin calldata _origin,
         bytes32 _guid,
         bytes calldata _message,
-        address /*_executor*/, // @dev unused in the default implementation.
+        address, /*_executor*/ // @dev unused in the default implementation.
         bytes calldata /*_extraData*/ // @dev unused in the default implementation.
     ) internal virtual override {
         // @dev The src sending chain doesn't know the address length on this chain (potentially non-evm)
@@ -96,11 +100,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         // @dev Convert the amount to credit into local decimals.
         uint256 amountToCreditLD = _toLD(_message.amountSD());
         // @dev Credit the amount to the recipient and return the ACTUAL amount the recipient received in local decimals
-        uint256 amountReceivedLD = _credit(
-            toAddress,
-            amountToCreditLD,
-            _origin.srcEid
-        );
+        uint256 amountReceivedLD = _credit(toAddress, amountToCreditLD, _origin.srcEid);
 
         if (_message.isComposed()) {
             // @dev Stores the lzCompose payload that will be executed in a separate tx.
@@ -111,7 +111,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             endpoint.sendCompose(
                 address(this), // Updated from default `toAddress`
                 _guid,
-                0 /* the index of the composed message*/,
+                0, /* the index of the composed message*/
                 _message.composeMsg()
             );
         }
@@ -150,17 +150,11 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         }
 
         // Decode LZ compose message.
-        (address srcChainSender_, bytes memory oftComposeMsg_) = TOFTMsgCoder
-            .decodeLzComposeMsg(_message);
+        (address srcChainSender_, bytes memory oftComposeMsg_) = TOFTMsgCoder.decodeLzComposeMsg(_message);
 
         // Decode OFT compose message.
-        (
-            uint16 msgType_,
-            ,
-            uint16 msgIndex_,
-            bytes memory tOFTComposeMsg_,
-            bytes memory nextMsg_
-        ) = TOFTMsgCoder.decodeTOFTComposeMsg(oftComposeMsg_);
+        (uint16 msgType_,, uint16 msgIndex_, bytes memory tOFTComposeMsg_, bytes memory nextMsg_) =
+            TOFTMsgCoder.decodeTOFTComposeMsg(oftComposeMsg_);
 
         if (msgType_ == PT_REMOTE_TRANSFER) {
             _remoteTransferReceiver(srcChainSender_, tOFTComposeMsg_);
@@ -175,54 +169,34 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         } else if (msgType_ == PT_YB_SEND_SGL_BORROW) {
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
-                abi.encodeWithSelector(
-                    TOFTv2MarketReceiverModule.marketBorrowReceiver.selector,
-                    tOFTComposeMsg_
-                ),
+                abi.encodeWithSelector(TOFTv2MarketReceiverModule.marketBorrowReceiver.selector, tOFTComposeMsg_),
                 false
             );
         } else if (msgType_ == PT_MARKET_REMOVE_COLLATERAL) {
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
                 abi.encodeWithSelector(
-                    TOFTv2MarketReceiverModule
-                        .marketRemoveCollateralReceiver
-                        .selector,
-                    tOFTComposeMsg_
+                    TOFTv2MarketReceiverModule.marketRemoveCollateralReceiver.selector, tOFTComposeMsg_
                 ),
                 false
             );
         } else if (msgType_ == PT_LEVERAGE_MARKET_DOWN) {
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
-                abi.encodeWithSelector(
-                    TOFTv2MarketReceiverModule
-                        .marketLeverageDownReceiver
-                        .selector,
-                    tOFTComposeMsg_
-                ),
+                abi.encodeWithSelector(TOFTv2MarketReceiverModule.marketLeverageDownReceiver.selector, tOFTComposeMsg_),
                 false
             );
         } else if (msgType_ == PT_TAP_EXERCISE) {
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2OptionsReceiver),
-                abi.encodeWithSelector(
-                    TOFTv2OptionsReceiverModule
-                        .exerciseOptionsReceiver
-                        .selector,
-                    tOFTComposeMsg_
-                ),
+                abi.encodeWithSelector(TOFTv2OptionsReceiverModule.exerciseOptionsReceiver.selector, tOFTComposeMsg_),
                 false
             );
         } else if (msgType_ == PT_SEND_PARAMS) {
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2GenericReceiver),
                 abi.encodeWithSelector(
-                    TOFTv2GenericReceiverModule
-                        .receiveWithParamsReceiver
-                        .selector,
-                    srcChainSender_,
-                    tOFTComposeMsg_
+                    TOFTv2GenericReceiverModule.receiveWithParamsReceiver.selector, srcChainSender_, tOFTComposeMsg_
                 ),
                 false
             );
@@ -237,10 +211,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
                 address(this),
                 _guid,
                 msgIndex_ + 1, // Increment the index
-                abi.encodePacked(
-                    OFTMsgCodec.addressToBytes32(srcChainSender_),
-                    nextMsg_
-                ) // Re encode the compose msg with the composeSender
+                abi.encodePacked(OFTMsgCodec.addressToBytes32(srcChainSender_), nextMsg_) // Re encode the compose msg with the composeSender
             );
         }
     }
@@ -257,33 +228,23 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
      * @param _srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the transfer (LZSendParam).
      */
-    function _remoteTransferReceiver(
-        address _srcChainSender,
-        bytes memory _data
-    ) internal virtual {
-        RemoteTransferMsg memory remoteTransferMsg_ = TOFTMsgCoder
-            .decodeRemoteTransferMsg(_data);
+    function _remoteTransferReceiver(address _srcChainSender, bytes memory _data) internal virtual {
+        RemoteTransferMsg memory remoteTransferMsg_ = TOFTMsgCoder.decodeRemoteTransferMsg(_data);
 
         /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
         _internalTransferWithAllowance(
-            remoteTransferMsg_.owner,
-            _srcChainSender,
-            remoteTransferMsg_.lzSendParam.sendParam.amountToSendLD
+            remoteTransferMsg_.owner, _srcChainSender, remoteTransferMsg_.lzSendParam.sendParam.amountToSendLD
         );
 
         // Make the internal transfer, burn the tokens from this contract and send them to the recipient on the other chain.
         _internalRemoteTransferSendPacket(
-            remoteTransferMsg_.owner,
-            remoteTransferMsg_.lzSendParam,
-            remoteTransferMsg_.composeMsg
+            remoteTransferMsg_.owner, remoteTransferMsg_.lzSendParam, remoteTransferMsg_.composeMsg
         );
 
         emit RemoteTransferReceived(
             remoteTransferMsg_.owner,
             remoteTransferMsg_.lzSendParam.sendParam.dstEid,
-            OFTMsgCodec.bytes32ToAddress(
-                remoteTransferMsg_.lzSendParam.sendParam.to
-            ),
+            OFTMsgCodec.bytes32ToAddress(remoteTransferMsg_.lzSendParam.sendParam.to),
             remoteTransferMsg_.lzSendParam.sendParam.amountToSendLD
         );
     }
@@ -298,18 +259,10 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         address _srcChainSender,
         LZSendParam memory _lzSendParam,
         bytes memory _composeMsg
-    )
-        internal
-        returns (
-            MessagingReceipt memory msgReceipt,
-            OFTReceipt memory oftReceipt
-        )
-    {
+    ) internal returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
         // Burn tokens from this contract
-        (uint256 amountDebitedLD_, uint256 amountToCreditLD_) = _debitThis(
-            _lzSendParam.sendParam.minAmountToCreditLD,
-            _lzSendParam.sendParam.dstEid
-        );
+        (uint256 amountDebitedLD_, uint256 amountToCreditLD_) =
+            _debitThis(_lzSendParam.sendParam.minAmountToCreditLD, _lzSendParam.sendParam.dstEid);
 
         _lzSendParam.sendParam.amountToSendLD = amountToCreditLD_;
         _lzSendParam.sendParam.minAmountToCreditLD = amountToCreditLD_;
@@ -320,41 +273,21 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
             _lzSendParam.sendParam.amountToSendLD = amountDebitedLD_;
             _lzSendParam.sendParam.minAmountToCreditLD = amountDebitedLD_;
             // Send the difference back to the user
-            _transfer(
-                address(this),
-                _srcChainSender,
-                _lzSendParam.sendParam.amountToSendLD - amountDebitedLD_
-            );
+            _transfer(address(this), _srcChainSender, _lzSendParam.sendParam.amountToSendLD - amountDebitedLD_);
         }
 
         // Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
-            _lzSendParam.sendParam,
-            _lzSendParam.extraOptions,
-            _composeMsg,
-            amountToCreditLD_,
-            _srcChainSender,
-            true
+            _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD_, _srcChainSender, true
         ); // msgSender is the sender of the composed message. We keep context by passing `_srcChainSender`.
 
         // Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
-        msgReceipt = _lzSend(
-            _lzSendParam.sendParam.dstEid,
-            message,
-            options,
-            _lzSendParam.fee,
-            _lzSendParam.refundAddress
-        );
+        msgReceipt =
+            _lzSend(_lzSendParam.sendParam.dstEid, message, options, _lzSendParam.fee, _lzSendParam.refundAddress);
         // Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD_, amountToCreditLD_);
 
-        emit OFTSent(
-            msgReceipt.guid,
-            _srcChainSender,
-            amountDebitedLD_,
-            amountToCreditLD_,
-            _composeMsg
-        );
+        emit OFTSent(msgReceipt.guid, _srcChainSender, amountDebitedLD_, amountToCreditLD_, _composeMsg);
     }
 
     /**
@@ -370,8 +303,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
      *      - s::bytes32: s value of the signature.
      */
     function _marketPermitReceiver(bytes memory _data) internal virtual {
-        MarketPermitActionMsg memory approval = TOFTMsgCoder
-            .decodeMarketPermitApprovalMsg(_data);
+        MarketPermitActionMsg memory approval = TOFTMsgCoder.decodeMarketPermitApprovalMsg(_data);
 
         _sanitizeTarget(approval.target);
 
@@ -395,11 +327,10 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
      *      - s::bytes32: s value of the signature.
      */
     function _yieldBoxPermitAssetReceiver(bytes memory _data) internal virtual {
-        ERC20PermitApprovalMsg[] memory approvals = TOFTMsgCoder
-            .decodeArrayOfERC20PermitApprovalMsg(_data);
+        ERC20PermitApprovalMsg[] memory approvals = TOFTMsgCoder.decodeArrayOfERC20PermitApprovalMsg(_data);
 
         uint256 approvalsLength = approvals.length;
-        for (uint256 i = 0; i < approvalsLength; ) {
+        for (uint256 i = 0; i < approvalsLength;) {
             _sanitizeTarget(approvals[i].token);
             unchecked {
                 ++i;
@@ -421,8 +352,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
      *      - s::bytes32: s value of the signature.
      */
     function _yieldBoxPermitAllReceiver(bytes memory _data) internal virtual {
-        YieldBoxApproveAllMsg memory approval = TOFTMsgCoder
-            .decodeYieldBoxApproveAllMsg(_data);
+        YieldBoxApproveAllMsg memory approval = TOFTMsgCoder.decodeYieldBoxApproveAllMsg(_data);
 
         _sanitizeTarget(approval.target);
 
@@ -446,15 +376,15 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
      *      - s::bytes32: s value of the signature.
      */
     function _erc20PermitApprovalReceiver(bytes memory _data) internal virtual {
-        ERC20PermitApprovalMsg[] memory approvals = TOFTMsgCoder
-            .decodeArrayOfERC20PermitApprovalMsg(_data);
+        ERC20PermitApprovalMsg[] memory approvals = TOFTMsgCoder.decodeArrayOfERC20PermitApprovalMsg(_data);
 
         toftV2ExtExec.erc20PermitApproval(approvals);
     }
 
     function _sanitizeTarget(address target) private view {
-        if (!cluster.isWhitelisted(0, target))
+        if (!cluster.isWhitelisted(0, target)) {
             revert InvalidApprovalTarget(target);
+        }
     }
 
     /**
@@ -465,11 +395,7 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
      * @param srcChainSender The address of the sender on the source chain.
      * @param _amount The amount to transfer
      */
-    function _internalTransferWithAllowance(
-        address _owner,
-        address srcChainSender,
-        uint256 _amount
-    ) internal {
+    function _internalTransferWithAllowance(address _owner, address srcChainSender, uint256 _amount) internal {
         if (_owner != srcChainSender) {
             _spendAllowance(_owner, srcChainSender, _amount);
         }

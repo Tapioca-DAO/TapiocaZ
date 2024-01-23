@@ -32,14 +32,12 @@ import {
     MarketBorrowMsg
 } from "contracts/ITOFTv2.sol";
 import {
-    TOFTv2Helper,
-    PrepareLzCallData,
-    PrepareLzCallReturn,
-    ComposeMsgData
+    TOFTv2Helper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData
 } from "contracts/extensions/TOFTv2Helper.sol";
 import {ERC20WithoutStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
 import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
 import {TOFTv2OptionsReceiverModule} from "contracts/modules/TOFTv2OptionsReceiverModule.sol";
+import {TOFTv2GenericReceiverModule} from "contracts/modules/TOFTv2GenericReceiverModule.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
 import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
@@ -58,7 +56,6 @@ import {TOFTv2Mock} from "./TOFTv2Mock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 
 import "forge-std/Test.sol";
-
 
 contract TOFTv2Test is TOFTTestHelper {
     using OptionsBuilder for bytes;
@@ -89,7 +86,6 @@ contract TOFTv2Test is TOFTTestHelper {
     address public userB = vm.addr(userBPKey);
     uint256 public initialBalance = 100 ether;
 
-
     /**
      * DEPLOY setup addresses
      */
@@ -109,13 +105,13 @@ contract TOFTv2Test is TOFTTestHelper {
     uint16 internal constant PT_TAP_EXERCISE = 703; // Use for exercise options on tOB available on another chain
     uint16 internal constant PT_SEND_PARAMS = 704; // Use for perform a normal OFT send but with a custom payload
 
-     /**
+    /**
      * @dev TOFTv2 global event checks
      */
     event OFTReceived(bytes32, address, uint256, uint256);
     event ComposeReceived(uint16 indexed msgType, bytes32 indexed guid, bytes composeMsg);
 
-     /**
+    /**
      * @dev Setup the OApps by deploying them and setting up the endpoints.
      */
     function setUp() public override {
@@ -140,44 +136,68 @@ contract TOFTv2Test is TOFTTestHelper {
             vm.label(address(cluster), "Cluster");
             vm.label(address(magnetar), "Magnetar");
         }
-        
-        TOFTInitStruct memory aTOFTInitStruct = createInitStruct("Token A", "TNKA", address(endpoints[aEid]), __owner, address(yieldBox), address(cluster), address(aERC20), aEid);
+
+        TOFTInitStruct memory aTOFTInitStruct = createInitStruct(
+            "Token A",
+            "TNKA",
+            address(endpoints[aEid]),
+            __owner,
+            address(yieldBox),
+            address(cluster),
+            address(aERC20),
+            aEid
+        );
         TOFTv2Sender aTOFTv2Sender = new TOFTv2Sender(aTOFTInitStruct);
         TOFTv2Receiver aTOFTv2Receiver = new TOFTv2Receiver(aTOFTInitStruct);
         TOFTv2MarketReceiverModule aTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
         TOFTv2OptionsReceiverModule aTOFTv2OptionsReceiverModule = new TOFTv2OptionsReceiverModule(aTOFTInitStruct);
+        TOFTv2GenericReceiverModule aTOFTv2GenericReceiverModule = new TOFTv2GenericReceiverModule(aTOFTInitStruct);
         vm.label(address(aTOFTv2Sender), "aTOFTv2Sender");
         vm.label(address(aTOFTv2Receiver), "aTOFTv2Receiver");
         vm.label(address(aTOFTv2MarketReceiverModule), "aTOFTv2MarketReceiverModule");
         vm.label(address(aTOFTv2OptionsReceiverModule), "aTOFTv2OptionsReceiverModule");
-        TOFTModulesInitStruct memory aTOFTModulesInitStruct = createModulesInitStruct(address(aTOFTv2Sender), address(aTOFTv2Receiver), address(aTOFTv2MarketReceiverModule), address(aTOFTv2MarketReceiverModule));
+        vm.label(address(aTOFTv2GenericReceiverModule), "aTOFTv2GenericReceiverModule");
+        TOFTModulesInitStruct memory aTOFTModulesInitStruct = createModulesInitStruct(
+            address(aTOFTv2Sender),
+            address(aTOFTv2Receiver),
+            address(aTOFTv2MarketReceiverModule),
+            address(aTOFTv2MarketReceiverModule),
+            address(aTOFTv2GenericReceiverModule)
+        );
         aTOFT = TOFTv2Mock(
-            payable(
-                _deployOApp(
-                    type(TOFTv2Mock).creationCode,
-                    abi.encode(aTOFTInitStruct, aTOFTModulesInitStruct)
-                )
-            )
+            payable(_deployOApp(type(TOFTv2Mock).creationCode, abi.encode(aTOFTInitStruct, aTOFTModulesInitStruct)))
         );
         vm.label(address(aTOFT), "aTOFT");
 
-        TOFTInitStruct memory bTOFTInitStruct = createInitStruct("Token B", "TNKB", address(endpoints[bEid]), __owner, address(yieldBox), address(cluster), address(bERC20), bEid);
+        TOFTInitStruct memory bTOFTInitStruct = createInitStruct(
+            "Token B",
+            "TNKB",
+            address(endpoints[bEid]),
+            __owner,
+            address(yieldBox),
+            address(cluster),
+            address(bERC20),
+            bEid
+        );
         TOFTv2Sender bTOFTv2Sender = new TOFTv2Sender(bTOFTInitStruct);
         TOFTv2Receiver bTOFTv2Receiver = new TOFTv2Receiver(bTOFTInitStruct);
         TOFTv2MarketReceiverModule bTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(bTOFTInitStruct);
         TOFTv2OptionsReceiverModule bTOFTv2OptionsReceiverModule = new TOFTv2OptionsReceiverModule(bTOFTInitStruct);
+        TOFTv2GenericReceiverModule bTOFTv2GenericReceiverModule = new TOFTv2GenericReceiverModule(bTOFTInitStruct);
         vm.label(address(bTOFTv2Sender), "bTOFTv2Sender");
         vm.label(address(bTOFTv2Receiver), "bTOFTv2Receiver");
         vm.label(address(bTOFTv2MarketReceiverModule), "bTOFTv2MarketReceiverModule");
         vm.label(address(bTOFTv2OptionsReceiverModule), "bTOFTv2OptionsReceiverModule");
-        TOFTModulesInitStruct memory bTOFTModulesInitStruct = createModulesInitStruct(address(bTOFTv2Sender), address(bTOFTv2Receiver), address(bTOFTv2MarketReceiverModule), address(bTOFTv2OptionsReceiverModule));
+        vm.label(address(bTOFTv2GenericReceiverModule), "bTOFTv2GenericReceiverModule");
+        TOFTModulesInitStruct memory bTOFTModulesInitStruct = createModulesInitStruct(
+            address(bTOFTv2Sender),
+            address(bTOFTv2Receiver),
+            address(bTOFTv2MarketReceiverModule),
+            address(bTOFTv2OptionsReceiverModule),
+            address(bTOFTv2GenericReceiverModule)
+        );
         bTOFT = TOFTv2Mock(
-            payable(
-                _deployOApp(
-                    type(TOFTv2Mock).creationCode,
-                    abi.encode(bTOFTInitStruct, bTOFTModulesInitStruct)
-                )
-            )
+            payable(_deployOApp(type(TOFTv2Mock).creationCode, abi.encode(bTOFTInitStruct, bTOFTModulesInitStruct)))
         );
         vm.label(address(bTOFT), "bTOFT");
 
@@ -197,7 +217,8 @@ contract TOFTv2Test is TOFTTestHelper {
         aTOFTYieldBoxId = registerYieldBoxAsset(address(yieldBox), address(aTOFT), address(aTOFTStrategy)); //we assume this is the asset Id
         bTOFTYieldBoxId = registerYieldBoxAsset(address(yieldBox), address(bTOFT), address(bTOFTStrategy)); //we assume this is the collateral Id
 
-        singularity = createSingularity(address(yieldBox), bTOFTYieldBoxId, aTOFTYieldBoxId, address(bTOFT), address(aTOFT));
+        singularity =
+            createSingularity(address(yieldBox), bTOFTYieldBoxId, aTOFTYieldBoxId, address(bTOFT), address(aTOFT));
         vm.label(address(singularity), "Singularity");
 
         cluster.updateContract(aEid, address(singularity), true);
@@ -206,7 +227,7 @@ contract TOFTv2Test is TOFTTestHelper {
         cluster.updateContract(bEid, address(magnetar), true);
     }
 
-       /**
+    /**
      * =================
      *      HELPERS
      * =================
@@ -236,7 +257,7 @@ contract TOFTv2Test is TOFTTestHelper {
         address srcMsgSender;
         bytes extraOptions;
     }
-     /**
+    /**
      * @notice Call lzCompose on the destination OApp.
      *
      * @dev Be sure to verify the message by calling `TestHelper.verifyPackets()`.
@@ -245,6 +266,7 @@ contract TOFTv2Test is TOFTTestHelper {
      *
      * @param _lzOFTComposedData The data to pass to the lzCompose call.
      */
+
     function __callLzCompose(LzOFTComposedData memory _lzOFTComposedData) internal {
         vm.expectEmit(true, true, true, false);
         emit ComposeReceived(_lzOFTComposedData.msgType, _lzOFTComposedData.guid, _lzOFTComposedData.composeMsg);
@@ -261,16 +283,14 @@ contract TOFTv2Test is TOFTTestHelper {
         );
     }
 
-
-
     function test_constructor() public {
         assertEq(address(aTOFT.yieldBox()), address(yieldBox));
         assertEq(address(aTOFT.cluster()), address(cluster));
         assertEq(address(aTOFT.erc20()), address(aERC20));
         assertEq(aTOFT.hostEid(), aEid);
-     }
+    }
 
-      function test_erc20_permit() public {
+    function test_erc20_permit() public {
         ERC20PermitStruct memory permit_ =
             ERC20PermitStruct({owner: userA, spender: userB, value: 1e18, nonce: 0, deadline: 1 days});
 
@@ -312,13 +332,11 @@ contract TOFTv2Test is TOFTTestHelper {
                 deadline: 2 days
             });
 
-            permitApprovalB_ = __getERC20PermitData(
-                approvalUserB_, bTOFT.getTypedDataHash(approvalUserB_), address(bTOFT), userAPKey
-            );
+            permitApprovalB_ =
+                __getERC20PermitData(approvalUserB_, bTOFT.getTypedDataHash(approvalUserB_), address(bTOFT), userAPKey);
 
-            permitApprovalC_ = __getERC20PermitData(
-                approvalUserC_, bTOFT.getTypedDataHash(approvalUserC_), address(bTOFT), userAPKey
-            );
+            permitApprovalC_ =
+                __getERC20PermitData(approvalUserC_, bTOFT.getTypedDataHash(approvalUserC_), address(bTOFT), userAPKey);
 
             ERC20PermitApprovalMsg[] memory approvals_ = new ERC20PermitApprovalMsg[](2);
             approvals_[0] = permitApprovalB_;
@@ -380,7 +398,7 @@ contract TOFTv2Test is TOFTTestHelper {
         assertEq(bTOFT.allowance(userA, userC_), 2e18);
         assertEq(bTOFT.nonces(userA), 2);
     }
-    
+
     function test_remote_transfer() public {
         // vars
         uint256 tokenAmount_ = 1 ether;
@@ -485,7 +503,7 @@ contract TOFTv2Test is TOFTTestHelper {
     function test_market_deposit_and_borrow() public {
         uint256 erc20Amount_ = 1 ether;
 
-        {   
+        {
             // test wrap
             deal(address(aERC20), address(this), erc20Amount_);
             deal(address(bERC20), address(this), erc20Amount_);
@@ -510,7 +528,6 @@ contract TOFTv2Test is TOFTTestHelper {
             deal(address(aTOFT), address(this), erc20Amount_);
             assertEq(aTOFT.balanceOf(address(this)), erc20Amount_);
         }
-        
 
         //useful in case of withdraw after borrow
         //MagnetarMock doesn't have this implemented yet, but we test the airdrop
@@ -520,7 +537,7 @@ contract TOFTv2Test is TOFTTestHelper {
         uint256 tokenAmount_ = 0.5 ether;
 
         {
-             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
+            // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
             PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTv2Helper.prepareLzCall( // B->A data
                 ITOFTv2(address(bTOFT)),
                 PrepareLzCallData({
@@ -553,28 +570,26 @@ contract TOFTv2Test is TOFTTestHelper {
         //approve magnetar
         bTOFT.approve(address(magnetar), type(uint256).max);
 
-        MarketBorrowMsg memory marketBorrowMsg =
-            MarketBorrowMsg({
-                from: address(this),
-                to: address(this),
-                borrowParams: ITapiocaOFT.IBorrowParams({
-                    amount: tokenAmount_,
-                    borrowAmount: tokenAmount_,
-                    marketHelper: address(magnetar),
-                    market: address(singularity),
-                    deposit: true
-                }),
-                withdrawParams: ICommonData.IWithdrawParams({
-                    withdraw: false,
-                    withdrawLzFeeAmount: 0,
-                    withdrawOnOtherChain: false,
-                    withdrawLzChainId: 0,
-                    withdrawAdapterParams: "0x",
-                    unwrap: false,
-                    refundAddress: payable(0),
-                    zroPaymentAddress: address(0)
-                })
-            });
+        MarketBorrowMsg memory marketBorrowMsg = MarketBorrowMsg({
+            user: address(this),
+            borrowParams: ITapiocaOFT.IBorrowParams({
+                amount: tokenAmount_,
+                borrowAmount: tokenAmount_,
+                marketHelper: address(magnetar),
+                market: address(singularity),
+                deposit: true
+            }),
+            withdrawParams: ICommonData.IWithdrawParams({
+                withdraw: false,
+                withdrawLzFeeAmount: 0,
+                withdrawOnOtherChain: false,
+                withdrawLzChainId: 0,
+                withdrawAdapterParams: "0x",
+                unwrap: false,
+                refundAddress: payable(0),
+                zroPaymentAddress: address(0)
+            })
+        });
         bytes memory marketBorrowMsg_ = tOFTv2Helper.buildMarketBorrowMsg(marketBorrowMsg);
 
         PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTv2Helper.prepareLzCall(
@@ -589,7 +604,7 @@ contract TOFTv2Test is TOFTTestHelper {
                 composeMsgData: ComposeMsgData({
                     index: 0,
                     gas: 500_000,
-                    value: uint128(withdrawMsgFee_.nativeFee), 
+                    value: uint128(withdrawMsgFee_.nativeFee),
                     data: marketBorrowMsg_,
                     prevData: bytes(""),
                     prevOptionsData: bytes("")
@@ -626,9 +641,10 @@ contract TOFTv2Test is TOFTTestHelper {
         {
             assertEq(aTOFT.balanceOf(address(this)), erc20Amount_ - tokenAmount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
-            assertEq(yieldBox.toAmount(aTOFTYieldBoxId, yieldBox.balanceOf(address(this), aTOFTYieldBoxId), false), tokenAmount_);
-
+            assertEq(
+                yieldBox.toAmount(aTOFTYieldBoxId, yieldBox.balanceOf(address(this), aTOFTYieldBoxId), false),
+                tokenAmount_
+            );
         }
     }
-
 }

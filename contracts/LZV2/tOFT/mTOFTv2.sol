@@ -59,34 +59,20 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      */
     uint256 public mintFee;
 
-    uint256 private constant _FEE_PRECISION = 1e5;
-
     /**
      * @notice event emitted when a connected chain is reigstered or unregistered
      */
-    event ConnectedChainStatusUpdated(
-        uint256 indexed _chain,
-        bool indexed _old,
-        bool indexed _new
-    );
+    event ConnectedChainStatusUpdated(uint256 indexed _chain, bool indexed _old, bool indexed _new);
 
     /**
      * @notice event emitted when balancer status is updated
      */
-    event BalancerStatusUpdated(
-        address indexed _balancer,
-        bool indexed _bool,
-        bool indexed _new
-    );
+    event BalancerStatusUpdated(address indexed _balancer, bool indexed _bool, bool indexed _new);
 
     /**
      * @notice event emitted when rebalancing is performed
      */
-    event Rebalancing(
-        address indexed _balancer,
-        uint256 indexed _amount,
-        bool indexed _isNative
-    );
+    event Rebalancing(address indexed _balancer, uint256 indexed _amount, bool indexed _isNative);
 
     /**
      * @notice event emitted when mint cap is updated
@@ -102,12 +88,11 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
     error mTOFTV2_NotHost();
     error mTOFTV2_BalancerNotAuthorized();
     error mTOFTV2_CapNotValid();
-    error mTOFTV2_OverCap();
 
-    constructor(
-        TOFTInitStruct memory _tOFTData,
-        TOFTModulesInitStruct memory _modulesData
-    ) BaseTOFTv2(_tOFTData) ERC20Permit(_tOFTData.name) {
+    constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _modulesData)
+        BaseTOFTv2(_tOFTData)
+        ERC20Permit(_tOFTData.name)
+    {
         if (_getChainId() == hostEid) {
             connectedChains[hostEid] = true;
         }
@@ -117,35 +102,24 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
 
         // Set TOFTv2 execution modules
         if (_modulesData.tOFTSenderModule == address(0)) revert TOFT_NotValid();
-        if (_modulesData.tOFTReceiverModule == address(0))
+        if (_modulesData.tOFTReceiverModule == address(0)) {
             revert TOFT_NotValid();
-        if (_modulesData.marketReceiverModule == address(0))
+        }
+        if (_modulesData.marketReceiverModule == address(0)) {
             revert TOFT_NotValid();
-        if (_modulesData.optionsReceiverModule == address(0))
+        }
+        if (_modulesData.optionsReceiverModule == address(0)) {
             revert TOFT_NotValid();
-        if (_modulesData.genericReceiverModule == address(0))
+        }
+        if (_modulesData.genericReceiverModule == address(0)) {
             revert TOFT_NotValid();
+        }
 
-        _setModule(
-            uint8(ITOFTv2.Module.TOFTv2Sender),
-            _modulesData.tOFTSenderModule
-        );
-        _setModule(
-            uint8(ITOFTv2.Module.TOFTv2Receiver),
-            _modulesData.tOFTReceiverModule
-        );
-        _setModule(
-            uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
-            _modulesData.marketReceiverModule
-        );
-        _setModule(
-            uint8(ITOFTv2.Module.TOFTv2OptionsReceiver),
-            _modulesData.optionsReceiverModule
-        );
-        _setModule(
-            uint8(ITOFTv2.Module.TOFTv2GenericReceiver),
-            _modulesData.genericReceiverModule
-        );
+        _setModule(uint8(ITOFTv2.Module.TOFTv2Sender), _modulesData.tOFTSenderModule);
+        _setModule(uint8(ITOFTv2.Module.TOFTv2Receiver), _modulesData.tOFTReceiverModule);
+        _setModule(uint8(ITOFTv2.Module.TOFTv2MarketReceiver), _modulesData.marketReceiverModule);
+        _setModule(uint8(ITOFTv2.Module.TOFTv2OptionsReceiver), _modulesData.optionsReceiverModule);
+        _setModule(uint8(ITOFTv2.Module.TOFTv2GenericReceiver), _modulesData.genericReceiverModule);
     }
 
     /**
@@ -181,14 +155,7 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
         // Call the internal OApp implementation of lzReceive.
         _executeModule(
             uint8(ITOFTv2.Module.TOFTv2Receiver),
-            abi.encodeWithSelector(
-                OAppReceiver.lzReceive.selector,
-                _origin,
-                _guid,
-                _message,
-                _executor,
-                _extraData
-            ),
+            abi.encodeWithSelector(OAppReceiver.lzReceive.selector, _origin, _guid, _message, _executor, _extraData),
             false
         );
     }
@@ -205,11 +172,11 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      *
      * @return returnData The return data from the module execution, if any.
      */
-    function executeModule(
-        ITOFTv2.Module _module,
-        bytes memory _data,
-        bool _forwardRevert
-    ) external payable returns (bytes memory returnData) {
+    function executeModule(ITOFTv2.Module _module, bytes memory _data, bool _forwardRevert)
+        external
+        payable
+        returns (bytes memory returnData)
+    {
         return _executeModule(uint8(_module), _data, _forwardRevert);
     }
 
@@ -244,24 +211,15 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      *      - amountDebitLD::uint256: Amount of tokens ACTUALLY debited in local decimals.
      *      - amountCreditLD::uint256: Amount of tokens to be credited on the remote side.
      */
-    function sendPacket(
-        LZSendParam calldata _lzSendParam,
-        bytes calldata _composeMsg
-    )
+    function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         public
         payable
-        returns (
-            MessagingReceipt memory msgReceipt,
-            OFTReceipt memory oftReceipt
-        )
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
     {
         (msgReceipt, oftReceipt) = abi.decode(
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2Sender),
-                abi.encodeCall(
-                    TOFTv2Sender.sendPacket,
-                    (_lzSendParam, _composeMsg)
-                ),
+                abi.encodeCall(TOFTv2Sender.sendPacket, (_lzSendParam, _composeMsg)),
                 false
             ),
             (MessagingReceipt, OFTReceipt)
@@ -283,12 +241,9 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      * @dev Returns the hash of the struct used by the permit function.
      * @param _permitData Struct containing permit data.
      */
-    function getTypedDataHash(
-        ERC20PermitStruct calldata _permitData
-    ) public view returns (bytes32) {
-        bytes32 permitTypeHash_ = keccak256(
-            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-        );
+    function getTypedDataHash(ERC20PermitStruct calldata _permitData) public view returns (bytes32) {
+        bytes32 permitTypeHash_ =
+            keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
         bytes32 structHash_ = keccak256(
             abi.encode(
@@ -315,14 +270,15 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      *
      * @return minted The mtOFTv2 minted amount.
      */
-    function wrap(
-        address _fromAddress,
-        address _toAddress,
-        uint256 _amount
-    ) external payable nonReentrant returns (uint256 minted) {
+    function wrap(address _fromAddress, address _toAddress, uint256 _amount)
+        external
+        payable
+        nonReentrant
+        returns (uint256 minted)
+    {
         if (balancers[msg.sender]) revert mTOFTV2_BalancerNotAuthorized();
         if (!connectedChains[_getChainId()]) revert mTOFTV2_NotHost();
-        if (totalSupply() + _amount > mintCap) revert mTOFTV2_OverCap();
+        if (totalSupply() + _amount > mintCap) revert mTOFTV2_CapNotValid();
 
         uint256 feeAmount = _checkAndExtractFees(_amount);
 
@@ -394,10 +350,7 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      * @param _balancer the operator address
      * @param _status the new whitelist status
      */
-    function updateBalancerState(
-        address _balancer,
-        bool _status
-    ) external onlyOwner {
+    function updateBalancerState(address _balancer, bool _status) external onlyOwner {
         emit BalancerStatusUpdated(_balancer, balancers[_balancer], _status);
         balancers[_balancer] = _status;
     }
@@ -419,15 +372,13 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
     /// =====================
     /// Private
     /// =====================
-    function _checkAndExtractFees(
-        uint256 _amount
-    ) private returns (uint256 feeAmount) {
+    function _checkAndExtractFees(uint256 _amount) private returns (uint256 feeAmount) {
         feeAmount = 0;
 
         // not on host chain; extract fee
         // fees are used to rebalance liquidity to host chain
         if (_getChainId() != hostEid && mintFee > 0) {
-            feeAmount = (_amount * mintFee) / _FEE_PRECISION;
+            feeAmount = (_amount * mintFee) / 1e5;
             if (feeAmount > 0) {
                 if (erc20 == address(0)) {
                     vault.registerFees{value: feeAmount}(feeAmount);
