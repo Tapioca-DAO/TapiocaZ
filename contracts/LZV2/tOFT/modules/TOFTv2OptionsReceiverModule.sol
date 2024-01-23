@@ -2,14 +2,19 @@
 pragma solidity 0.8.22;
 
 // LZ
-import {MessagingReceipt, OFTReceipt, SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {
+    MessagingReceipt, OFTReceipt, SendParam
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 
 // Tapioca
-import {ITapiocaOptionsBroker, ITapiocaOptionsBrokerCrossChain} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
+import {
+    ITapiocaOptionsBroker,
+    ITapiocaOptionsBrokerCrossChain
+} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "contracts/ITOFTv2.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
 import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
@@ -39,10 +44,7 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
     error TOFTv2OptionsReceiverModule_NotAuthorized(address invalidAddress);
 
     event ExerciseOptionsReceived(
-        address indexed user,
-        address indexed target,
-        uint256 indexed oTapTokenId,
-        uint256 paymentTokenAmount
+        address indexed user, address indexed target, uint256 indexed oTapTokenId, uint256 paymentTokenAmount
     );
 
     constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
@@ -57,22 +59,17 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
     function exerciseOptionsReceiver(bytes memory _data) public payable {
         _sanitizeSender();
 
-        // @dev decode received message
-        ExerciseOptionsMsg memory msg_ = TOFTMsgCoder.decodeExerciseOptionsMsg(
-            _data
-        );
+        // Decode received message.
+        ExerciseOptionsMsg memory msg_ = TOFTMsgCoder.decodeExerciseOptionsMsg(_data);
 
         _checkWhitelistStatus(msg_.optionsData.target);
-        _checkWhitelistStatus(
-            LzLib.bytes32ToAddress(msg_.lzSendParams.sendParam.to)
-        );
+        _checkWhitelistStatus(LzLib.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
 
         {
-            // @dev _data declared for visibility
-            ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
-                memory _options = msg_.optionsData;
+            // _data declared for visibility.
+            ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
 
-            // @dev call exerciseOption() with address(this) as the payment token
+            /// @dev call exerciseOption() with address(this) as the payment token
             uint256 bBefore = balanceOf(address(this));
             ITapiocaOptionsBroker(_options.target).exerciseOption(
                 _options.oTAPTokenID,
@@ -81,43 +78,35 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
             );
             uint256 bAfter = balanceOf(address(this));
 
-            // @dev refund if less was used
+            // Refund if less was used.
             if (bBefore > bAfter) {
                 uint256 diff = bBefore - bAfter;
                 if (diff < _options.paymentTokenAmount) {
-                    IERC20(address(this)).safeTransfer(
-                        _options.from,
-                        _options.paymentTokenAmount - diff
-                    );
+                    IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
                 }
             }
         }
 
         {
-            // @dev _data declared for visibility
-            ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData
-                memory _options = msg_.optionsData;
+            // _data declared for visibility.
+            ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
             SendParam memory _send = msg_.lzSendParams.sendParam;
 
             address tapOft = ITapiocaOptionsBroker(_options.target).tapOFT();
             if (msg_.withdrawOnOtherChain) {
-                //@dev determine the right amount to send back to source
-                uint256 amountToSend = _send.amountToSendLD > _options.tapAmount
-                    ? _options.tapAmount
-                    : _send.amountToSendLD;
+                /// @dev determine the right amount to send back to source
+                uint256 amountToSend =
+                    _send.amountToSendLD > _options.tapAmount ? _options.tapAmount : _send.amountToSendLD;
                 if (_send.minAmountToCreditLD > amountToSend) {
                     _send.minAmountToCreditLD = amountToSend;
                 }
 
-                //@dev send to source and preserve source `msg.sender` (`from` in this case)
+                // Sends to source and preserve source `msg.sender` (`from` in this case).
                 _sendPacket(msg_.lzSendParams, msg_.composeMsg, _options.from);
 
-                //@dev refund extra amounts
+                // Refund extra amounts
                 if (_options.tapAmount - amountToSend > 0) {
-                    IERC20(tapOft).safeTransfer(
-                        _options.from,
-                        _options.tapAmount - amountToSend
-                    );
+                    IERC20(tapOft).safeTransfer(_options.from, _options.tapAmount - amountToSend);
                 }
             } else {
                 //send on this chain
@@ -127,29 +116,24 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
     }
 
     function _sanitizeSender() private view {
-        if (msg.sender != address(endpoint))
+        if (msg.sender != address(endpoint)) {
             revert TOFTv2OptionsReceiverModule_NotAuthorized(msg.sender);
+        }
     }
 
     function _checkWhitelistStatus(address _addr) private view {
         if (_addr != address(0)) {
-            if (!cluster.isWhitelisted(0, _addr))
+            if (!cluster.isWhitelisted(0, _addr)) {
                 revert TOFTv2OptionsReceiverModule_NotAuthorized(_addr);
+            }
         }
     }
 
-    function _sendPacket(
-        LZSendParam memory _lzSendParam,
-        bytes memory _composeMsg,
-        address _srcChainSender
-    )
+    function _sendPacket(LZSendParam memory _lzSendParam, bytes memory _composeMsg, address _srcChainSender)
         private
-        returns (
-            MessagingReceipt memory msgReceipt,
-            OFTReceipt memory oftReceipt
-        )
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
     {
-        // @dev Applies the token transfers regarding this send() operation.
+        /// @dev Applies the token transfers regarding this send() operation.
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
         // - amountToCreditLD is the amount in local decimals that will be credited to the recipient on the remote OFT instance.
         (uint256 amountDebitedLD, uint256 amountToCreditLD) = _debit(
@@ -158,33 +142,17 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
             _lzSendParam.sendParam.dstEid
         );
 
-        // @dev Builds the options and OFT message to quote in the endpoint.
+        /// @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
-            _lzSendParam.sendParam,
-            _lzSendParam.extraOptions,
-            _composeMsg,
-            amountToCreditLD,
-            _srcChainSender,
-            true
+            _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD, _srcChainSender, true
         );
 
-        // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
-        msgReceipt = _lzSend(
-            _lzSendParam.sendParam.dstEid,
-            message,
-            options,
-            _lzSendParam.fee,
-            _lzSendParam.refundAddress
-        );
-        // @dev Formulate the OFT receipt.
+        /// @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
+        msgReceipt =
+            _lzSend(_lzSendParam.sendParam.dstEid, message, options, _lzSendParam.fee, _lzSendParam.refundAddress);
+        /// @dev Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD, amountToCreditLD);
 
-        emit OFTSent(
-            msgReceipt.guid,
-            msg.sender,
-            amountDebitedLD,
-            amountToCreditLD,
-            _composeMsg
-        );
+        emit OFTSent(msgReceipt.guid, msg.sender, amountDebitedLD, amountToCreditLD, _composeMsg);
     }
 }
