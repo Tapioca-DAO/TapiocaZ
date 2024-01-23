@@ -62,10 +62,11 @@ abstract contract ModuleManager {
      *
      * @return returnData The return data from the module execution, if any.
      */
-    function _executeModule(uint8 _module, bytes memory _data, bool _forwardRevert)
-        internal
-        returns (bytes memory returnData)
-    {
+    function _executeModule(
+        uint8 _module,
+        bytes memory _data,
+        bool _forwardRevert
+    ) internal returns (bytes memory returnData) {
         bool success = true;
         address module = _extractModule(_module);
 

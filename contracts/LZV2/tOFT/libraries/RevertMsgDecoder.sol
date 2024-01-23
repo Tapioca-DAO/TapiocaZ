@@ -6,7 +6,9 @@ library RevertMsgDecoder {
      * @notice Return the revert message from an external call.
      * @param _returnData The return data from the external call.
      */
-    function _getRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
+    function _getRevertMsg(
+        bytes memory _returnData
+    ) internal pure returns (string memory) {
         if (_returnData.length > 1000) {
             return "RevertMsgDecoder: reason too long";
         }

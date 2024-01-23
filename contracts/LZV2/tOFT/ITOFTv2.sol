@@ -25,10 +25,11 @@ interface ITOFTv2 {
      * LZ functions
      * =======================
      */
-    function combineOptions(uint32 _eid, uint16 _msgType, bytes calldata _extraOptions)
-        external
-        view
-        returns (bytes memory);
+    function combineOptions(
+        uint32 _eid,
+        uint16 _msgType,
+        bytes calldata _extraOptions
+    ) external view returns (bytes memory);
 
     /**
      * =======================

@@ -5,14 +5,7 @@ pragma solidity 0.8.22;
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 
 // Tapioca
-import {
-    ERC20PermitApprovalMsg,
-    ERC20PermitApprovalMsg,
-    LZSendParam,
-    YieldBoxApproveAllMsg,
-    MarketPermitActionMsg,
-    ERC20PermitStruct
-} from "contracts/ITOFTv2.sol";
+import {ERC20PermitApprovalMsg, ERC20PermitApprovalMsg, LZSendParam, YieldBoxApproveAllMsg, MarketPermitActionMsg, ERC20PermitStruct} from "contracts/ITOFTv2.sol";
 import {IPermit} from "tapioca-periph/contracts/interfaces/IPermit.sol";
 import {IPermitAll} from "tapioca-periph/contracts/interfaces/IPermitAll.sol";
 import {IPermitAction} from "tapioca-periph/contracts/interfaces/IPermitAction.sol";
@@ -40,9 +33,16 @@ contract TOFTv2ExtExec {
      * @notice Executes YieldBox setApprovalForAll(true) operation.
      * @param _approval The approval message.
      */
-    function yieldBoxPermitApproveAll(YieldBoxApproveAllMsg calldata _approval) public {
+    function yieldBoxPermitApproveAll(
+        YieldBoxApproveAllMsg calldata _approval
+    ) public {
         IPermitAll(_approval.target).permitAll(
-            _approval.owner, _approval.spender, _approval.deadline, _approval.v, _approval.r, _approval.s
+            _approval.owner,
+            _approval.spender,
+            _approval.deadline,
+            _approval.v,
+            _approval.r,
+            _approval.s
         );
     }
 
@@ -50,9 +50,16 @@ contract TOFTv2ExtExec {
      * @notice Executes YieldBox setApprovalForAll(false) operation.
      * @param _approval The approval message.
      */
-    function yieldBoxPermitRevokeAll(YieldBoxApproveAllMsg calldata _approval) public {
+    function yieldBoxPermitRevokeAll(
+        YieldBoxApproveAllMsg calldata _approval
+    ) public {
         IPermitAll(_approval.target).revokeAll(
-            _approval.owner, _approval.spender, _approval.deadline, _approval.v, _approval.r, _approval.s
+            _approval.owner,
+            _approval.spender,
+            _approval.deadline,
+            _approval.v,
+            _approval.r,
+            _approval.s
         );
     }
 
@@ -61,9 +68,11 @@ contract TOFTv2ExtExec {
      * @dev similar to IERC20Permit
      * @param _approvals The approvals message.
      */
-    function yieldBoxPermitApproveAsset(ERC20PermitApprovalMsg[] calldata _approvals) public {
+    function yieldBoxPermitApproveAsset(
+        ERC20PermitApprovalMsg[] calldata _approvals
+    ) public {
         uint256 approvalsLength = _approvals.length;
-        for (uint256 i = 0; i < approvalsLength;) {
+        for (uint256 i = 0; i < approvalsLength; ) {
             // @dev token is YieldBox
             if (_approvals[i].value == 0) {
                 IPermit(_approvals[i].token).revoke(
@@ -96,7 +105,9 @@ contract TOFTv2ExtExec {
      * @notice Executes SGL/BB permitLend operation.
      * @param _approval The approval message.
      */
-    function marketPermitLendApproval(MarketPermitActionMsg calldata _approval) public {
+    function marketPermitLendApproval(
+        MarketPermitActionMsg calldata _approval
+    ) public {
         bytes memory sigData = abi.encode(
             false,
             _approval.owner,
@@ -108,14 +119,19 @@ contract TOFTv2ExtExec {
             _approval.s
         );
 
-        IPermitAction(_approval.target).permitAction(sigData, _approval.actionType);
+        IPermitAction(_approval.target).permitAction(
+            sigData,
+            _approval.actionType
+        );
     }
 
     /**
      * @notice Executes SGL/BB permitBorrow operation.
      * @param _approval The approval message.
      */
-    function marketPermitBorrowApproval(MarketPermitActionMsg calldata _approval) public {
+    function marketPermitBorrowApproval(
+        MarketPermitActionMsg calldata _approval
+    ) public {
         bytes memory sigData = abi.encode(
             true,
             _approval.owner,
@@ -127,16 +143,21 @@ contract TOFTv2ExtExec {
             _approval.s
         );
 
-        IPermitAction(_approval.target).permitAction(sigData, _approval.actionType);
+        IPermitAction(_approval.target).permitAction(
+            sigData,
+            _approval.actionType
+        );
     }
 
     /**
      * @notice Executes an ERC20 permit approval.
      * @param _approvals The ERC20 permit approval messages.
      */
-    function erc20PermitApproval(ERC20PermitApprovalMsg[] calldata _approvals) public {
+    function erc20PermitApproval(
+        ERC20PermitApprovalMsg[] calldata _approvals
+    ) public {
         uint256 approvalsLength = _approvals.length;
-        for (uint256 i = 0; i < approvalsLength;) {
+        for (uint256 i = 0; i < approvalsLength; ) {
             IERC20Permit(_approvals[i].token).permit(
                 _approvals[i].owner,
                 _approvals[i].spender,

@@ -46,10 +46,10 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
         _;
     }
 
-    constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _modulesData)
-        BaseTOFTv2(_tOFTData)
-        ERC20Permit(_tOFTData.name)
-    {
+    constructor(
+        TOFTInitStruct memory _tOFTData,
+        TOFTModulesInitStruct memory _modulesData
+    ) BaseTOFTv2(_tOFTData) ERC20Permit(_tOFTData.name) {
         // Set TOFTv2 execution modules
         if (_modulesData.tOFTSenderModule == address(0)) revert TOFT_NotValid();
         if (_modulesData.tOFTReceiverModule == address(0)) {
@@ -65,11 +65,26 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
             revert TOFT_NotValid();
         }
 
-        _setModule(uint8(ITOFTv2.Module.TOFTv2Sender), _modulesData.tOFTSenderModule);
-        _setModule(uint8(ITOFTv2.Module.TOFTv2Receiver), _modulesData.tOFTReceiverModule);
-        _setModule(uint8(ITOFTv2.Module.TOFTv2MarketReceiver), _modulesData.marketReceiverModule);
-        _setModule(uint8(ITOFTv2.Module.TOFTv2OptionsReceiver), _modulesData.optionsReceiverModule);
-        _setModule(uint8(ITOFTv2.Module.TOFTv2GenericReceiver), _modulesData.genericReceiverModule);
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2Sender),
+            _modulesData.tOFTSenderModule
+        );
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2Receiver),
+            _modulesData.tOFTReceiverModule
+        );
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
+            _modulesData.marketReceiverModule
+        );
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2OptionsReceiver),
+            _modulesData.optionsReceiverModule
+        );
+        _setModule(
+            uint8(ITOFTv2.Module.TOFTv2GenericReceiver),
+            _modulesData.genericReceiverModule
+        );
     }
 
     /**
@@ -105,7 +120,14 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
         // Call the internal OApp implementation of lzReceive.
         _executeModule(
             uint8(ITOFTv2.Module.TOFTv2Receiver),
-            abi.encodeWithSelector(OAppReceiver.lzReceive.selector, _origin, _guid, _message, _executor, _extraData),
+            abi.encodeWithSelector(
+                OAppReceiver.lzReceive.selector,
+                _origin,
+                _guid,
+                _message,
+                _executor,
+                _extraData
+            ),
             false
         );
     }
@@ -122,11 +144,11 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      *
      * @return returnData The return data from the module execution, if any.
      */
-    function executeModule(ITOFTv2.Module _module, bytes memory _data, bool _forwardRevert)
-        external
-        payable
-        returns (bytes memory returnData)
-    {
+    function executeModule(
+        ITOFTv2.Module _module,
+        bytes memory _data,
+        bool _forwardRevert
+    ) external payable returns (bytes memory returnData) {
         return _executeModule(uint8(_module), _data, _forwardRevert);
     }
 
@@ -161,15 +183,24 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      *      - amountDebitLD::uint256: Amount of tokens ACTUALLY debited in local decimals.
      *      - amountCreditLD::uint256: Amount of tokens to be credited on the remote side.
      */
-    function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+    function sendPacket(
+        LZSendParam calldata _lzSendParam,
+        bytes calldata _composeMsg
+    )
         public
         payable
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt
+        )
     {
         (msgReceipt, oftReceipt) = abi.decode(
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2Sender),
-                abi.encodeCall(TOFTv2Sender.sendPacket, (_lzSendParam, _composeMsg)),
+                abi.encodeCall(
+                    TOFTv2Sender.sendPacket,
+                    (_lzSendParam, _composeMsg)
+                ),
                 false
             ),
             (MessagingReceipt, OFTReceipt)
@@ -191,9 +222,12 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      * @dev Returns the hash of the struct used by the permit function.
      * @param _permitData Struct containing permit data.
      */
-    function getTypedDataHash(ERC20PermitStruct calldata _permitData) public view returns (bytes32) {
-        bytes32 permitTypeHash_ =
-            keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    function getTypedDataHash(
+        ERC20PermitStruct calldata _permitData
+    ) public view returns (bytes32) {
+        bytes32 permitTypeHash_ = keccak256(
+            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+        );
 
         bytes32 structHash_ = keccak256(
             abi.encode(
@@ -220,13 +254,11 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      *
      * @return minted The tOFTv2 minted amount.
      */
-    function wrap(address _fromAddress, address _toAddress, uint256 _amount)
-        external
-        payable
-        nonReentrant
-        onlyHostChain
-        returns (uint256 minted)
-    {
+    function wrap(
+        address _fromAddress,
+        address _toAddress,
+        uint256 _amount
+    ) external payable nonReentrant onlyHostChain returns (uint256 minted) {
         if (erc20 == address(0)) {
             _wrapNative(_toAddress, _amount, 0);
         } else {
@@ -242,7 +274,10 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of tokens to unwrap.
      */
-    function unwrap(address _toAddress, uint256 _amount) external onlyHostChain nonReentrant {
+    function unwrap(
+        address _toAddress,
+        uint256 _amount
+    ) external onlyHostChain nonReentrant {
         _unwrap(_toAddress, _amount);
     }
 }

@@ -2,9 +2,7 @@
 pragma solidity 0.8.22;
 
 // LZ
-import {
-    MessagingReceipt, OFTReceipt, SendParam
-} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {MessagingReceipt, OFTReceipt, SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
 import {ITOFTv2, LZSendParam, TOFTInitStruct} from "contracts/ITOFTv2.sol";
@@ -56,10 +54,16 @@ contract TOFTv2Sender is BaseTOFTv2 {
      *      - amountCreditLD::uint256: Amount of tokens to be credited on the remote side.
      */
     // TODO parse and enforce composed options here.
-    function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+    function sendPacket(
+        LZSendParam calldata _lzSendParam,
+        bytes calldata _composeMsg
+    )
         public
         payable
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt
+        )
     {
         // @dev Applies the token transfers regarding this send() operation.
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
@@ -72,15 +76,31 @@ contract TOFTv2Sender is BaseTOFTv2 {
 
         // @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
-            _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD, address(0), false
+            _lzSendParam.sendParam,
+            _lzSendParam.extraOptions,
+            _composeMsg,
+            amountToCreditLD,
+            address(0),
+            false
         );
 
         // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
-        msgReceipt =
-            _lzSend(_lzSendParam.sendParam.dstEid, message, options, _lzSendParam.fee, _lzSendParam.refundAddress);
+        msgReceipt = _lzSend(
+            _lzSendParam.sendParam.dstEid,
+            message,
+            options,
+            _lzSendParam.fee,
+            _lzSendParam.refundAddress
+        );
         // @dev Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD, amountToCreditLD);
 
-        emit OFTSent(msgReceipt.guid, msg.sender, amountDebitedLD, amountToCreditLD, _composeMsg);
+        emit OFTSent(
+            msgReceipt.guid,
+            msg.sender,
+            amountDebitedLD,
+            amountToCreditLD,
+            _composeMsg
+        );
     }
 }
