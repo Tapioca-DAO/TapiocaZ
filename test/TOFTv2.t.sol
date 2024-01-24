@@ -566,6 +566,7 @@ contract TOFTv2Test is TOFTTestHelper {
         /**
          * Actions
          */
+        uint256 tokenAmountSD = tOFTv2Helper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
         bTOFT.approve(address(magnetar), type(uint256).max);
@@ -573,8 +574,8 @@ contract TOFTv2Test is TOFTTestHelper {
         MarketBorrowMsg memory marketBorrowMsg = MarketBorrowMsg({
             user: address(this),
             borrowParams: ITapiocaOFT.IBorrowParams({
-                amount: tokenAmount_,
-                borrowAmount: tokenAmount_,
+                amount: tokenAmountSD,
+                borrowAmount: tokenAmountSD,
                 marketHelper: address(magnetar),
                 market: address(singularity),
                 deposit: true

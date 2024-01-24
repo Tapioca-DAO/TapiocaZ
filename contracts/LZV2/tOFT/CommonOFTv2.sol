@@ -20,18 +20,6 @@ contract CommonOFTv2 is OFT {
     {}
 
     /**
-     * @dev public function to remove dust from the given local decimal amount.
-     * @param _amountLD The amount in local decimals.
-     * @return amountLD The amount after removing dust.
-     *
-     * @dev Prevents the loss of dust when moving amounts between chains with different decimals.
-     * @dev eg. uint(123) with a conversion rate of 100 becomes uint(100).
-     */
-    function removeDust(uint256 _amountLD) public view virtual returns (uint256 amountLD) {
-        return _removeDust(_amountLD);
-    }
-
-    /**
      * @dev Slightly modified version of the OFT quoteSend() operation. Includes a `_msgType` parameter.
      * The `_buildMsgAndOptionsByType()` appends the packet type to the message.
      * @notice Provides a quote for the send() operation.

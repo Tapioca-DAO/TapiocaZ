@@ -68,31 +68,34 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
      */
     function marketBorrowReceiver(bytes memory _data) public payable {
         /// @dev decode received message
-        MarketBorrowMsg memory marketBorrowMsg_ = TOFTMsgCoder.decodeMarketBorrowMsg(_data);
+        MarketBorrowMsg memory msg_ = TOFTMsgCoder.decodeMarketBorrowMsg(_data);
 
         /// @dev sanitize 'borrowParams.marketHelper' and 'borrowParams.market'
-        _checkWhitelistStatus(marketBorrowMsg_.borrowParams.marketHelper);
-        _checkWhitelistStatus(marketBorrowMsg_.borrowParams.market);
+        _checkWhitelistStatus(msg_.borrowParams.marketHelper);
+        _checkWhitelistStatus(msg_.borrowParams.market);
+
+        msg_.borrowParams.amount = _toLD(uint64(msg_.borrowParams.amount));
+        msg_.borrowParams.borrowAmount = _toLD(uint64(msg_.borrowParams.borrowAmount));
 
         /// @dev use market helper to deposit, add collateral to market and withdrawTo
         /// @dev 'borrowParams.marketHelper' is MagnetarV2 contract
-        approve(address(marketBorrowMsg_.borrowParams.marketHelper), marketBorrowMsg_.borrowParams.amount);
-        IMagnetar(marketBorrowMsg_.borrowParams.marketHelper).depositAddCollateralAndBorrowFromMarket{value: msg.value}(
-            marketBorrowMsg_.borrowParams.market,
-            marketBorrowMsg_.user,
-            marketBorrowMsg_.borrowParams.amount,
-            marketBorrowMsg_.borrowParams.borrowAmount,
+        approve(address(msg_.borrowParams.marketHelper), msg_.borrowParams.amount);
+        IMagnetar(msg_.borrowParams.marketHelper).depositAddCollateralAndBorrowFromMarket{value: msg.value}(
+            msg_.borrowParams.market,
+            msg_.user,
+            msg_.borrowParams.amount,
+            msg_.borrowParams.borrowAmount,
             false, //extract from user; he needs to approve magnetar
-            marketBorrowMsg_.borrowParams.deposit,
-            marketBorrowMsg_.withdrawParams
+            msg_.borrowParams.deposit,
+            msg_.withdrawParams
         );
 
         emit BorrowReceived(
-            marketBorrowMsg_.user,
-            marketBorrowMsg_.borrowParams.market,
-            marketBorrowMsg_.borrowParams.amount,
-            marketBorrowMsg_.borrowParams.deposit,
-            marketBorrowMsg_.withdrawParams.withdraw
+            msg_.user,
+            msg_.borrowParams.market,
+            msg_.borrowParams.amount,
+            msg_.borrowParams.deposit,
+            msg_.withdrawParams.withdraw
         );
     }
 
@@ -112,6 +115,8 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
 
         address ybAddress = IMarket(msg_.removeParams.market).yieldBox();
         uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
+
+        msg_.removeParams.amount = _toLD(uint64(msg_.removeParams.amount));
 
         {
             uint256 share = IYieldBoxBase(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
@@ -166,6 +171,9 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         _checkWhitelistStatus(msg_.externalData.swapper);
         _checkWhitelistStatus(msg_.externalData.tOft);
         _checkWhitelistStatus(LzLib.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
+
+        msg_.amount = _toLD(uint64(msg_.amount));
+        msg_.swapData.amountOutMin = _toLD(uint64(msg_.swapData.amountOutMin));
 
         uint256 amountOut;
         {

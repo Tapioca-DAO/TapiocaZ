@@ -73,7 +73,7 @@ contract TOFTv2Helper {
      * @param _decimalConversionRate The OFT decimal conversion rate
      * @return amountLD The amount in local decimals.
      */
-    function toLD(uint64 _amountSD, uint256 _decimalConversionRate) internal pure returns (uint256 amountLD) {
+    function toLD(uint64 _amountSD, uint256 _decimalConversionRate) external pure returns (uint256 amountLD) {
         return _amountSD * _decimalConversionRate;
     }
 
@@ -83,8 +83,20 @@ contract TOFTv2Helper {
      * @param _decimalConversionRate The OFT decimal conversion rate
      * @return amountSD The amount in shared decimals.
      */
-    function toSD(uint256 _amountLD, uint256 _decimalConversionRate) internal pure virtual returns (uint64 amountSD) {
+    function toSD(uint256 _amountLD, uint256 _decimalConversionRate) external pure returns (uint64 amountSD) {
         return uint64(_amountLD / _decimalConversionRate);
+    }
+
+    /**
+     * @dev Remove dust from the given local decimal amount.
+     * @param _amountLD The amount in local decimals.
+     * @return amountLD The amount after removing dust.
+     *
+     * @dev Prevents the loss of dust when moving amounts between chains with different decimals.
+     * @dev eg. uint(123) with a conversion rate of 100 becomes uint(100).
+     */
+    function _removeDust(uint256 _amountLD, uint256 _decimalConversionRate) internal pure returns (uint256 amountLD) {
+        return (_amountLD / _decimalConversionRate) * _decimalConversionRate;
     }
 
     /**

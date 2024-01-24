@@ -198,10 +198,9 @@ contract mTapiocaOFT is BaseTOFT, ReentrancyGuard {
         if (!balancers[msg.sender]) revert BalancerNotAuthorized();
         if (_amount == 0) revert NotValid();
 
-        bool _isNative = erc20 == address(0);
         vault.withdraw(msg.sender, _amount);
 
-        emit Rebalancing(msg.sender, _amount, _isNative);
+        emit Rebalancing(msg.sender, _amount,  erc20 == address(0));
     }
 
     // ************************* //

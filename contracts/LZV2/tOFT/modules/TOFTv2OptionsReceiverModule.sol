@@ -66,6 +66,8 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
         {
             // _data declared for visibility.
             ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
+            _options.tapAmount = _toLD(uint64(_options.tapAmount));
+            _options.paymentTokenAmount = _toLD(uint64(_options.paymentTokenAmount));
 
             /// @dev call exerciseOption() with address(this) as the payment token
             uint256 bBefore = balanceOf(address(this));

@@ -74,16 +74,6 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      */
     event Rebalancing(address indexed _balancer, uint256 indexed _amount, bool indexed _isNative);
 
-    /**
-     * @notice event emitted when mint cap is updated
-     */
-    event MintCapUpdated(uint256 indexed oldVal, uint256 indexed newVal);
-
-    /**
-     * @notice event emitted when mint fee is updated
-     */
-    event MintFeeUpdated(uint256 indexed oldVal, uint256 indexed newVal);
-
     error mTOFTV2_NotNative();
     error mTOFTV2_NotHost();
     error mTOFTV2_BalancerNotAuthorized();
@@ -322,7 +312,6 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      * @param _fee the new fee amount
      */
     function setMintFee(uint256 _fee) external onlyOwner {
-        emit MintFeeUpdated(mintFee, _fee);
         mintFee = _fee;
     }
 
@@ -332,7 +321,6 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      */
     function setMintCap(uint256 _cap) external onlyOwner {
         if (_cap < totalSupply()) revert mTOFTV2_CapNotValid();
-        emit MintCapUpdated(mintCap, _cap);
         mintCap = _cap;
     }
 
@@ -363,10 +351,9 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
         if (!balancers[msg.sender]) revert mTOFTV2_BalancerNotAuthorized();
         if (_amount == 0) revert TOFT_NotValid();
 
-        bool _isNative = erc20 == address(0);
         vault.withdraw(msg.sender, _amount);
 
-        emit Rebalancing(msg.sender, _amount, _isNative);
+        emit Rebalancing(msg.sender, _amount, erc20 == address(0));
     }
 
     /// =====================
