@@ -3,7 +3,13 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {ERC20PermitApprovalMsg, ERC20PermitStruct} from "contracts/ITOFTv2.sol";
+import {
+    ERC20PermitApprovalMsg,
+    ERC20PermitStruct,
+    YieldBoxApproveAllMsg,
+    YieldBoxApproveAssetMsg,
+    MarketPermitActionMsg
+} from "contracts/ITOFTv2.sol";
 
 import "forge-std/Test.sol";
 
@@ -31,6 +37,70 @@ contract TestUtils is Test {
             v: v_,
             r: r_,
             s: s_
+        });
+    }
+
+    function __getYieldBoxPermitAllData(
+        ERC20PermitStruct memory _permit,
+        address _target,
+        bool _isPermit,
+        bytes32 _digest,
+        uint256 _pkSigner
+    ) internal pure returns (YieldBoxApproveAllMsg memory permitApproval_) {
+        (uint8 v_, bytes32 r_, bytes32 s_) = vm.sign(_pkSigner, _digest);
+
+        permitApproval_ = YieldBoxApproveAllMsg({
+            target: _target,
+            owner: _permit.owner,
+            spender: _permit.spender,
+            deadline: _permit.deadline,
+            v: v_,
+            r: r_,
+            s: s_,
+            permit: _isPermit
+        });
+    }
+
+    function __getYieldBoxPermitAssetData(
+        ERC20PermitStruct memory _permit,
+        address _target,
+        bool _isPermit,
+        bytes32 _digest,
+        uint256 _pkSigner
+    ) internal pure returns (YieldBoxApproveAssetMsg memory permitApproval_) {
+        (uint8 v_, bytes32 r_, bytes32 s_) = vm.sign(_pkSigner, _digest);
+
+        permitApproval_ = YieldBoxApproveAssetMsg({
+            target: _target,
+            owner: _permit.owner,
+            spender: _permit.spender,
+            assetId: _permit.value,
+            deadline: _permit.deadline,
+            v: v_,
+            r: r_,
+            s: s_,
+            permit: _isPermit
+        });
+    }
+
+    function __getMarketPermitData(MarketPermitActionMsg memory _permit, bytes32 _digest, uint256 _pkSigner)
+        internal
+        pure
+        returns (MarketPermitActionMsg memory permitApproval_)
+    {
+        (uint8 v_, bytes32 r_, bytes32 s_) = vm.sign(_pkSigner, _digest);
+
+        permitApproval_ = MarketPermitActionMsg({
+            target: _permit.target,
+            actionType: _permit.actionType,
+            owner: _permit.owner,
+            spender: _permit.spender,
+            value: _permit.value,
+            deadline: _permit.deadline,
+            v: v_,
+            r: r_,
+            s: s_,
+            permitAsset: _permit.permitAsset
         });
     }
 }

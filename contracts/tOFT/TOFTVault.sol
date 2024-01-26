@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+// External
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
-
-contract TOFTVault is BoringOwnable {
+/**
+ * @title TOFTVault
+ * @author TapiocaDAO
+ * @notice Holds TOFT funds
+ */
+contract TOFTVault is Ownable {
     using SafeERC20 for IERC20;
 
     address private _token;
     bool private _isNative;
     uint256 private _fees;
 
-    // ************** //
-    // *** ERRORS *** //
-    // ************** //
     error NotValid();
     error ZeroAmount();
     error Failed();
@@ -27,6 +29,9 @@ contract TOFTVault is BoringOwnable {
         _isNative = token_ == address(0);
     }
 
+    /// =====================
+    /// View
+    /// =====================
     /// @notice returns total active supply including fees
     function viewTotalSupply() external view returns (uint256) {
         return viewSupply() + viewFees();
@@ -46,6 +51,9 @@ contract TOFTVault is BoringOwnable {
         return _fees;
     }
 
+    /// =====================
+    /// Owner
+    /// =====================
     /// @notice register fees for mTOFT
     function registerFees(uint256 amount) external payable onlyOwner {
         if (msg.value > 0 && msg.value != amount) revert FeesAmountNotRight();
@@ -75,10 +83,13 @@ contract TOFTVault is BoringOwnable {
         _withdraw(to, amount);
     }
 
+    /// =====================
+    /// Private
+    /// =====================
     function _withdraw(address to, uint256 amount) private {
         if (amount > viewSupply()) revert AmountNotRight();
         if (_isNative) {
-            (bool success, ) = to.call{value: amount}("");
+            (bool success,) = to.call{value: amount}("");
             if (!success) revert Failed();
         } else {
             IERC20(_token).safeTransfer(to, amount);
