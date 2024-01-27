@@ -23,7 +23,6 @@ contract TestUtils is Test {
      */
     function __getERC20PermitData(ERC20PermitStruct memory _permit, bytes32 _digest, address _token, uint256 _pkSigner)
         internal
-        pure
         returns (ERC20PermitApprovalMsg memory permitApproval_)
     {
         (uint8 v_, bytes32 r_, bytes32 s_) = vm.sign(_pkSigner, _digest);
@@ -46,7 +45,7 @@ contract TestUtils is Test {
         bool _isPermit,
         bytes32 _digest,
         uint256 _pkSigner
-    ) internal pure returns (YieldBoxApproveAllMsg memory permitApproval_) {
+    ) internal returns (YieldBoxApproveAllMsg memory permitApproval_) {
         (uint8 v_, bytes32 r_, bytes32 s_) = vm.sign(_pkSigner, _digest);
 
         permitApproval_ = YieldBoxApproveAllMsg({
@@ -67,7 +66,7 @@ contract TestUtils is Test {
         bool _isPermit,
         bytes32 _digest,
         uint256 _pkSigner
-    ) internal pure returns (YieldBoxApproveAssetMsg memory permitApproval_) {
+    ) internal returns (YieldBoxApproveAssetMsg memory permitApproval_) {
         (uint8 v_, bytes32 r_, bytes32 s_) = vm.sign(_pkSigner, _digest);
 
         permitApproval_ = YieldBoxApproveAssetMsg({
@@ -85,7 +84,6 @@ contract TestUtils is Test {
 
     function __getMarketPermitData(MarketPermitActionMsg memory _permit, bytes32 _digest, uint256 _pkSigner)
         internal
-        pure
         returns (MarketPermitActionMsg memory permitApproval_)
     {
         (uint8 v_, bytes32 r_, bytes32 s_) = vm.sign(_pkSigner, _digest);
