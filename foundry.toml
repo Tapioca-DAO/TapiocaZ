@@ -13,7 +13,6 @@ optimizer_runs = 1500
 
 remappings = [
     "contracts/=contracts/tOFT/",
-    "contractsV1/=contracts/",
 	'forge-deploy/=node_modules/forge-deploy/contracts/',
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
 	"tapioca-sdk/=node_modules/tapioca-sdk/"
