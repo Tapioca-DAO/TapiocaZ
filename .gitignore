@@ -6,6 +6,7 @@ typechain
 tapioca-sdk
 package-lock.json
 docs
+.VSCodeCounter
 
 #Hardhat files
 cache
