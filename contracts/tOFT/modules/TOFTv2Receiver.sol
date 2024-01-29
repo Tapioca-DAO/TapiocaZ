@@ -266,8 +266,10 @@ contract TOFTv2Receiver is BaseTOFTv2, IOAppComposer {
         bytes memory _composeMsg
     ) internal returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
         // Burn tokens from this contract
-        (uint256 amountDebitedLD_, uint256 amountToCreditLD_) =
-            _debit(_lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid);
+        (uint256 amountDebitedLD_, uint256 amountToCreditLD_) = _debitView(
+            _lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid
+        );
+        _burn(address(this), amountToCreditLD_);
 
         _lzSendParam.sendParam.amountLD = amountToCreditLD_;
         _lzSendParam.sendParam.minAmountLD = amountToCreditLD_;
