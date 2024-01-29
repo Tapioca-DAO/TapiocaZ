@@ -122,8 +122,11 @@ contract TOFTv2Helper {
         sendParam_ = SendParam({
             dstEid: _prepareLzCallData.dstEid,
             to: _prepareLzCallData.recipient,
-            amountToSendLD: _prepareLzCallData.amountToSendLD,
-            minAmountToCreditLD: _prepareLzCallData.minAmountToCreditLD
+            amountLD: _prepareLzCallData.amountToSendLD,
+            minAmountLD: _prepareLzCallData.minAmountToCreditLD,
+            extraOptions: "0x",
+            composeMsg: "0x",
+            oftCmd: "0x"
         });
 
         // If compose call found, we get its compose options and message.
@@ -177,6 +180,9 @@ contract TOFTv2Helper {
         }
 
         msgFee_ = tOFTToken.quoteSendPacket(sendParam_, oftMsgOptions_, false, composeMsg_, "");
+
+        sendParam_.extraOptions = oftMsgOptions_;
+        sendParam_.composeMsg = composeMsg_;
 
         lzSendParam_ = LZSendParam({
             sendParam: sendParam_,

@@ -19,7 +19,7 @@ import {TOFTv2ExtExec} from "contracts/extensions/TOFTv2ExtExec.sol";
 import {ModuleManager} from "contracts/modules/ModuleManager.sol";
 import {ITOFTv2, TOFTInitStruct} from "contracts/ITOFTv2.sol";
 import {CommonOFTv2} from "contracts/CommonOFTv2.sol";
-import {TOFTVault} from "contractsV1/tOFT/TOFTVault.sol"; //TODO replace after removing v1 contracts
+import {TOFTVault} from "contracts/TOFTVault.sol"; //TODO replace after removing v1 contracts
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

@@ -101,10 +101,9 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
             address tapOft = ITapiocaOptionsBroker(_options.target).tapOFT();
             if (msg_.withdrawOnOtherChain) {
                 /// @dev determine the right amount to send back to source
-                uint256 amountToSend =
-                    _send.amountToSendLD > _options.tapAmount ? _options.tapAmount : _send.amountToSendLD;
-                if (_send.minAmountToCreditLD > amountToSend) {
-                    _send.minAmountToCreditLD = amountToSend;
+                uint256 amountToSend = _send.amountLD > _options.tapAmount ? _options.tapAmount : _send.amountLD;
+                if (_send.minAmountLD > amountToSend) {
+                    _send.minAmountLD = amountToSend;
                 }
 
                 // Sends to source and preserve source `msg.sender` (`from` in this case).
@@ -136,11 +135,8 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
         /// @dev Applies the token transfers regarding this send() operation.
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
         // - amountToCreditLD is the amount in local decimals that will be credited to the recipient on the remote OFT instance.
-        (uint256 amountDebitedLD, uint256 amountToCreditLD) = _debit(
-            _lzSendParam.sendParam.amountToSendLD,
-            _lzSendParam.sendParam.minAmountToCreditLD,
-            _lzSendParam.sendParam.dstEid
-        );
+        (uint256 amountDebitedLD, uint256 amountToCreditLD) =
+            _debit(_lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid);
 
         /// @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
@@ -153,7 +149,7 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
         /// @dev Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD, amountToCreditLD);
 
-        emit OFTSent(msgReceipt.guid, msg.sender, amountDebitedLD, amountToCreditLD, _composeMsg);
+        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD);
     }
 
     /**

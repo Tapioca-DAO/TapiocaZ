@@ -26,10 +26,6 @@ contract OFTAdapterMock is OFTAdapter {
         return _credit(_to, _amountToCreditLD, _srcEid);
     }
 
-    function increaseOutboundAmount(uint256 _amount) public {
-        outboundAmount += _amount;
-    }
-
     function removeDust(uint256 _amountLD) public view returns (uint256 amountLD) {
         return _removeDust(_amountLD);
     }

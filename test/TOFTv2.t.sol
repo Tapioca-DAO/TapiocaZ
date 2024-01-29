@@ -1080,7 +1080,15 @@ contract TOFTv2Test is TOFTTestHelper {
             }),
             withdrawOnOtherChain: false,
             lzSendParams: LZSendParam({
-                sendParam: SendParam({dstEid: 0, to: "0x", amountToSendLD: 0, minAmountToCreditLD: 0}),
+                sendParam: SendParam({
+                    dstEid: 0,
+                    to: "0x",
+                    amountLD: 0,
+                    minAmountLD: 0,
+                    extraOptions: "0x",
+                    composeMsg: "0x",
+                    oftCmd: "0x"
+                }),
                 fee: MessagingFee({nativeFee: 0, lzTokenFee: 0}),
                 extraOptions: "0x",
                 refundAddress: address(this)
