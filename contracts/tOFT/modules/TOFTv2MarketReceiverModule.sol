@@ -170,6 +170,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         _checkWhitelistStatus(msg_.externalData.magnetar);
         _checkWhitelistStatus(msg_.externalData.swapper);
         _checkWhitelistStatus(msg_.externalData.tOft);
+        _checkWhitelistStatus(msg_.swapData.tokenOut);
         _checkWhitelistStatus(LzLib.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
 
         msg_.amount = _toLD(uint64(msg_.amount));
