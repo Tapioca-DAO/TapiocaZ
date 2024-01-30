@@ -17,9 +17,9 @@ import {
     ITapiocaOptionBroker,
     ITapiocaOptionBrokerCrossChain
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "contracts/ITOFTv2.sol";
+import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "contracts/ITOFT.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
+import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -36,20 +36,20 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 //TODO: perform ld2sd and sd2ld on uint256
 
 /**
- * @title TOFTv2OptionsReceiverModule
+ * @title TOFTOptionsReceiverModule
  * @author TapiocaDAO
- * @notice TOFTv2 Options module
+ * @notice TOFT Options module
  */
-contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
+contract TOFTOptionsReceiverModule is BaseTOFT {
     using SafeERC20 for IERC20;
 
-    error TOFTv2OptionsReceiverModule_NotAuthorized(address invalidAddress);
+    error TOFTOptionsReceiverModule_NotAuthorized(address invalidAddress);
 
     event ExerciseOptionsReceived(
         address indexed user, address indexed target, uint256 indexed oTapTokenId, uint256 paymentTokenAmount
     );
 
-    constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
+    constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
     /**
      * @notice Exercise tOB option
@@ -125,7 +125,7 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
     function _checkWhitelistStatus(address _addr) private view {
         if (_addr != address(0)) {
             if (!cluster.isWhitelisted(0, _addr)) {
-                revert TOFTv2OptionsReceiverModule_NotAuthorized(_addr);
+                revert TOFTOptionsReceiverModule_NotAuthorized(_addr);
             }
         }
     }

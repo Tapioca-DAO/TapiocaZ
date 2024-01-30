@@ -23,7 +23,7 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 // Tapioca
 import {
-    ITOFTv2,
+    ITOFT,
     LZSendParam,
     ERC20PermitStruct,
     ERC20PermitApprovalMsg,
@@ -37,25 +37,25 @@ import {
     YieldBoxApproveAllMsg,
     YieldBoxApproveAssetMsg,
     MarketPermitActionMsg
-} from "contracts/ITOFTv2.sol";
+} from "contracts/ITOFT.sol";
 import {
-    TOFTv2Helper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData
-} from "contracts/extensions/TOFTv2Helper.sol";
+    TOFTHelper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData
+} from "contracts/extensions/TOFTHelper.sol";
 import {
     ITapiocaOptionBroker,
     ITapiocaOptionBrokerCrossChain
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ERC20WithoutStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
-import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
-import {TOFTv2OptionsReceiverModule} from "contracts/modules/TOFTv2OptionsReceiverModule.sol";
-import {TOFTv2GenericReceiverModule} from "contracts/modules/TOFTv2GenericReceiverModule.sol";
+import {TOFTMarketReceiverModule} from "contracts/modules/TOFTMarketReceiverModule.sol";
+import {TOFTOptionsReceiverModule} from "contracts/modules/TOFTOptionsReceiverModule.sol";
+import {TOFTGenericReceiverModule} from "contracts/modules/TOFTGenericReceiverModule.sol";
 import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
-import {TOFTv2Receiver} from "contracts/modules/TOFTv2Receiver.sol";
+import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
+import {TOFTSender} from "contracts/modules/TOFTSender.sol";
 
 // Tapioca Tests
 import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
@@ -63,14 +63,14 @@ import {TOFTTestHelper} from "./TOFTTestHelper.t.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
 import {ERC721Mock} from "./ERC721Mock.sol";
-import {TOFTv2Mock} from "./TOFTv2Mock.sol";
+import {TOFTMock} from "./TOFTMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 
 import "forge-std/Test.sol";
 
 //TODO: test magnetar withdraw to chain
 
-contract TOFTv2Test is TOFTTestHelper {
+contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
     using OFTMsgCodec for bytes32;
     using OFTMsgCodec for bytes;
@@ -84,13 +84,13 @@ contract TOFTv2Test is TOFTTestHelper {
     ERC20Mock bERC20;
     ERC20Mock tapOFT;
 
-    TOFTv2Mock aTOFT;
-    TOFTv2Mock bTOFT;
+    TOFTMock aTOFT;
+    TOFTMock bTOFT;
     // MagnetarV2 magnetar;
     MagnetarMock magnetar;
     SingularityMock singularity;
 
-    TOFTv2Helper tOFTv2Helper;
+    TOFTHelper tOFTHelper;
 
     TapiocaOptionsBrokerMock tOB;
 
@@ -123,7 +123,7 @@ contract TOFTv2Test is TOFTTestHelper {
     uint16 internal constant PT_SEND_PARAMS = 804; // Use for perform a normal OFT send but with a custom payload
 
     /**
-     * @dev TOFTv2 global event checks
+     * @dev TOFT global event checks
      */
     event OFTReceived(bytes32, address, uint256, uint256);
     event ComposeReceived(uint16 indexed msgType, bytes32 indexed guid, bytes composeMsg);
@@ -168,25 +168,25 @@ contract TOFTv2Test is TOFTTestHelper {
             address(aERC20),
             aEid
         );
-        TOFTv2Sender aTOFTv2Sender = new TOFTv2Sender(aTOFTInitStruct);
-        TOFTv2Receiver aTOFTv2Receiver = new TOFTv2Receiver(aTOFTInitStruct);
-        TOFTv2MarketReceiverModule aTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(aTOFTInitStruct);
-        TOFTv2OptionsReceiverModule aTOFTv2OptionsReceiverModule = new TOFTv2OptionsReceiverModule(aTOFTInitStruct);
-        TOFTv2GenericReceiverModule aTOFTv2GenericReceiverModule = new TOFTv2GenericReceiverModule(aTOFTInitStruct);
-        vm.label(address(aTOFTv2Sender), "aTOFTv2Sender");
-        vm.label(address(aTOFTv2Receiver), "aTOFTv2Receiver");
-        vm.label(address(aTOFTv2MarketReceiverModule), "aTOFTv2MarketReceiverModule");
-        vm.label(address(aTOFTv2OptionsReceiverModule), "aTOFTv2OptionsReceiverModule");
-        vm.label(address(aTOFTv2GenericReceiverModule), "aTOFTv2GenericReceiverModule");
+        TOFTSender aTOFTSender = new TOFTSender(aTOFTInitStruct);
+        TOFTReceiver aTOFTReceiver = new TOFTReceiver(aTOFTInitStruct);
+        TOFTMarketReceiverModule aTOFTMarketReceiverModule = new TOFTMarketReceiverModule(aTOFTInitStruct);
+        TOFTOptionsReceiverModule aTOFTOptionsReceiverModule = new TOFTOptionsReceiverModule(aTOFTInitStruct);
+        TOFTGenericReceiverModule aTOFTGenericReceiverModule = new TOFTGenericReceiverModule(aTOFTInitStruct);
+        vm.label(address(aTOFTSender), "aTOFTSender");
+        vm.label(address(aTOFTReceiver), "aTOFTReceiver");
+        vm.label(address(aTOFTMarketReceiverModule), "aTOFTMarketReceiverModule");
+        vm.label(address(aTOFTOptionsReceiverModule), "aTOFTOptionsReceiverModule");
+        vm.label(address(aTOFTGenericReceiverModule), "aTOFTGenericReceiverModule");
         TOFTModulesInitStruct memory aTOFTModulesInitStruct = createModulesInitStruct(
-            address(aTOFTv2Sender),
-            address(aTOFTv2Receiver),
-            address(aTOFTv2MarketReceiverModule),
-            address(aTOFTv2MarketReceiverModule),
-            address(aTOFTv2GenericReceiverModule)
+            address(aTOFTSender),
+            address(aTOFTReceiver),
+            address(aTOFTMarketReceiverModule),
+            address(aTOFTMarketReceiverModule),
+            address(aTOFTGenericReceiverModule)
         );
-        aTOFT = TOFTv2Mock(
-            payable(_deployOApp(type(TOFTv2Mock).creationCode, abi.encode(aTOFTInitStruct, aTOFTModulesInitStruct)))
+        aTOFT = TOFTMock(
+            payable(_deployOApp(type(TOFTMock).creationCode, abi.encode(aTOFTInitStruct, aTOFTModulesInitStruct)))
         );
         vm.label(address(aTOFT), "aTOFT");
 
@@ -200,30 +200,30 @@ contract TOFTv2Test is TOFTTestHelper {
             address(bERC20),
             bEid
         );
-        TOFTv2Sender bTOFTv2Sender = new TOFTv2Sender(bTOFTInitStruct);
-        TOFTv2Receiver bTOFTv2Receiver = new TOFTv2Receiver(bTOFTInitStruct);
-        TOFTv2MarketReceiverModule bTOFTv2MarketReceiverModule = new TOFTv2MarketReceiverModule(bTOFTInitStruct);
-        TOFTv2OptionsReceiverModule bTOFTv2OptionsReceiverModule = new TOFTv2OptionsReceiverModule(bTOFTInitStruct);
-        TOFTv2GenericReceiverModule bTOFTv2GenericReceiverModule = new TOFTv2GenericReceiverModule(bTOFTInitStruct);
-        vm.label(address(bTOFTv2Sender), "bTOFTv2Sender");
-        vm.label(address(bTOFTv2Receiver), "bTOFTv2Receiver");
-        vm.label(address(bTOFTv2MarketReceiverModule), "bTOFTv2MarketReceiverModule");
-        vm.label(address(bTOFTv2OptionsReceiverModule), "bTOFTv2OptionsReceiverModule");
-        vm.label(address(bTOFTv2GenericReceiverModule), "bTOFTv2GenericReceiverModule");
+        TOFTSender bTOFTSender = new TOFTSender(bTOFTInitStruct);
+        TOFTReceiver bTOFTReceiver = new TOFTReceiver(bTOFTInitStruct);
+        TOFTMarketReceiverModule bTOFTMarketReceiverModule = new TOFTMarketReceiverModule(bTOFTInitStruct);
+        TOFTOptionsReceiverModule bTOFTOptionsReceiverModule = new TOFTOptionsReceiverModule(bTOFTInitStruct);
+        TOFTGenericReceiverModule bTOFTGenericReceiverModule = new TOFTGenericReceiverModule(bTOFTInitStruct);
+        vm.label(address(bTOFTSender), "bTOFTSender");
+        vm.label(address(bTOFTReceiver), "bTOFTReceiver");
+        vm.label(address(bTOFTMarketReceiverModule), "bTOFTMarketReceiverModule");
+        vm.label(address(bTOFTOptionsReceiverModule), "bTOFTOptionsReceiverModule");
+        vm.label(address(bTOFTGenericReceiverModule), "bTOFTGenericReceiverModule");
         TOFTModulesInitStruct memory bTOFTModulesInitStruct = createModulesInitStruct(
-            address(bTOFTv2Sender),
-            address(bTOFTv2Receiver),
-            address(bTOFTv2MarketReceiverModule),
-            address(bTOFTv2OptionsReceiverModule),
-            address(bTOFTv2GenericReceiverModule)
+            address(bTOFTSender),
+            address(bTOFTReceiver),
+            address(bTOFTMarketReceiverModule),
+            address(bTOFTOptionsReceiverModule),
+            address(bTOFTGenericReceiverModule)
         );
-        bTOFT = TOFTv2Mock(
-            payable(_deployOApp(type(TOFTv2Mock).creationCode, abi.encode(bTOFTInitStruct, bTOFTModulesInitStruct)))
+        bTOFT = TOFTMock(
+            payable(_deployOApp(type(TOFTMock).creationCode, abi.encode(bTOFTInitStruct, bTOFTModulesInitStruct)))
         );
         vm.label(address(bTOFT), "bTOFT");
 
-        tOFTv2Helper = new TOFTv2Helper();
-        vm.label(address(tOFTv2Helper), "TOFTv2Helper");
+        tOFTHelper = new TOFTHelper();
+        vm.label(address(tOFTHelper), "TOFTHelper");
 
         // config and wire the ofts
         address[] memory ofts = new address[](2);
@@ -369,11 +369,11 @@ contract TOFTv2Test is TOFTTestHelper {
             approvals_[0] = permitApprovalB_;
             approvals_[1] = permitApprovalC_;
 
-            approvalsMsg_ = tOFTv2Helper.buildPermitApprovalMsg(approvals_);
+            approvalsMsg_ = tOFTHelper.buildPermitApprovalMsg(approvals_);
         }
 
-        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -438,8 +438,8 @@ contract TOFTv2Test is TOFTTestHelper {
             deal(address(bTOFT), address(this), tokenAmount_);
 
             // @dev `remoteMsgFee_` is to be airdropped on dst to pay for the `remoteTransfer` operation (B->A).
-            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTv2Helper.prepareLzCall( // B->A data
-                ITOFTv2(address(bTOFT)),
+            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTHelper.prepareLzCall( // B->A data
+                ITOFT(address(bTOFT)),
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -467,10 +467,10 @@ contract TOFTv2Test is TOFTTestHelper {
          */
         RemoteTransferMsg memory remoteTransferData =
             RemoteTransferMsg({composeMsg: new bytes(0), owner: address(this), lzSendParam: remoteLzSendParam_});
-        bytes memory remoteTransferMsg_ = tOFTv2Helper.buildRemoteTransferMsg(remoteTransferData);
+        bytes memory remoteTransferMsg_ = tOFTHelper.buildRemoteTransferMsg(remoteTransferData);
 
-        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -561,8 +561,8 @@ contract TOFTv2Test is TOFTTestHelper {
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
-            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTv2Helper.prepareLzCall( // B->A data
-                ITOFTv2(address(bTOFT)),
+            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTHelper.prepareLzCall( // B->A data
+                ITOFT(address(bTOFT)),
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -588,7 +588,7 @@ contract TOFTv2Test is TOFTTestHelper {
         /**
          * Actions
          */
-        uint256 tokenAmountSD = tOFTv2Helper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
+        uint256 tokenAmountSD = tOFTHelper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
         bTOFT.approve(address(magnetar), type(uint256).max);
@@ -613,10 +613,10 @@ contract TOFTv2Test is TOFTTestHelper {
                 zroPaymentAddress: address(0)
             })
         });
-        bytes memory marketBorrowMsg_ = tOFTv2Helper.buildMarketBorrowMsg(marketBorrowMsg);
+        bytes memory marketBorrowMsg_ = tOFTHelper.buildMarketBorrowMsg(marketBorrowMsg);
 
-        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -688,8 +688,8 @@ contract TOFTv2Test is TOFTTestHelper {
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
-            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTv2Helper.prepareLzCall( // B->A data
-                ITOFTv2(address(bTOFT)),
+            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTHelper.prepareLzCall( // B->A data
+                ITOFT(address(bTOFT)),
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -715,7 +715,7 @@ contract TOFTv2Test is TOFTTestHelper {
         /**
          * Actions
          */
-        uint256 tokenAmountSD = tOFTv2Helper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
+        uint256 tokenAmountSD = tOFTHelper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
         bTOFT.approve(address(magnetar), type(uint256).max);
@@ -737,10 +737,10 @@ contract TOFTv2Test is TOFTTestHelper {
                 zroPaymentAddress: address(0)
             })
         });
-        bytes memory marketMsg_ = tOFTv2Helper.buildMarketRemoveCollateralMsg(marketMsg);
+        bytes memory marketMsg_ = tOFTHelper.buildMarketRemoveCollateralMsg(marketMsg);
 
-        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -815,8 +815,8 @@ contract TOFTv2Test is TOFTTestHelper {
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
-            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTv2Helper.prepareLzCall( // B->A data
-                ITOFTv2(address(bTOFT)),
+            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTHelper.prepareLzCall( // B->A data
+                ITOFT(address(bTOFT)),
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -842,14 +842,14 @@ contract TOFTv2Test is TOFTTestHelper {
         /**
          * Actions
          */
-        uint256 tokenAmountSD = tOFTv2Helper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
+        uint256 tokenAmountSD = tOFTHelper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
         SendParamsMsg memory sendMsg = SendParamsMsg({receiver: address(this), unwrap: true, amount: tokenAmountSD});
-        bytes memory sendMsg_ = tOFTv2Helper.buildSendWithParamsMsg(sendMsg);
+        bytes memory sendMsg_ = tOFTHelper.buildSendWithParamsMsg(sendMsg);
 
-        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -920,8 +920,8 @@ contract TOFTv2Test is TOFTTestHelper {
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
-            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTv2Helper.prepareLzCall( // B->A data
-                ITOFTv2(address(bTOFT)),
+            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTHelper.prepareLzCall( // B->A data
+                ITOFT(address(bTOFT)),
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(userA)),
@@ -947,14 +947,14 @@ contract TOFTv2Test is TOFTTestHelper {
         /**
          * Actions
          */
-        uint256 tokenAmountSD = tOFTv2Helper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
+        uint256 tokenAmountSD = tOFTHelper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
         SendParamsMsg memory sendMsg = SendParamsMsg({receiver: address(userA), unwrap: true, amount: tokenAmountSD});
-        bytes memory sendMsg_ = tOFTv2Helper.buildSendWithParamsMsg(sendMsg);
+        bytes memory sendMsg_ = tOFTHelper.buildSendWithParamsMsg(sendMsg);
 
-        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(userA)),
@@ -1027,8 +1027,8 @@ contract TOFTv2Test is TOFTTestHelper {
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
-            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTv2Helper.prepareLzCall( // B->A data
-                ITOFTv2(address(bTOFT)),
+            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTHelper.prepareLzCall( // B->A data
+                ITOFT(address(bTOFT)),
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -1054,7 +1054,7 @@ contract TOFTv2Test is TOFTTestHelper {
         /**
          * Actions
          */
-        uint256 tokenAmountSD = tOFTv2Helper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
+        uint256 tokenAmountSD = tOFTHelper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
         ExerciseOptionsMsg memory exerciseMsg = ExerciseOptionsMsg({
@@ -1082,10 +1082,10 @@ contract TOFTv2Test is TOFTTestHelper {
             }),
             composeMsg: "0x"
         });
-        bytes memory sendMsg_ = tOFTv2Helper.buildExerciseOptionMsg(exerciseMsg);
+        bytes memory sendMsg_ = tOFTHelper.buildExerciseOptionMsg(exerciseMsg);
 
-        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -1148,11 +1148,11 @@ contract TOFTv2Test is TOFTTestHelper {
             YieldBoxApproveAllMsg memory permitApproval_ =
                 __getYieldBoxPermitAllData(approvalUserB_, address(yieldBox), true, digest_, userAPKey);
 
-            approvalMsg_ = tOFTv2Helper.buildYieldBoxApproveAllMsg(permitApproval_);
+            approvalMsg_ = tOFTHelper.buildYieldBoxApproveAllMsg(permitApproval_);
         }
 
-        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -1209,11 +1209,11 @@ contract TOFTv2Test is TOFTTestHelper {
             YieldBoxApproveAllMsg memory permitApproval_ =
                 __getYieldBoxPermitAllData(approvalUserB_, address(yieldBox), false, digest_, userAPKey);
 
-            approvalMsg_ = tOFTv2Helper.buildYieldBoxApproveAllMsg(permitApproval_);
+            approvalMsg_ = tOFTHelper.buildYieldBoxApproveAllMsg(permitApproval_);
         }
 
-        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -1289,11 +1289,11 @@ contract TOFTv2Test is TOFTTestHelper {
             approvals_[0] = permitApprovalB_;
             approvals_[1] = permitApprovalC_;
 
-            approvalsMsg_ = tOFTv2Helper.buildYieldBoxApproveAssetMsg(approvals_);
+            approvalsMsg_ = tOFTHelper.buildYieldBoxApproveAssetMsg(approvals_);
         }
 
-        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -1377,11 +1377,11 @@ contract TOFTv2Test is TOFTTestHelper {
             approvals_[0] = permitApprovalB_;
             approvals_[1] = permitApprovalC_;
 
-            approvalsMsg_ = tOFTv2Helper.buildYieldBoxApproveAssetMsg(approvals_);
+            approvalsMsg_ = tOFTHelper.buildYieldBoxApproveAssetMsg(approvals_);
         }
 
-        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -1453,11 +1453,11 @@ contract TOFTv2Test is TOFTTestHelper {
             bytes32 digest_ = _getMarketPermitTypedDataHash(true, 1, userA, userB, 1e18, 1 days);
             MarketPermitActionMsg memory permitApproval_ = __getMarketPermitData(approvalUserB_, digest_, userAPKey);
 
-            approvalMsg_ = tOFTv2Helper.buildMarketPermitApprovalMsg(permitApproval_);
+            approvalMsg_ = tOFTHelper.buildMarketPermitApprovalMsg(permitApproval_);
         }
 
-        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
@@ -1521,11 +1521,11 @@ contract TOFTv2Test is TOFTTestHelper {
             bytes32 digest_ = _getMarketPermitTypedDataHash(false, 1, userA, userB, 1e18, 1 days);
             MarketPermitActionMsg memory permitApproval_ = __getMarketPermitData(approvalUserB_, digest_, userAPKey);
 
-            approvalMsg_ = tOFTv2Helper.buildMarketPermitApprovalMsg(permitApproval_);
+            approvalMsg_ = tOFTHelper.buildMarketPermitApprovalMsg(permitApproval_);
         }
 
-        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTv2Helper.prepareLzCall(
-            ITOFTv2(address(aTOFT)),
+        PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),

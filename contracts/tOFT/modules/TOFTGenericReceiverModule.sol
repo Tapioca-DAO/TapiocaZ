@@ -16,9 +16,9 @@ import {
     ITapiocaOptionBrokerCrossChain
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import {TOFTInitStruct, SendParamsMsg} from "contracts/ITOFTv2.sol";
+import {TOFTInitStruct, SendParamsMsg} from "contracts/ITOFT.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
+import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -35,17 +35,17 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 //TODO: perform ld2sd and sd2ld on uint256
 
 /**
- * @title TOFTv2GenericReceiverModule
+ * @title TOFTGenericReceiverModule
  * @author TapiocaDAO
- * @notice TOFTv2 Generic module
+ * @notice TOFT Generic module
  */
-contract TOFTv2GenericReceiverModule is BaseTOFTv2 {
+contract TOFTGenericReceiverModule is BaseTOFT {
     using SafeERC20 for IERC20;
 
-    error TOFTv2GenericReceiverModule_NotAuthorized(address invalidAddress);
-    error TOFTv2GenericReceiverModule_TransferFailed();
+    error TOFTGenericReceiverModule_NotAuthorized(address invalidAddress);
+    error TOFTGenericReceiverModule_TransferFailed();
 
-    constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
+    constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
     /**
      * @notice Unwrap and sends underlying to `receiver`.
@@ -73,7 +73,7 @@ contract TOFTv2GenericReceiverModule is BaseTOFTv2 {
                 IERC20(toftERC20).safeTransfer(msg_.receiver, msg_.amount);
             } else {
                 (bool sent,) = msg_.receiver.call{value: msg_.amount}("");
-                if (!sent) revert TOFTv2GenericReceiverModule_TransferFailed();
+                if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
             }
         }
     }

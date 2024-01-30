@@ -11,7 +11,7 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol"; //todo: it can be remov
 // Tapioca
 import {
     TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg
-} from "contracts/ITOFTv2.sol";
+} from "contracts/ITOFT.sol";
 import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
@@ -20,7 +20,7 @@ import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
+import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -38,15 +38,15 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 //TODO: perform ld2sd and sd2ld on uint256
 
 /**
- * @title TOFTv2MarketReceiverModule
+ * @title TOFTMarketReceiverModule
  * @author TapiocaDAO
- * @notice TOFTv2 Market module
+ * @notice TOFT Market module
  */
-contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
+contract TOFTMarketReceiverModule is BaseTOFT {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
 
-    error TOFTv2MarketReceiverModule_NotAuthorized(address invalidAddress);
+    error TOFTMarketReceiverModule_NotAuthorized(address invalidAddress);
 
     event BorrowReceived(
         address indexed user, address indexed market, uint256 indexed amount, bool deposit, bool withdraw
@@ -56,7 +56,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
 
     event LeverageDownReceived(address indexed user, address indexed market, uint256 indexed amount);
 
-    constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
+    constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
     /**
      * @notice Calls depositAddCollateralAndBorrowFromMarket on Magnetar
@@ -130,7 +130,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
             //TODO: refactor after periph is updated
             if (msg_.withdrawParams.withdraw) {
                 if (!cluster.isWhitelisted(0, msg_.removeParams.marketHelper)) {
-                    revert TOFTv2MarketReceiverModule_NotAuthorized(msg_.removeParams.marketHelper);
+                    revert TOFTMarketReceiverModule_NotAuthorized(msg_.removeParams.marketHelper);
                 }
                 IMagnetar(payable(msg_.removeParams.marketHelper)).withdrawToChain{value: msg.value}(
                     IMagnetar.WithdrawToChainData(
@@ -241,7 +241,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
     function _checkWhitelistStatus(address _addr) private view {
         if (_addr != address(0)) {
             if (!cluster.isWhitelisted(0, _addr)) {
-                revert TOFTv2MarketReceiverModule_NotAuthorized(_addr);
+                revert TOFTMarketReceiverModule_NotAuthorized(_addr);
             }
         }
     }

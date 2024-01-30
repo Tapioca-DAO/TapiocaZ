@@ -13,10 +13,11 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
-import {ITOFTv2, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "contracts/ITOFTv2.sol";
-import {TOFTv2Receiver} from "contracts/modules/TOFTv2Receiver.sol";
-import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
-import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
+import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "contracts/ITOFT.sol";
+import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
+import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
+import {TOFTSender} from "contracts/modules/TOFTSender.sol";
+import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -32,65 +33,25 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 /**
- * @title mTOFTv2
+ * @title TOFT
  * @author TapiocaDAO
- * @notice Tapioca OFT wrapper contract that is connected with multiple chains
- * @dev It can be wrapped and unwrapped on multiple connected chains
+ * @notice Tapioca OFT wrapper contract
+ * @dev It can be wrapped and unwrapped only on host chain
  */
-contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
-    /**
-     * @notice allowed chains where you can unwrap your TOFT
-     */
-    mapping(uint256 => bool) public connectedChains;
+contract TOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
+    error TOFT_OnlyHostChain();
+    error TOFT_NotNative();
 
-    /**
-     * @notice map of approved balancers
-     * @dev a balancer can extract the underlying
-     */
-    mapping(address => bool) public balancers;
-
-    /**
-     * @notice max mTOFT mintable
-     */
-    uint256 public mintCap;
-
-    /**
-     * @notice current non-host chain mint fee
-     */
-    uint256 public mintFee;
-
-    /**
-     * @notice event emitted when a connected chain is reigstered or unregistered
-     */
-    event ConnectedChainStatusUpdated(uint256 indexed _chain, bool indexed _old, bool indexed _new);
-
-    /**
-     * @notice event emitted when balancer status is updated
-     */
-    event BalancerStatusUpdated(address indexed _balancer, bool indexed _bool, bool indexed _new);
-
-    /**
-     * @notice event emitted when rebalancing is performed
-     */
-    event Rebalancing(address indexed _balancer, uint256 indexed _amount, bool indexed _isNative);
-
-    error mTOFTV2_NotNative();
-    error mTOFTV2_NotHost();
-    error mTOFTV2_BalancerNotAuthorized();
-    error mTOFTV2_CapNotValid();
+    modifier onlyHostChain() {
+        if (_getChainId() != hostEid) revert TOFT_OnlyHostChain();
+        _;
+    }
 
     constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _modulesData)
-        BaseTOFTv2(_tOFTData)
+        BaseTOFT(_tOFTData)
         ERC20Permit(_tOFTData.name)
     {
-        if (_getChainId() == hostEid) {
-            connectedChains[hostEid] = true;
-        }
-
-        mintCap = 1_000_000 * 1e18; // TOFT is always in 18 decimals
-        mintFee = 5e2; // 0.5%
-
-        // Set TOFTv2 execution modules
+        // Set TOFT execution modules
         if (_modulesData.tOFTSenderModule == address(0)) revert TOFT_NotValid();
         if (_modulesData.tOFTReceiverModule == address(0)) {
             revert TOFT_NotValid();
@@ -105,11 +66,11 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
             revert TOFT_NotValid();
         }
 
-        _setModule(uint8(ITOFTv2.Module.TOFTv2Sender), _modulesData.tOFTSenderModule);
-        _setModule(uint8(ITOFTv2.Module.TOFTv2Receiver), _modulesData.tOFTReceiverModule);
-        _setModule(uint8(ITOFTv2.Module.TOFTv2MarketReceiver), _modulesData.marketReceiverModule);
-        _setModule(uint8(ITOFTv2.Module.TOFTv2OptionsReceiver), _modulesData.optionsReceiverModule);
-        _setModule(uint8(ITOFTv2.Module.TOFTv2GenericReceiver), _modulesData.genericReceiverModule);
+        _setModule(uint8(ITOFT.Module.TOFTSender), _modulesData.tOFTSenderModule);
+        _setModule(uint8(ITOFT.Module.TOFTReceiver), _modulesData.tOFTReceiverModule);
+        _setModule(uint8(ITOFT.Module.TOFTMarketReceiver), _modulesData.marketReceiverModule);
+        _setModule(uint8(ITOFT.Module.TOFTOptionsReceiver), _modulesData.optionsReceiverModule);
+        _setModule(uint8(ITOFT.Module.TOFTGenericReceiver), _modulesData.genericReceiverModule);
     }
 
     /**
@@ -117,7 +78,7 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      */
     fallback() external payable {
         /// @dev Call the receiver module on fallback, assume it's gonna be called by endpoint.
-        _executeModule(uint8(ITOFTv2.Module.TOFTv2Receiver), msg.data, false);
+        _executeModule(uint8(ITOFT.Module.TOFTReceiver), msg.data, false);
     }
 
     receive() external payable {}
@@ -144,7 +105,7 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
     ) public payable override {
         // Call the internal OApp implementation of lzReceive.
         _executeModule(
-            uint8(ITOFTv2.Module.TOFTv2Receiver),
+            uint8(ITOFT.Module.TOFTReceiver),
             abi.encodeWithSelector(OAppReceiver.lzReceive.selector, _origin, _guid, _message, _executor, _extraData),
             false
         );
@@ -162,12 +123,58 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      *
      * @return returnData The return data from the module execution, if any.
      */
-    function executeModule(ITOFTv2.Module _module, bytes memory _data, bool _forwardRevert)
+    function executeModule(ITOFT.Module _module, bytes memory _data, bool _forwardRevert)
         external
         payable
         returns (bytes memory returnData)
     {
         return _executeModule(uint8(_module), _data, _forwardRevert);
+    }
+
+    /// ========================
+    /// Frequently used modules
+    /// ========================
+
+    /**
+     * @dev Slightly modified version of the OFT send() operation. Includes a `_msgType` parameter.
+     * The `_buildMsgAndOptionsByType()` appends the packet type to the message.
+     * @dev Executes the send operation.
+     * @param _lzSendParam The parameters for the send operation.
+     *      - _sendParam: The parameters for the send operation.
+     *          - dstEid::uint32: Destination endpoint ID.
+     *          - to::bytes32: Recipient address.
+     *          - amountToSendLD::uint256: Amount to send in local decimals.
+     *          - minAmountToCreditLD::uint256: Minimum amount to credit in local decimals.
+     *      - _fee: The calculated fee for the send() operation.
+     *          - nativeFee::uint256: The native fee.
+     *          - lzTokenFee::uint256: The lzToken fee.
+     *      - _extraOptions::bytes: Additional options for the send() operation.
+     *      - refundAddress::address: The address to refund the native fee to.
+     * @param _composeMsg The composed message for the send() operation. Is a combination of 1 or more TAP specific messages.
+     *
+     * @return msgReceipt The receipt for the send operation.
+     *      - guid::bytes32: The unique identifier for the sent message.
+     *      - nonce::uint64: The nonce of the sent message.
+     *      - fee: The LayerZero fee incurred for the message.
+     *          - nativeFee::uint256: The native fee.
+     *          - lzTokenFee::uint256: The lzToken fee.
+     * @return oftReceipt The OFT receipt information.
+     *      - amountDebitLD::uint256: Amount of tokens ACTUALLY debited in local decimals.
+     *      - amountCreditLD::uint256: Amount of tokens to be credited on the remote side.
+     */
+    function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        public
+        payable
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        (msgReceipt, oftReceipt) = abi.decode(
+            _executeModule(
+                uint8(ITOFT.Module.TOFTSender),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacket, (_lzSendParam, _composeMsg)),
+                false
+            ),
+            (MessagingReceipt, OFTReceipt)
+        );
     }
 
     /// =====================
@@ -206,133 +213,43 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
     /// External
     /// =====================
     /**
-     * @notice Wrap an ERC20 with a fee if existing.
-     * @dev Minted amount might be less than requested amount. see `mintFee`
+     * @notice Wrap an ERC20.
+     * @dev Minted amount is 1:1 with `_amount`
      * @param _fromAddress The address to wrap from.
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of ERC20 to wrap.
      *
-     * @return minted The mtOFTv2 minted amount.
+     * @return minted The tOFT minted amount.
      */
     function wrap(address _fromAddress, address _toAddress, uint256 _amount)
         external
         payable
         nonReentrant
+        onlyHostChain
         returns (uint256 minted)
     {
-        if (balancers[msg.sender]) revert mTOFTV2_BalancerNotAuthorized();
-        if (!connectedChains[_getChainId()]) revert mTOFTV2_NotHost();
-        if (totalSupply() + _amount > mintCap) revert mTOFTV2_CapNotValid();
-
-        uint256 feeAmount = _checkAndExtractFees(_amount);
-
         if (erc20 == address(0)) {
-            _wrapNative(_toAddress, _amount, feeAmount);
+            _wrapNative(_toAddress, _amount, 0);
         } else {
-            if (msg.value > 0) revert mTOFTV2_NotNative();
-            _wrap(_fromAddress, _toAddress, _amount, feeAmount);
+            if (msg.value > 0) revert TOFT_NotNative();
+            _wrap(_fromAddress, _toAddress, _amount, 0);
         }
 
-        return _amount - feeAmount;
+        return _amount; //no fee for TOFT
     }
 
     /**
-     * @notice Unwrap an ERC20/Native with a 1:1 ratio.
+     * @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of tokens to unwrap.
      */
-    function unwrap(address _toAddress, uint256 _amount) external nonReentrant {
-        if (!connectedChains[_getChainId()]) revert mTOFTV2_NotHost();
-        if (balancers[msg.sender]) revert mTOFTV2_BalancerNotAuthorized();
+    function unwrap(address _toAddress, uint256 _amount) external onlyHostChain nonReentrant {
         _unwrap(_toAddress, _amount);
     }
 
-    /// =====================
-    /// Owner
-    /// =====================
-
-    /**
-     * @notice withdraw fees from Vault.
-     * @param _to receiver; usually Balancer.sol contract
-     * @param _amount the fees amount
-     */
-    function withdrawFees(address _to, uint256 _amount) external onlyOwner {
-        vault.transferFees(_to, _amount);
-    }
-
-    /**
-     * @notice sets the wrap fee for non host chains
-     * @dev fee precision is 1e5; a fee of 1e4 is 10%
-     * @param _fee the new fee amount
-     */
-    function setMintFee(uint256 _fee) external onlyOwner {
-        mintFee = _fee;
-    }
-
-    /**
-     * @notice sets the wrap cap
-     * @param _cap the new cap amount
-     */
-    function setMintCap(uint256 _cap) external onlyOwner {
-        if (_cap < totalSupply()) revert mTOFTV2_CapNotValid();
-        mintCap = _cap;
-    }
-
-    /**
-     * @notice updates a connected chain whitelist status
-     * @param _chain the block.chainid of that specific chain
-     */
-    function setConnectedChain(uint256 _chain) external onlyOwner {
-        emit ConnectedChainStatusUpdated(_chain, connectedChains[_chain], true);
-        connectedChains[_chain] = true;
-    }
-
-    /**
-     * @notice updates a Balancer whitelist status
-     * @param _balancer the operator address
-     * @param _status the new whitelist status
-     */
-    function updateBalancerState(address _balancer, bool _status) external onlyOwner {
-        emit BalancerStatusUpdated(_balancer, balancers[_balancer], _status);
-        balancers[_balancer] = _status;
-    }
-
-    /**
-     * @notice extracts the underlying token/native for rebalancing
-     * @param _amount the amount used for rebalancing
-     */
-    function extractUnderlying(uint256 _amount) external nonReentrant {
-        if (!balancers[msg.sender]) revert mTOFTV2_BalancerNotAuthorized();
-        if (_amount == 0) revert TOFT_NotValid();
-
-        vault.withdraw(msg.sender, _amount);
-
-        emit Rebalancing(msg.sender, _amount, erc20 == address(0));
-    }
-
-    /// =====================
-    /// Private
-    /// =====================
-    function _checkAndExtractFees(uint256 _amount) private returns (uint256 feeAmount) {
-        feeAmount = 0;
-
-        // not on host chain; extract fee
-        // fees are used to rebalance liquidity to host chain
-        if (_getChainId() != hostEid && mintFee > 0) {
-            feeAmount = (_amount * mintFee) / 1e5;
-            if (feeAmount > 0) {
-                if (erc20 == address(0)) {
-                    vault.registerFees{value: feeAmount}(feeAmount);
-                } else {
-                    vault.registerFees(feeAmount);
-                }
-            }
-        }
-    }
     /**
      * @notice Return the current chain EID.
      */
-
     function _getChainId() internal view override returns (uint32) {
         return IMessagingChannel(endpoint).eid();
     }

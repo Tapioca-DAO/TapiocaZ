@@ -28,7 +28,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 /**
  * @title Balancer
  * @author TapiocaDAO
- * @notice Rebalances mTOFTv2 by transferring underlying tokens to other layers through Stargate
+ * @notice Rebalances mTOFT by transferring underlying tokens to other layers through Stargate
  */
 contract Balancer is Ownable {
     using SafeERC20 for IERC20;

@@ -9,7 +9,7 @@ import {
     YieldBoxApproveAllMsg,
     YieldBoxApproveAssetMsg,
     MarketPermitActionMsg
-} from "contracts/ITOFTv2.sol";
+} from "contracts/ITOFT.sol";
 
 import "forge-std/Test.sol";
 

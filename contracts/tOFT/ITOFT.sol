@@ -22,14 +22,14 @@ import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
-interface ITOFTv2 is ITapiocaOmnichainEngine {
+interface ITOFT is ITapiocaOmnichainEngine {
     enum Module {
         NonModule, //0
-        TOFTv2Sender,
-        TOFTv2Receiver,
-        TOFTv2MarketReceiver,
-        TOFTv2OptionsReceiver,
-        TOFTv2GenericReceiver
+        TOFTSender,
+        TOFTReceiver,
+        TOFTMarketReceiver,
+        TOFTOptionsReceiver,
+        TOFTGenericReceiver
     }
 }
 

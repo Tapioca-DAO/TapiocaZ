@@ -17,7 +17,7 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 
 // Tapioca
 import {
-    ITOFTv2,
+    ITOFT,
     TOFTInitStruct,
     LZSendParam,
     YieldBoxApproveAllMsg,
@@ -25,14 +25,14 @@ import {
     MarketRemoveCollateralMsg,
     SendParamsMsg,
     YieldBoxApproveAssetMsg
-} from "contracts/ITOFTv2.sol";
+} from "contracts/ITOFT.sol";
 import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainReceiver.sol";
-import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
-import {TOFTv2OptionsReceiverModule} from "contracts/modules/TOFTv2OptionsReceiverModule.sol";
-import {TOFTv2GenericReceiverModule} from "contracts/modules/TOFTv2GenericReceiverModule.sol";
+import {TOFTMarketReceiverModule} from "contracts/modules/TOFTMarketReceiverModule.sol";
+import {TOFTOptionsReceiverModule} from "contracts/modules/TOFTOptionsReceiverModule.sol";
+import {TOFTGenericReceiverModule} from "contracts/modules/TOFTGenericReceiverModule.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
-import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
-import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
+import {TOFTSender} from "contracts/modules/TOFTSender.sol";
+import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
 
@@ -48,14 +48,14 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract TOFTv2Receiver is BaseTOFTv2, TapiocaOmnichainReceiver {
+contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
     using OFTMsgCodec for bytes;
     using OFTMsgCodec for bytes32;
     using SafeERC20 for IERC20;
 
     error InvalidApprovalTarget(address _target);
 
-    constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
+    constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
     /**
      * @inheritdoc TapiocaOmnichainReceiver
@@ -86,37 +86,37 @@ contract TOFTv2Receiver is BaseTOFTv2, TapiocaOmnichainReceiver {
             _marketPermitReceiver(_toeComposeMsg);
         } else if (_msgType == MSG_YB_SEND_SGL_BORROW) {
             _executeModule(
-                uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
-                abi.encodeWithSelector(TOFTv2MarketReceiverModule.marketBorrowReceiver.selector, _toeComposeMsg),
+                uint8(ITOFT.Module.TOFTMarketReceiver),
+                abi.encodeWithSelector(TOFTMarketReceiverModule.marketBorrowReceiver.selector, _toeComposeMsg),
                 false
             );
         } else if (_msgType == MSG_MARKET_REMOVE_COLLATERAL) {
             _executeModule(
-                uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
+                uint8(ITOFT.Module.TOFTMarketReceiver),
                 abi.encodeWithSelector(
-                    TOFTv2MarketReceiverModule.marketRemoveCollateralReceiver.selector, _toeComposeMsg
+                    TOFTMarketReceiverModule.marketRemoveCollateralReceiver.selector, _toeComposeMsg
                 ),
                 false
             );
         } else if (_msgType == MSG_LEVERAGE_MARKET_DOWN) {
             _executeModule(
-                uint8(ITOFTv2.Module.TOFTv2MarketReceiver),
-                abi.encodeWithSelector(TOFTv2MarketReceiverModule.marketLeverageDownReceiver.selector, _toeComposeMsg),
+                uint8(ITOFT.Module.TOFTMarketReceiver),
+                abi.encodeWithSelector(TOFTMarketReceiverModule.marketLeverageDownReceiver.selector, _toeComposeMsg),
                 false
             );
         } else if (_msgType == MSG_TAP_EXERCISE) {
             _executeModule(
-                uint8(ITOFTv2.Module.TOFTv2OptionsReceiver),
+                uint8(ITOFT.Module.TOFTOptionsReceiver),
                 abi.encodeWithSelector(
-                    TOFTv2OptionsReceiverModule.exerciseOptionsReceiver.selector, _srcChainSender, _toeComposeMsg
+                    TOFTOptionsReceiverModule.exerciseOptionsReceiver.selector, _srcChainSender, _toeComposeMsg
                 ),
                 false
             );
         } else if (_msgType == MSG_SEND_PARAMS) {
             _executeModule(
-                uint8(ITOFTv2.Module.TOFTv2GenericReceiver),
+                uint8(ITOFT.Module.TOFTGenericReceiver),
                 abi.encodeWithSelector(
-                    TOFTv2GenericReceiverModule.receiveWithParamsReceiver.selector, _srcChainSender, _toeComposeMsg
+                    TOFTGenericReceiverModule.receiveWithParamsReceiver.selector, _srcChainSender, _toeComposeMsg
                 ),
                 false
             );
@@ -147,9 +147,9 @@ contract TOFTv2Receiver is BaseTOFTv2, TapiocaOmnichainReceiver {
         _sanitizeTarget(approval.target);
 
         if (approval.permitAsset) {
-            toftV2ExtExec.marketPermitAssetApproval(approval);
+            toftExtExec.marketPermitAssetApproval(approval);
         } else {
-            toftV2ExtExec.marketPermitCollateralApproval(approval);
+            toftExtExec.marketPermitCollateralApproval(approval);
         }
     }
 
@@ -176,7 +176,7 @@ contract TOFTv2Receiver is BaseTOFTv2, TapiocaOmnichainReceiver {
             }
         }
 
-        toftV2ExtExec.yieldBoxPermitApproveAsset(approvals);
+        toftExtExec.yieldBoxPermitApproveAsset(approvals);
     }
 
     /**
@@ -196,9 +196,9 @@ contract TOFTv2Receiver is BaseTOFTv2, TapiocaOmnichainReceiver {
         _sanitizeTarget(approval.target);
 
         if (approval.permit) {
-            toftV2ExtExec.yieldBoxPermitApproveAll(approval);
+            toftExtExec.yieldBoxPermitApproveAll(approval);
         } else {
-            toftV2ExtExec.yieldBoxPermitRevokeAll(approval);
+            toftExtExec.yieldBoxPermitRevokeAll(approval);
         }
     }
 

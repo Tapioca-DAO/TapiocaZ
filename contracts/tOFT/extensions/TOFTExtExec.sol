@@ -13,7 +13,7 @@ import {
     MarketPermitActionMsg,
     ERC20PermitStruct,
     YieldBoxApproveAssetMsg
-} from "contracts/ITOFTv2.sol";
+} from "contracts/ITOFT.sol";
 import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
 import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
@@ -32,11 +32,11 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 */
 
 /**
- * @title TOFTv2ExtExec
+ * @title TOFTExtExec
  * @author TapiocaDAO
- * @notice Used to execute external calls from the TOFTv2 contract. So to not use TOFTv2 in the call context.
+ * @notice Used to execute external calls from the TOFT contract. So to not use TOFT in the call context.
  */
-contract TOFTv2ExtExec {
+contract TOFTExtExec {
     /**
      * @notice Executes YieldBox setApprovalForAll(true) operation.
      * @param _approval The approval message.
@@ -129,27 +129,5 @@ contract TOFTv2ExtExec {
         );
 
         IPermitAction(_approval.target).permitAction(sigData, _approval.actionType);
-    }
-
-    /**
-     * @notice Executes an ERC20 permit approval.
-     * @param _approvals The ERC20 permit approval messages.
-     */
-    function erc20PermitApproval(ERC20PermitApprovalMsg[] calldata _approvals) public {
-        uint256 approvalsLength = _approvals.length;
-        for (uint256 i = 0; i < approvalsLength;) {
-            IERC20Permit(_approvals[i].token).permit(
-                _approvals[i].owner,
-                _approvals[i].spender,
-                _approvals[i].value,
-                _approvals[i].deadline,
-                _approvals[i].v,
-                _approvals[i].r,
-                _approvals[i].s
-            );
-            unchecked {
-                ++i;
-            }
-        }
     }
 }

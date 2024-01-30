@@ -8,8 +8,8 @@ import {
 
 // Tapioca
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
-import {ITOFTv2, LZSendParam, TOFTInitStruct} from "contracts/ITOFTv2.sol";
-import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
+import {ITOFT, LZSendParam, TOFTInitStruct} from "contracts/ITOFT.sol";
+import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
 
@@ -25,6 +25,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract TOFTv2Sender is BaseTOFTv2, TapiocaOmnichainSender {
-    constructor(TOFTInitStruct memory _data) BaseTOFTv2(_data) {}
+contract TOFTSender is BaseTOFT, TapiocaOmnichainSender {
+    constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 }

@@ -6,7 +6,7 @@ import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC2
 
 // Tapioca
 import {
-    ITOFTv2,
+    ITOFT,
     YieldBoxApproveAllMsg,
     MarketPermitActionMsg,
     MarketBorrowMsg,
@@ -15,7 +15,7 @@ import {
     SendParamsMsg,
     ExerciseOptionsMsg,
     YieldBoxApproveAssetMsg
-} from "contracts/ITOFTv2.sol";
+} from "contracts/ITOFT.sol";
 import {
     TapiocaOmnichainEngineHelper,
     PrepareLzCallData,
@@ -38,7 +38,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-contract TOFTv2Helper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
+contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
     /// =======================
     /// Builder functions
     /// =======================

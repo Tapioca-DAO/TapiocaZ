@@ -8,7 +8,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 // Tapioca
 import {
-    ITOFTv2,
+    ITOFT,
     ERC20PermitApprovalMsg,
     LZSendParam,
     YieldBoxApproveAllMsg,
@@ -20,14 +20,14 @@ import {
     ExerciseOptionsMsg,
     SendParamsMsg,
     YieldBoxApproveAssetMsg
-} from "contracts/ITOFTv2.sol";
+} from "contracts/ITOFT.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 
 library TOFTMsgCoder {
     // ***************************************
-    // * Encoding & Decoding TOFTv2 messages *
+    // * Encoding & Decoding TOFT messages *
     // ***************************************
 
     /**
@@ -51,7 +51,7 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2Receiver.erc20PermitApprovalReceiver()` operation.
+     * @notice Decodes an encoded message for the `TOFTReceiver.erc20PermitApprovalReceiver()` operation.
      *
      *                    *   message packet   *
      * ------------------------------------------------------------- *
@@ -169,7 +169,7 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Encodes the message for the `TOFTv2Receiver._yieldBoxRevokeAllReceiver()` operation.
+     * @notice Encodes the message for the `TOFTReceiver._yieldBoxRevokeAllReceiver()` operation.
      */
     function buildYieldBoxApproveAllMsg(YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg)
         internal
@@ -189,7 +189,7 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Encodes the message for the `TOFTv2Receiver._yieldBoxMarketPermitActionReceiver()` operation.
+     * @notice Encodes the message for the `TOFTReceiver._yieldBoxMarketPermitActionReceiver()` operation.
      */
     function buildMarketPermitApprovalMsg(MarketPermitActionMsg memory _marketApprovalMsg)
         internal
@@ -223,7 +223,7 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2Receiver.marketPermitActionReceiver()` operation.
+     * @notice Decodes an encoded message for the `TOFTReceiver.marketPermitActionReceiver()` operation.
      *
      *                    *   message packet   *
      * ------------------------------------------------------------- *
@@ -307,7 +307,7 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2Receiver.ybPermitAll()` operation.
+     * @notice Decodes an encoded message for the `TOFTReceiver.ybPermitAll()` operation.
      *
      *                    *   message packet   *
      * ------------------------------------------------------------- *
@@ -363,21 +363,21 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketBorrowReceiver()` operation.
+     * @notice Encodes the message for the `TOFTMarketReceiverModule.marketBorrowReceiver()` operation.
      */
     function buildMarketBorrow(MarketBorrowMsg memory _marketBorrowMsg) internal pure returns (bytes memory) {
         return abi.encode(_marketBorrowMsg);
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketBorrowReceiver()` operation.
+     * @notice Decodes an encoded message for the `TOFTMarketReceiverModule.marketBorrowReceiver()` operation.
      */
     function decodeMarketBorrowMsg(bytes memory _msg) internal pure returns (MarketBorrowMsg memory marketBorrowMsg_) {
         return abi.decode(_msg, (MarketBorrowMsg));
     }
 
     /**
-     * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketRemoveCollateralReceiver()` operation.
+     * @notice Encodes the message for the `TOFTMarketReceiverModule.marketRemoveCollateralReceiver()` operation.
      */
     function buildMarketRemoveCollateralMsg(MarketRemoveCollateralMsg memory _marketMsg)
         internal
@@ -388,7 +388,7 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketRemoveCollateralReceiver()` operation.
+     * @notice Decodes an encoded message for the `TOFTMarketReceiverModule.marketRemoveCollateralReceiver()` operation.
      */
     function decodeMarketRemoveCollateralMsg(bytes memory _msg)
         internal
@@ -399,14 +399,14 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Encodes the message for the `TOFTv2MarketReceiverModule.marketLeverageDownReceiver()` operation.
+     * @notice Encodes the message for the `TOFTMarketReceiverModule.marketLeverageDownReceiver()` operation.
      */
     function buildMarketLeverageDownMsg(MarketLeverageDownMsg memory _marketMsg) internal pure returns (bytes memory) {
         return abi.encode(_marketMsg);
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2MarketReceiverModule.marketLeverageDownReceiver()` operation.
+     * @notice Decodes an encoded message for the `TOFTMarketReceiverModule.marketLeverageDownReceiver()` operation.
      */
     function decodeMarketLeverageDownMsg(bytes memory _msg)
         internal
@@ -417,28 +417,28 @@ library TOFTMsgCoder {
     }
 
     /**
-     * @notice Encodes the message for the `TOFTv2OptionsReceiverModule.exerciseOptionsReceiver()` operation.
+     * @notice Encodes the message for the `TOFTOptionsReceiverModule.exerciseOptionsReceiver()` operation.
      */
     function buildExerciseOptionsMsg(ExerciseOptionsMsg memory _marketMsg) internal pure returns (bytes memory) {
         return abi.encode(_marketMsg);
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2OptionsReceiverModule.exerciseOptionsReceiver()` operation.
+     * @notice Decodes an encoded message for the `TOFTOptionsReceiverModule.exerciseOptionsReceiver()` operation.
      */
     function decodeExerciseOptionsMsg(bytes memory _msg) internal pure returns (ExerciseOptionsMsg memory marketMsg_) {
         return abi.decode(_msg, (ExerciseOptionsMsg));
     }
 
     /**
-     * @notice Encodes the message for the `TOFTv2Receiver._receiveWithParams()` operation.
+     * @notice Encodes the message for the `TOFTReceiver._receiveWithParams()` operation.
      */
     function buildSendParamsMsg(SendParamsMsg memory _msg) internal pure returns (bytes memory) {
         return abi.encode(_msg);
     }
 
     /**
-     * @notice Decodes an encoded message for the `TOFTv2Receiver._receiveWithParams()` operation.
+     * @notice Decodes an encoded message for the `TOFTReceiver._receiveWithParams()` operation.
      */
     function decodeSendParamsMsg(bytes memory _msg) internal pure returns (SendParamsMsg memory sendMsg_) {
         return abi.decode(_msg, (SendParamsMsg));
