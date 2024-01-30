@@ -1,26 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// LZ
-import {ExecutorOptions} from "@layerzerolabs/lz-evm-protocol-v2/contracts/messagelib/libs/ExecutorOptions.sol";
-import {IOAppMsgInspector} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppMsgInspector.sol";
-import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
-import {SendParam, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
-
 // External
-import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {BaseTOFTTokenMsgType} from "contracts/BaseTOFTTokenMsgType.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {TOFTv2ExtExec} from "contracts/extensions/TOFTv2ExtExec.sol";
 import {ModuleManager} from "contracts/modules/ModuleManager.sol";
 import {ITOFTv2, TOFTInitStruct} from "contracts/ITOFTv2.sol";
-import {CommonOFTv2} from "contracts/CommonOFTv2.sol";
-import {TOFTVault} from "contracts/TOFTVault.sol"; //TODO replace after removing v1 contracts
+import {TOFTVault} from "contracts/TOFTVault.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -40,24 +33,19 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  * @author TapiocaDAO
  * @notice Base TOFT contract for LZ V2
  */
-contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
+abstract contract BaseTOFTv2 is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOFTTokenMsgType {
     using SafeERC20 for IERC20;
-    using OFTMsgCodec for bytes;
-    using OFTMsgCodec for bytes32;
 
     // LZ packets
-    uint16 internal constant PT_REMOTE_TRANSFER = 400; // Use for transferring tokens from the contract from another chain
+    uint16 internal constant PT_YB_APPROVE_ASSET = 600; // Use for YieldBox 'setApprovalForAsset(true)' operation
+    uint16 internal constant PT_YB_APPROVE_ALL = 601; // Use for YieldBox 'setApprovalForAll(true)' operation
+    uint16 internal constant PT_MARKET_PERMIT = 602; // Use for market.permitLend() operation
 
-    uint16 internal constant PT_APPROVALS = 500; // Use for ERC20Permit approvals
-    uint16 internal constant PT_YB_APPROVE_ASSET = 501; // Use for YieldBox 'setApprovalForAsset(true)' operation
-    uint16 internal constant PT_YB_APPROVE_ALL = 502; // Use for YieldBox 'setApprovalForAll(true)' operation
-    uint16 internal constant PT_MARKET_PERMIT = 503; // Use for market.permitLend() operation
-
-    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 700; // Use for remove collateral from a market available on another chain
-    uint16 internal constant PT_YB_SEND_SGL_BORROW = 701; // Use fror send to YB and/or borrow from a market available on another chain
-    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 702; // Use for leverage sell on a market available on another chain
-    uint16 internal constant PT_TAP_EXERCISE = 703; // Use for exercise options on tOB available on another chain
-    uint16 internal constant PT_SEND_PARAMS = 704; // Use for perform a normal OFT send but with a custom payload
+    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 800; // Use for remove collateral from a market available on another chain
+    uint16 internal constant PT_YB_SEND_SGL_BORROW = 801; // Use fror send to YB and/or borrow from a market available on another chain
+    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 802; // Use for leverage sell on a market available on another chain
+    uint16 internal constant PT_TAP_EXERCISE = 803; // Use for exercise options on tOB available on another chain
+    uint16 internal constant PT_SEND_PARAMS = 804; // Use for perform a normal OFT send but with a custom payload
 
     /// @dev Used to execute certain extern calls from the TOFTv2 contract, such as ERC20Permit approvals.
     TOFTv2ExtExec public immutable toftV2ExtExec;
@@ -67,11 +55,12 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
     address public immutable erc20;
     ICluster public cluster;
 
-    error InvalidMsgType(uint16 msgType); // Triggered if the msgType is invalid on an `_lzCompose`.
     error TOFT_AllowanceNotValid();
     error TOFT_NotValid();
 
-    constructor(TOFTInitStruct memory _data) CommonOFTv2(_data.name, _data.symbol, _data.endpoint, _data.owner) {
+    constructor(TOFTInitStruct memory _data)
+        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.owner)
+    {
         yieldBox = IYieldBox(_data.yieldBox);
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
@@ -85,15 +74,8 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
      * @notice set the Cluster address.
      * @param _cluster the new Cluster address
      */
-    function setCluster(address _cluster) external virtual {
+    function setCluster(address _cluster) external virtual onlyOwner {
         cluster = ICluster(_cluster);
-    }
-
-    /**
-     * @notice Return the current chain EID.
-     */
-    function _getChainId() internal view override returns (uint32) {
-        return IMessagingChannel(endpoint).eid();
     }
 
     function _wrap(address _fromAddress, address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {

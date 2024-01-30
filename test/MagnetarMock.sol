@@ -8,10 +8,9 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // Tapioca
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
-
-import "forge-std/console.sol";
 
 /*
 * @dev need this because of via-ir: true error on original Magnetar
@@ -28,48 +27,40 @@ contract MagnetarMock {
         cluster = ICluster(_cluster);
     }
 
-    function depositAddCollateralAndBorrowFromMarket(
-        IMarket market,
-        address user,
-        uint256 collateralAmount,
-        uint256 borrowAmount,
-        bool extractFromSender,
-        bool deposit,
-        ICommonData.IWithdrawParams calldata withdrawParams
-    ) external payable {
-        if (!cluster.isWhitelisted(cluster.lzChainId(), address(market))) revert MagnetarMock_NotAuthorized();
+    function depositAddCollateralAndBorrowFromMarket(IMagnetar.DepositAddCollateralAndBorrowFromMarketData memory _data) external payable {
+        if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.market))) revert MagnetarMock_NotAuthorized();
 
-        IYieldBox yieldBox = IYieldBox(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(IMarket(_data.market).yieldBox());
 
-        uint256 collateralId = market.collateralId();
+        uint256 collateralId = IMarket(_data.market).collateralId();
         (, address collateralAddress,,) = yieldBox.assets(collateralId);
 
-        uint256 _share = yieldBox.toShare(collateralId, collateralAmount, false);
+        uint256 _share = yieldBox.toShare(collateralId, _data.collateralAmount, false);
 
         //deposit to YieldBox
-        if (deposit) {
+        if (_data.deposit) {
             // transfers tokens from sender or from the user to this contract
-            collateralAmount =
-                _extractTokens(extractFromSender ? msg.sender : user, collateralAddress, collateralAmount);
-            _share = yieldBox.toShare(collateralId, collateralAmount, false);
+            _data.collateralAmount =
+                _extractTokens(_data.extractFromSender ? msg.sender : _data.user, collateralAddress, _data.collateralAmount);
+            _share = yieldBox.toShare(collateralId, _data.collateralAmount, false);
 
             // deposit to YieldBox
             IERC20(collateralAddress).approve(address(yieldBox), 0);
-            IERC20(collateralAddress).approve(address(yieldBox), collateralAmount);
-            yieldBox.depositAsset(collateralId, address(this), address(this), collateralAmount, 0);
+            IERC20(collateralAddress).approve(address(yieldBox), _data.collateralAmount);
+            yieldBox.depositAsset(collateralId, address(this), address(this), _data.collateralAmount, 0);
         }
 
         // performs .addCollateral on market
-        if (collateralAmount > 0) {
-            yieldBox.setApprovalForAll(address(market), true);
-            market.addCollateral(deposit ? address(this) : user, user, false, collateralAmount, _share);
+        if (_data.collateralAmount > 0) {
+            yieldBox.setApprovalForAll(address(_data.market), true);
+            IMarket(_data.market).addCollateral(_data.deposit ? address(this) : _data.user, _data.user, false, _data.collateralAmount, _share);
         }
 
         // performs .borrow on market
         // if `withdraw` it uses `withdrawTo` to withdraw assets on the same chain or to another one
-        if (borrowAmount > 0) {
-            address borrowReceiver = withdrawParams.withdraw ? address(this) : user;
-            market.borrow(user, borrowReceiver, borrowAmount);
+        if (_data.borrowAmount > 0) {
+            address borrowReceiver = _data.withdrawParams.withdraw ? address(this) : _data.user;
+            IMarket(_data.market).borrow(_data.user, borrowReceiver, _data.borrowAmount);
 
             // if (withdrawParams.withdraw) {
             // bytes memory withdrawAssetBytes = abi.encode(
@@ -93,7 +84,7 @@ contract MagnetarMock {
             // }
         }
 
-        yieldBox.setApprovalForAll(address(market), false);
+        yieldBox.setApprovalForAll(address(_data.market), false);
     }
 
     function _extractTokens(address _from, address _token, uint256 _amount) private returns (uint256) {

@@ -14,6 +14,7 @@ import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
 import {ITOFTv2, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "contracts/ITOFTv2.sol";
+import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {TOFTv2Receiver} from "contracts/modules/TOFTv2Receiver.sol";
 import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
 import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
@@ -169,7 +170,7 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
         (msgReceipt, oftReceipt) = abi.decode(
             _executeModule(
                 uint8(ITOFTv2.Module.TOFTv2Sender),
-                abi.encodeCall(TOFTv2Sender.sendPacket, (_lzSendParam, _composeMsg)),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacket, (_lzSendParam, _composeMsg)),
                 false
             ),
             (MessagingReceipt, OFTReceipt)
@@ -244,5 +245,12 @@ contract TOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
      */
     function unwrap(address _toAddress, uint256 _amount) external onlyHostChain nonReentrant {
         _unwrap(_toAddress, _amount);
+    }
+
+    /**
+     * @notice Return the current chain EID.
+     */
+    function _getChainId() internal view override returns (uint32) {
+        return IMessagingChannel(endpoint).eid();
     }
 }

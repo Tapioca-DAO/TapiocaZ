@@ -170,52 +170,6 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
         return _executeModule(uint8(_module), _data, _forwardRevert);
     }
 
-    /// ========================
-    /// Frequently used modules
-    /// ========================
-
-    /**
-     * @dev Slightly modified version of the OFT send() operation. Includes a `_msgType` parameter.
-     * The `_buildMsgAndOptionsByType()` appends the packet type to the message.
-     * @dev Executes the send operation.
-     * @param _lzSendParam The parameters for the send operation.
-     *      - _sendParam: The parameters for the send operation.
-     *          - dstEid::uint32: Destination endpoint ID.
-     *          - to::bytes32: Recipient address.
-     *          - amountToSendLD::uint256: Amount to send in local decimals.
-     *          - minAmountToCreditLD::uint256: Minimum amount to credit in local decimals.
-     *      - _fee: The calculated fee for the send() operation.
-     *          - nativeFee::uint256: The native fee.
-     *          - lzTokenFee::uint256: The lzToken fee.
-     *      - _extraOptions::bytes: Additional options for the send() operation.
-     *      - refundAddress::address: The address to refund the native fee to.
-     * @param _composeMsg The composed message for the send() operation. Is a combination of 1 or more TAP specific messages.
-     *
-     * @return msgReceipt The receipt for the send operation.
-     *      - guid::bytes32: The unique identifier for the sent message.
-     *      - nonce::uint64: The nonce of the sent message.
-     *      - fee: The LayerZero fee incurred for the message.
-     *          - nativeFee::uint256: The native fee.
-     *          - lzTokenFee::uint256: The lzToken fee.
-     * @return oftReceipt The OFT receipt information.
-     *      - amountDebitLD::uint256: Amount of tokens ACTUALLY debited in local decimals.
-     *      - amountCreditLD::uint256: Amount of tokens to be credited on the remote side.
-     */
-    function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
-        public
-        payable
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
-    {
-        (msgReceipt, oftReceipt) = abi.decode(
-            _executeModule(
-                uint8(ITOFTv2.Module.TOFTv2Sender),
-                abi.encodeCall(TOFTv2Sender.sendPacket, (_lzSendParam, _composeMsg)),
-                false
-            ),
-            (MessagingReceipt, OFTReceipt)
-        );
-    }
-
     /// =====================
     /// View
     /// =====================
@@ -374,5 +328,12 @@ contract mTOFTv2 is BaseTOFTv2, Pausable, ReentrancyGuard, ERC20Permit {
                 }
             }
         }
+    }
+    /**
+     * @notice Return the current chain EID.
+     */
+
+    function _getChainId() internal view override returns (uint32) {
+        return IMessagingChannel(endpoint).eid();
     }
 }

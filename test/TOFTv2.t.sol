@@ -111,16 +111,16 @@ contract TOFTv2Test is TOFTTestHelper {
     address __owner = address(this);
 
     uint16 internal constant SEND = 1; // Send LZ message type
-    uint16 internal constant PT_REMOTE_TRANSFER = 400; // Use for transferring tokens from the contract from another chain
     uint16 internal constant PT_APPROVALS = 500; // Use for ERC20Permit approvals
-    uint16 internal constant PT_YB_APPROVE_ASSET = 501; // Use for YieldBox 'setApprovalForAsset(true)' operation
-    uint16 internal constant PT_YB_APPROVE_ALL = 502; // Use for YieldBox 'setApprovalForAll(true)' operation
-    uint16 internal constant PT_MARKET_PERMIT = 503; // Use for market.permitLend() operation
-    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 700; // Use for remove collateral from a market available on another chain
-    uint16 internal constant PT_YB_SEND_SGL_BORROW = 701; // Use fror send to YB and/or borrow from a market available on another chain
-    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 702; // Use for leverage sell on a market available on another chain
-    uint16 internal constant PT_TAP_EXERCISE = 703; // Use for exercise options on tOB available on another chain
-    uint16 internal constant PT_SEND_PARAMS = 704; // Use for perform a normal OFT send but with a custom payload
+    uint16 internal constant PT_YB_APPROVE_ASSET = 600; // Use for YieldBox 'setApprovalForAsset(true)' operation
+    uint16 internal constant PT_YB_APPROVE_ALL = 601; // Use for YieldBox 'setApprovalForAll(true)' operation
+    uint16 internal constant PT_MARKET_PERMIT = 602; // Use for market.permitLend() operation
+    uint16 internal constant PT_REMOTE_TRANSFER = 700; // Use for transferring tokens from the contract from another chain
+    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 800; // Use for remove collateral from a market available on another chain
+    uint16 internal constant PT_YB_SEND_SGL_BORROW = 801; // Use fror send to YB and/or borrow from a market available on another chain
+    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 802; // Use for leverage sell on a market available on another chain
+    uint16 internal constant PT_TAP_EXERCISE = 803; // Use for exercise options on tOB available on another chain
+    uint16 internal constant PT_SEND_PARAMS = 804; // Use for perform a normal OFT send but with a custom payload
 
     /**
      * @dev TOFTv2 global event checks
@@ -377,7 +377,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_APPROVALS,
@@ -444,7 +443,6 @@ contract TOFTv2Test is TOFTTestHelper {
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                    refundAddress: address(this),
                     amountToSendLD: tokenAmount_,
                     minAmountToCreditLD: tokenAmount_,
                     msgType: SEND,
@@ -476,7 +474,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_REMOTE_TRANSFER,
@@ -569,7 +566,6 @@ contract TOFTv2Test is TOFTTestHelper {
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                    refundAddress: address(this),
                     amountToSendLD: tokenAmount_,
                     minAmountToCreditLD: tokenAmount_,
                     msgType: SEND,
@@ -624,7 +620,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: tokenAmount_,
                 minAmountToCreditLD: tokenAmount_,
                 msgType: PT_YB_SEND_SGL_BORROW,
@@ -698,7 +693,6 @@ contract TOFTv2Test is TOFTTestHelper {
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                    refundAddress: address(this),
                     amountToSendLD: 0,
                     minAmountToCreditLD: 0,
                     msgType: SEND,
@@ -750,7 +744,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_MARKET_REMOVE_COLLATERAL,
@@ -827,7 +820,6 @@ contract TOFTv2Test is TOFTTestHelper {
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                    refundAddress: address(this),
                     amountToSendLD: erc20Amount_,
                     minAmountToCreditLD: erc20Amount_,
                     msgType: SEND,
@@ -861,7 +853,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: erc20Amount_,
                 minAmountToCreditLD: erc20Amount_,
                 msgType: PT_SEND_PARAMS,
@@ -934,7 +925,6 @@ contract TOFTv2Test is TOFTTestHelper {
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(userA)),
-                    refundAddress: address(this),
                     amountToSendLD: erc20Amount_,
                     minAmountToCreditLD: erc20Amount_,
                     msgType: SEND,
@@ -968,7 +958,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(userA)),
-                refundAddress: address(this),
                 amountToSendLD: erc20Amount_,
                 minAmountToCreditLD: erc20Amount_,
                 msgType: PT_SEND_PARAMS,
@@ -1043,7 +1032,6 @@ contract TOFTv2Test is TOFTTestHelper {
                 PrepareLzCallData({
                     dstEid: aEid,
                     recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                    refundAddress: address(this),
                     amountToSendLD: erc20Amount_,
                     minAmountToCreditLD: erc20Amount_,
                     msgType: SEND,
@@ -1101,7 +1089,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: erc20Amount_,
                 minAmountToCreditLD: erc20Amount_,
                 msgType: PT_TAP_EXERCISE,
@@ -1169,7 +1156,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_YB_APPROVE_ALL,
@@ -1231,7 +1217,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_YB_APPROVE_ALL,
@@ -1312,7 +1297,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_YB_APPROVE_ASSET,
@@ -1401,7 +1385,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_YB_APPROVE_ASSET,
@@ -1478,7 +1461,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_MARKET_PERMIT,
@@ -1547,7 +1529,6 @@ contract TOFTv2Test is TOFTTestHelper {
             PrepareLzCallData({
                 dstEid: bEid,
                 recipient: OFTMsgCodec.addressToBytes32(address(this)),
-                refundAddress: address(this),
                 amountToSendLD: 0,
                 minAmountToCreditLD: 0,
                 msgType: PT_MARKET_PERMIT,

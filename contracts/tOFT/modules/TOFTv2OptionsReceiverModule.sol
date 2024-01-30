@@ -5,6 +5,8 @@ pragma solidity 0.8.22;
 import {
     MessagingReceipt, OFTReceipt, SendParam
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {IOAppMsgInspector} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppMsgInspector.sol";
+import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -139,8 +141,8 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
             _debit(_lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid);
 
         /// @dev Builds the options and OFT message to quote in the endpoint.
-        (bytes memory message, bytes memory options) = _buildOFTMsgAndOptions(
-            _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD, _srcChainSender, true
+        (bytes memory message, bytes memory options) = _buildOFTMsgAndOptionsMemory(
+            _lzSendParam.sendParam, _lzSendParam.extraOptions, _composeMsg, amountToCreditLD, _srcChainSender
         );
 
         /// @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
@@ -150,6 +152,34 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
         oftReceipt = OFTReceipt(amountDebitedLD, amountToCreditLD);
 
         emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD);
+    }
+    /**
+     * @dev For details about this function, check `BaseTapiocaOmnichainEngine._buildOFTMsgAndOptions()`.
+     * @dev !!!! IMPORTANT !!!! The differences are:
+     *      - memory instead of calldata for parameters.
+     *      - `_msgSender` is used instead of using context `msg.sender`, to preserve context of the OFT call and use `msg.sender` of the source chain.
+     *      - Does NOT combine options, make sure to pass valid options to cover gas costs/value transfers.
+     */
+
+    function _buildOFTMsgAndOptionsMemory(
+        SendParam memory _sendParam,
+        bytes memory _extraOptions,
+        bytes memory _composeMsg,
+        uint256 _amountToCreditLD,
+        address _msgSender
+    ) private view returns (bytes memory message, bytes memory options) {
+        bool hasCompose = _composeMsg.length > 0;
+
+        message = hasCompose
+            ? abi.encodePacked(
+                _sendParam.to, _toSD(_amountToCreditLD), OFTMsgCodec.addressToBytes32(_msgSender), _composeMsg
+            )
+            : abi.encodePacked(_sendParam.to, _toSD(_amountToCreditLD));
+        options = _extraOptions;
+
+        if (msgInspector != address(0)) {
+            IOAppMsgInspector(msgInspector).inspect(message, options);
+        }
     }
 
     /**
