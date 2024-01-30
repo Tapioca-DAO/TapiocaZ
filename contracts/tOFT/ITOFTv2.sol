@@ -5,10 +5,10 @@ pragma solidity 0.8.22;
 import {SendParam, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
-import {ITapiocaOptionsBrokerCrossChain} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
-import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
-import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
-import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
+import {ITapiocaOptionBrokerCrossChain} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 
 interface ITOFTv2 {
     enum Module {
@@ -103,7 +103,7 @@ struct SendParamsMsg {
  * @notice Encodes the message for the PT_TAP_EXERCISE operation.
  */
 struct ExerciseOptionsMsg {
-    ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData optionsData;
+    ITapiocaOptionBrokerCrossChain.IExerciseOptionsData optionsData;
     bool withdrawOnOtherChain;
     //@dev send back to source message params
     LZSendParam lzSendParams;

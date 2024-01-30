@@ -14,9 +14,9 @@ import {
     ERC20PermitStruct,
     YieldBoxApproveAssetMsg
 } from "contracts/ITOFTv2.sol";
-import {IPermit} from "tapioca-periph/contracts/interfaces/IPermit.sol";
-import {IPermitAll} from "tapioca-periph/contracts/interfaces/IPermitAll.sol";
-import {IPermitAction} from "tapioca-periph/contracts/interfaces/IPermitAction.sol";
+import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
+import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
+import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

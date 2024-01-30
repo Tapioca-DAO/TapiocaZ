@@ -12,9 +12,9 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
 
 // Tapioca
 import {
-    ITapiocaOptionsBroker,
-    ITapiocaOptionsBrokerCrossChain
-} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
+    ITapiocaOptionBroker,
+    ITapiocaOptionBrokerCrossChain
+} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "contracts/ITOFTv2.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
 import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
@@ -65,7 +65,7 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
 
         {
             // _data declared for visibility.
-            ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
+            ITapiocaOptionBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
             _options.tapAmount = _toLD(uint64(_options.tapAmount));
             _options.paymentTokenAmount = _toLD(uint64(_options.paymentTokenAmount));
 
@@ -76,7 +76,7 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
             _approve(address(this), _options.target, 0);
             _approve(address(this), _options.target, _options.paymentTokenAmount);
             uint256 bBefore = balanceOf(address(this));
-            ITapiocaOptionsBroker(_options.target).exerciseOption(
+            ITapiocaOptionBroker(_options.target).exerciseOption(
                 _options.oTAPTokenID,
                 address(this), //payment token
                 _options.tapAmount
@@ -95,10 +95,10 @@ contract TOFTv2OptionsReceiverModule is BaseTOFTv2 {
 
         {
             // _data declared for visibility.
-            ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
+            ITapiocaOptionBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
             SendParam memory _send = msg_.lzSendParams.sendParam;
 
-            address tapOft = ITapiocaOptionsBroker(_options.target).tapOFT();
+            address tapOft = ITapiocaOptionBroker(_options.target).tapOFT();
             if (msg_.withdrawOnOtherChain) {
                 /// @dev determine the right amount to send back to source
                 uint256 amountToSend = _send.amountLD > _options.tapAmount ? _options.tapAmount : _send.amountLD;

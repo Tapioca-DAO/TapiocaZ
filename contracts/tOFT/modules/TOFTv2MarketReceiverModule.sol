@@ -12,13 +12,13 @@ import "tapioca-sdk/dist/contracts/libraries/LzLib.sol"; //todo: it can be remov
 import {
     TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg
 } from "contracts/ITOFTv2.sol";
-import {IYieldBoxBase} from "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
-import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
-import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
-import {IMagnetar} from "tapioca-periph/contracts/interfaces/IMagnetar.sol";
-import {ISwapper} from "tapioca-periph/contracts/interfaces/ISwapper.sol";
-import {IUSDOBase} from "tapioca-periph/contracts/interfaces/IUSDO.sol";
-import {IMarket} from "tapioca-periph/contracts/interfaces/IMarket.sol";
+import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
+import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
+import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
 import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
 
@@ -80,16 +80,18 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         /// @dev use market helper to deposit, add collateral to market and withdrawTo
         /// @dev 'borrowParams.marketHelper' is MagnetarV2 contract
         approve(address(msg_.borrowParams.marketHelper), msg_.borrowParams.amount);
-        IMagnetar(msg_.borrowParams.marketHelper).depositAddCollateralAndBorrowFromMarket{value: msg.value}(
-            msg_.borrowParams.market,
-            msg_.user,
-            msg_.borrowParams.amount,
-            msg_.borrowParams.borrowAmount,
-            false, //extract from user; he needs to approve magnetar
-            msg_.borrowParams.deposit,
-            msg_.withdrawParams
+        IMagnetar(payable(msg_.borrowParams.marketHelper)).depositAddCollateralAndBorrowFromMarket{value: msg.value}(
+            IMagnetar.DepositAddCollateralAndBorrowFromMarketData(
+                msg_.borrowParams.market,
+                msg_.user,
+                msg_.borrowParams.amount,
+                msg_.borrowParams.borrowAmount,
+                false,
+                msg_.borrowParams.deposit,
+                msg_.withdrawParams,
+                msg.value
+            )
         );
-
         emit BorrowReceived(
             msg_.user,
             msg_.borrowParams.market,
@@ -119,7 +121,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         msg_.removeParams.amount = _toLD(uint64(msg_.removeParams.amount));
 
         {
-            uint256 share = IYieldBoxBase(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
+            uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
             approve(msg_.removeParams.market, share);
             IMarket(msg_.removeParams.market).removeCollateral(msg_.user, msg_.user, share);
         }
@@ -130,18 +132,20 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
                 if (!cluster.isWhitelisted(0, msg_.removeParams.marketHelper)) {
                     revert TOFTv2MarketReceiverModule_NotAuthorized(msg_.removeParams.marketHelper);
                 }
-                IMagnetar(msg_.removeParams.marketHelper).withdrawToChain{value: msg.value}(
-                    ybAddress,
-                    msg_.user,
-                    assetId,
-                    msg_.withdrawParams.withdrawLzChainId,
-                    LzLib.addressToBytes32(msg_.user),
-                    msg_.removeParams.amount,
-                    msg_.withdrawParams.withdrawAdapterParams,
-                    payable(msg_.user),
-                    msg.value,
-                    msg_.withdrawParams.unwrap,
-                    msg_.withdrawParams.zroPaymentAddress
+                IMagnetar(payable(msg_.removeParams.marketHelper)).withdrawToChain{value: msg.value}(
+                    IMagnetar.WithdrawToChainData(
+                        ybAddress,
+                        msg_.user,
+                        assetId,
+                        msg_.withdrawParams.withdrawLzChainId,
+                        LzLib.addressToBytes32(msg_.user),
+                        msg_.removeParams.amount,
+                        msg_.withdrawParams.withdrawAdapterParams,
+                        payable(msg_.user),
+                        msg.value,
+                        msg_.withdrawParams.unwrap,
+                        msg_.withdrawParams.zroPaymentAddress
+                    )
                 );
             }
         }
@@ -212,7 +216,7 @@ contract TOFTv2MarketReceiverModule is BaseTOFTv2 {
         //             amount: 0,
         //             fraction: 0
         //         }),
-        //         participateData: ITapiocaOptionsBroker.IOptionsParticipateData({
+        //         participateData: ITapiocaOptionBroker.IOptionsParticipateData({
         //             participate: false,
         //             target: address(0),
         //             tOLPTokenId: 0

@@ -21,8 +21,8 @@ import {
     SendParamsMsg,
     YieldBoxApproveAssetMsg
 } from "contracts/ITOFTv2.sol";
-import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
-import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
+import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 
 import "forge-std/console.sol";
 

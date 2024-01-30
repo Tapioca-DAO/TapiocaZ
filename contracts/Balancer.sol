@@ -7,10 +7,10 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import "tapioca-periph/contracts/interfaces/IStargateEthVault.sol";
-import "tapioca-periph/contracts/interfaces/IStargateRouter.sol";
-import "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
-import "tapioca-periph/contracts/interfaces/ITOFTVault.sol";
+import "tapioca-periph/interfaces/external/stargate/IStargateEthVault.sol";
+import "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
+import "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import "tapioca-periph/interfaces/tapiocaz/ITOFTVault.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

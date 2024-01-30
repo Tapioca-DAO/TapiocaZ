@@ -13,8 +13,9 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
-import {IYieldBoxBase} from "tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
-import {ICluster} from "tapioca-periph/contracts/interfaces/ICluster.sol";
+import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {TOFTv2ExtExec} from "contracts/extensions/TOFTv2ExtExec.sol";
 import {ModuleManager} from "contracts/modules/ModuleManager.sol";
 import {ITOFTv2, TOFTInitStruct} from "contracts/ITOFTv2.sol";
@@ -60,7 +61,7 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
 
     /// @dev Used to execute certain extern calls from the TOFTv2 contract, such as ERC20Permit approvals.
     TOFTv2ExtExec public immutable toftV2ExtExec;
-    IYieldBoxBase public immutable yieldBox;
+    IYieldBox public immutable yieldBox;
     TOFTVault public immutable vault;
     uint256 public immutable hostEid;
     address public immutable erc20;
@@ -71,7 +72,7 @@ contract BaseTOFTv2 is CommonOFTv2, ModuleManager {
     error TOFT_NotValid();
 
     constructor(TOFTInitStruct memory _data) CommonOFTv2(_data.name, _data.symbol, _data.endpoint, _data.owner) {
-        yieldBox = IYieldBoxBase(_data.yieldBox);
+        yieldBox = IYieldBox(_data.yieldBox);
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;

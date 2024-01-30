@@ -6,10 +6,10 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
-import {IYieldBoxBase} from "../tapioca-periph/contracts/interfaces/IYieldBoxBase.sol";
-import {ICommonData} from "../tapioca-periph/contracts/interfaces/ICommonData.sol";
-import {ICluster} from "../tapioca-periph/contracts/interfaces/ICluster.sol";
-import {IMarket} from "../tapioca-periph/contracts/interfaces/IMarket.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 
 import "forge-std/console.sol";
 
@@ -39,7 +39,7 @@ contract MagnetarMock {
     ) external payable {
         if (!cluster.isWhitelisted(cluster.lzChainId(), address(market))) revert MagnetarMock_NotAuthorized();
 
-        IYieldBoxBase yieldBox = IYieldBoxBase(market.yieldBox());
+        IYieldBox yieldBox = IYieldBox(market.yieldBox());
 
         uint256 collateralId = market.collateralId();
         (, address collateralAddress,,) = yieldBox.assets(collateralId);

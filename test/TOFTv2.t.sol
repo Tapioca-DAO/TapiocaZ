@@ -42,18 +42,17 @@ import {
     TOFTv2Helper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData
 } from "contracts/extensions/TOFTv2Helper.sol";
 import {
-    ITapiocaOptionsBroker,
-    ITapiocaOptionsBrokerCrossChain
-} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
+    ITapiocaOptionBroker,
+    ITapiocaOptionBrokerCrossChain
+} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ERC20WithoutStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
 import {TOFTv2MarketReceiverModule} from "contracts/modules/TOFTv2MarketReceiverModule.sol";
 import {TOFTv2OptionsReceiverModule} from "contracts/modules/TOFTv2OptionsReceiverModule.sol";
 import {TOFTv2GenericReceiverModule} from "contracts/modules/TOFTv2GenericReceiverModule.sol";
+import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
-import {ITapiocaOFT} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
-import {ICommonData} from "tapioca-periph/contracts/interfaces/ICommonData.sol";
-// import {MagnetarV2} from "../tapioca-periph/contracts/Magnetar/MagnetarV2.sol";
-import {Cluster} from "../tapioca-periph/contracts/Cluster/Cluster.sol";
+import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTv2Receiver} from "contracts/modules/TOFTv2Receiver.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
 import {TOFTv2Sender} from "contracts/modules/TOFTv2Sender.sol";
@@ -1071,7 +1070,7 @@ contract TOFTv2Test is TOFTTestHelper {
 
         //approve magnetar
         ExerciseOptionsMsg memory exerciseMsg = ExerciseOptionsMsg({
-            optionsData: ITapiocaOptionsBrokerCrossChain.IExerciseOptionsData({
+            optionsData: ITapiocaOptionBrokerCrossChain.IExerciseOptionsData({
                 from: address(this),
                 target: address(tOB),
                 paymentTokenAmount: tokenAmountSD,

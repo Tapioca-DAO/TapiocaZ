@@ -15,8 +15,9 @@ remappings = [
     "contracts/=contracts/tOFT/",
 	'forge-deploy/=node_modules/forge-deploy/contracts/',
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
-	"tapioca-sdk/=node_modules/tapioca-sdk/",
-	"forge-std/=lib/forge-std/src/"
+	"forge-std/=lib/forge-std/src/",
+	"tapioca-sdk/=gitmodule/tapioca-sdk/contracts/",
+	"tapioca-periph/=gitmodule/tapioca-periph/contracts/"
 ]
 
 # forge-dpeloy

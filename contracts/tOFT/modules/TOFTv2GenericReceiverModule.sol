@@ -12,10 +12,10 @@ import {
 
 // Tapioca
 import {
-    ITapiocaOptionsBroker,
-    ITapiocaOptionsBrokerCrossChain
-} from "tapioca-periph/contracts/interfaces/ITapiocaOptionsBroker.sol";
-import {ITapiocaOFTBase} from "tapioca-periph/contracts/interfaces/ITapiocaOFT.sol";
+    ITapiocaOptionBroker,
+    ITapiocaOptionBrokerCrossChain
+} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {TOFTInitStruct, SendParamsMsg} from "contracts/ITOFTv2.sol";
 import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
 import {BaseTOFTv2} from "contracts/BaseTOFTv2.sol";
