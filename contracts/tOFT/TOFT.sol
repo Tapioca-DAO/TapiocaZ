@@ -41,6 +41,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 contract TOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
     error TOFT_OnlyHostChain();
     error TOFT_NotNative();
+    error TOFT_Failed();
 
     modifier onlyHostChain() {
         if (_getChainId() != hostEid) revert TOFT_OnlyHostChain();
@@ -126,14 +127,11 @@ contract TOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
     function executeModule(ITOFT.Module _module, bytes memory _data, bool _forwardRevert)
         external
         payable
+        whenNotPaused
         returns (bytes memory returnData)
     {
         return _executeModule(uint8(_module), _data, _forwardRevert);
     }
-
-    /// ========================
-    /// Frequently used modules
-    /// ========================
 
     /**
      * @dev Slightly modified version of the OFT send() operation. Includes a `_msgType` parameter.
@@ -165,6 +163,7 @@ contract TOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
     function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
         public
         payable
+        whenNotPaused
         returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
     {
         (msgReceipt, oftReceipt) = abi.decode(
@@ -224,6 +223,7 @@ contract TOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
     function wrap(address _fromAddress, address _toAddress, uint256 _amount)
         external
         payable
+        whenNotPaused
         nonReentrant
         onlyHostChain
         returns (uint256 minted)
@@ -237,6 +237,23 @@ contract TOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
 
         return _amount; //no fee for TOFT
     }
+
+    /// =====================
+    /// Owner
+    /// =====================
+    /**
+     * @notice rescues unused ETH from the contract
+     * @param amount the amount to rescue
+     * @param to the recipient
+     */
+    function rescueEth(uint256 amount, address to) external onlyOwner {
+        (bool success,) = to.call{value: amount}("");
+        if (!success) revert TOFT_Failed();
+    }
+
+    /// =====================
+    /// Private
+    /// =====================
 
     /**
      * @notice Unwrap an ERC20/Native with a 1:1 ratio. Called only on host chain.

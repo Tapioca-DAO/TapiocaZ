@@ -1,17 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// OZ
-import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
-
 // Tapioca
 import {
-    ERC20PermitApprovalMsg,
-    ERC20PermitApprovalMsg,
-    LZSendParam,
     YieldBoxApproveAllMsg,
     MarketPermitActionMsg,
-    ERC20PermitStruct,
     YieldBoxApproveAssetMsg
 } from "contracts/ITOFT.sol";
 import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";

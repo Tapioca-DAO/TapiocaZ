@@ -16,6 +16,7 @@ import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
 import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "contracts/ITOFT.sol";
+import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {IStargateReceiver} from "tapioca-periph/interfaces/external/stargate/IStargateReceiver.sol";
 import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
 import {TOFTSender} from "contracts/modules/TOFTSender.sol";
@@ -88,6 +89,7 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
     error mTOFT_BalancerNotAuthorized();
     error mTOFT_NotAuthorized();
     error mTOFT_CapNotValid();
+    error mTOFT_Failed();
 
     constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _modulesData, address _stgRouter)
         BaseTOFT(_tOFTData)
@@ -177,9 +179,53 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
     function executeModule(ITOFT.Module _module, bytes memory _data, bool _forwardRevert)
         external
         payable
+        whenNotPaused
         returns (bytes memory returnData)
     {
         return _executeModule(uint8(_module), _data, _forwardRevert);
+    }
+
+    /**
+     * @dev Slightly modified version of the OFT send() operation. Includes a `_msgType` parameter.
+     * The `_buildMsgAndOptionsByType()` appends the packet type to the message.
+     * @dev Executes the send operation.
+     * @param _lzSendParam The parameters for the send operation.
+     *      - _sendParam: The parameters for the send operation.
+     *          - dstEid::uint32: Destination endpoint ID.
+     *          - to::bytes32: Recipient address.
+     *          - amountToSendLD::uint256: Amount to send in local decimals.
+     *          - minAmountToCreditLD::uint256: Minimum amount to credit in local decimals.
+     *      - _fee: The calculated fee for the send() operation.
+     *          - nativeFee::uint256: The native fee.
+     *          - lzTokenFee::uint256: The lzToken fee.
+     *      - _extraOptions::bytes: Additional options for the send() operation.
+     *      - refundAddress::address: The address to refund the native fee to.
+     * @param _composeMsg The composed message for the send() operation. Is a combination of 1 or more TAP specific messages.
+     *
+     * @return msgReceipt The receipt for the send operation.
+     *      - guid::bytes32: The unique identifier for the sent message.
+     *      - nonce::uint64: The nonce of the sent message.
+     *      - fee: The LayerZero fee incurred for the message.
+     *          - nativeFee::uint256: The native fee.
+     *          - lzTokenFee::uint256: The lzToken fee.
+     * @return oftReceipt The OFT receipt information.
+     *      - amountDebitLD::uint256: Amount of tokens ACTUALLY debited in local decimals.
+     *      - amountCreditLD::uint256: Amount of tokens to be credited on the remote side.
+     */
+    function sendPacket(LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        public
+        payable
+        whenNotPaused
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        (msgReceipt, oftReceipt) = abi.decode(
+            _executeModule(
+                uint8(ITOFT.Module.TOFTSender),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacket, (_lzSendParam, _composeMsg)),
+                false
+            ),
+            (MessagingReceipt, OFTReceipt)
+        );
     }
 
     /// =====================
@@ -229,6 +275,7 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
     function wrap(address _fromAddress, address _toAddress, uint256 _amount)
         external
         payable
+        whenNotPaused
         nonReentrant
         returns (uint256 minted)
     {
@@ -253,7 +300,7 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of tokens to unwrap.
      */
-    function unwrap(address _toAddress, uint256 _amount) external nonReentrant {
+    function unwrap(address _toAddress, uint256 _amount) external nonReentrant whenNotPaused {
         if (!connectedChains[_getChainId()]) revert mTOFT_NotHost();
         if (balancers[msg.sender]) revert mTOFT_BalancerNotAuthorized();
         _unwrap(_toAddress, _amount);
@@ -276,6 +323,16 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
     /// =====================
     /// Owner
     /// =====================
+    /**
+     * @notice rescues unused ETH from the contract
+     * @param amount the amount to rescue
+     * @param to the recipient
+     */
+    function rescueEth(uint256 amount, address to) external onlyOwner {
+        (bool success,) = to.call{value: amount}("");
+        if (!success) revert mTOFT_Failed();
+    }
+
     /**
      * @notice sets the StargateRouter address
      * @param _router the router address
