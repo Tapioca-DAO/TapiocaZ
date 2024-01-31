@@ -27,7 +27,10 @@ contract MagnetarMock {
         cluster = ICluster(_cluster);
     }
 
-    function depositAddCollateralAndBorrowFromMarket(IMagnetar.DepositAddCollateralAndBorrowFromMarketData memory _data) external payable {
+    function depositAddCollateralAndBorrowFromMarket(IMagnetar.DepositAddCollateralAndBorrowFromMarketData memory _data)
+        external
+        payable
+    {
         if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.market))) revert MagnetarMock_NotAuthorized();
 
         IYieldBox yieldBox = IYieldBox(IMarket(_data.market).yieldBox());
@@ -40,8 +43,9 @@ contract MagnetarMock {
         //deposit to YieldBox
         if (_data.deposit) {
             // transfers tokens from sender or from the user to this contract
-            _data.collateralAmount =
-                _extractTokens(_data.extractFromSender ? msg.sender : _data.user, collateralAddress, _data.collateralAmount);
+            _data.collateralAmount = _extractTokens(
+                _data.extractFromSender ? msg.sender : _data.user, collateralAddress, _data.collateralAmount
+            );
             _share = yieldBox.toShare(collateralId, _data.collateralAmount, false);
 
             // deposit to YieldBox
@@ -53,7 +57,9 @@ contract MagnetarMock {
         // performs .addCollateral on market
         if (_data.collateralAmount > 0) {
             yieldBox.setApprovalForAll(address(_data.market), true);
-            IMarket(_data.market).addCollateral(_data.deposit ? address(this) : _data.user, _data.user, false, _data.collateralAmount, _share);
+            IMarket(_data.market).addCollateral(
+                _data.deposit ? address(this) : _data.user, _data.user, false, _data.collateralAmount, _share
+            );
         }
 
         // performs .borrow on market

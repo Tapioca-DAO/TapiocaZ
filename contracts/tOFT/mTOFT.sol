@@ -10,10 +10,13 @@ import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 // External
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
 import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "contracts/ITOFT.sol";
+import {IStargateReceiver} from "tapioca-periph/interfaces/external/stargate/IStargateReceiver.sol";
 import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
 import {TOFTSender} from "contracts/modules/TOFTSender.sol";
 import {BaseTOFT} from "contracts/BaseTOFT.sol";
@@ -37,7 +40,9 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  * @notice Tapioca OFT wrapper contract that is connected with multiple chains
  * @dev It can be wrapped and unwrapped on multiple connected chains
  */
-contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
+contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateReceiver {
+    using SafeERC20 for IERC20;
+
     /**
      * @notice allowed chains where you can unwrap your TOFT
      */
@@ -59,6 +64,10 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
      */
     uint256 public mintFee;
 
+    address private _stargateRouter;
+
+    event StargateRouterUpdated(address indexed _old, address indexed _new);
+
     /**
      * @notice event emitted when a connected chain is reigstered or unregistered
      */
@@ -77,9 +86,10 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
     error mTOFT_NotNative();
     error mTOFT_NotHost();
     error mTOFT_BalancerNotAuthorized();
+    error mTOFT_NotAuthorized();
     error mTOFT_CapNotValid();
 
-    constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _modulesData)
+    constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _modulesData, address _stgRouter)
         BaseTOFT(_tOFTData)
         ERC20Permit(_tOFTData.name)
     {
@@ -110,6 +120,8 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
         _setModule(uint8(ITOFT.Module.TOFTMarketReceiver), _modulesData.marketReceiverModule);
         _setModule(uint8(ITOFT.Module.TOFTOptionsReceiver), _modulesData.optionsReceiverModule);
         _setModule(uint8(ITOFT.Module.TOFTGenericReceiver), _modulesData.genericReceiverModule);
+
+        _stargateRouter = _stgRouter;
     }
 
     /**
@@ -247,15 +259,37 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
         _unwrap(_toAddress, _amount);
     }
 
+    /**
+     * @notice needed for Stargate Router to receive funds from Balancer.sol contract
+     * @param amountLD Amount to deposit
+     */
+    function sgReceive(uint16, bytes memory, uint256, address, uint256 amountLD, bytes memory) external payable {
+        if (msg.sender != _stargateRouter) revert mTOFT_NotAuthorized();
+
+        if (erc20 == address(0)) {
+            vault.depositNative{value: amountLD}();
+        } else {
+            IERC20(erc20).safeTransfer(address(vault), amountLD);
+        }
+    }
+
     /// =====================
     /// Owner
     /// =====================
-
+    /**
+     * @notice sets the StargateRouter address
+     * @param _router the router address
+     */
+    function setStargateRouter(address _router) external onlyOwner {
+        emit StargateRouterUpdated(_stargateRouter, _router);
+        _stargateRouter = _router;
+    }
     /**
      * @notice withdraw fees from Vault.
      * @param _to receiver; usually Balancer.sol contract
      * @param _amount the fees amount
      */
+
     function withdrawFees(address _to, uint256 _amount) external onlyOwner {
         vault.transferFees(_to, _amount);
     }

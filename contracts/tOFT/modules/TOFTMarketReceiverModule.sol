@@ -9,9 +9,7 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import "tapioca-sdk/dist/contracts/libraries/LzLib.sol"; //todo: it can be removed after Magnetar V2 migration
 
 // Tapioca
-import {
-    TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg
-} from "contracts/ITOFT.sol";
+import {TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg} from "contracts/ITOFT.sol";
 import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
