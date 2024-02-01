@@ -19,7 +19,6 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {
     ITOFT,
     TOFTInitStruct,
-    LZSendParam,
     YieldBoxApproveAllMsg,
     MarketPermitActionMsg,
     MarketRemoveCollateralMsg,
@@ -30,7 +29,7 @@ import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/Ta
 import {TOFTMarketReceiverModule} from "contracts/modules/TOFTMarketReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "contracts/modules/TOFTOptionsReceiverModule.sol";
 import {TOFTGenericReceiverModule} from "contracts/modules/TOFTGenericReceiverModule.sol";
-import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
 import {TOFTSender} from "contracts/modules/TOFTSender.sol";
 import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
@@ -140,7 +139,7 @@ contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
      */
 
     function _marketPermitReceiver(bytes memory _data) internal virtual {
-        MarketPermitActionMsg memory approval = TOFTMsgCoder.decodeMarketPermitApprovalMsg(_data);
+        MarketPermitActionMsg memory approval = TOFTMsgCodec.decodeMarketPermitApprovalMsg(_data);
 
         _sanitizeTarget(approval.target);
 
@@ -164,7 +163,7 @@ contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
      *      - s::bytes32: s value of the signature.
      */
     function _yieldBoxPermitAssetReceiver(bytes memory _data) internal virtual {
-        YieldBoxApproveAssetMsg[] memory approvals = TOFTMsgCoder.decodeArrayOfYieldBoxPermitAssetMsg(_data);
+        YieldBoxApproveAssetMsg[] memory approvals = TOFTMsgCodec.decodeArrayOfYieldBoxPermitAssetMsg(_data);
 
         uint256 approvalsLength = approvals.length;
         for (uint256 i = 0; i < approvalsLength;) {
@@ -189,7 +188,7 @@ contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
      *      - s::bytes32: s value of the signature.
      */
     function _yieldBoxPermitAllReceiver(bytes memory _data) internal virtual {
-        YieldBoxApproveAllMsg memory approval = TOFTMsgCoder.decodeYieldBoxApproveAllMsg(_data);
+        YieldBoxApproveAllMsg memory approval = TOFTMsgCodec.decodeYieldBoxApproveAllMsg(_data);
 
         _sanitizeTarget(approval.target);
 

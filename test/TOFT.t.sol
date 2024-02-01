@@ -52,7 +52,7 @@ import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
-import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
 import {TOFTSender} from "contracts/modules/TOFTSender.sol";
 
 // Tapioca Tests

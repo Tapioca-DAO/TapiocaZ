@@ -18,7 +18,7 @@ import {
     ITapiocaOptionBrokerCrossChain
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "contracts/ITOFT.sol";
-import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
@@ -60,7 +60,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      */
     function exerciseOptionsReceiver(address srcChainSender, bytes memory _data) public payable {
         // Decode received message.
-        ExerciseOptionsMsg memory msg_ = TOFTMsgCoder.decodeExerciseOptionsMsg(_data);
+        ExerciseOptionsMsg memory msg_ = TOFTMsgCodec.decodeExerciseOptionsMsg(_data);
 
         _checkWhitelistStatus(msg_.optionsData.target);
         _checkWhitelistStatus(LzLib.bytes32ToAddress(msg_.lzSendParams.sendParam.to));

@@ -17,7 +17,7 @@ import {
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {TOFTInitStruct, SendParamsMsg} from "contracts/ITOFT.sol";
-import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
@@ -57,7 +57,7 @@ contract TOFTGenericReceiverModule is BaseTOFT {
      *      - amount::uint256: Amount to unwrap.
      */
     function receiveWithParamsReceiver(address srcChainSender, bytes memory _data) public payable {
-        SendParamsMsg memory msg_ = TOFTMsgCoder.decodeSendParamsMsg(_data);
+        SendParamsMsg memory msg_ = TOFTMsgCodec.decodeSendParamsMsg(_data);
 
         msg_.amount = _toLD(uint64(msg_.amount));
 

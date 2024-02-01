@@ -10,7 +10,6 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {
     ITOFT,
     ERC20PermitApprovalMsg,
-    LZSendParam,
     YieldBoxApproveAllMsg,
     MarketPermitActionMsg,
     RemoteTransferMsg,
@@ -25,30 +24,10 @@ import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine
 import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 
-library TOFTMsgCoder {
+library TOFTMsgCodec {
     // ***************************************
     // * Encoding & Decoding TOFT messages *
     // ***************************************
-
-    /**
-     * @notice Encodes the message for the `remoteTransfer` operation.
-     * @param _remoteTransferMsg The owner + LZ send param to pass on the remote chain. (B->A)
-     */
-    function buildRemoteTransferMsg(RemoteTransferMsg memory _remoteTransferMsg) internal pure returns (bytes memory) {
-        return abi.encode(_remoteTransferMsg);
-    }
-
-    /**
-     * @notice Decode the message for the `remoteTransfer` operation.
-     * @param _msg The owner + LZ send param to pass on the remote chain. (B->A)
-     */
-    function decodeRemoteTransferMsg(bytes memory _msg)
-        internal
-        pure
-        returns (RemoteTransferMsg memory remoteTransferMsg_)
-    {
-        return abi.decode(_msg, (RemoteTransferMsg));
-    }
 
     /**
      * @notice Decodes an encoded message for the `TOFTReceiver.erc20PermitApprovalReceiver()` operation.
@@ -74,7 +53,7 @@ library TOFTMsgCoder {
      * s             | bytes32   | 157   | 189                       *
      * ------------------------------------------------------------- *
      *
-     * @param _msg The encoded message. see `TOFTMsgCoder.buildERC20PermitApprovalMsg()`
+     * @param _msg The encoded message. see `TOFTMsgCodec.buildERC20PermitApprovalMsg()`
      */
     struct __offsets {
         uint8 tokenOffset;
@@ -251,7 +230,7 @@ library TOFTMsgCoder {
      * permitLend    | bool      | 191  | 192                        *
      * ------------------------------------------------------------- *
      *
-     * @param _msg The encoded message. see `TOFTMsgCoder.buildMarketPermitApprovalMsg()`
+     * @param _msg The encoded message. see `TOFTMsgCodec.buildMarketPermitApprovalMsg()`
      */
     function decodeMarketPermitApprovalMsg(bytes memory _msg)
         internal
@@ -330,7 +309,7 @@ library TOFTMsgCoder {
      * permit        | bool      | 157   | 158                       *
      * ------------------------------------------------------------- *
      *
-     * @param _msg The encoded message. see `TOFTMsgCoder.buildYieldBoxPermitAll()`
+     * @param _msg The encoded message. see `TOFTMsgCodec.buildYieldBoxPermitAll()`
      */
     function decodeYieldBoxApproveAllMsg(bytes memory _msg)
         internal

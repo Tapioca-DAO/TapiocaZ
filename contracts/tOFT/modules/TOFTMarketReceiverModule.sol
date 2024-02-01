@@ -17,7 +17,7 @@ import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*
@@ -66,7 +66,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      */
     function marketBorrowReceiver(bytes memory _data) public payable {
         /// @dev decode received message
-        MarketBorrowMsg memory msg_ = TOFTMsgCoder.decodeMarketBorrowMsg(_data);
+        MarketBorrowMsg memory msg_ = TOFTMsgCodec.decodeMarketBorrowMsg(_data);
 
         /// @dev sanitize 'borrowParams.marketHelper' and 'borrowParams.market'
         _checkWhitelistStatus(msg_.borrowParams.marketHelper);
@@ -109,7 +109,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      */
     function marketRemoveCollateralReceiver(bytes memory _data) public payable {
         /// @dev decode received message
-        MarketRemoveCollateralMsg memory msg_ = TOFTMsgCoder.decodeMarketRemoveCollateralMsg(_data);
+        MarketRemoveCollateralMsg memory msg_ = TOFTMsgCodec.decodeMarketRemoveCollateralMsg(_data);
 
         _checkWhitelistStatus(msg_.removeParams.market);
 
@@ -166,7 +166,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      */
     function marketLeverageDownReceiver(bytes memory _data) public payable {
         /// @dev decode received message
-        MarketLeverageDownMsg memory msg_ = TOFTMsgCoder.decodeMarketLeverageDownMsg(_data);
+        MarketLeverageDownMsg memory msg_ = TOFTMsgCodec.decodeMarketLeverageDownMsg(_data);
 
         _checkWhitelistStatus(msg_.externalData.srcMarket);
         _checkWhitelistStatus(msg_.externalData.magnetar);

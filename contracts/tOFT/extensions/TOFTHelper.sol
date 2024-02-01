@@ -23,7 +23,7 @@ import {
     ComposeMsgData
 } from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {BaseTOFTTokenMsgType} from "contracts/BaseTOFTTokenMsgType.sol";
-import {TOFTMsgCoder} from "contracts/libraries/TOFTMsgCoder.sol";
+import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -47,7 +47,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
      *
      */
     function buildExerciseOptionMsg(ExerciseOptionsMsg calldata _msg) public pure returns (bytes memory) {
-        return TOFTMsgCoder.buildExerciseOptionsMsg(_msg);
+        return TOFTMsgCodec.buildExerciseOptionsMsg(_msg);
     }
 
     /**
@@ -55,7 +55,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
      *
      */
     function buildSendWithParamsMsg(SendParamsMsg calldata _msg) public pure returns (bytes memory) {
-        return TOFTMsgCoder.buildSendParamsMsg(_msg);
+        return TOFTMsgCodec.buildSendParamsMsg(_msg);
     }
 
     /**
@@ -63,7 +63,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
      *
      */
     function buildMarketLeverageDownMsg(MarketLeverageDownMsg calldata _marketMsg) public pure returns (bytes memory) {
-        return TOFTMsgCoder.buildMarketLeverageDownMsg(_marketMsg);
+        return TOFTMsgCodec.buildMarketLeverageDownMsg(_marketMsg);
     }
 
     /**
@@ -75,7 +75,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
         pure
         returns (bytes memory)
     {
-        return TOFTMsgCoder.buildMarketRemoveCollateralMsg(_marketMsg);
+        return TOFTMsgCodec.buildMarketRemoveCollateralMsg(_marketMsg);
     }
 
     /**
@@ -83,7 +83,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
      *
      */
     function buildMarketBorrowMsg(MarketBorrowMsg calldata _marketBorrowMsg) public pure returns (bytes memory) {
-        return TOFTMsgCoder.buildMarketBorrow(_marketBorrowMsg);
+        return TOFTMsgCodec.buildMarketBorrow(_marketBorrowMsg);
     }
 
     /**
@@ -95,7 +95,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
         pure
         returns (bytes memory msg_)
     {
-        msg_ = TOFTMsgCoder.buildMarketPermitApprovalMsg(_marketPermitActionMsg);
+        msg_ = TOFTMsgCodec.buildMarketPermitApprovalMsg(_marketPermitActionMsg);
     }
 
     /**
@@ -107,7 +107,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
         pure
         returns (bytes memory msg_)
     {
-        msg_ = TOFTMsgCoder.buildYieldBoxApproveAllMsg(_yieldBoxApprovalAllMsg);
+        msg_ = TOFTMsgCodec.buildYieldBoxApproveAllMsg(_yieldBoxApprovalAllMsg);
     }
 
     /**
@@ -122,7 +122,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
     {
         uint256 approvalsLength = _approvalMsg.length;
         for (uint256 i; i < approvalsLength;) {
-            msg_ = abi.encodePacked(msg_, TOFTMsgCoder.buildYieldBoxPermitAssetMsg(_approvalMsg[i]));
+            msg_ = abi.encodePacked(msg_, TOFTMsgCodec.buildYieldBoxPermitAssetMsg(_approvalMsg[i]));
             unchecked {
                 ++i;
             }
