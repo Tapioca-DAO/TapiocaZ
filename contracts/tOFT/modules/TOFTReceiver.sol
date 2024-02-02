@@ -24,7 +24,7 @@ import {
     MarketRemoveCollateralMsg,
     SendParamsMsg,
     YieldBoxApproveAssetMsg
-} from "contracts/ITOFT.sol";
+} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainReceiver.sol";
 import {TOFTMarketReceiverModule} from "contracts/modules/TOFTMarketReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "contracts/modules/TOFTOptionsReceiverModule.sol";

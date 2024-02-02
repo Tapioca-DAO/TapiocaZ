@@ -37,7 +37,7 @@ import {
     YieldBoxApproveAllMsg,
     YieldBoxApproveAssetMsg,
     MarketPermitActionMsg
-} from "contracts/ITOFT.sol";
+} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TOFTHelper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData} from "contracts/extensions/TOFTHelper.sol";
 import {
     ITapiocaOptionBroker,

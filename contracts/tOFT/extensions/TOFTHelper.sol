@@ -15,7 +15,7 @@ import {
     SendParamsMsg,
     ExerciseOptionsMsg,
     YieldBoxApproveAssetMsg
-} from "contracts/ITOFT.sol";
+} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
     TapiocaOmnichainEngineHelper,
     PrepareLzCallData,

@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {YieldBoxApproveAllMsg, MarketPermitActionMsg, YieldBoxApproveAssetMsg} from "contracts/ITOFT.sol";
+import {YieldBoxApproveAllMsg, MarketPermitActionMsg, YieldBoxApproveAssetMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
 import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";

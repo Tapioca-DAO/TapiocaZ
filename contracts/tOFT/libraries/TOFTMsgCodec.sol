@@ -19,7 +19,7 @@ import {
     ExerciseOptionsMsg,
     SendParamsMsg,
     YieldBoxApproveAssetMsg
-} from "contracts/ITOFT.sol";
+} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
 import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";

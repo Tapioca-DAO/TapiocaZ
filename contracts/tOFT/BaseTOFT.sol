@@ -12,7 +12,7 @@ import {BaseTOFTTokenMsgType} from "contracts/BaseTOFTTokenMsgType.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {ModuleManager} from "contracts/modules/ModuleManager.sol";
 import {TOFTExtExec} from "contracts/extensions/TOFTExtExec.sol";
-import {ITOFT, TOFTInitStruct} from "contracts/ITOFT.sol";
+import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TOFTVault} from "contracts/TOFTVault.sol";
 
 /*

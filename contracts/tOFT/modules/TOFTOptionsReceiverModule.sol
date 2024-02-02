@@ -17,7 +17,7 @@ import {
     ITapiocaOptionBroker,
     ITapiocaOptionBrokerCrossChain
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "contracts/ITOFT.sol";
+import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/BaseTOFT.sol";
 

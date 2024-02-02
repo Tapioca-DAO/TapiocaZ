@@ -15,7 +15,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
-import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "contracts/ITOFT.sol";
+import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {IStargateReceiver} from "tapioca-periph/interfaces/external/stargate/IStargateReceiver.sol";
 import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";

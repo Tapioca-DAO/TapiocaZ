@@ -14,7 +14,7 @@ import {IYieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/interfaces
 import {IStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/interfaces/IStrategy.sol";
 import {IERC20} from "@boringcrypto/boring-solidity/contracts/interfaces/IERC20.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
-import {TOFTInitStruct, TOFTModulesInitStruct} from "contracts/ITOFT.sol";
+import {TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";

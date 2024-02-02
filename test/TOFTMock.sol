@@ -6,7 +6,7 @@ import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/
 
 // Tapioca
 import {TOFT} from "contracts/TOFT.sol";
-import {TOFTInitStruct, TOFTModulesInitStruct} from "contracts/ITOFT.sol";
+import {TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

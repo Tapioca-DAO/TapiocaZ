@@ -13,7 +13,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
-import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "contracts/ITOFT.sol";
+import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
 import {TOFTSender} from "contracts/modules/TOFTSender.sol";
