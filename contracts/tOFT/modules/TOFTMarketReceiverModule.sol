@@ -124,7 +124,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         if (msg_.withdrawParams.withdrawLzFeeAmount > 0) {
             msg_.withdrawParams.withdrawLzFeeAmount = _toLD(msg_.withdrawParams.withdrawLzFeeAmount.toUint64());
         }
-        
+
         {
             uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
             approve(msg_.removeParams.market, share);
@@ -134,9 +134,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         {
             //TODO: refactor after periph is updated
             if (msg_.withdrawParams.withdraw) {
-                if (!cluster.isWhitelisted(0, msg_.removeParams.marketHelper)) {
-                    revert TOFTMarketReceiverModule_NotAuthorized(msg_.removeParams.marketHelper);
-                }
+                _checkWhitelistStatus(msg_.removeParams.marketHelper);
                 IMagnetar(payable(msg_.removeParams.marketHelper)).withdrawToChain{value: msg.value}(
                     IMagnetar.WithdrawToChainData(
                         ybAddress,
