@@ -44,11 +44,11 @@ import {
     ITapiocaOptionBrokerCrossChain
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ERC20WithoutStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
+import {ITapiocaOFT, IBorrowParams, IRemoveParams} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
+import {ICommonData, IWithdrawParams} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {TOFTMarketReceiverModule} from "contracts/modules/TOFTMarketReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "contracts/modules/TOFTOptionsReceiverModule.sol";
 import {TOFTGenericReceiverModule} from "contracts/modules/TOFTGenericReceiverModule.sol";
-import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
@@ -593,14 +593,14 @@ contract TOFTTest is TOFTTestHelper {
 
         MarketBorrowMsg memory marketBorrowMsg = MarketBorrowMsg({
             user: address(this),
-            borrowParams: ITapiocaOFT.IBorrowParams({
+            borrowParams: IBorrowParams({
                 amount: tokenAmountSD,
                 borrowAmount: tokenAmountSD,
                 marketHelper: address(magnetar),
                 market: address(singularity),
                 deposit: true
             }),
-            withdrawParams: ICommonData.IWithdrawParams({
+            withdrawParams: IWithdrawParams({
                 withdraw: false,
                 withdrawLzFeeAmount: 0,
                 withdrawOnOtherChain: false,
@@ -719,12 +719,12 @@ contract TOFTTest is TOFTTestHelper {
         bTOFT.approve(address(magnetar), type(uint256).max);
         MarketRemoveCollateralMsg memory marketMsg = MarketRemoveCollateralMsg({
             user: address(this),
-            removeParams: ITapiocaOFT.IRemoveParams({
+            removeParams: IRemoveParams({
                 amount: tokenAmountSD,
                 marketHelper: address(magnetar),
                 market: address(singularity)
             }),
-            withdrawParams: ICommonData.IWithdrawParams({
+            withdrawParams: IWithdrawParams({
                 withdraw: false,
                 withdrawLzFeeAmount: 0,
                 withdrawOnOtherChain: false,
