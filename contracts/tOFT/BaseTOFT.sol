@@ -58,7 +58,7 @@ abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOF
     error TOFT_NotValid();
 
     constructor(TOFTInitStruct memory _data)
-        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.owner)
+        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate)
     {
         yieldBox = IYieldBox(_data.yieldBox);
         cluster = ICluster(_data.cluster);

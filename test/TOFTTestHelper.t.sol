@@ -72,7 +72,7 @@ contract TOFTTestHelper is TestHelper, TestUtils {
             name: name,
             symbol: symbol,
             endpoint: endpoint,
-            owner: owner,
+            delegate: owner,
             yieldBox: yieldBox,
             cluster: cluster,
             erc20: erc20,

@@ -54,7 +54,7 @@ struct TOFTInitStruct {
     string name;
     string symbol;
     address endpoint;
-    address owner;
+    address delegate;
     address yieldBox;
     address cluster;
     address erc20;
