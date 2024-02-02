@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // LZ
 import {
@@ -41,6 +41,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  */
 contract TOFTGenericReceiverModule is BaseTOFT {
     using SafeERC20 for IERC20;
+    using SafeCast for uint256;
 
     error TOFTGenericReceiverModule_NotAuthorized(address invalidAddress);
     error TOFTGenericReceiverModule_TransferFailed();
@@ -59,7 +60,7 @@ contract TOFTGenericReceiverModule is BaseTOFT {
     function receiveWithParamsReceiver(address srcChainSender, bytes memory _data) public payable {
         SendParamsMsg memory msg_ = TOFTMsgCodec.decodeSendParamsMsg(_data);
 
-        msg_.amount = _toLD(uint64(msg_.amount));
+        msg_.amount = _toLD(msg_.amount.toUint64());
 
         if (msg_.unwrap) {
             ITapiocaOFTBase tOFT = ITapiocaOFTBase(address(this));

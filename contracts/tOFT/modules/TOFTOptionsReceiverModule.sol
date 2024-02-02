@@ -10,7 +10,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "tapioca-sdk/dist/contracts/libraries/LzLib.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
 import {
@@ -33,8 +33,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
         _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 */
 
-//TODO: perform ld2sd and sd2ld on uint256
-
 /**
  * @title TOFTOptionsReceiverModule
  * @author TapiocaDAO
@@ -42,6 +40,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  */
 contract TOFTOptionsReceiverModule is BaseTOFT {
     using SafeERC20 for IERC20;
+    using SafeCast for uint256;
 
     error TOFTOptionsReceiverModule_NotAuthorized(address invalidAddress);
 
@@ -63,13 +62,13 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         ExerciseOptionsMsg memory msg_ = TOFTMsgCodec.decodeExerciseOptionsMsg(_data);
 
         _checkWhitelistStatus(msg_.optionsData.target);
-        _checkWhitelistStatus(LzLib.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
+        _checkWhitelistStatus(OFTMsgCodec.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
 
         {
             // _data declared for visibility.
             ITapiocaOptionBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
-            _options.tapAmount = _toLD(uint64(_options.tapAmount));
-            _options.paymentTokenAmount = _toLD(uint64(_options.paymentTokenAmount));
+            _options.tapAmount = _toLD(_options.tapAmount.toUint64());
+            _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
 
             // @dev retrieve paymentToken amount
             _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);

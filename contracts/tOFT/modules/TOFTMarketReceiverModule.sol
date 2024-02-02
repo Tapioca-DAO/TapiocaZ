@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+// LZ
+import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
+
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
-
-// LZ
-import "tapioca-sdk/dist/contracts/libraries/LzLib.sol"; //todo: it can be removed after Magnetar V2 migration
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
 import {TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg} from "contracts/ITOFT.sol";
@@ -14,6 +15,7 @@ import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {IOftSender} from "tapioca-periph/interfaces/oft/IOftSender.sol";
 import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
@@ -33,8 +35,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-//TODO: perform ld2sd and sd2ld on uint256
-
 /**
  * @title TOFTMarketReceiverModule
  * @author TapiocaDAO
@@ -43,6 +43,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 contract TOFTMarketReceiverModule is BaseTOFT {
     using SafeERC20 for IERC20;
     using BytesLib for bytes;
+    using SafeCast for uint256;
 
     error TOFTMarketReceiverModule_NotAuthorized(address invalidAddress);
 
@@ -72,8 +73,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         _checkWhitelistStatus(msg_.borrowParams.marketHelper);
         _checkWhitelistStatus(msg_.borrowParams.market);
 
-        msg_.borrowParams.amount = _toLD(uint64(msg_.borrowParams.amount));
-        msg_.borrowParams.borrowAmount = _toLD(uint64(msg_.borrowParams.borrowAmount));
+        msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
+        msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
 
         /// @dev use market helper to deposit, add collateral to market and withdrawTo
         /// @dev 'borrowParams.marketHelper' is MagnetarV2 contract
@@ -116,7 +117,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         address ybAddress = IMarket(msg_.removeParams.market).yieldBox();
         uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
 
-        msg_.removeParams.amount = _toLD(uint64(msg_.removeParams.amount));
+        msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
 
         {
             uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
@@ -136,7 +137,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
                         msg_.user,
                         assetId,
                         msg_.withdrawParams.withdrawLzChainId,
-                        LzLib.addressToBytes32(msg_.user),
+                        OFTMsgCodec.addressToBytes32(msg_.user),
                         msg_.removeParams.amount,
                         msg_.withdrawParams.withdrawAdapterParams,
                         payable(msg_.user),
@@ -172,11 +173,13 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         _checkWhitelistStatus(msg_.externalData.magnetar);
         _checkWhitelistStatus(msg_.externalData.swapper);
         _checkWhitelistStatus(msg_.externalData.tOft);
-        _checkWhitelistStatus(msg_.swapData.tokenOut);
-        _checkWhitelistStatus(LzLib.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
+        _checkWhitelistStatus(OFTMsgCodec.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
+        if (msg_.swapData.tokenOut != address(0)) {
+            _checkWhitelistStatus(msg_.swapData.tokenOut);
+        }
 
-        msg_.amount = _toLD(uint64(msg_.amount));
-        msg_.swapData.amountOutMin = _toLD(uint64(msg_.swapData.amountOutMin));
+        msg_.amount = _toLD(msg_.amount.toUint64());
+        msg_.swapData.amountOutMin = _toLD(msg_.swapData.amountOutMin.toUint64());
 
         uint256 amountOut;
         {
