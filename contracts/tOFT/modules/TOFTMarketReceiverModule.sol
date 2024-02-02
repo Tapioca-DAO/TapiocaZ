@@ -75,6 +75,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
         msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
         msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
+        if (msg_.withdrawParams.withdrawLzFeeAmount > 0) {
+            msg_.withdrawParams.withdrawLzFeeAmount = _toLD(msg_.withdrawParams.withdrawLzFeeAmount.toUint64());
+        }
 
         /// @dev use market helper to deposit, add collateral to market and withdrawTo
         /// @dev 'borrowParams.marketHelper' is MagnetarV2 contract
@@ -118,7 +121,10 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
-
+        if (msg_.withdrawParams.withdrawLzFeeAmount > 0) {
+            msg_.withdrawParams.withdrawLzFeeAmount = _toLD(msg_.withdrawParams.withdrawLzFeeAmount.toUint64());
+        }
+        
         {
             uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
             approve(msg_.removeParams.market, share);
