@@ -11,11 +11,9 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
 import {TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {IOftSender} from "tapioca-periph/interfaces/oft/IOftSender.sol";
 import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";

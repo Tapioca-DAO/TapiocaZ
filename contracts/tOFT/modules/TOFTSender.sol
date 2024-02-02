@@ -1,14 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// LZ
-import {
-    MessagingReceipt, OFTReceipt, SendParam
-} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-
 // Tapioca
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
-import {ITOFT, LZSendParam, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {BaseTOFT} from "contracts/BaseTOFT.sol";
 
 /*

@@ -6,15 +6,10 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // LZ
-import {
-    MessagingReceipt, OFTReceipt, SendParam
-} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 // Tapioca
-import {
-    ITapiocaOptionBroker,
-    ITapiocaOptionBrokerCrossChain
-} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
