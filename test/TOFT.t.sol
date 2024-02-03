@@ -38,22 +38,27 @@ import {
     YieldBoxApproveAssetMsg,
     MarketPermitActionMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {TOFTHelper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData} from "contracts/extensions/TOFTHelper.sol";
 import {
     ITapiocaOptionBroker,
     ITapiocaOptionBrokerCrossChain
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ERC20WithoutStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
+import {
+    TOFTHelper,
+    PrepareLzCallData,
+    PrepareLzCallReturn,
+    ComposeMsgData
+} from "contracts/tOFT/extensions/TOFTHelper.sol";
 import {ITapiocaOFT, IBorrowParams, IRemoveParams} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData, IWithdrawParams} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {TOFTMarketReceiverModule} from "contracts/modules/TOFTMarketReceiverModule.sol";
-import {TOFTOptionsReceiverModule} from "contracts/modules/TOFTOptionsReceiverModule.sol";
-import {TOFTGenericReceiverModule} from "contracts/modules/TOFTGenericReceiverModule.sol";
-import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
+import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
+import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsReceiverModule.sol";
+import {TOFTGenericReceiverModule} from "contracts/tOFT/modules/TOFTGenericReceiverModule.sol";
+import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
+import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
+import {TOFTReceiver} from "contracts/tOFT/modules/TOFTReceiver.sol";
+import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
-import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
-import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
-import {TOFTSender} from "contracts/modules/TOFTSender.sol";
+import {YieldBox} from "yieldbox/YieldBox.sol";
 
 // Tapioca Tests
 import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
