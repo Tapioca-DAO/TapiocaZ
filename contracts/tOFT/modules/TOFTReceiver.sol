@@ -19,11 +19,11 @@ import {
     YieldBoxApproveAssetMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainReceiver.sol";
-import {TOFTMarketReceiverModule} from "contracts/modules/TOFTMarketReceiverModule.sol";
-import {TOFTOptionsReceiverModule} from "contracts/modules/TOFTOptionsReceiverModule.sol";
-import {TOFTGenericReceiverModule} from "contracts/modules/TOFTGenericReceiverModule.sol";
-import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
-import {BaseTOFT} from "contracts/BaseTOFT.sol";
+import {TOFTMarketReceiverModule} from "./TOFTMarketReceiverModule.sol";
+import {TOFTOptionsReceiverModule} from "./TOFTOptionsReceiverModule.sol";
+import {TOFTGenericReceiverModule} from "./TOFTGenericReceiverModule.sol";
+import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
 /*
 

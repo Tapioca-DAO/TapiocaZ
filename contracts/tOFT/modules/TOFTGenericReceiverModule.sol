@@ -12,8 +12,8 @@ import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
-import {BaseTOFT} from "contracts/BaseTOFT.sol";
+import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

@@ -7,13 +7,13 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {BaseTOFTTokenMsgType} from "contracts/BaseTOFTTokenMsgType.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {ModuleManager} from "contracts/modules/ModuleManager.sol";
-import {TOFTExtExec} from "contracts/extensions/TOFTExtExec.sol";
 import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {TOFTVault} from "contracts/TOFTVault.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {BaseTOFTTokenMsgType} from "./BaseTOFTTokenMsgType.sol";
+import {ModuleManager} from "./modules/ModuleManager.sol";
+import {TOFTExtExec} from "./extensions/TOFTExtExec.sol";
+import {TOFTVault} from "./TOFTVault.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
