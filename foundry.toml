@@ -17,7 +17,8 @@ remappings = [
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
 	"forge-std/=lib/forge-std/src/",
 	"tapioca-sdk/=gitmodule/tapioca-sdk/contracts/",
-	"tapioca-periph/=gitmodule/tapioca-periph/contracts/"
+	"tapioca-periph/=gitmodule/tapioca-periph/contracts/",
+	"yieldbox/=gitmodule/tap-yieldbox/contracts/"
 ]
 
 # forge-dpeloy
