@@ -7,14 +7,8 @@ package-lock.json
 docs
 .VSCodeCounter
 
-#Hardhat files
-cache
-artifacts
-
-# Forge files
-out
-cache_forge
-lib/forge-std
+#Hardhat & forge files
+gen
 
 #Others
 .DS_Store

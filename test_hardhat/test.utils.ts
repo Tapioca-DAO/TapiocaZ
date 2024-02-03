@@ -3,7 +3,7 @@ import { useUtils } from '../scripts/utils';
 import hre, { ethers, network } from 'hardhat';
 import { time } from '@nomicfoundation/hardhat-network-helpers';
 import { MTapiocaOFT } from 'tapioca-sdk/dist/typechain/tapiocaz';
-import { Cluster__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-periphery';
+import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
 
 export const register = async (hre: HardhatRuntimeEnvironment) => {
     const { ethers } = hre;

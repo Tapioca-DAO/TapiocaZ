@@ -28,8 +28,10 @@ declare global {
 // Load the env vars from the .env/<network>.env file. the <network> file name is the same as the network in hh `--network arbitrum_sepolia`
 loadEnv();
 // Check if the folder /gen/typechain exists, if not, create it. This is needed if the repo was freshly cloned.
-if (!fs.existsSync('./gen/typechain')) {
-    fs.mkdirSync('./gen/typechain');
+if (!fs.existsSync('./gen/typechain/index.ts')) {
+    try {
+        fs.mkdirSync('./gen/typechain', { recursive: true });
+    } catch (e) {}
     fs.writeFileSync('./gen/typechain/index.ts', '');
 }
 
@@ -74,7 +76,7 @@ const config: HardhatUserConfig & { dodoc: any } = {
     paths: {
         artifacts: './gen/artifacts',
         cache: './gen/cache',
-        tests: './hardhat_test',
+        tests: './test_hardhat',
     },
     dodoc: {
         runOnCompile: false,
