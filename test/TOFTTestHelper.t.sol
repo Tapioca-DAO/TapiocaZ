@@ -59,42 +59,4 @@ contract TOFTTestHelper is TestHelper, TestUtils {
     function createCluster(uint32 hostEid, address owner) public returns (Cluster) {
         return new Cluster(hostEid, owner);
     }
-
-    function createInitStruct(
-        string memory name,
-        string memory symbol,
-        address endpoint,
-        address owner,
-        address yieldBox,
-        address cluster,
-        address erc20,
-        uint256 hostEid
-    ) public pure returns (TOFTInitStruct memory) {
-        return TOFTInitStruct({
-            name: name,
-            symbol: symbol,
-            endpoint: endpoint,
-            delegate: owner,
-            yieldBox: yieldBox,
-            cluster: cluster,
-            erc20: erc20,
-            hostEid: hostEid
-        });
-    }
-
-    function createModulesInitStruct(
-        address tOFTSenderModule,
-        address tOFTReceiverModule,
-        address marketReceiverModule,
-        address optionsReceiverModule,
-        address genericReceiverModule
-    ) public pure returns (TOFTModulesInitStruct memory) {
-        return TOFTModulesInitStruct({
-            tOFTSenderModule: tOFTSenderModule,
-            tOFTReceiverModule: tOFTReceiverModule,
-            marketReceiverModule: marketReceiverModule,
-            optionsReceiverModule: optionsReceiverModule,
-            genericReceiverModule: genericReceiverModule
-        });
-    }
 }

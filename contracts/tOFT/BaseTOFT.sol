@@ -56,17 +56,17 @@ abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOF
 
     error TOFT_AllowanceNotValid();
     error TOFT_NotValid();
+    error TOFT_VaultWrongERC20();
 
     constructor(TOFTInitStruct memory _data)
-        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate)
+        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate, _data.extExec)
     {
         yieldBox = IYieldBox(_data.yieldBox);
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
-        vault = new TOFTVault(_data.erc20);
-
-        toftExtExec = new TOFTExtExec();
+        vault = TOFTVault(_data.toftVault);
+        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**
