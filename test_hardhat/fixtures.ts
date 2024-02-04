@@ -11,9 +11,9 @@ import {
     ERC20Mock,
     StargateRouterMock__factory,
     StargateRouterETHMock__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
+} from '@tapioca-sdk/typechain/tapioca-mocks';
 
-import { Cluster__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-periphery';
+import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
 
 export const setupFixture = async () => {
     const signer = (await hre.ethers.getSigners())[0];

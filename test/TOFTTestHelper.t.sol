@@ -2,19 +2,21 @@
 
 pragma solidity 0.8.22;
 
+// External
+import {IERC20} from "@boringcrypto/boring-solidity/contracts/interfaces/IERC20.sol";
+
 // Lz
 import {TestHelper} from "./LZSetup/TestHelper.sol";
 
 // Tapioca
-import {ERC20WithoutStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/strategies/ERC20WithoutStrategy.sol";
-import {IWrappedNative} from "tapioca-sdk/src/contracts/YieldBox/contracts/interfaces/IWrappedNative.sol";
-import {YieldBoxURIBuilder} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBoxURIBuilder.sol";
-import {TokenType} from "tapioca-sdk/src/contracts/YieldBox/contracts/enums/YieldBoxTokenType.sol";
-import {IYieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/interfaces/IYieldBox.sol";
-import {IStrategy} from "tapioca-sdk/src/contracts/YieldBox/contracts/interfaces/IStrategy.sol";
-import {IERC20} from "@boringcrypto/boring-solidity/contracts/interfaces/IERC20.sol";
-import {YieldBox} from "tapioca-sdk/src/contracts/YieldBox/contracts/YieldBox.sol";
 import {TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
+import {IWrappedNative} from "yieldbox/interfaces/IWrappedNative.sol";
+import {YieldBoxURIBuilder} from "yieldbox/YieldBoxURIBuilder.sol";
+import {TokenType} from "yieldbox/enums/YieldBoxTokenType.sol";
+import {IYieldBox} from "yieldbox/interfaces/IYieldBox.sol";
+import {IStrategy} from "yieldbox/interfaces/IStrategy.sol";
+import {YieldBox} from "yieldbox/YieldBox.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
@@ -56,43 +58,5 @@ contract TOFTTestHelper is TestHelper, TestUtils {
 
     function createCluster(uint32 hostEid, address owner) public returns (Cluster) {
         return new Cluster(hostEid, owner);
-    }
-
-    function createInitStruct(
-        string memory name,
-        string memory symbol,
-        address endpoint,
-        address owner,
-        address yieldBox,
-        address cluster,
-        address erc20,
-        uint256 hostEid
-    ) public pure returns (TOFTInitStruct memory) {
-        return TOFTInitStruct({
-            name: name,
-            symbol: symbol,
-            endpoint: endpoint,
-            delegate: owner,
-            yieldBox: yieldBox,
-            cluster: cluster,
-            erc20: erc20,
-            hostEid: hostEid
-        });
-    }
-
-    function createModulesInitStruct(
-        address tOFTSenderModule,
-        address tOFTReceiverModule,
-        address marketReceiverModule,
-        address optionsReceiverModule,
-        address genericReceiverModule
-    ) public pure returns (TOFTModulesInitStruct memory) {
-        return TOFTModulesInitStruct({
-            tOFTSenderModule: tOFTSenderModule,
-            tOFTReceiverModule: tOFTReceiverModule,
-            marketReceiverModule: marketReceiverModule,
-            optionsReceiverModule: optionsReceiverModule,
-            genericReceiverModule: genericReceiverModule
-        });
     }
 }

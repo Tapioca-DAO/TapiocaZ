@@ -15,12 +15,18 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
-import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct, LZSendParam, ERC20PermitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {
+    ITOFT,
+    TOFTInitStruct,
+    TOFTModulesInitStruct,
+    LZSendParam,
+    ERC20PermitStruct
+} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {IStargateReceiver} from "tapioca-periph/interfaces/external/stargate/IStargateReceiver.sol";
-import {TOFTReceiver} from "contracts/modules/TOFTReceiver.sol";
-import {TOFTSender} from "contracts/modules/TOFTSender.sol";
-import {BaseTOFT} from "contracts/BaseTOFT.sol";
+import {TOFTReceiver} from "./modules/TOFTReceiver.sol";
+import {TOFTSender} from "./modules/TOFTSender.sol";
+import {BaseTOFT} from "./BaseTOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -233,13 +239,6 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
     /// =====================
 
     /**
-     * @notice returns token's decimals
-     */
-    function decimals() public pure override returns (uint8) {
-        return 18;
-    }
-
-    /**
      * @dev Returns the hash of the struct used by the permit function.
      * @param _permitData Struct containing permit data.
      */
@@ -334,58 +333,45 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
     }
 
     /**
-     * @notice sets the StargateRouter address
-     * @param _router the router address
+     * @notice sets the owner state
      */
-    function setStargateRouter(address _router) external onlyOwner {
-        emit StargateRouterUpdated(_stargateRouter, _router);
-        _stargateRouter = _router;
+    struct SetOwnerStateData {
+        address stargateRouter;
+        uint256 mintFee;
+        uint256 mintCap;
+        // connected chains
+        uint256 connectedChain;
+        bool connectedChainState;
+        // balancer
+        address balancerStateAddress;
+        bool balancerState;
     }
+
+    function setOwnerState(SetOwnerStateData memory _data) external onlyOwner {
+        if (_stargateRouter != _data.stargateRouter) {
+            _stargateRouter = _data.stargateRouter;
+        }
+        if (mintFee != _data.mintFee) {
+            mintFee = _data.mintFee;
+        }
+        if (mintCap != _data.mintCap) {
+            mintCap = _data.mintCap;
+        }
+        if (connectedChains[_data.connectedChain] != _data.connectedChainState) {
+            connectedChains[_data.connectedChain] = _data.connectedChainState;
+        }
+        if (balancers[_data.balancerStateAddress] != _data.balancerState) {
+            balancers[_data.balancerStateAddress] = _data.balancerState;
+        }
+    }
+
     /**
      * @notice withdraw fees from Vault.
      * @param _to receiver; usually Balancer.sol contract
      * @param _amount the fees amount
      */
-
     function withdrawFees(address _to, uint256 _amount) external onlyOwner {
         vault.transferFees(_to, _amount);
-    }
-
-    /**
-     * @notice sets the wrap fee for non host chains
-     * @dev fee precision is 1e5; a fee of 1e4 is 10%
-     * @param _fee the new fee amount
-     */
-    function setMintFee(uint256 _fee) external onlyOwner {
-        mintFee = _fee;
-    }
-
-    /**
-     * @notice sets the wrap cap
-     * @param _cap the new cap amount
-     */
-    function setMintCap(uint256 _cap) external onlyOwner {
-        if (_cap < totalSupply()) revert mTOFT_CapNotValid();
-        mintCap = _cap;
-    }
-
-    /**
-     * @notice updates a connected chain whitelist status
-     * @param _chain the block.chainid of that specific chain
-     */
-    function setConnectedChain(uint256 _chain) external onlyOwner {
-        emit ConnectedChainStatusUpdated(_chain, connectedChains[_chain], true);
-        connectedChains[_chain] = true;
-    }
-
-    /**
-     * @notice updates a Balancer whitelist status
-     * @param _balancer the operator address
-     * @param _status the new whitelist status
-     */
-    function updateBalancerState(address _balancer, bool _status) external onlyOwner {
-        emit BalancerStatusUpdated(_balancer, balancers[_balancer], _status);
-        balancers[_balancer] = _status;
     }
 
     /**

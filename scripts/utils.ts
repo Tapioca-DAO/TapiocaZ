@@ -6,13 +6,11 @@ import { Deployment } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import _ from 'lodash';
 import SDK from 'tapioca-sdk';
-import { TContract, TDeployment } from '../constants';
 import {
     LZEndpointMock__factory,
     YieldBoxMock__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
+} from '@tapioca-sdk/typechain/tapioca-mocks';
 import config from '../hardhat.export';
-import { ERC20Permit, TapiocaOFT__factory } from '../typechain';
 
 export const BN = (n: any) => ethers.BigNumber.from(n);
 export const generateSalt = () => ethers.utils.randomBytes(32);
@@ -231,125 +229,6 @@ export const useUtils = (
         attachTapiocaOFT,
         newEOA,
     };
-};
-
-export const saveToJson = (data: any, filename: string, flag: 'a' | 'w') => {
-    const json = JSON.stringify(data, null, 2);
-    writeFileSync(filename, json, { flag });
-};
-
-export const readFromJson = (filename: string) => {
-    if (existsSync(filename)) {
-        const json = readFileSync(filename, 'utf8');
-        return JSON.parse(json) ?? {};
-    }
-    return {};
-};
-export const readTOFTDeployments = (): TDeployment => {
-    return readFromJson('deployments.json');
-};
-
-export const saveTOFTDeployment = (chainId: string, contracts: TContract[]) => {
-    const deployments: TDeployment = {
-        ...readFromJson('deployments.json'),
-    };
-
-    deployments[chainId] = [...(deployments[chainId] || []), ...contracts];
-
-    saveToJson(deployments, 'deployments.json', 'w');
-    return deployments;
-};
-
-export const removeTOFTDeployment = (chainId: string, contract: TContract) => {
-    const deployments: TDeployment = {
-        ...readFromJson('deployments.json'),
-    };
-
-    deployments[chainId] = _.remove(
-        deployments[chainId],
-        (e) => e?.address?.toLowerCase() != contract?.address?.toLowerCase(),
-    );
-
-    saveToJson(deployments, 'deployments.json', 'w');
-    return deployments;
-};
-
-export const getContractNames = async (hre: HardhatRuntimeEnvironment) =>
-    (await hre.artifacts.getArtifactPaths()).map((e) =>
-        e.split('.sol')[1].replace('/', '').replace('.json', ''),
-    );
-
-export const handleGetChainBy = (
-    ...params: Parameters<typeof SDK.API.utils.getChainBy>
-) => {
-    const chain = SDK.API.utils.getChainBy(...params);
-    if (!chain) {
-        throw new Error(
-            `[-] Chain ${String(
-                params[1],
-            )} not supported in Tapioca-SDK\nSupported chains: ${JSON.stringify(
-                SDK.API.utils.getSupportedChains(),
-                undefined,
-                2,
-            )}\n\n`,
-        );
-    }
-    return chain;
-};
-
-export const getDeploymentByChain = async (
-    hre: HardhatRuntimeEnvironment,
-    network: string,
-    contract: string,
-) => {
-    if (network === hre.network.name) {
-        return await hre.deployments.get(contract);
-    }
-    const deployment = readFromJson(
-        `deployments/${network}/${contract}.json`,
-    ) as Deployment;
-    if (!deployment?.address)
-        throw new Error(
-            `[-] Deployment not found for ${contract} on ${network}`,
-        );
-    return deployment;
-};
-
-export const getTOFTDeploymentByERC20Address = (
-    chainID: string,
-    erc20Address: string,
-) => {
-    const toft = readTOFTDeployments()[chainID].find((e) => {
-        return (
-            e?.meta?.erc20?.address?.toLowerCase() ===
-            erc20Address?.toLowerCase()
-        );
-    }) as TContract;
-    if (!toft) {
-        throw new Error(
-            `[-] TOFT not deployed on chain ${
-                handleGetChainBy('chainId', chainID).name
-            }`,
-        );
-    }
-    return toft;
-};
-
-export const getTOFTDeploymentByTOFTAddress = (
-    chainID: string,
-    address: string,
-) => {
-    const toft = readTOFTDeployments()[chainID].find(
-        (e) => e.address === address,
-    );
-    if (!toft?.meta.hostChain.id) {
-        throw new Error('[-] TOFT not deployed on host chain');
-    }
-    if (!toft?.meta.linkedChain.id) {
-        throw new Error('[-] TOFT not deployed on linked chain');
-    }
-
-    return toft!;
 };
 
 export async function getERC20PermitSignature(

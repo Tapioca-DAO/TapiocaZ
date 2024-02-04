@@ -1,18 +1,24 @@
 {
   "compilerOptions": {
-    "target": "es2018",
+    "target": "es2020",
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
     "declaration": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@tapioca-sdk/*": ["gitmodule/tapioca-sdk/src/*"],
+      "@typechain/*": ["gen/typechain/*"],
+    }
   },
   "include": [
     "./hardhat.config.ts",
-    "./scripts",
-    "./test",
-    "./typechain",
+    "./hardhat_scripts",
+    "./test_hardhat",
+    "./gen/typechain",
     "./tasks",
     "./deploy"
   ]

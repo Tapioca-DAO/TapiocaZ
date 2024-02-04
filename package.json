@@ -67,6 +67,7 @@
         "solhint": "^3.4.1",
         "solidity-coverage": "^0.8.1",
         "ts-node": "^10.7.0",
+        "tsconfig-paths": "^4.2.0",
         "typechain": "^8.1.0",
         "typescript": "^4.4.3",
         "write-json-file": "4.3.0"
@@ -78,7 +79,7 @@
         "inquirer": "^8.2.5",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
-        "tapioca-sdk": "^1.5.18",
+        "tapioca-sdk": "1.6.6",
         "uuid": "^9.0.0"
     }
 }

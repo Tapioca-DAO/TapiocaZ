@@ -22,8 +22,8 @@ import {
     PrepareLzCallReturn,
     ComposeMsgData
 } from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
-import {BaseTOFTTokenMsgType} from "contracts/BaseTOFTTokenMsgType.sol";
-import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
+import {BaseTOFTTokenMsgType} from "../BaseTOFTTokenMsgType.sol";
+import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

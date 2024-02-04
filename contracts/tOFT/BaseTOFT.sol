@@ -7,13 +7,13 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {BaseTOFTTokenMsgType} from "contracts/BaseTOFTTokenMsgType.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {ModuleManager} from "contracts/modules/ModuleManager.sol";
-import {TOFTExtExec} from "contracts/extensions/TOFTExtExec.sol";
 import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {TOFTVault} from "contracts/TOFTVault.sol";
+import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {BaseTOFTTokenMsgType} from "./BaseTOFTTokenMsgType.sol";
+import {ModuleManager} from "./modules/ModuleManager.sol";
+import {TOFTExtExec} from "./extensions/TOFTExtExec.sol";
+import {TOFTVault} from "./TOFTVault.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -36,17 +36,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOFTTokenMsgType {
     using SafeERC20 for IERC20;
 
-    // LZ packets
-    uint16 internal constant PT_YB_APPROVE_ASSET = 600; // Use for YieldBox 'setApprovalForAsset(true)' operation
-    uint16 internal constant PT_YB_APPROVE_ALL = 601; // Use for YieldBox 'setApprovalForAll(true)' operation
-    uint16 internal constant PT_MARKET_PERMIT = 602; // Use for market.permitLend() operation
-
-    uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 800; // Use for remove collateral from a market available on another chain
-    uint16 internal constant PT_YB_SEND_SGL_BORROW = 801; // Use fror send to YB and/or borrow from a market available on another chain
-    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 802; // Use for leverage sell on a market available on another chain
-    uint16 internal constant PT_TAP_EXERCISE = 803; // Use for exercise options on tOB available on another chain
-    uint16 internal constant PT_SEND_PARAMS = 804; // Use for perform a normal OFT send but with a custom payload
-
     TOFTExtExec public immutable toftExtExec;
     IYieldBox public immutable yieldBox;
     TOFTVault public immutable vault;
@@ -56,17 +45,17 @@ abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOF
 
     error TOFT_AllowanceNotValid();
     error TOFT_NotValid();
+    error TOFT_VaultWrongERC20();
 
     constructor(TOFTInitStruct memory _data)
-        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate)
+        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate, _data.extExec)
     {
         yieldBox = IYieldBox(_data.yieldBox);
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
-        vault = new TOFTVault(_data.erc20);
-
-        toftExtExec = new TOFTExtExec();
+        vault = TOFTVault(_data.toftVault);
+        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**

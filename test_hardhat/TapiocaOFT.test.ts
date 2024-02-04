@@ -6,18 +6,18 @@ import {
     LZEndpointMock__factory,
     YieldBoxMock__factory,
     TOFTStrategyMock__factory,
-} from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
+} from '@tapioca-sdk/typechain/tapioca-mocks';
 
 import {
     YieldBox__factory,
     YieldBoxURIBuilder__factory,
     YieldBox,
-} from '../gitsub_tapioca-sdk/src/typechain/YieldBox';
+} from '@tapioca-sdk/typechain/YieldBox';
 import { BN, getERC20PermitSignature } from '../scripts/utils';
 import { setupFixture } from './fixtures';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TapiocaOFT } from '../typechain';
-import { Cluster__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-periphery';
+import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
 
 describe('TapiocaOFT', () => {
     it('simulate deploy', async () => {

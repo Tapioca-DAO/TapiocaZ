@@ -5,8 +5,8 @@ import {
 import { expect } from 'chai';
 import { BytesLike } from 'ethers';
 import hre, { ethers } from 'hardhat';
-import { ERC20Mock__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-mocks';
-import { Cluster__factory } from '../gitsub_tapioca-sdk/src/typechain/tapioca-periphery';
+import { ERC20Mock__factory } from '@tapioca-sdk/typechain/tapioca-mocks';
+import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
 import { generateSalt, useUtils } from '../scripts/utils';
 import { TapiocaOFT__factory } from '../typechain';
 import { setupFixture } from './fixtures';

@@ -10,15 +10,20 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
-import {TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, MarketLeverageDownMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {
+    TOFTInitStruct,
+    MarketBorrowMsg,
+    MarketRemoveCollateralMsg,
+    MarketLeverageDownMsg
+} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMagnetar} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 import {IUSDOBase} from "tapioca-periph/interfaces/bar/IUSDO.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {TOFTMsgCodec} from "contracts/libraries/TOFTMsgCodec.sol";
-import {BaseTOFT} from "contracts/BaseTOFT.sol";
+import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

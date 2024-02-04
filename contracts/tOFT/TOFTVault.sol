@@ -14,7 +14,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract TOFTVault is Ownable {
     using SafeERC20 for IERC20;
 
-    address private _token;
+    address public _token;
     bool private _isNative;
     uint256 private _fees;
 
