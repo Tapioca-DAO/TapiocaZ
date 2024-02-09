@@ -161,7 +161,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         );
     }
 
-    //TODO: test after USDO v2 migration
     /**
      * @notice Performs market.leverageDown()
      * @param _data The call data containing info about the operation.
@@ -172,6 +171,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      *      - lzSendParam::struct: LZ v2 send back to source params
      *      - composeMsg::bytes: lzCompose message to be executed back on source
      */
+    //TODO Remove
     function marketLeverageDownReceiver(bytes memory _data) public payable {
         /// @dev decode received message
         MarketLeverageDownMsg memory msg_ = TOFTMsgCodec.decodeMarketLeverageDownMsg(_data);
