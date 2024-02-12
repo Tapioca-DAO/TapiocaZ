@@ -85,12 +85,6 @@ contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
                 abi.encodeWithSelector(TOFTMarketReceiverModule.marketRemoveCollateralReceiver.selector, _toeComposeMsg),
                 false
             );
-        } else if (_msgType == MSG_LEVERAGE_MARKET_DOWN) {
-            _executeModule(
-                uint8(ITOFT.Module.TOFTMarketReceiver),
-                abi.encodeWithSelector(TOFTMarketReceiverModule.marketLeverageDownReceiver.selector, _toeComposeMsg),
-                false
-            );
         } else if (_msgType == MSG_TAP_EXERCISE) {
             _executeModule(
                 uint8(ITOFT.Module.TOFTOptionsReceiver),

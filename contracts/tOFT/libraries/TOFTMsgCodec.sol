@@ -13,7 +13,6 @@ import {
     YieldBoxApproveAssetMsg,
     MarketPermitActionMsg,
     MarketRemoveCollateralMsg,
-    MarketLeverageDownMsg,
     MarketBorrowMsg,
     ExerciseOptionsMsg,
     SendParamsMsg
@@ -364,24 +363,6 @@ library TOFTMsgCodec {
         returns (MarketRemoveCollateralMsg memory marketMsg_)
     {
         return abi.decode(_msg, (MarketRemoveCollateralMsg));
-    }
-
-    /**
-     * @notice Encodes the message for the `TOFTMarketReceiverModule.marketLeverageDownReceiver()` operation.
-     */
-    function buildMarketLeverageDownMsg(MarketLeverageDownMsg memory _marketMsg) internal pure returns (bytes memory) {
-        return abi.encode(_marketMsg);
-    }
-
-    /**
-     * @notice Decodes an encoded message for the `TOFTMarketReceiverModule.marketLeverageDownReceiver()` operation.
-     */
-    function decodeMarketLeverageDownMsg(bytes memory _msg)
-        internal
-        pure
-        returns (MarketLeverageDownMsg memory marketMsg_)
-    {
-        return abi.decode(_msg, (MarketLeverageDownMsg));
     }
 
     /**

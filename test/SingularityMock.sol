@@ -131,7 +131,7 @@ contract SingularityMock is EIP712 {
     }
 
     function _permit(
-        bool asset, // 1 = asset, 0 = collateral
+        bool _asset, // 1 = asset, 0 = collateral
         address owner,
         address spender,
         uint256 value,
@@ -146,7 +146,7 @@ contract SingularityMock is EIP712 {
 
         structHash = keccak256(
             abi.encode(
-                asset ? _PERMIT_TYPEHASH : _PERMIT_TYPEHASH_BORROW, owner, spender, value, _useNonce(owner), deadline
+                _asset ? _PERMIT_TYPEHASH : _PERMIT_TYPEHASH_BORROW, owner, spender, value, _useNonce(owner), deadline
             )
         );
 
@@ -156,7 +156,7 @@ contract SingularityMock is EIP712 {
 
         require(signer == owner, "ERC20Permit: invalid signature");
 
-        if (asset) {
+        if (_asset) {
             _approve(owner, spender, value);
         } else {
             _approveBorrow(owner, spender, value);

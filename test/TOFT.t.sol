@@ -123,9 +123,8 @@ contract TOFTTest is TOFTTestHelper {
     uint16 internal constant PT_REMOTE_TRANSFER = 700; // Use for transferring tokens from the contract from another chain
     uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 800; // Use for remove collateral from a market available on another chain
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 801; // Use fror send to YB and/or borrow from a market available on another chain
-    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 802; // Use for leverage sell on a market available on another chain
-    uint16 internal constant PT_TAP_EXERCISE = 803; // Use for exercise options on tOB available on another chain
-    uint16 internal constant PT_SEND_PARAMS = 804; // Use for perform a normal OFT send but with a custom payload
+    uint16 internal constant PT_TAP_EXERCISE = 802; // Use for exercise options on tOB available on another chain
+    uint16 internal constant PT_SEND_PARAMS = 803; // Use for perform a normal OFT send but with a custom payload
 
     /**
      * @dev TOFT global event checks

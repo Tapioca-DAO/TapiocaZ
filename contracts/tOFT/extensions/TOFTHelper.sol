@@ -11,7 +11,6 @@ import {
     MarketPermitActionMsg,
     MarketBorrowMsg,
     MarketRemoveCollateralMsg,
-    MarketLeverageDownMsg,
     SendParamsMsg,
     ExerciseOptionsMsg,
     YieldBoxApproveAssetMsg
@@ -58,13 +57,6 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
         return TOFTMsgCodec.buildSendParamsMsg(_msg);
     }
 
-    /**
-     * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
-     *
-     */
-    function buildMarketLeverageDownMsg(MarketLeverageDownMsg calldata _marketMsg) public pure returns (bytes memory) {
-        return TOFTMsgCodec.buildMarketLeverageDownMsg(_marketMsg);
-    }
 
     /**
      * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
@@ -137,7 +129,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
         if (
             _msgType == MSG_YB_APPROVE_ASSET || _msgType == MSG_YB_APPROVE_ALL || _msgType == MSG_MARKET_PERMIT
                 || _msgType == MSG_MARKET_REMOVE_COLLATERAL || _msgType == MSG_YB_SEND_SGL_BORROW
-                || _msgType == MSG_LEVERAGE_MARKET_DOWN || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS
+                || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS
         ) {
             return true;
         }
