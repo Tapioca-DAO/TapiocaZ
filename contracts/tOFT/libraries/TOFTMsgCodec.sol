@@ -19,8 +19,8 @@ import {
     SendParamsMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
-import {ITapiocaOFT} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 
 library TOFTMsgCodec {
     // ***************************************
@@ -90,7 +90,6 @@ library TOFTMsgCodec {
         pure
         returns (YieldBoxApproveAssetMsg memory approvalMsg_)
     {
-        // TODO bitwise operators ?
         __offsets memory offsets_ = __offsets({
             tokenOffset: 20,
             ownerOffset: 40,
@@ -175,7 +174,6 @@ library TOFTMsgCodec {
     {
         return abi.encodePacked(
             _marketApprovalMsg.target,
-            _marketApprovalMsg.actionType,
             _marketApprovalMsg.owner,
             _marketApprovalMsg.spender,
             _marketApprovalMsg.value,
@@ -189,7 +187,6 @@ library TOFTMsgCodec {
 
     struct __marketOffsets {
         uint8 targetOffset;
-        uint8 actionTypeOffset;
         uint8 ownerOffset;
         uint8 spenderOffset;
         uint8 valueOffset;
@@ -208,24 +205,22 @@ library TOFTMsgCodec {
      * ------------------------------------------------------------- *
      * target        | address   | 0     | 20                        *
      * ------------------------------------------------------------- *
-     * actionType    | address   | 20    | 22                        *
+     * owner         | address   | 20    | 40                        *
      * ------------------------------------------------------------- *
-     * owner         | address   | 22    | 42                        *
+     * spender       | address   | 40    | 60                        *
      * ------------------------------------------------------------- *
-     * spender       | address   | 42    | 62                        *
+     * value         | address   | 60    | 92                        *
      * ------------------------------------------------------------- *
-     * value         | address   | 62    | 94                        *
+     * deadline      | uint256   | 92   | 124                        *
      * ------------------------------------------------------------- *
-     * deadline      | uint256   | 94   | 126                        *
+     * v             | uint8     | 124  | 125                        *
      * ------------------------------------------------------------- *
-     * v             | uint8     | 126  | 127                        *
+     * r             | bytes32   | 125  | 157                        *
      * ------------------------------------------------------------- *
-     * r             | bytes32   | 127  | 159                        *
-     * ------------------------------------------------------------- *
-     * s             | bytes32   | 159  | 191                        *
+     * s             | bytes32   | 157  | 189                        *
      * ------------------------------------------------------------- *
      * ------------------------------------------------------------- *
-     * permitLend    | bool      | 191  | 192                        *
+     * permitLend    | bool      | 189  | 190                        *
      * ------------------------------------------------------------- *
      *
      * @param _msg The encoded message. see `TOFTMsgCodec.buildMarketPermitApprovalMsg()`
@@ -237,22 +232,19 @@ library TOFTMsgCodec {
     {
         __marketOffsets memory offsets_ = __marketOffsets({
             targetOffset: 20,
-            actionTypeOffset: 22,
-            ownerOffset: 42,
-            spenderOffset: 62,
-            valueOffset: 94,
-            deadlineOffset: 126,
-            vOffset: 127,
-            rOffset: 159,
-            sOffset: 191
+            ownerOffset: 40,
+            spenderOffset: 60,
+            valueOffset: 92,
+            deadlineOffset: 124,
+            vOffset: 125,
+            rOffset: 157,
+            sOffset: 189
         });
 
         // Decoded data
         address target = BytesLib.toAddress(BytesLib.slice(_msg, 0, offsets_.targetOffset), 0);
 
-        uint16 actionType = uint16(BytesLib.toUint16(BytesLib.slice(_msg, offsets_.targetOffset, 2), 0));
-
-        address owner = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.actionTypeOffset, 20), 0);
+        address owner = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.targetOffset, 20), 0);
 
         address spender = BytesLib.toAddress(BytesLib.slice(_msg, offsets_.ownerOffset, 20), 0);
 
@@ -269,8 +261,7 @@ library TOFTMsgCodec {
         bool permitLend = _msg[offsets_.sOffset] != 0;
 
         // Return structured data
-        marketPermitActionMsg_ =
-            MarketPermitActionMsg(target, actionType, owner, spender, value, deadline, v, r, s, permitLend);
+        marketPermitActionMsg_ = MarketPermitActionMsg(target, owner, spender, value, deadline, v, r, s, permitLend);
     }
 
     struct __ybOffsets {

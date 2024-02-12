@@ -10,8 +10,7 @@ import {SendParam} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/
 
 // Tapioca
 import {ITapiocaOptionBroker} from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {ITapiocaOFTBase} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import {TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT, TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
@@ -26,8 +25,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
        _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
         _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 */
-
-//TODO: perform ld2sd and sd2ld on uint256
 
 /**
  * @title TOFTGenericReceiverModule
@@ -58,7 +55,7 @@ contract TOFTGenericReceiverModule is BaseTOFT {
         msg_.amount = _toLD(msg_.amount.toUint64());
 
         if (msg_.unwrap) {
-            ITapiocaOFTBase tOFT = ITapiocaOFTBase(address(this));
+            ITOFT tOFT = ITOFT(address(this));
             address toftERC20 = tOFT.erc20();
 
             /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.

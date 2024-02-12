@@ -54,8 +54,10 @@ abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOF
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
-        vault = TOFTVault(_data.toftVault);
+        vault = new TOFTVault(_data.erc20);
         if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
+
+        toftExtExec = new TOFTExtExec();
     }
 
     /**

@@ -14,8 +14,7 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
 import {
-    ITapiocaOptionBroker,
-    ITapiocaOptionBrokerCrossChain
+    ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
@@ -66,7 +65,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
         {
             // _data declared for visibility.
-            ITapiocaOptionBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
+            IExerciseOptionsData memory _options = msg_.optionsData;
             _options.tapAmount = _toLD(_options.tapAmount.toUint64());
             _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
 
@@ -96,7 +95,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
         {
             // _data declared for visibility.
-            ITapiocaOptionBrokerCrossChain.IExerciseOptionsData memory _options = msg_.optionsData;
+            IExerciseOptionsData memory _options = msg_.optionsData;
             SendParam memory _send = msg_.lzSendParams.sendParam;
 
             address tapOft = ITapiocaOptionBroker(_options.target).tapOFT();

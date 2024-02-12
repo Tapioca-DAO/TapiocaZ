@@ -2,10 +2,15 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {YieldBoxApproveAllMsg, MarketPermitActionMsg, YieldBoxApproveAssetMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
+import {
+    YieldBoxApproveAllMsg,
+    MarketPermitActionMsg,
+    YieldBoxApproveAssetMsg
+} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
+import {IPermitBorrow} from "tapioca-periph/interfaces/common/IPermitBorrow.sol";
 import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
-import {IPermitAction} from "tapioca-periph/interfaces/common/IPermitAction.sol";
+import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
@@ -25,7 +30,7 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
  * @author TapiocaDAO
  * @notice Used to execute external calls from the TOFT contract. So to not use TOFT in the call context.
  */
-contract TOFTExtExec {
+contract TOFTExtExec is TapiocaOmnichainExtExec {
     /**
      * @notice Executes YieldBox setApprovalForAll(true) operation.
      * @param _approval The approval message.
@@ -87,8 +92,7 @@ contract TOFTExtExec {
      * @param _approval The approval message.
      */
     function marketPermitAssetApproval(MarketPermitActionMsg calldata _approval) public {
-        bytes memory sigData = abi.encode(
-            true,
+        IPermit(_approval.target).permit(
             _approval.owner,
             _approval.spender,
             _approval.value,
@@ -97,8 +101,6 @@ contract TOFTExtExec {
             _approval.r,
             _approval.s
         );
-
-        IPermitAction(_approval.target).permitAction(sigData, _approval.actionType);
     }
 
     /**
@@ -106,8 +108,7 @@ contract TOFTExtExec {
      * @param _approval The approval message.
      */
     function marketPermitCollateralApproval(MarketPermitActionMsg calldata _approval) public {
-        bytes memory sigData = abi.encode(
-            false,
+        IPermitBorrow(_approval.target).permitBorrow(
             _approval.owner,
             _approval.spender,
             _approval.value,
@@ -116,7 +117,5 @@ contract TOFTExtExec {
             _approval.r,
             _approval.s
         );
-
-        IPermitAction(_approval.target).permitAction(sigData, _approval.actionType);
     }
 }

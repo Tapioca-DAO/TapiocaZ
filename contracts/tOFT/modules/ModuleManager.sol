@@ -16,7 +16,6 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 
 */
 
-// TODO move to a common file
 /**
  * @title ModuleManager
  * @author TapiocaDAO
