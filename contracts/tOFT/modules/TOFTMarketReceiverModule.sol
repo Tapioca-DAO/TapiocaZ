@@ -10,11 +10,7 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
-import {
-    TOFTInitStruct,
-    MarketBorrowMsg,
-    MarketRemoveCollateralMsg
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
     IMagnetar,
     MagnetarCall,
