@@ -92,7 +92,6 @@ contract TestUtils is Test {
 
         permitApproval_ = MarketPermitActionMsg({
             target: _permit.target,
-            actionType: _permit.actionType,
             owner: _permit.owner,
             spender: _permit.spender,
             value: _permit.value,

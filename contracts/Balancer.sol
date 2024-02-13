@@ -2,27 +2,25 @@
 pragma solidity 0.8.22;
 
 // External
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import "tapioca-periph/interfaces/external/stargate/IStargateEthVault.sol";
-import "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
-import "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import "tapioca-periph/interfaces/tapiocaz/ITOFTVault.sol";
+import {IStargateEthVault} from "tapioca-periph/interfaces/external/stargate/IStargateEthVault.sol";
+import {IStargateRouter} from "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
+import {ITOFTVault} from "tapioca-periph/interfaces/tapiocaz/ITOFTVault.sol";
+import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 
 /*
-__/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        
- _\///////\\\/////____/\\\\\\\\\\\\\__\/\\\/////////\\\_\/////\\\///______/\\\///\\\________/\\\////////____/\\\\\\\\\\\\\__       
-  _______\/\\\________/\\\/////////\\\_\/\\\_______\/\\\_____\/\\\_______/\\\/__\///\\\____/\\\/____________/\\\/////////\\\_      
-   _______\/\\\_______\/\\\_______\/\\\_\/\\\\\\\\\\\\\/______\/\\\______/\\\______\//\\\__/\\\_____________\/\\\_______\/\\\_     
-    _______\/\\\_______\/\\\\\\\\\\\\\\\_\/\\\/////////________\/\\\_____\/\\\_______\/\\\_\/\\\_____________\/\\\\\\\\\\\\\\\_    
-     _______\/\\\_______\/\\\/////////\\\_\/\\\_________________\/\\\_____\//\\\______/\\\__\//\\\____________\/\\\/////////\\\_   
-      _______\/\\\_______\/\\\_______\/\\\_\/\\\_________________\/\\\______\///\\\__/\\\_____\///\\\__________\/\\\_______\/\\\_  
-       _______\/\\\_______\/\\\_______\/\\\_\/\\\______________/\\\\\\\\\\\____\///\\\\\/________\////\\\\\\\\\_\/\\\_______\/\\\_ 
-        _______\///________\///________\///__\///______________\///////////_______\/////_____________\/////////__\///________\///__
 
+████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
+╚══██╔══╝██╔══██╗██╔══██╗██║██╔═══██╗██╔════╝██╔══██╗
+   ██║   ███████║██████╔╝██║██║   ██║██║     ███████║
+   ██║   ██╔══██║██╔═══╝ ██║██║   ██║██║     ██╔══██║
+   ██║   ██║  ██║██║     ██║╚██████╔╝╚██████╗██║  ██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+   
 */
 
 /**
@@ -124,7 +122,7 @@ contract Balancer is Ownable {
     {
         bytes memory ercData;
         {
-            if (ITapiocaOFT(_srcOft).erc20() != address(0)) {
+            if (ITOFT(_srcOft).erc20() != address(0)) {
                 ercData = abi.encode(
                     connectedOFTs[_srcOft][_dstChainId].srcPoolId, connectedOFTs[_srcOft][_dstChainId].dstPoolId
                 );
@@ -182,17 +180,12 @@ contract Balancer is Ownable {
             revert RebalanceAmountNotSet();
         }
 
-        //check if OFT is still valid
-        if (!_isValidOft(_srcOft, connectedOFTs[_srcOft][_dstChainId].dstOft, _dstChainId)) {
-            revert DestinationOftNotValid();
-        }
-
         //extract
-        ITapiocaOFT(_srcOft).extractUnderlying(_amount);
+        ITOFT(_srcOft).extractUnderlying(_amount);
 
         //send
         {
-            bool _isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
+            bool _isNative = ITOFT(_srcOft).erc20() == address(0);
             if (msg.value == 0) revert FeeAmountNotSet();
             if (_isNative) {
                 if (disableEth) revert SwapNotEnabled();
@@ -236,11 +229,8 @@ contract Balancer is Ownable {
         if (connectedOFTs[_srcOft][_dstChainId].rebalanceable > 0) {
             revert AlreadyInitialized();
         }
-        bool isNative = ITapiocaOFT(_srcOft).erc20() == address(0);
+        bool isNative = ITOFT(_srcOft).erc20() == address(0);
         if (!isNative && _ercData.length == 0) revert PoolInfoRequired();
-        if (!_isValidOft(_srcOft, _dstOft, _dstChainId)) {
-            revert DestinationOftNotValid();
-        }
 
         (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(_ercData, (uint256, uint256));
 
@@ -263,7 +253,7 @@ contract Balancer is Ownable {
         onlyOwner
     {
         connectedOFTs[_srcOft][_dstChainId].rebalanceable += _amount;
-        uint256 totalToftSupply = ITOFTVault(ITapiocaOFT(_srcOft).vault()).viewSupply();
+        uint256 totalToftSupply = ITOFTVault(ITOFT(_srcOft).vault()).viewSupply();
         if (connectedOFTs[_srcOft][_dstChainId].rebalanceable > totalToftSupply) {
             revert RebalanceAmountNotValid();
         }
@@ -277,11 +267,6 @@ contract Balancer is Ownable {
     /// =====================
     /// Private
     /// =====================
-    function _isValidOft(address _srcOft, address _dstOft, uint16 _dstChainId) private view returns (bool) {
-        bytes memory trustedRemotePath = abi.encodePacked(_dstOft, _srcOft);
-        return ITapiocaOFT(_srcOft).isTrustedRemote(_dstChainId, trustedRemotePath);
-    }
-
     function _sendNative(address payable _oft, uint256 _amount, uint16 _dstChainId, uint256 _slippage) private {
         if (address(this).balance < _amount) revert ExceedsBalance();
         uint256 valueAmount = msg.value + _amount;
@@ -301,7 +286,7 @@ contract Balancer is Ownable {
         uint256 _slippage,
         bytes memory _data
     ) private {
-        address erc20 = ITapiocaOFT(_oft).erc20();
+        address erc20 = ITOFT(_oft).erc20();
         if (IERC20Metadata(erc20).balanceOf(address(this)) < _amount) {
             revert ExceedsBalance();
         }

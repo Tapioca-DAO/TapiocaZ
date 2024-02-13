@@ -36,11 +36,12 @@ import {
     ExerciseOptionsMsg,
     YieldBoxApproveAllMsg,
     YieldBoxApproveAssetMsg,
-    MarketPermitActionMsg
+    MarketPermitActionMsg,
+    IBorrowParams,
+    IRemoveParams
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
-    ITapiocaOptionBroker,
-    ITapiocaOptionBrokerCrossChain
+    ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {
     TOFTHelper,
@@ -48,18 +49,17 @@ import {
     PrepareLzCallReturn,
     ComposeMsgData
 } from "contracts/tOFT/extensions/TOFTHelper.sol";
-import {ITapiocaOFT, IBorrowParams, IRemoveParams} from "tapioca-periph/interfaces/tap-token/ITapiocaOFT.sol";
-import {ICommonData, IWithdrawParams} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsReceiverModule.sol";
 import {TOFTGenericReceiverModule} from "contracts/tOFT/modules/TOFTGenericReceiverModule.sol";
+import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
+import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 import {TOFTExtExec} from "contracts/tOFT/extensions/TOFTExtExec.sol";
 import {TOFTReceiver} from "contracts/tOFT/modules/TOFTReceiver.sol";
 import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
 import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
-import {TOFTVault} from "contracts/tOFT/TOFTVault.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
 // Tapioca Tests
@@ -123,9 +123,8 @@ contract TOFTTest is TOFTTestHelper {
     uint16 internal constant PT_REMOTE_TRANSFER = 700; // Use for transferring tokens from the contract from another chain
     uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 800; // Use for remove collateral from a market available on another chain
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 801; // Use fror send to YB and/or borrow from a market available on another chain
-    uint16 internal constant PT_LEVERAGE_MARKET_DOWN = 802; // Use for leverage sell on a market available on another chain
-    uint16 internal constant PT_TAP_EXERCISE = 803; // Use for exercise options on tOB available on another chain
-    uint16 internal constant PT_SEND_PARAMS = 804; // Use for perform a normal OFT send but with a custom payload
+    uint16 internal constant PT_TAP_EXERCISE = 802; // Use for exercise options on tOB available on another chain
+    uint16 internal constant PT_SEND_PARAMS = 803; // Use for perform a normal OFT send but with a custom payload
 
     /**
      * @dev TOFT global event checks
@@ -163,7 +162,6 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(magnetar), "Magnetar");
         }
 
-        TOFTVault toftVaultA = new TOFTVault(address(aERC20));
         TOFTExtExec toftExtExec = new TOFTExtExec();
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",
@@ -174,7 +172,6 @@ contract TOFTTest is TOFTTestHelper {
             cluster: address(cluster),
             erc20: address(aERC20),
             hostEid: aEid,
-            toftVault: address(toftVaultA),
             extExec: address(toftExtExec)
         });
         {
@@ -201,7 +198,6 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(aTOFT), "aTOFT");
         }
 
-        TOFTVault toftVaultB = new TOFTVault(address(bERC20));
         TOFTInitStruct memory bTOFTInitStruct = TOFTInitStruct({
             name: "Token B",
             symbol: "TNKB",
@@ -211,7 +207,6 @@ contract TOFTTest is TOFTTestHelper {
             cluster: address(cluster),
             erc20: address(bERC20),
             hostEid: bEid,
-            toftVault: address(toftVaultB),
             extExec: address(toftExtExec)
         });
         {
@@ -385,7 +380,7 @@ contract TOFTTest is TOFTTestHelper {
             approvals_[0] = permitApprovalB_;
             approvals_[1] = permitApprovalC_;
 
-            approvalsMsg_ = tOFTHelper.buildPermitApprovalMsg(approvals_);
+            approvalsMsg_ = tOFTHelper.encodeERC20PermitApprovalMsg(approvals_);
         }
 
         PrepareLzCallReturn memory prepareLzCallReturn_ = tOFTHelper.prepareLzCall(
@@ -608,6 +603,7 @@ contract TOFTTest is TOFTTestHelper {
 
         //approve magnetar
         bTOFT.approve(address(magnetar), type(uint256).max);
+        bTOFT.approve(address(bTOFT), type(uint256).max);
 
         MarketBorrowMsg memory marketBorrowMsg = MarketBorrowMsg({
             user: address(this),
@@ -618,15 +614,31 @@ contract TOFTTest is TOFTTestHelper {
                 market: address(singularity),
                 deposit: true
             }),
-            withdrawParams: IWithdrawParams({
-                withdraw: false,
-                withdrawLzFeeAmount: 0,
-                withdrawOnOtherChain: false,
-                withdrawLzChainId: 0,
-                withdrawAdapterParams: "0x",
+            withdrawParams: MagnetarWithdrawData({
+                withdraw: true,
+                yieldBox: address(yieldBox),
+                assetId: aTOFTYieldBoxId,
                 unwrap: false,
-                refundAddress: payable(0),
-                zroPaymentAddress: address(0)
+                lzSendParams: LZSendParam({
+                    refundAddress: address(this),
+                    fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
+                    extraOptions: "0x",
+                    sendParam: SendParam({
+                        amountLD: tokenAmount_,
+                        composeMsg: "0x",
+                        dstEid: 0,
+                        extraOptions: "0x",
+                        minAmountLD: 0,
+                        oftCmd: "0x",
+                        to: OFTMsgCodec.addressToBytes32(address(this))
+                    })
+                }),
+                sendGas: 0,
+                composeGas: 0,
+                sendVal: 0,
+                composeVal: 0,
+                composeMsg: "0x",
+                composeMsgType: 0
             })
         });
         bytes memory marketBorrowMsg_ = tOFTHelper.buildMarketBorrowMsg(marketBorrowMsg);
@@ -641,13 +653,13 @@ contract TOFTTest is TOFTTestHelper {
                 msgType: PT_YB_SEND_SGL_BORROW,
                 composeMsgData: ComposeMsgData({
                     index: 0,
-                    gas: 500_000,
+                    gas: 1_000_000,
                     value: uint128(withdrawMsgFee_.nativeFee),
                     data: marketBorrowMsg_,
                     prevData: bytes(""),
                     prevOptionsData: bytes("")
                 }),
-                lzReceiveGas: 500_000,
+                lzReceiveGas: 1_000_000,
                 lzReceiveValue: 0
             })
         );
@@ -677,12 +689,9 @@ contract TOFTTest is TOFTTestHelper {
 
         // Check execution
         {
-            assertEq(aTOFT.balanceOf(address(this)), erc20Amount_ - tokenAmount_);
+            assertEq(aTOFT.balanceOf(address(this)), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
-            assertEq(
-                yieldBox.toAmount(aTOFTYieldBoxId, yieldBox.balanceOf(address(this), aTOFTYieldBoxId), false),
-                tokenAmount_
-            );
+            assertEq(yieldBox.toAmount(aTOFTYieldBoxId, yieldBox.balanceOf(address(this), aTOFTYieldBoxId), false), 0);
         }
     }
 
@@ -742,15 +751,31 @@ contract TOFTTest is TOFTTestHelper {
                 marketHelper: address(magnetar),
                 market: address(singularity)
             }),
-            withdrawParams: IWithdrawParams({
-                withdraw: false,
-                withdrawLzFeeAmount: 0,
-                withdrawOnOtherChain: false,
-                withdrawLzChainId: 0,
-                withdrawAdapterParams: "0x",
+            withdrawParams: MagnetarWithdrawData({
+                withdraw: true,
+                yieldBox: address(yieldBox),
+                assetId: bTOFTYieldBoxId,
                 unwrap: false,
-                refundAddress: payable(0),
-                zroPaymentAddress: address(0)
+                lzSendParams: LZSendParam({
+                    refundAddress: address(this),
+                    fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
+                    extraOptions: "0x",
+                    sendParam: SendParam({
+                        amountLD: tokenAmount_,
+                        composeMsg: "0x",
+                        dstEid: 0,
+                        extraOptions: "0x",
+                        minAmountLD: 0,
+                        oftCmd: "0x",
+                        to: OFTMsgCodec.addressToBytes32(address(this))
+                    })
+                }),
+                sendGas: 0,
+                composeGas: 0,
+                sendVal: 0,
+                composeVal: 0,
+                composeMsg: "0x",
+                composeMsgType: 0
             })
         });
         bytes memory marketMsg_ = tOFTHelper.buildMarketRemoveCollateralMsg(marketMsg);
@@ -801,11 +826,8 @@ contract TOFTTest is TOFTTestHelper {
 
         // Check execution
         {
-            assertEq(bTOFT.balanceOf(address(this)), 0);
-            assertEq(
-                yieldBox.toAmount(bTOFTYieldBoxId, yieldBox.balanceOf(address(this), bTOFTYieldBoxId), false),
-                tokenAmount_
-            );
+            assertEq(bTOFT.balanceOf(address(this)), tokenAmount_);
+            assertEq(yieldBox.toAmount(bTOFTYieldBoxId, yieldBox.balanceOf(address(this), bTOFTYieldBoxId), false), 0);
         }
     }
 
@@ -1074,7 +1096,7 @@ contract TOFTTest is TOFTTestHelper {
 
         //approve magnetar
         ExerciseOptionsMsg memory exerciseMsg = ExerciseOptionsMsg({
-            optionsData: ITapiocaOptionBrokerCrossChain.IExerciseOptionsData({
+            optionsData: IExerciseOptionsData({
                 from: address(this),
                 target: address(tOB),
                 paymentTokenAmount: tokenAmountSD,
@@ -1455,7 +1477,6 @@ contract TOFTTest is TOFTTestHelper {
             // @dev v,r,s will be completed on `__getMarketPermitData`
             MarketPermitActionMsg memory approvalUserB_ = MarketPermitActionMsg({
                 target: address(singularity),
-                actionType: 1,
                 owner: userA,
                 spender: userB,
                 value: 1e18,
@@ -1466,7 +1487,7 @@ contract TOFTTest is TOFTTestHelper {
                 permitAsset: true
             });
 
-            bytes32 digest_ = _getMarketPermitTypedDataHash(true, 1, userA, userB, 1e18, 1 days);
+            bytes32 digest_ = _getMarketPermitTypedDataHash(true, userA, userB, 1e18, 1 days);
             MarketPermitActionMsg memory permitApproval_ = __getMarketPermitData(approvalUserB_, digest_, userAPKey);
 
             approvalMsg_ = tOFTHelper.buildMarketPermitApprovalMsg(permitApproval_);
@@ -1523,7 +1544,6 @@ contract TOFTTest is TOFTTestHelper {
             // @dev v,r,s will be completed on `__getMarketPermitData`
             MarketPermitActionMsg memory approvalUserB_ = MarketPermitActionMsg({
                 target: address(singularity),
-                actionType: 1,
                 owner: userA,
                 spender: userB,
                 value: 1e18,
@@ -1534,7 +1554,7 @@ contract TOFTTest is TOFTTestHelper {
                 permitAsset: false
             });
 
-            bytes32 digest_ = _getMarketPermitTypedDataHash(false, 1, userA, userB, 1e18, 1 days);
+            bytes32 digest_ = _getMarketPermitTypedDataHash(false, userA, userB, 1e18, 1 days);
             MarketPermitActionMsg memory permitApproval_ = __getMarketPermitData(approvalUserB_, digest_, userAPKey);
 
             approvalMsg_ = tOFTHelper.buildMarketPermitApprovalMsg(permitApproval_);
@@ -1587,23 +1607,17 @@ contract TOFTTest is TOFTTestHelper {
 
     function _getMarketPermitTypedDataHash(
         bool permitAsset,
-        uint16 actionType_,
         address owner_,
         address spender_,
         uint256 value_,
         uint256 deadline_
     ) private view returns (bytes32) {
         bytes32 permitTypeHash_ = permitAsset
-            ? keccak256(
-                "Permit(uint16 actionType,address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-            )
-            : keccak256(
-                "PermitBorrow(uint16 actionType,address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-            );
+            ? bytes32(0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9)
+            : bytes32(0xe9685ff6d48c617fe4f692c50e602cce27cbad0290beb93cfa77eac43968d58c);
 
         uint256 nonce = singularity.nonces(owner_);
-        bytes32 structHash_ =
-            keccak256(abi.encode(permitTypeHash_, actionType_, owner_, spender_, value_, nonce++, deadline_));
+        bytes32 structHash_ = keccak256(abi.encode(permitTypeHash_, owner_, spender_, value_, nonce++, deadline_));
 
         return keccak256(abi.encodePacked("\x19\x01", singularity.DOMAIN_SEPARATOR(), structHash_));
     }

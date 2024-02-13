@@ -27,12 +27,11 @@ contract SingularityMock is EIP712 {
     /// @notice collateral share per user
     mapping(address => uint256) public userCollateralShare;
 
-    bytes32 private constant _PERMIT_TYPEHASH = keccak256(
-        "Permit(uint16 actionType,address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    );
-    bytes32 private constant _PERMIT_TYPEHASH_BORROW = keccak256(
-        "PermitBorrow(uint16 actionType,address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    );
+    // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    bytes32 private constant _PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+    // keccak256("PermitBorrow(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
+    bytes32 private constant _PERMIT_TYPEHASH_BORROW =
+        0xe9685ff6d48c617fe4f692c50e602cce27cbad0290beb93cfa77eac43968d58c;
 
     /// @notice owner > balance mapping.
     mapping(address => uint256) public balanceOf;
@@ -76,14 +75,7 @@ contract SingularityMock is EIP712 {
     function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
         external
     {
-        _permit(0, true, owner, spender, value, deadline, v, r, s);
-    }
-
-    function permitAction(bytes memory data, uint16 actionType) external virtual {
-        (bool _borrow, address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) =
-            abi.decode(data, (bool, address, address, uint256, uint256, uint8, bytes32, bytes32));
-
-        _permit(actionType, _borrow, owner, spender, value, deadline, v, r, s);
+        _permit(true, owner, spender, value, deadline, v, r, s);
     }
 
     function permitBorrow(
@@ -95,7 +87,7 @@ contract SingularityMock is EIP712 {
         bytes32 r,
         bytes32 s
     ) external virtual {
-        _permit(0, false, owner, spender, value, deadline, v, r, s);
+        _permit(false, owner, spender, value, deadline, v, r, s);
     }
 
     function borrow(address from, address to, uint256 amount) external returns (uint256 part, uint256 share) {
@@ -139,7 +131,6 @@ contract SingularityMock is EIP712 {
     }
 
     function _permit(
-        uint16 actionType,
         bool _asset, // 1 = asset, 0 = collateral
         address owner,
         address spender,
@@ -155,13 +146,7 @@ contract SingularityMock is EIP712 {
 
         structHash = keccak256(
             abi.encode(
-                _asset ? _PERMIT_TYPEHASH : _PERMIT_TYPEHASH_BORROW,
-                actionType,
-                owner,
-                spender,
-                value,
-                _useNonce(owner),
-                deadline
+                _asset ? _PERMIT_TYPEHASH : _PERMIT_TYPEHASH_BORROW, owner, spender, value, _useNonce(owner), deadline
             )
         );
 
