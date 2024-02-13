@@ -25,8 +25,6 @@ import {TOFTGenericReceiverModule} from "./TOFTGenericReceiverModule.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
-import "forge-std/console.sol";
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -151,21 +149,13 @@ contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
      *      - s::bytes32: s value of the signature.
      */
     function _yieldBoxPermitAllReceiver(bytes memory _data) internal virtual {
-        console.log("--------------A");
         YieldBoxApproveAllMsg memory approval = TOFTMsgCodec.decodeYieldBoxApproveAllMsg(_data);
-        console.log("--------------B");
-
         _sanitizeTarget(approval.target);
-        console.log("--------------C");
 
         if (approval.permit) {
-            console.log("--------------D");
             toftExtExec.yieldBoxPermitApproveAll(approval);
-            console.log("--------------E");
         } else {
-            console.log("--------------F");
             toftExtExec.yieldBoxPermitRevokeAll(approval);
-            console.log("--------------G");
         }
     }
 
