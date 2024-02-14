@@ -37,197 +37,20 @@ export const useUtils = (
     hre: HardhatRuntimeEnvironment,
     signer: SignerWithAddress,
 ) => {
-    const { ethers } = hre;
-
-    // DEPLOYMENTS
-    const deployLZEndpointMock = async (chainId: number) => {
-        const LZEndpointMock = new LZEndpointMock__factory(signer);
-        return await LZEndpointMock.deploy(chainId);
-    };
-
-    const deployTapiocaWrapper = async () =>
-        await (
-            await (
-                await ethers.getContractFactory('TapiocaWrapper')
-            ).deploy((await ethers.getSigners())[0].address)
-        ).deployed();
-
-    const deployYieldBoxMock = async () => {
-        const YieldBoxMock = new YieldBoxMock__factory(signer);
-        return await YieldBoxMock.deploy();
-    };
-
-    // UTILS
-    const Tx_deployTapiocaOFT = async (
-        lzEndpoint: string,
-        erc20Address: string,
-        yieldBoxAddress: string,
-        clusterAddress: string,
-        hostChainID: number,
-        hostChainNetworkSigner: Wallet | SignerWithAddress,
-        linked?: boolean,
-    ) => {
-        const erc20 = (
-            await ethers.getContractAt('ERC20', erc20Address)
-        ).connect(hostChainNetworkSigner);
-
-        const erc20name =
-            erc20Address == ethers.constants.AddressZero
-                ? 'Ethereum'
-                : await erc20.name();
-        const erc20symbol =
-            erc20Address == ethers.constants.AddressZero
-                ? 'ETH'
-                : await erc20.symbol();
-        const erc20decimal =
-            erc20Address == ethers.constants.AddressZero
-                ? 18
-                : await erc20.decimals();
-
-        const leverageModule = await (
-            await ethers.getContractFactory('BaseTOFTLeverageModule')
-        ).deploy(
-            lzEndpoint,
-            erc20Address,
-            yieldBoxAddress,
-            clusterAddress,
-            erc20name,
-            erc20symbol,
-            erc20decimal,
-            hostChainID,
-        );
-        await leverageModule.deployed();
-        const leverageDestinationModule = await (
-            await ethers.getContractFactory('BaseTOFTLeverageDestinationModule')
-        ).deploy(
-            lzEndpoint,
-            erc20Address,
-            yieldBoxAddress,
-            clusterAddress,
-            erc20name,
-            erc20symbol,
-            erc20decimal,
-            hostChainID,
-        );
-        await leverageDestinationModule.deployed();
-
-        const marketModule = await (
-            await ethers.getContractFactory('BaseTOFTMarketModule')
-        ).deploy(
-            lzEndpoint,
-            erc20Address,
-            yieldBoxAddress,
-            clusterAddress,
-            erc20name,
-            erc20symbol,
-            erc20decimal,
-            hostChainID,
-        );
-        await marketModule.deployed();
-        const marketDestinationModule = await (
-            await ethers.getContractFactory('BaseTOFTMarketDestinationModule')
-        ).deploy(
-            lzEndpoint,
-            erc20Address,
-            yieldBoxAddress,
-            clusterAddress,
-            erc20name,
-            erc20symbol,
-            erc20decimal,
-            hostChainID,
-        );
-        await marketDestinationModule.deployed();
-
-        const optionsModule = await (
-            await ethers.getContractFactory('BaseTOFTOptionsModule')
-        ).deploy(
-            lzEndpoint,
-            erc20Address,
-            yieldBoxAddress,
-            clusterAddress,
-            erc20name,
-            erc20symbol,
-            erc20decimal,
-            hostChainID,
-        );
-        await optionsModule.deployed();
-        const optionsDestinationModule = await (
-            await ethers.getContractFactory('BaseTOFTOptionsDestinationModule')
-        ).deploy(
-            lzEndpoint,
-            erc20Address,
-            yieldBoxAddress,
-            clusterAddress,
-            erc20name,
-            erc20symbol,
-            erc20decimal,
-            hostChainID,
-        );
-        await optionsDestinationModule.deployed();
-
-        const genericModule = await (
-            await ethers.getContractFactory('BaseTOFTGenericModule')
-        ).deploy(
-            lzEndpoint,
-            erc20Address,
-            yieldBoxAddress,
-            clusterAddress,
-            erc20name,
-            erc20symbol,
-            erc20decimal,
-            hostChainID,
-        );
-        await genericModule.deployed();
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-
-        const args: Parameters<TapiocaOFT__factory['deploy']> = [
-            lzEndpoint,
-            erc20Address,
-            yieldBoxAddress,
-            clusterAddress,
-            erc20name,
-            erc20symbol,
-            erc20decimal,
-            hostChainID,
-            leverageModule.address,
-            leverageDestinationModule.address,
-            marketModule.address,
-            marketDestinationModule.address,
-            optionsModule.address,
-            optionsDestinationModule.address,
-            genericModule.address,
-        ];
-
-        const txData = (
-            await ethers.getContractFactory(
-                linked ? 'mTapiocaOFT' : 'TapiocaOFT',
-            )
-        ).getDeployTransaction(...args).data as BytesLike;
-
-        return { txData, args };
-    };
-
-    const attachTapiocaOFT = async (address: string, linked?: boolean) =>
-        await ethers.getContractAt(
-            linked ? 'mTapiocaOFT' : 'TapiocaOFT',
-            address,
-        );
-
     const newEOA = () =>
         new hre.ethers.Wallet(
             hre.ethers.Wallet.createRandom().privateKey,
             hre.ethers.provider,
         );
 
+    const deployYieldBoxMock = async () => {
+        const YieldBoxMock = new YieldBoxMock__factory(signer);
+        return await YieldBoxMock.deploy();
+    };
+
     return {
-        deployYieldBoxMock,
-        deployLZEndpointMock,
-        deployTapiocaWrapper,
-        Tx_deployTapiocaOFT,
-        attachTapiocaOFT,
         newEOA,
+        deployYieldBoxMock
     };
 };
 

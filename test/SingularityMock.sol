@@ -8,9 +8,6 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-//TODO: remove
-import "forge-std/console.sol";
-
 contract SingularityMock is EIP712 {
     using SafeERC20 for IERC20;
 

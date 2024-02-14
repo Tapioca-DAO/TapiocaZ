@@ -13,6 +13,11 @@ import {
     StargateRouterETHMock__factory,
 } from '@tapioca-sdk/typechain/tapioca-mocks';
 
+import {
+    LZEndpointMock__factory,
+    YieldBoxMock__factory,
+} from '@tapioca-sdk/typechain/tapioca-mocks';
+
 import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
 
 export const setupFixture = async () => {
@@ -92,10 +97,6 @@ export const setupFixture = async () => {
     );
 
     const {
-        LZEndpointMock_chainID_0,
-        LZEndpointMock_chainID_10,
-        tapiocaWrapper_0,
-        tapiocaWrapper_10,
         YieldBox_0,
         YieldBox_10,
         utils,
@@ -103,159 +104,153 @@ export const setupFixture = async () => {
 
     const Cluster = new Cluster__factory(signer);
     const Cluster_0 = await Cluster.deploy(
-        await LZEndpointMock_chainID_0.address,
+        31337,
         signer.address,
     );
     const Cluster_10 = await Cluster.deploy(
-        await LZEndpointMock_chainID_10.address,
+        10,
         signer.address,
     );
 
-    //Deploy mTapiocaOFT0
-    {
-        const txData = await tapiocaWrapper_0.populateTransaction.createTOFT(
-            mErc20Mock.address,
-            (
-                await utils.Tx_deployTapiocaOFT(
-                    LZEndpointMock_chainID_0.address,
-                    mErc20Mock.address,
-                    YieldBox_0.address,
-                    Cluster_0.address,
-                    31337, //hardhat network
-                    signer,
-                    true,
-                )
-            ).txData,
-            hre.ethers.utils.randomBytes(32),
-            true,
-        );
-        txData.gasLimit = await hre.ethers.provider.estimateGas(txData);
-        await signer.sendTransaction(txData);
-    }
-    const mtapiocaOFT0 = (await utils.attachTapiocaOFT(
-        await tapiocaWrapper_0.tapiocaOFTs(
-            (await tapiocaWrapper_0.tapiocaOFTLength()).sub(1),
-        ),
-        true,
-    )) as MTapiocaOFT;
+     const LZEndpointMock = new LZEndpointMock__factory(signer);
+     const lzEndpoint0 =  await LZEndpointMock.deploy(31337);
+     const lzEndpoint10 =  await LZEndpointMock.deploy(10);
 
-    const setMintFeeFn = mtapiocaOFT0.interface.encodeFunctionData(
-        'setMintFee',
-        [0],
+
+    const mToftFactory = await hre.ethers.getContractFactory('mTOFT');
+    const toftFactory = await hre.ethers.getContractFactory('TOFT');
+
+    //Deploy mTapiocaOFT0
+    let initStruct0 = {
+        name: "mtapiocaOFT0",
+        symbol: "mt0",
+        endpoint: lzEndpoint0.address,
+        delegate: signer.address,
+        yieldBox: YieldBox_0.address,
+        cluster: Cluster_0.address,
+        erc20: mErc20Mock.address,
+        hostEid: 31337,
+        extExec: hre.ethers.constants.AddressZero,
+    };
+    const mtoftSender0 = await (await hre.ethers.getContractFactory('TOFTSender')).deploy(initStruct0);
+    const mtoftReceiver0 = await (await hre.ethers.getContractFactory('TOFTReceiver')).deploy(initStruct0);
+    const mtoftGenericReceiver0 = await (await hre.ethers.getContractFactory('TOFTGenericReceiverModule')).deploy(initStruct0);
+    const mtoftMarketReceiver0 = await (await hre.ethers.getContractFactory('TOFTMarketReceiverModule')).deploy(initStruct0);
+    const mtoftOptionsReceiver0 = await (await hre.ethers.getContractFactory('TOFTOptionsReceiverModule')).deploy(initStruct0);
+    const mtapiocaOFT0 = await mToftFactory.deploy(
+        initStruct0, 
+        {
+            tOFTSenderModule: mtoftSender0.address,
+            tOFTReceiverModule: mtoftReceiver0.address,
+            marketReceiverModule: mtoftMarketReceiver0.address,
+            optionsReceiverModule: mtoftOptionsReceiver0.address,
+            genericReceiverModule: mtoftGenericReceiver0.address,
+        },
+        hre.ethers.constants.AddressZero
     );
-    await tapiocaWrapper_0.executeTOFT(
-        mtapiocaOFT0.address,
-        setMintFeeFn,
-        true,
-    );
+    await mtapiocaOFT0.deployed();
+
+    const ownerStateData = {
+        stargateRouter: hre.ethers.constants.AddressZero,
+        mintFee: 0,
+        mintCap: 0,
+        connectedChain: 0,
+        connectedChainState: false,
+        balancerStateAddress: hre.ethers.constants.AddressZero,
+        balancerState: false,
+    }
+    await mtapiocaOFT0.setOwnerState(ownerStateData);
 
     // Deploy mTapiocaOFT10
-    {
-        const txData = await tapiocaWrapper_10.populateTransaction.createTOFT(
-            mErc20Mock.address,
-            (
-                await utils.Tx_deployTapiocaOFT(
-                    LZEndpointMock_chainID_10.address,
-                    mErc20Mock.address,
-                    YieldBox_10.address,
-                    Cluster_10.address,
-                    10,
-                    signer,
-                    true,
-                )
-            ).txData,
-            hre.ethers.utils.randomBytes(32),
-            true,
-        );
-        txData.gasLimit = await hre.ethers.provider.estimateGas(txData);
-        await signer.sendTransaction(txData);
-    }
-    const mtapiocaOFT10 = (await utils.attachTapiocaOFT(
-        await tapiocaWrapper_10.tapiocaOFTs(
-            (await tapiocaWrapper_10.tapiocaOFTLength()).sub(1),
-        ),
-        true,
-    )) as MTapiocaOFT;
-
-    await tapiocaWrapper_10.executeTOFT(
-        mtapiocaOFT10.address,
-        setMintFeeFn,
-        true,
+    let initStruct10 = {
+        name: "mtapiocaOFT0",
+        symbol: "mt0",
+        endpoint: lzEndpoint10.address,
+        delegate: signer.address,
+        yieldBox: YieldBox_0.address,
+        cluster: Cluster_0.address,
+        erc20: mErc20Mock.address,
+        hostEid: 10,
+        extExec: hre.ethers.constants.AddressZero,
+    };
+    const mtoftSender10 = await (await hre.ethers.getContractFactory('TOFTSender')).deploy(initStruct10);
+    const mtoftReceiver10 = await (await hre.ethers.getContractFactory('TOFTReceiver')).deploy(initStruct10);
+    const mtoftGenericReceiver10 = await (await hre.ethers.getContractFactory('TOFTGenericReceiverModule')).deploy(initStruct10);
+    const mtoftMarketReceiver10 = await (await hre.ethers.getContractFactory('TOFTMarketReceiverModule')).deploy(initStruct10);
+    const mtoftOptionsReceiver10 = await (await hre.ethers.getContractFactory('TOFTOptionsReceiverModule')).deploy(initStruct10);
+    const mtapiocaOFT10 = await mToftFactory.deploy(
+        initStruct10, 
+        {
+            tOFTSenderModule: mtoftSender10.address,
+            tOFTReceiverModule: mtoftReceiver10.address,
+            marketReceiverModule: mtoftMarketReceiver10.address,
+            optionsReceiverModule: mtoftOptionsReceiver10.address,
+            genericReceiverModule: mtoftGenericReceiver10.address,
+        },
+        hre.ethers.constants.AddressZero
     );
+    await mtapiocaOFT0.deployed();
+
+    await mtapiocaOFT10.setOwnerState(ownerStateData);
 
     // Deploy TapiocaOFT0
-    {
-        const txData = await tapiocaWrapper_0.populateTransaction.createTOFT(
-            erc20Mock.address,
-            (
-                await utils.Tx_deployTapiocaOFT(
-                    LZEndpointMock_chainID_0.address,
-                    erc20Mock.address,
-                    YieldBox_0.address,
-                    Cluster_0.address,
-                    31337, //hardhat network
-                    signer,
-                )
-            ).txData,
-            hre.ethers.utils.randomBytes(32),
-            false,
-        );
-        txData.gasLimit = await hre.ethers.provider.estimateGas(txData);
-        await signer.sendTransaction(txData);
-    }
+    initStruct0 = {
+        name: "tapiocaOFT0",
+        symbol: "t0",
+        endpoint: lzEndpoint0.address,
+        delegate: signer.address,
+        yieldBox: YieldBox_0.address,
+        cluster: Cluster_0.address,
+        erc20: erc20Mock.address,
+        hostEid: 31337,
+        extExec: hre.ethers.constants.AddressZero,
+    };
+    const toftSender0 = await (await hre.ethers.getContractFactory('TOFTSender')).deploy(initStruct0);
+    const toftReceiver0 = await (await hre.ethers.getContractFactory('TOFTReceiver')).deploy(initStruct0);
+    const toftGenericReceiver0 = await (await hre.ethers.getContractFactory('TOFTGenericReceiverModule')).deploy(initStruct0);
+    const toftMarketReceiver0 = await (await hre.ethers.getContractFactory('TOFTMarketReceiverModule')).deploy(initStruct0);
+    const toftOptionsReceiver0 = await (await hre.ethers.getContractFactory('TOFTOptionsReceiverModule')).deploy(initStruct0);
+    const tapiocaOFT0 = await toftFactory.deploy(
+        initStruct0, 
+        {
+            tOFTSenderModule: toftSender0.address,
+            tOFTReceiverModule: toftReceiver0.address,
+            marketReceiverModule: toftMarketReceiver0.address,
+            optionsReceiverModule: toftOptionsReceiver0.address,
+            genericReceiverModule: toftGenericReceiver0.address,
+        }
+    );
+    await tapiocaOFT0.deployed();
 
-    const tapiocaOFT0 = (await utils.attachTapiocaOFT(
-        await tapiocaWrapper_0.tapiocaOFTs(
-            (await tapiocaWrapper_0.tapiocaOFTLength()).sub(1),
-        ),
-    )) as TapiocaOFT;
 
     // Deploy TapiocaOFT10
-    {
-        const txData = await tapiocaWrapper_10.populateTransaction.createTOFT(
-            erc20Mock.address,
-            (
-                await utils.Tx_deployTapiocaOFT(
-                    LZEndpointMock_chainID_10.address,
-                    erc20Mock.address,
-                    YieldBox_10.address,
-                    Cluster_10.address,
-                    10,
-                    signer,
-                )
-            ).txData,
-            hre.ethers.utils.randomBytes(32),
-            false,
-        );
-        txData.gasLimit = await hre.ethers.provider.estimateGas(txData);
-        await signer.sendTransaction(txData);
-    }
-
-    const tapiocaOFT10 = (await utils.attachTapiocaOFT(
-        await tapiocaWrapper_10.tapiocaOFTs(
-            (await tapiocaWrapper_10.tapiocaOFTLength()).sub(1),
-        ),
-    )) as TapiocaOFT;
-
-    // Link endpoints with addresses
-    await LZEndpointMock_chainID_0.setDestLzEndpoint(
-        tapiocaOFT10.address,
-        LZEndpointMock_chainID_10.address,
+    initStruct10 = {
+        name: "tapiocaOFT10",
+        symbol: "t10",
+        endpoint: lzEndpoint10.address,
+        delegate: signer.address,
+        yieldBox: YieldBox_10.address,
+        cluster: Cluster_10.address,
+        erc20: erc20Mock.address,
+        hostEid: 10,
+        extExec: hre.ethers.constants.AddressZero,
+    };
+    const toftSender10 = await (await hre.ethers.getContractFactory('TOFTSender')).deploy(initStruct10);
+    const toftReceiver10 = await (await hre.ethers.getContractFactory('TOFTReceiver')).deploy(initStruct10);
+    const toftGenericReceiver10 = await (await hre.ethers.getContractFactory('TOFTGenericReceiverModule')).deploy(initStruct10);
+    const toftMarketReceiver10 = await (await hre.ethers.getContractFactory('TOFTMarketReceiverModule')).deploy(initStruct10);
+    const toftOptionsReceiver10 = await (await hre.ethers.getContractFactory('TOFTOptionsReceiverModule')).deploy(initStruct10);
+    const tapiocaOFT10 = await toftFactory.deploy(
+        initStruct10, 
+        {
+            tOFTSenderModule: toftSender10.address,
+            tOFTReceiverModule: toftReceiver10.address,
+            marketReceiverModule: toftMarketReceiver10.address,
+            optionsReceiverModule: toftOptionsReceiver10.address,
+            genericReceiverModule: toftGenericReceiver10.address,
+        },
     );
-    await LZEndpointMock_chainID_10.setDestLzEndpoint(
-        tapiocaOFT0.address,
-        LZEndpointMock_chainID_0.address,
-    );
-
-    // Link endpoints with addresses
-    await LZEndpointMock_chainID_0.setDestLzEndpoint(
-        mtapiocaOFT10.address,
-        LZEndpointMock_chainID_10.address,
-    );
-    await LZEndpointMock_chainID_10.setDestLzEndpoint(
-        mtapiocaOFT0.address,
-        LZEndpointMock_chainID_0.address,
-    );
+    await tapiocaOFT10.deployed();
 
     const dummyAmount = ethers.BigNumber.from(1e5);
     const bigDummyAmount = ethers.utils.parseEther('10');
@@ -273,10 +268,6 @@ export const setupFixture = async () => {
     const vars = {
         signer,
         randomUser,
-        LZEndpointMock_chainID_0,
-        LZEndpointMock_chainID_10,
-        tapiocaWrapper_0,
-        tapiocaWrapper_10,
         erc20Mock,
         erc20Mock1,
         erc20Mock2,

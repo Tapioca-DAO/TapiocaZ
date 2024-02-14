@@ -73,8 +73,6 @@ import {ERC20Mock} from "./ERC20Mock.sol";
 
 import "forge-std/Test.sol";
 
-//TODO: test magnetar withdraw to chain
-
 contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
     using OFTMsgCodec for bytes32;

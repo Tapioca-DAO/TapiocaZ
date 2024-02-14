@@ -3,12 +3,12 @@ pragma solidity 0.8.22;
 
 // External
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
+import {IStargateRouter, IStargateRouterBase} from "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
 import {IStargateEthVault} from "tapioca-periph/interfaces/external/stargate/IStargateEthVault.sol";
-import {IStargateRouter} from "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
 import {ITOFTVault} from "tapioca-periph/interfaces/tapiocaz/ITOFTVault.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 
@@ -80,7 +80,6 @@ contract Balancer is Ownable {
     error FeeAmountNotSet();
     error PoolInfoRequired();
     error RebalanceAmountNotSet();
-    error DestinationOftNotValid();
     error Failed();
     error SwapNotEnabled();
     error AlreadyInitialized();
