@@ -278,10 +278,12 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
     {
         if (balancers[msg.sender]) revert mTOFT_BalancerNotAuthorized();
         if (!connectedChains[_getChainId()]) revert mTOFT_NotHost();
-        if (totalSupply() + _amount > mintCap) revert mTOFT_CapNotValid();
+        if (mintCap > 0) {
+            if (totalSupply() + _amount > mintCap) revert mTOFT_CapNotValid();
+        }
+
 
         uint256 feeAmount = _checkAndExtractFees(_amount);
-
         if (erc20 == address(0)) {
             _wrapNative(_toAddress, _amount, feeAmount);
         } else {
@@ -353,6 +355,7 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
             mintFee = _data.mintFee;
         }
         if (mintCap != _data.mintCap) {
+            if (_data.mintCap < totalSupply()) revert mTOFT_CapNotValid();
             mintCap = _data.mintCap;
         }
         if (connectedChains[_data.connectedChain] != _data.connectedChainState) {

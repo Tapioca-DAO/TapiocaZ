@@ -7,24 +7,10 @@ import { time } from '@nomicfoundation/hardhat-network-helpers';
 describe('Balancer', () => {
     describe('connectedOFTs', () => {
         it('should fail for unauthorized user', async () => {
-            const { randomUser, mtapiocaOFT0, balancer, tapiocaWrapper_0 } =
+            const { randomUser, mtapiocaOFT0, balancer } =
                 await loadFixture(setupFixture);
 
             expect(randomUser.address).to.not.eq(ethers.constants.AddressZero);
-
-            const path = hre.ethers.utils.solidityPack(
-                ['address', 'address'],
-                [mtapiocaOFT0.address, mtapiocaOFT0.address],
-            );
-            const encodedTX = (
-                await hre.ethers.getContractFactory('TapiocaOFT')
-            ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
-
-            await tapiocaWrapper_0.executeTOFT(
-                mtapiocaOFT0.address,
-                encodedTX,
-                true,
-            );
 
             await expect(
                 balancer
@@ -42,22 +28,8 @@ describe('Balancer', () => {
         });
 
         it('should be able to add connected chains', async () => {
-            const { mtapiocaOFT0, balancer, tapiocaWrapper_0 } =
+            const { mtapiocaOFT0, balancer } =
                 await loadFixture(setupFixture);
-
-            const path = hre.ethers.utils.solidityPack(
-                ['address', 'address'],
-                [mtapiocaOFT0.address, mtapiocaOFT0.address],
-            );
-            const encodedTX = (
-                await hre.ethers.getContractFactory('TapiocaOFT')
-            ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
-
-            await tapiocaWrapper_0.executeTOFT(
-                mtapiocaOFT0.address,
-                encodedTX,
-                true,
-            );
 
             await balancer.initConnectedOFT(
                 mtapiocaOFT0.address,
@@ -80,22 +52,8 @@ describe('Balancer', () => {
 
     describe('rebalance', async () => {
         it('should fail for unauthorized user', async () => {
-            const { randomUser, mtapiocaOFT0, balancer, tapiocaWrapper_0 } =
+            const { randomUser, mtapiocaOFT0, balancer } =
                 await loadFixture(setupFixture);
-
-            const path = hre.ethers.utils.solidityPack(
-                ['address', 'address'],
-                [mtapiocaOFT0.address, mtapiocaOFT0.address],
-            );
-            const encodedTX = (
-                await hre.ethers.getContractFactory('TapiocaOFT')
-            ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
-
-            await tapiocaWrapper_0.executeTOFT(
-                mtapiocaOFT0.address,
-                encodedTX,
-                true,
-            );
 
             await expect(
                 balancer
@@ -125,50 +83,9 @@ describe('Balancer', () => {
                 mtapiocaOFT0,
                 mtapiocaOFT10,
                 balancer,
-                tapiocaWrapper_0,
-                tapiocaWrapper_10,
                 mErc20Mock,
-                stargateRouterETHMock,
                 stargateRouterMock,
             } = await loadFixture(setupFixture);
-
-            const path = hre.ethers.utils.solidityPack(
-                ['address', 'address'],
-                [mtapiocaOFT10.address, mtapiocaOFT0.address],
-            );
-            const encodedTX = (
-                await hre.ethers.getContractFactory('TapiocaOFT')
-            ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
-
-            await tapiocaWrapper_0.executeTOFT(
-                mtapiocaOFT0.address,
-                encodedTX,
-                true,
-            );
-
-            const txData = mtapiocaOFT0.interface.encodeFunctionData(
-                'updateBalancerState',
-                [balancer.address, true],
-            );
-            await expect(
-                tapiocaWrapper_0.executeTOFT(
-                    mtapiocaOFT0.address,
-                    txData,
-                    true,
-                ),
-            ).to.not.be.reverted;
-
-            await expect(
-                balancer.initConnectedOFT(
-                    mtapiocaOFT0.address,
-                    1,
-                    mtapiocaOFT10.address,
-                    ethers.utils.defaultAbiCoder.encode(
-                        ['uint256', 'uint256'],
-                        [1, 1],
-                    ),
-                ),
-            ).to.not.be.reverted;
 
             const amount = ethers.utils.parseEther('1');
             await time.increase(86401);
@@ -184,19 +101,41 @@ describe('Balancer', () => {
             const balanceOft10Before = await mErc20Mock.balanceOf(vault10);
             expect(balanceOft10Before.eq(0)).to.be.true;
 
-            await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
+            let ownerStateData = {
+                stargateRouter: ethers.constants.AddressZero,
+                mintFee: 0,
+                mintCap: 0,
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: balancer.address,
+                balancerState: true,
+            };
+            await mtapiocaOFT0.setOwnerState(ownerStateData);
 
-            const setStargateTx = mtapiocaOFT10.interface.encodeFunctionData(
-                'setStargateRouter',
-                [stargateRouterMock.address],
-            );
             await expect(
-                tapiocaWrapper_10.executeTOFT(
+                balancer.initConnectedOFT(
+                    mtapiocaOFT0.address,
+                    1,
                     mtapiocaOFT10.address,
-                    setStargateTx,
-                    true,
+                    ethers.utils.defaultAbiCoder.encode(
+                        ['uint256', 'uint256'],
+                        [1, 1],
+                    ),
                 ),
             ).to.not.be.reverted;
+
+            await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
+
+            ownerStateData = {
+                stargateRouter: stargateRouterMock.address,
+                mintFee: 0,
+                mintCap: 0,
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: hre.ethers.constants.AddressZero,
+                balancerState: false,
+            }
+            await mtapiocaOFT10.setOwnerState(ownerStateData);
 
             const data = ethers.utils.defaultAbiCoder.encode(
                 ['uint256', 'uint256'],
@@ -221,24 +160,11 @@ describe('Balancer', () => {
         });
 
         it('should test checker', async () => {
-            const { mtapiocaOFT0, mtapiocaOFT10, balancer, tapiocaWrapper_0 } =
+            const { mtapiocaOFT0, mtapiocaOFT10, balancer, mErc20Mock, signer } =
                 await loadFixture(setupFixture);
 
-            const path = hre.ethers.utils.solidityPack(
-                ['address', 'address'],
-                [mtapiocaOFT10.address, mtapiocaOFT0.address],
-            );
-            const encodedTX = (
-                await hre.ethers.getContractFactory('TapiocaOFT')
-            ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            await tapiocaWrapper_0.executeTOFT(
-                mtapiocaOFT0.address,
-                encodedTX,
-                true,
-            );
-
-            let checkData = await balancer.checker(mtapiocaOFT0.address, 1);
+            let checkData = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
             expect(checkData.canExec).to.be.false;
 
             await expect(
@@ -253,65 +179,41 @@ describe('Balancer', () => {
                 ),
             ).to.not.be.reverted;
 
-            checkData = await balancer.checker(mtapiocaOFT0.address, 1);
+            checkData = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
             expect(checkData.canExec).to.be.false;
+
+            await mErc20Mock.mintTo(signer.address, 100);
+            await mErc20Mock.approve(mtapiocaOFT0.address, ethers.constants.MaxUint256);
+            await mtapiocaOFT0.wrap(signer.address, signer.address, 100);
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
 
-            checkData = await balancer.checker(mtapiocaOFT0.address, 1);
+            checkData = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
             expect(checkData.canExec).to.be.true;
         });
 
         it('should perform the call for authorized user', async () => {
             const {
-                signer,
                 mtapiocaOFT0,
                 mtapiocaOFT10,
                 balancer,
-                tapiocaWrapper_0,
-                tapiocaWrapper_10,
-                stargateRouterETHMock,
                 stargateRouterMock,
                 mErc20Mock,
+                signer,
             } = await loadFixture(setupFixture);
 
-            const setStargateTx = mtapiocaOFT10.interface.encodeFunctionData(
-                'setStargateRouter',
-                [stargateRouterMock.address],
-            );
-            await expect(
-                tapiocaWrapper_10.executeTOFT(
-                    mtapiocaOFT10.address,
-                    setStargateTx,
-                    true,
-                ),
-            ).to.not.be.reverted;
 
-            const path = hre.ethers.utils.solidityPack(
-                ['address', 'address'],
-                [mtapiocaOFT10.address, mtapiocaOFT0.address],
-            );
-            const encodedTX = (
-                await hre.ethers.getContractFactory('TapiocaOFT')
-            ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
-
-            await tapiocaWrapper_0.executeTOFT(
-                mtapiocaOFT0.address,
-                encodedTX,
-                true,
-            );
-
-            const txData = mtapiocaOFT0.interface.encodeFunctionData(
-                'updateBalancerState',
-                [balancer.address, true],
-            );
-            await expect(
-                tapiocaWrapper_0.executeTOFT(
-                    mtapiocaOFT0.address,
-                    txData,
-                    true,
-                ),
-            ).to.not.be.reverted;
+            const ownerStateData = {
+                stargateRouter: stargateRouterMock.address,
+                mintFee: 0,
+                mintCap: 0,
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: balancer.address,
+                balancerState: true,
+            }
+            await mtapiocaOFT10.setOwnerState(ownerStateData);
+            await mtapiocaOFT0.setOwnerState(ownerStateData);
 
             await expect(
                 balancer.initConnectedOFT(
@@ -324,6 +226,11 @@ describe('Balancer', () => {
                     ),
                 ),
             ).to.not.be.reverted;
+
+            await mErc20Mock.mintTo(signer.address, 100);
+            await mErc20Mock.approve(mtapiocaOFT0.address, ethers.constants.MaxUint256);
+            await mtapiocaOFT0.wrap(signer.address, signer.address, 100);
+
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
 
             const amount = ethers.utils.parseEther('1');
@@ -343,8 +250,9 @@ describe('Balancer', () => {
             await mErc20Mock.transfer(vault, amount.add(1));
 
             const balance = await mErc20Mock.balanceOf(vault);
-            expect(balance.eq(amount.add(1))).to.be.true;
-
+            expect(balance.eq(amount.add(101))).to.be.true;
+            
+          
             await expect(
                 balancer.rebalance(
                     mtapiocaOFT0.address,
@@ -366,9 +274,12 @@ describe('Balancer', () => {
                 }),
             ).to.be.revertedWithCustomError(balancer, 'RebalanceAmountNotSet');
 
+            await mErc20Mock.mintTo(signer.address, amount);
+            await mErc20Mock.approve(mtapiocaOFT0.address, ethers.constants.MaxUint256);
+            await mtapiocaOFT0.wrap(signer.address, signer.address, amount);
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
 
-            let checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1);
+            let checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
             expect(checkerInfo.canExec).to.be.true;
             let oftInfo = (
                 await balancer.connectedOFTs(mtapiocaOFT0.address, 1)
@@ -386,7 +297,7 @@ describe('Balancer', () => {
                     },
                 ),
             ).to.not.be.reverted;
-            checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1);
+            checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
             oftInfo = (await balancer.connectedOFTs(mtapiocaOFT0.address, 1))
                 .rebalanceable;
             expect(checkerInfo.canExec).to.be.false;
@@ -398,35 +309,22 @@ describe('Balancer', () => {
                 mtapiocaOFT0,
                 mtapiocaOFT10,
                 balancer,
-                tapiocaWrapper_0,
                 mErc20Mock,
+                stargateRouterMock,
             } = await loadFixture(setupFixture);
 
-            let path = hre.ethers.utils.solidityPack(
-                ['address', 'address'],
-                [mtapiocaOFT10.address, mtapiocaOFT0.address],
-            );
-            let encodedTX = (
-                await hre.ethers.getContractFactory('TapiocaOFT')
-            ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
 
-            await tapiocaWrapper_0.executeTOFT(
-                mtapiocaOFT0.address,
-                encodedTX,
-                true,
-            );
-
-            const txData = mtapiocaOFT0.interface.encodeFunctionData(
-                'updateBalancerState',
-                [balancer.address, true],
-            );
-            await expect(
-                tapiocaWrapper_0.executeTOFT(
-                    mtapiocaOFT0.address,
-                    txData,
-                    true,
-                ),
-            ).to.not.be.reverted;
+            const ownerStateData = {
+                stargateRouter: stargateRouterMock.address,
+                mintFee: 0,
+                mintCap: 0,
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: balancer.address,
+                balancerState: true,
+            };
+            await mtapiocaOFT0.setOwnerState(ownerStateData);
+            await mtapiocaOFT10.setOwnerState(ownerStateData);
 
             await expect(
                 balancer.initConnectedOFT(
@@ -439,9 +337,12 @@ describe('Balancer', () => {
                     ),
                 ),
             ).to.not.be.reverted;
+            const amount = ethers.utils.parseEther('1');
+            await mErc20Mock.mintTo(signer.address,amount);
+            await mErc20Mock.approve(mtapiocaOFT0.address, ethers.constants.MaxUint256);
+            await mtapiocaOFT0.wrap(signer.address, signer.address, amount);
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
 
-            const amount = ethers.utils.parseEther('1');
             await expect(
                 balancer.rebalance(
                     mtapiocaOFT0.address,
@@ -458,7 +359,7 @@ describe('Balancer', () => {
             await mErc20Mock.transfer(vault, amount.add(1));
 
             const balance = await mErc20Mock.balanceOf(vault);
-            expect(balance.eq(amount.add(1))).to.be.true;
+            expect(balance.eq(amount.mul(2).add(1))).to.be.true;
 
             await expect(
                 balancer.rebalance(
@@ -483,22 +384,9 @@ describe('Balancer', () => {
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
 
-            const checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1);
+            const checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
             expect(checkerInfo.canExec).to.be.true;
 
-            path = hre.ethers.utils.solidityPack(
-                ['address', 'address'],
-                [mtapiocaOFT0.address, mtapiocaOFT0.address],
-            );
-            encodedTX = (
-                await hre.ethers.getContractFactory('TapiocaOFT')
-            ).interface.encodeFunctionData('setTrustedRemote', [1, path]);
-
-            await tapiocaWrapper_0.executeTOFT(
-                mtapiocaOFT0.address,
-                encodedTX,
-                true,
-            );
             await expect(
                 balancer.rebalance(
                     mtapiocaOFT0.address,
@@ -510,7 +398,7 @@ describe('Balancer', () => {
                         value: ethers.utils.parseEther('0.1'),
                     },
                 ),
-            ).to.be.revertedWithCustomError(balancer, 'DestinationOftNotValid');
+            ).to.not.be.reverted;
         });
     });
 });

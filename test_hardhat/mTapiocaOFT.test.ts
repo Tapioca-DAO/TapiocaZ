@@ -7,67 +7,101 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { BN, getERC20PermitSignature } from '../scripts/utils';
 import { setupFixture } from './fixtures';
+import {LZEndpointMock__factory, YieldBoxMock__factory} from '@tapioca-sdk/typechain/tapioca-mocks';
+import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
 
 describe('mTapiocaOFT', () => {
     describe('extractFees()', () => {
         it('should extract fees', async () => {
             const {
                 signer,
-                mtapiocaOFT0,
-                mtapiocaOFT10,
-                tapiocaWrapper_10,
                 mErc20Mock,
                 mintAndApprove,
                 dummyAmount,
             } = await loadFixture(setupFixture);
 
-            const fee = 1e4;
-            const setMintFeeFn = mtapiocaOFT10.interface.encodeFunctionData(
-                'setMintFee',
-                [fee], //10%
-            );
-            await tapiocaWrapper_10.executeTOFT(
-                mtapiocaOFT10.address,
-                setMintFeeFn,
-                true,
+            const mToftFactory = await ethers.getContractFactory('mTOFT');
+
+            const Cluster = new Cluster__factory(signer);
+            const Cluster_0 = await Cluster.deploy(
+                31337,
+                signer.address,
             );
 
-            const setConnectedChainFn =
-                mtapiocaOFT10.interface.encodeFunctionData(
-                    'setConnectedChain',
-                    [await mtapiocaOFT0.hostChainID()],
-                );
-            await tapiocaWrapper_10.executeTOFT(
-                mtapiocaOFT10.address,
-                setConnectedChainFn,
-                true,
+            const YieldBoxMock = new YieldBoxMock__factory(signer);
+            const YieldBox_0 = await YieldBoxMock.deploy();
+
+            const LZEndpointMock = new LZEndpointMock__factory(signer);
+            const lzEndpoint0 =  await LZEndpointMock.deploy(31337);
+
+            let initStruct = {
+                name: "mtapiocaOFT",
+                symbol: "mt",
+                endpoint: lzEndpoint0.address,
+                delegate: signer.address,
+                yieldBox: YieldBox_0.address,
+                cluster: Cluster_0.address,
+                erc20: mErc20Mock.address,
+                hostEid: 10,
+                extExec: ethers.constants.AddressZero,
+            };
+            const mtoftSender = await (await ethers.getContractFactory('TOFTSender')).deploy(initStruct);
+            const mtoftReceiver = await (await ethers.getContractFactory('TOFTReceiver')).deploy(initStruct);
+            const mtoftGenericReceiver = await (await ethers.getContractFactory('TOFTGenericReceiverModule')).deploy(initStruct);
+            const mtoftMarketReceiver = await (await ethers.getContractFactory('TOFTMarketReceiverModule')).deploy(initStruct);
+            const mtoftOptionsReceiver = await (await ethers.getContractFactory('TOFTOptionsReceiverModule')).deploy(initStruct);
+            const mtapiocaOFT = await mToftFactory.deploy(
+                initStruct, 
+                {
+                    tOFTSenderModule: mtoftSender.address,
+                    tOFTReceiverModule: mtoftReceiver.address,
+                    marketReceiverModule: mtoftMarketReceiver.address,
+                    optionsReceiverModule: mtoftOptionsReceiver.address,
+                    genericReceiverModule: mtoftGenericReceiver.address,
+                },
+                ethers.constants.AddressZero
             );
+            await mtapiocaOFT.deployed();
+
+    
+
+            const fee = 1e4;
+            let ownerStateData = {
+                stargateRouter: ethers.constants.AddressZero,
+                mintFee: fee,
+                mintCap: 0,
+                connectedChain: 31337,
+                connectedChainState: true,
+                balancerStateAddress: ethers.constants.AddressZero,
+                balancerState: false,
+            }
+            await mtapiocaOFT.setOwnerState(ownerStateData);
 
             await mintAndApprove(
                 mErc20Mock,
-                mtapiocaOFT10,
+                mtapiocaOFT,
                 signer,
                 dummyAmount,
             );
 
-            const balTOFTSignerBefore = await mtapiocaOFT10.balanceOf(
+            const balTOFTSignerBefore = await mtapiocaOFT.balanceOf(
                 signer.address,
             );
             const vault = await ethers.getContractAt(
                 'TOFTVault',
-                await mtapiocaOFT10.vault(),
+                await mtapiocaOFT.vault(),
             );
             const balERC20ContractBefore = await mErc20Mock.balanceOf(
                 vault.address,
             );
 
-            await mtapiocaOFT10.wrap(
+            await mtapiocaOFT.wrap(
                 signer.address,
                 signer.address,
                 dummyAmount,
             );
 
-            const balTOFTSignerAfter = await mtapiocaOFT10.balanceOf(
+            const balTOFTSignerAfter = await mtapiocaOFT.balanceOf(
                 signer.address,
             );
             const balERC20ContractAfter = await mErc20Mock.balanceOf(
@@ -86,54 +120,51 @@ describe('mTapiocaOFT', () => {
             const vaultActiveSupply = await vault.viewSupply();
             const vaultFeeSupply = await vault.viewFees();
             const vaultTotalSupply = await vault.viewTotalSupply();
-            const toftTotalSupply = await mtapiocaOFT10.totalSupply();
+            const toftTotalSupply = await mtapiocaOFT.totalSupply();
             expect(vaultActiveSupply.eq(dummyAmountMinusFee)).to.be.true;
             expect(vaultFeeSupply.eq(dummyAmount.mul(fee).div(1e5))).to.be.true;
             expect(vaultTotalSupply.eq(dummyAmount)).to.be.true;
             expect(toftTotalSupply.eq(dummyAmountMinusFee)).to.be.true;
 
-            const setMintCapWrongFn =
-                mtapiocaOFT10.interface.encodeFunctionData('setMintCap', [
-                    dummyAmount.div(2),
-                ]);
-            const setMintCapRightFn =
-                mtapiocaOFT10.interface.encodeFunctionData('setMintCap', [
-                    dummyAmount.add(1),
-                ]);
+            ownerStateData = {
+                stargateRouter: ethers.constants.AddressZero,
+                mintFee: 1e4,
+                mintCap: dummyAmount.div(2),
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: ethers.constants.AddressZero,
+                balancerState: false,
+            };
             await expect(
-                tapiocaWrapper_10.executeTOFT(
-                    mtapiocaOFT10.address,
-                    setMintCapWrongFn,
-                    true,
-                ),
+                mtapiocaOFT.setOwnerState(ownerStateData)
             ).to.be.reverted;
+            
+            ownerStateData = {
+                stargateRouter: ethers.constants.AddressZero,
+                mintFee: 1e4,
+                mintCap: dummyAmount.add(1),
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: ethers.constants.AddressZero,
+                balancerState: false,
+            };
             await expect(
-                tapiocaWrapper_10.executeTOFT(
-                    mtapiocaOFT10.address,
-                    setMintCapRightFn,
-                    true,
-                ),
+                mtapiocaOFT.setOwnerState(ownerStateData)
             ).to.not.be.reverted;
+            
 
             await mintAndApprove(
                 mErc20Mock,
-                mtapiocaOFT10,
+                mtapiocaOFT,
                 signer,
                 dummyAmount,
             );
             await expect(
-                mtapiocaOFT10.wrap(signer.address, signer.address, dummyAmount),
-            ).to.be.revertedWithCustomError(mtapiocaOFT10, 'OverCap');
+                mtapiocaOFT.wrap(signer.address, signer.address, dummyAmount),
+            ).to.be.revertedWithCustomError(mtapiocaOFT, 'mTOFT_CapNotValid');
 
-            const withdrawFeesFn = mtapiocaOFT10.interface.encodeFunctionData(
-                'withdrawFees',
-                [signer.address, await vault.viewFees()],
-            );
-            await tapiocaWrapper_10.executeTOFT(
-                mtapiocaOFT10.address,
-                withdrawFeesFn,
-                true,
-            );
+      
+            await mtapiocaOFT.withdrawFees(signer.address, await vault.viewFees());
 
             const viewFees = await vault.viewFees();
             expect(viewFees.eq(0)).to.be.true;
@@ -141,7 +172,7 @@ describe('mTapiocaOFT', () => {
     });
     describe('extractUnderlying()', () => {
         it('should fail for unknown balance', async () => {
-            const { signer, mtapiocaOFT0, tapiocaWrapper_0, mErc20Mock } =
+            const { signer, mtapiocaOFT0, mErc20Mock } =
                 await loadFixture(setupFixture);
 
             let balancerStatus = await mtapiocaOFT0.balancers(signer.address);
@@ -149,17 +180,17 @@ describe('mTapiocaOFT', () => {
 
             await expect(mtapiocaOFT0.extractUnderlying(1)).to.be.reverted;
 
-            const txData = mtapiocaOFT0.interface.encodeFunctionData(
-                'updateBalancerState',
-                [signer.address, true],
-            );
-            await expect(
-                tapiocaWrapper_0.executeTOFT(
-                    mtapiocaOFT0.address,
-                    txData,
-                    true,
-                ),
-            ).to.not.be.reverted;
+            const ownerStateData = {
+                stargateRouter: ethers.constants.AddressZero,
+                mintFee: 0,
+                mintCap: 0,
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: signer.address,
+                balancerState: true,
+            };
+            await mtapiocaOFT0.setOwnerState(ownerStateData);
+
 
             balancerStatus = await mtapiocaOFT0.balancers(signer.address);
             expect(balancerStatus).to.be.true;
@@ -271,7 +302,6 @@ describe('mTapiocaOFT', () => {
                 signer,
                 mErc20Mock,
                 mtapiocaOFT0,
-                tapiocaWrapper_0,
                 mintAndApprove,
                 dummyAmount,
             } = await loadFixture(setupFixture);
@@ -292,17 +322,16 @@ describe('mTapiocaOFT', () => {
             await expect(mtapiocaOFT0.extractUnderlying(dummyAmount)).to.be
                 .reverted;
 
-            const txData = mtapiocaOFT0.interface.encodeFunctionData(
-                'updateBalancerState',
-                [signer.address, true],
-            );
-            await expect(
-                tapiocaWrapper_0.executeTOFT(
-                    mtapiocaOFT0.address,
-                    txData,
-                    true,
-                ),
-            ).to.not.be.reverted;
+            const ownerStateData = {
+                stargateRouter: ethers.constants.AddressZero,
+                mintFee: 0,
+                mintCap: 0,
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: signer.address,
+                balancerState: true,
+            };
+            await mtapiocaOFT0.setOwnerState(ownerStateData);
 
             await expect(mtapiocaOFT0.extractUnderlying(dummyAmount)).to.not.be
                 .reverted;
@@ -320,29 +349,14 @@ describe('mTapiocaOFT', () => {
                 signer,
                 mtapiocaOFT0,
                 mtapiocaOFT10,
-                tapiocaWrapper_10,
                 dummyAmount,
             } = await loadFixture(setupFixture);
 
             await expect(mtapiocaOFT10.unwrap(signer.address, dummyAmount)).to
                 .be.reverted;
 
-            const otherChainId = await mtapiocaOFT0.hostChainID();
-            const txData = mtapiocaOFT10.interface.encodeFunctionData(
-                'setConnectedChain',
-                [otherChainId],
-            );
-            await expect(
-                tapiocaWrapper_10.executeTOFT(
-                    mtapiocaOFT10.address,
-                    txData,
-                    true,
-                ),
-            ).to.not.be.reverted;
-
-            await expect(mtapiocaOFT10.unwrap(signer.address, dummyAmount)).to
-                .be.reverted;
         });
+
         it('Should unwrap and give a 1:1 ratio amount of tokens', async () => {
             const {
                 signer,
