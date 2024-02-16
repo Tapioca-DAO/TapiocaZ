@@ -3,10 +3,12 @@ import _ from 'lodash';
 import inquirer from 'inquirer';
 
 export const rescueEthFromOft__task = async (
-    args: { address: string, oft: boolean },
+    args: { address: string; oft: boolean },
     hre: HardhatRuntimeEnvironment,
 ) => {
-    const tOFT = args.oft ? await hre.ethers.getContractAt('TOFT', args.address) : await hre.ethers.getContractAt('mTOFT', args.address);
+    const tOFT = args.oft
+        ? await hre.ethers.getContractAt('TOFT', args.address)
+        : await hre.ethers.getContractAt('mTOFT', args.address);
 
     const { to } = await inquirer.prompt({
         type: 'input',
@@ -22,5 +24,4 @@ export const rescueEthFromOft__task = async (
     });
 
     await (await tOFT.rescueEth(amount, to)).wait(3);
-   
 };

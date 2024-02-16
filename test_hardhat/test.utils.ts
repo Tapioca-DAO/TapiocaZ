@@ -9,8 +9,7 @@ export const register = async (hre: HardhatRuntimeEnvironment) => {
     const { ethers } = hre;
     const signer = (await ethers.getSigners())[0];
 
-    const { deployYieldBoxMock } =
-        useUtils(hre, signer);
+    const { deployYieldBoxMock } = useUtils(hre, signer);
 
     const utils = useUtils(hre, signer);
     return {
@@ -51,7 +50,7 @@ export async function registerFork() {
     );
     await setBalance(eoa1.address, 100000);
 
-    const { deployYieldBoxMock} = useUtils(hre, deployer);
+    const { deployYieldBoxMock } = useUtils(hre, deployer);
 
     const yieldBox = await deployYieldBoxMock();
 
