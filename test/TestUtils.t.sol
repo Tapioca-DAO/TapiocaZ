@@ -4,12 +4,11 @@ pragma solidity 0.8.22;
 
 // Tapioca
 import {
-    ERC20PermitApprovalMsg,
-    ERC20PermitStruct,
     YieldBoxApproveAllMsg,
     YieldBoxApproveAssetMsg,
     MarketPermitActionMsg
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {ERC20PermitApprovalMsg, ERC20PermitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 
 import "forge-std/Test.sol";
 

@@ -7,13 +7,11 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
-import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TOFTInitStruct, IToftVault} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {BaseTOFTTokenMsgType} from "./BaseTOFTTokenMsgType.sol";
 import {ModuleManager} from "./modules/ModuleManager.sol";
-import {TOFTExtExec} from "./extensions/TOFTExtExec.sol";
-import {TOFTVault} from "./TOFTVault.sol";
 
 /*
 
@@ -34,9 +32,8 @@ import {TOFTVault} from "./TOFTVault.sol";
 abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOFTTokenMsgType {
     using SafeERC20 for IERC20;
 
-    TOFTExtExec public immutable toftExtExec;
     IYieldBox public immutable yieldBox;
-    TOFTVault public immutable vault;
+    IToftVault public immutable vault;
     uint256 public immutable hostEid;
     address public immutable erc20;
     ICluster public cluster;
@@ -44,6 +41,7 @@ abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOF
     error TOFT_AllowanceNotValid();
     error TOFT_NotValid();
     error TOFT_VaultWrongERC20();
+    error TOFT_VaultWrongOwner();
 
     constructor(TOFTInitStruct memory _data)
         BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate, _data.extExec)
@@ -52,10 +50,10 @@ abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, BaseTOF
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
-        vault = new TOFTVault(_data.erc20);
-        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
+        vault = IToftVault(_data.vault);
+        vault.claimOwnership();
 
-        toftExtExec = new TOFTExtExec();
+        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**
