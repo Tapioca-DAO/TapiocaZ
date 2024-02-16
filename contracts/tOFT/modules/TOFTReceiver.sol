@@ -2,7 +2,6 @@
 pragma solidity 0.8.22;
 
 // LZ
-import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
 import {OFTCore} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFTCore.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
@@ -22,7 +21,6 @@ import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/Ta
 import {TOFTMarketReceiverModule} from "./TOFTMarketReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "./TOFTOptionsReceiverModule.sol";
 import {TOFTGenericReceiverModule} from "./TOFTGenericReceiverModule.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
 /*
@@ -37,11 +35,7 @@ import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 */
 
 contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
-    using OFTMsgCodec for bytes;
-    using OFTMsgCodec for bytes32;
     using SafeERC20 for IERC20;
-
-    error InvalidApprovalTarget(address _target);
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
@@ -66,9 +60,7 @@ contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
         override
         returns (bool success)
     {
-        if (_msgType == MSG_MARKET_PERMIT) {
-            _marketPermitReceiver(_toeComposeMsg);
-        } else if (_msgType == MSG_YB_SEND_SGL_BORROW) {
+        if (_msgType == MSG_YB_SEND_SGL_BORROW) {
             _executeModule(
                 uint8(ITOFT.Module.TOFTMarketReceiver),
                 abi.encodeWithSelector(TOFTMarketReceiverModule.marketBorrowReceiver.selector, _toeComposeMsg),
@@ -96,96 +88,9 @@ contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
                 ),
                 false
             );
-        } else if (_msgType == MSG_YB_APPROVE_ALL) {
-            _yieldBoxPermitAllReceiver(_toeComposeMsg);
-        } else if (_msgType == MSG_YB_APPROVE_ASSET) {
-            _yieldBoxPermitAssetReceiver(_toeComposeMsg);
-        } else if (_msgType == MSG_MARKET_PERMIT) {
-            _marketPermitReceiver(_toeComposeMsg);
         } else {
             return false;
         }
         return true;
-    }
-    // ********************* //
-    // ***** RECEIVERS ***** //
-    // ********************* //
-    /**
-     * @notice Approves YieldBox asset via permit.
-     * @param _data The call data containing info about the approvals.
-     *      - token::address: Address of the YieldBox to approve.
-     *      - owner::address: Address of the owner of the tokens.
-     *      - spender::address: Address of the spender.
-     *      - value::uint256: Amount of tokens to approve.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
-     */
-
-    function _yieldBoxPermitAssetReceiver(bytes memory _data) internal virtual {
-        YieldBoxApproveAssetMsg[] memory approvals = TOFTMsgCodec.decodeArrayOfYieldBoxPermitAssetMsg(_data);
-
-        uint256 approvalsLength = approvals.length;
-        for (uint256 i = 0; i < approvalsLength;) {
-            _sanitizeTarget(approvals[i].target);
-            unchecked {
-                ++i;
-            }
-        }
-
-        toftExtExec.yieldBoxPermitApproveAsset(approvals);
-    }
-
-    /**
-     * @notice Approves all assets on YieldBox.
-     * @param _data The call data containing info about the approval.
-     *      - target::address: Address of the YieldBox contract.
-     *      - owner::address: Address of the owner of the tokens.
-     *      - spender::address: Address of the spender.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
-     */
-    function _yieldBoxPermitAllReceiver(bytes memory _data) internal virtual {
-        YieldBoxApproveAllMsg memory approval = TOFTMsgCodec.decodeYieldBoxApproveAllMsg(_data);
-        _sanitizeTarget(approval.target);
-
-        if (approval.permit) {
-            toftExtExec.yieldBoxPermitApproveAll(approval);
-        } else {
-            toftExtExec.yieldBoxPermitRevokeAll(approval);
-        }
-    }
-
-    /**
-     * @notice Approves Market lend/borrow via permit.
-     * @param _data The call data containing info about the approval.
-     *      - token::address: Address of the YieldBox to approve.
-     *      - owner::address: Address of the owner of the tokens.
-     *      - spender::address: Address of the spender.
-     *      - value::uint256: Amount of tokens to approve.
-     *      - deadline::uint256: Deadline for the approval.
-     *      - v::uint8: v value of the signature.
-     *      - r::bytes32: r value of the signature.
-     *      - s::bytes32: s value of the signature.
-     */
-    function _marketPermitReceiver(bytes memory _data) internal virtual {
-        MarketPermitActionMsg memory approval = TOFTMsgCodec.decodeMarketPermitApprovalMsg(_data);
-
-        _sanitizeTarget(approval.target);
-
-        if (approval.permitAsset) {
-            toftExtExec.marketPermitAssetApproval(approval);
-        } else {
-            toftExtExec.marketPermitCollateralApproval(approval);
-        }
-    }
-
-    function _sanitizeTarget(address target) private view {
-        if (!cluster.isWhitelisted(0, target)) {
-            revert InvalidApprovalTarget(target);
-        }
     }
 }
