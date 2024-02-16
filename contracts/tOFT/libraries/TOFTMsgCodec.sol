@@ -18,6 +18,7 @@ import {
     SendParamsMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainEngineCodec} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainEngineCodec.sol";
+import {LockAndParticipateData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 
@@ -403,4 +404,19 @@ library TOFTMsgCodec {
     function decodeSendParamsMsg(bytes memory _msg) internal pure returns (SendParamsMsg memory sendMsg_) {
         return abi.decode(_msg, (SendParamsMsg));
     }
+
+    /**
+     * @notice Encodes the message for the `TOFTOptionsReceiverModule.lockAndParticipateReceiver()` operation.
+     */
+    function buildLockAndParticipateMsg(LockAndParticipateData memory _marketMsg) internal pure returns (bytes memory) {
+        return abi.encode(_marketMsg);
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTOptionsReceiverModule.lockAndParticipateReceiver()` operation.
+     */
+    function decodeLockAndParticipateMsg(bytes memory _msg) internal pure returns (LockAndParticipateData memory marketMsg_) {
+        return abi.decode(_msg, (LockAndParticipateData));
+    }
+
 }
