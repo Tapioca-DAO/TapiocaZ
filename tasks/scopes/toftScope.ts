@@ -10,27 +10,37 @@ import { setCluster__task } from '../exec/toft/13-setCluster';
 
 const tOFTScope = scope('oft', 'TOFT & mTOFT tasks');
 
-tOFTScope.task('setCluster', 'Set cluster', setCluster__task)
+tOFTScope
+    .task('setCluster', 'Set cluster', setCluster__task)
     .addParam('address', 'mTapiocaOFT address')
     .addParam('cluster', 'Cluster address')
     .addFlag('oft', 'true for TOFT contract; false for mTOFT contract');
 
-tOFTScope.task(
-    'updateConnectedChain',
-    'Update a connected chain status for mTapiocaOFT contract',
-    updateConnectedChain__task,
-).addParam('address', 'mTOFT address');
+tOFTScope
+    .task(
+        'updateConnectedChain',
+        'Update a connected chain status for mTapiocaOFT contract',
+        updateConnectedChain__task,
+    )
+    .addParam('address', 'mTOFT address');
 
-tOFTScope.task(
-    'updateBalancerState',
-    'Update a balancer status for mTapiocaOFT contract',
-    updateBalancerState__task,
-).addParam('address', 'mTOFT address');
+tOFTScope
+    .task(
+        'updateBalancerState',
+        'Update a balancer status for mTapiocaOFT contract',
+        updateBalancerState__task,
+    )
+    .addParam('address', 'mTOFT address');
 
-tOFTScope.task('rescueEthFromOft', 'Rescue ETH from OFT', rescueEthFromOft__task).addParam('address', 'mTOFT address').addFlag('oft', 'true for TOFT contract; false for mTOFT contract');
+tOFTScope
+    .task('rescueEthFromOft', 'Rescue ETH from OFT', rescueEthFromOft__task)
+    .addParam('address', 'mTOFT address')
+    .addFlag('oft', 'true for TOFT contract; false for mTOFT contract');
 
-tOFTScope.task(
-    'setStargateRouterOnOft',
-    'Rescue ETH from OFT',
-    setStargateRouterOnOft__task,
-).addParam('address', 'mTOFT address');
+tOFTScope
+    .task(
+        'setStargateRouterOnOft',
+        'Rescue ETH from OFT',
+        setStargateRouterOnOft__task,
+    )
+    .addParam('address', 'mTOFT address');

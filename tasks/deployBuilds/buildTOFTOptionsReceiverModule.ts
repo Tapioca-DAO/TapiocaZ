@@ -8,7 +8,9 @@ export const buildTOFTOptionsReceiverModule = async (
     args: Parameters<TOFTOptionsReceiverModule__factory['deploy']>,
 ): Promise<IDeployerVMAdd<TOFTOptionsReceiverModule__factory>> => {
     return {
-        contract: await hre.ethers.getContractFactory('TOFTOptionsReceiverModule'),
+        contract: await hre.ethers.getContractFactory(
+            'TOFTOptionsReceiverModule',
+        ),
         deploymentName,
         args,
         dependsOn: [],

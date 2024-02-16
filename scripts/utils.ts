@@ -50,7 +50,7 @@ export const useUtils = (
 
     return {
         newEOA,
-        deployYieldBoxMock
+        deployYieldBoxMock,
     };
 };
 
