@@ -73,6 +73,8 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             _checkWhitelistStatus(msg_.participateData.target);
         }
 
+        msg_.fraction = _toLD(msg_.fraction.toUint64());
+
         bytes memory call = abi.encodeWithSelector(
             MagnetarMintModule.lockAndParticipate.selector,
             msg_
