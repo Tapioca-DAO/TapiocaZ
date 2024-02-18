@@ -82,6 +82,12 @@ contract TOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
                 ),
                 false
             );
+        } else if (_msgType == MSG_LOCK_AND_PARTICIPATE) {
+            _executeModule(
+                uint8(ITOFT.Module.TOFTOptionsReceiver),
+                abi.encodeWithSelector(TOFTOptionsReceiverModule.lockAndParticipateReceiver.selector, _toeComposeMsg),
+                false
+            );
         } else {
             return false;
         }

@@ -16,7 +16,9 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {
     ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
+import {LockAndParticipateData, IMagnetar, MagnetarCall, MagnetarAction} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
@@ -48,6 +50,49 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
+    /**
+     * @notice Execute `magnetar.lockAndParticipate`
+     * @dev Lock on tOB and/or participate on tOLP
+     * @param _data The call data containing info about the operation.
+     * @param _data.user the user to perform the operation for
+     * @param _data.singularity the SGL address
+     * @param _data.fraction the amount to lock
+     * @param _data.lockData the data needed to lock on tOB
+     * @param _data.participateData the data needed to participate on tOLP
+     */
+    function lockAndParticipateReceiver(bytes memory _data) public payable {
+        // Decode receive message
+        LockAndParticipateData memory msg_ = TOFTMsgCodec.decodeLockAndParticipateMsg(_data);
+
+        _checkWhitelistStatus(msg_.magnetar);
+        _checkWhitelistStatus(msg_.singularity);
+        if (msg_.lockData.lock) {
+            _checkWhitelistStatus(msg_.lockData.target);
+        }
+        if (msg_.participateData.participate) {
+            _checkWhitelistStatus(msg_.participateData.target);
+        }
+
+        if (msg_.fraction > 0) {
+            msg_.fraction = _toLD(msg_.fraction.toUint64());
+        }
+
+        bytes memory call = abi.encodeWithSelector(
+            MagnetarMintModule.lockAndParticipate.selector,
+            msg_
+        );
+        MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
+        magnetarCall[0] = MagnetarCall({
+            id: MagnetarAction.MintModule,
+            target: msg_.magnetar,
+            value: msg.value,
+            allowFailure: false,
+            call: call
+        });
+        IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+    }
+
+    
     /**
      * @notice Exercise tOB option
      * @param _data The call data containing info about the operation.

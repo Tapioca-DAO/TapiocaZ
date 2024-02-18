@@ -143,7 +143,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
                 MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
                 magnetarCall[0] = MagnetarCall({
                     id: MagnetarAction.YieldBoxModule,
-                    target: address(this), //ignored in module calls
+                    target: address(this),
                     value: msg.value,
                     allowFailure: false,
                     call: call
