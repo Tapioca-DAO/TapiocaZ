@@ -34,10 +34,13 @@ contract TOFTVault is Ownable {
     error Failed();
     error FeesAmountNotRight();
     error AmountNotRight();
+    error OwnerSet();
 
     constructor(address token_) {
         _token = token_;
         _isNative = token_ == address(0);
+
+        _transferOwnership(address(0));
     }
 
     /// =====================
@@ -65,6 +68,13 @@ contract TOFTVault is Ownable {
     /// =====================
     /// Owner
     /// =====================
+
+    /// @dev Intended to be called once by the TOFT contract
+    function claimOwnership() external {
+        if (owner() != address(0)) revert OwnerSet();
+        _transferOwnership(msg.sender);
+    }
+
     /// @notice register fees for mTOFT
     function registerFees(uint256 amount) external payable onlyOwner {
         if (msg.value > 0 && msg.value != amount) revert FeesAmountNotRight();

@@ -9,17 +9,11 @@ import {
     MessagingReceipt,
     OFTReceipt
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-import {OFTComposeMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTComposeMsgCodec.sol";
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
-import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 
 // External
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 // Tapioca
 import {
@@ -49,17 +43,15 @@ import {
     PrepareLzCallReturn,
     ComposeMsgData
 } from "contracts/tOFT/extensions/TOFTHelper.sol";
-import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
-import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsReceiverModule.sol";
+import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
 import {TOFTGenericReceiverModule} from "contracts/tOFT/modules/TOFTGenericReceiverModule.sol";
+import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsReceiverModule.sol";
+import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
-import {TOFTExtExec} from "contracts/tOFT/extensions/TOFTExtExec.sol";
+import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTReceiver} from "contracts/tOFT/modules/TOFTReceiver.sol";
 import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
-import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
 // Tapioca Tests
@@ -67,9 +59,9 @@ import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
 import {TOFTTestHelper} from "./TOFTTestHelper.t.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
-import {ERC721Mock} from "./ERC721Mock.sol";
-import {TOFTMock} from "./TOFTMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
+import {TOFTVault} from "contracts/tOFT/TOFTVault.sol";
+import {TOFTMock} from "./TOFTMock.sol";
 
 import "forge-std/Test.sol";
 
@@ -160,7 +152,9 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(magnetar), "Magnetar");
         }
 
-        TOFTExtExec toftExtExec = new TOFTExtExec();
+        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+
+        TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",
             symbol: "TNKA",
@@ -169,6 +163,7 @@ contract TOFTTest is TOFTTestHelper {
             yieldBox: address(yieldBox),
             cluster: address(cluster),
             erc20: address(aERC20),
+            vault: address(aTOFTVault),
             hostEid: aEid,
             extExec: address(toftExtExec)
         });
@@ -196,6 +191,8 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(aTOFT), "aTOFT");
         }
 
+        
+        TOFTVault bTOFTVault = new TOFTVault(address(bERC20));
         TOFTInitStruct memory bTOFTInitStruct = TOFTInitStruct({
             name: "Token B",
             symbol: "TNKB",
@@ -204,6 +201,7 @@ contract TOFTTest is TOFTTestHelper {
             yieldBox: address(yieldBox),
             cluster: address(cluster),
             erc20: address(bERC20),
+            vault: address(bTOFTVault),
             hostEid: bEid,
             extExec: address(toftExtExec)
         });

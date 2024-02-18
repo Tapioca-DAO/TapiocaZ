@@ -7,8 +7,9 @@ import { time } from '@nomicfoundation/hardhat-network-helpers';
 describe('Balancer', () => {
     describe('connectedOFTs', () => {
         it('should fail for unauthorized user', async () => {
-            const { randomUser, mtapiocaOFT0, balancer } =
-                await loadFixture(setupFixture);
+            const { randomUser, mtapiocaOFT0, balancer } = await loadFixture(
+                setupFixture,
+            );
 
             expect(randomUser.address).to.not.eq(ethers.constants.AddressZero);
 
@@ -28,8 +29,7 @@ describe('Balancer', () => {
         });
 
         it('should be able to add connected chains', async () => {
-            const { mtapiocaOFT0, balancer } =
-                await loadFixture(setupFixture);
+            const { mtapiocaOFT0, balancer } = await loadFixture(setupFixture);
 
             await balancer.initConnectedOFT(
                 mtapiocaOFT0.address,
@@ -52,8 +52,9 @@ describe('Balancer', () => {
 
     describe('rebalance', async () => {
         it('should fail for unauthorized user', async () => {
-            const { randomUser, mtapiocaOFT0, balancer } =
-                await loadFixture(setupFixture);
+            const { randomUser, mtapiocaOFT0, balancer } = await loadFixture(
+                setupFixture,
+            );
 
             await expect(
                 balancer
@@ -134,7 +135,7 @@ describe('Balancer', () => {
                 connectedChainState: false,
                 balancerStateAddress: hre.ethers.constants.AddressZero,
                 balancerState: false,
-            }
+            };
             await mtapiocaOFT10.setOwnerState(ownerStateData);
 
             const data = ethers.utils.defaultAbiCoder.encode(
@@ -160,11 +161,19 @@ describe('Balancer', () => {
         });
 
         it('should test checker', async () => {
-            const { mtapiocaOFT0, mtapiocaOFT10, balancer, mErc20Mock, signer } =
-                await loadFixture(setupFixture);
+            const {
+                mtapiocaOFT0,
+                mtapiocaOFT10,
+                balancer,
+                mErc20Mock,
+                signer,
+            } = await loadFixture(setupFixture);
 
-
-            let checkData = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
+            let checkData = await balancer.checker(
+                mtapiocaOFT0.address,
+                1,
+                1e4,
+            );
             expect(checkData.canExec).to.be.false;
 
             await expect(
@@ -183,7 +192,10 @@ describe('Balancer', () => {
             expect(checkData.canExec).to.be.false;
 
             await mErc20Mock.mintTo(signer.address, 100);
-            await mErc20Mock.approve(mtapiocaOFT0.address, ethers.constants.MaxUint256);
+            await mErc20Mock.approve(
+                mtapiocaOFT0.address,
+                ethers.constants.MaxUint256,
+            );
             await mtapiocaOFT0.wrap(signer.address, signer.address, 100);
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
@@ -202,7 +214,6 @@ describe('Balancer', () => {
                 signer,
             } = await loadFixture(setupFixture);
 
-
             const ownerStateData = {
                 stargateRouter: stargateRouterMock.address,
                 mintFee: 0,
@@ -211,7 +222,7 @@ describe('Balancer', () => {
                 connectedChainState: false,
                 balancerStateAddress: balancer.address,
                 balancerState: true,
-            }
+            };
             await mtapiocaOFT10.setOwnerState(ownerStateData);
             await mtapiocaOFT0.setOwnerState(ownerStateData);
 
@@ -228,7 +239,10 @@ describe('Balancer', () => {
             ).to.not.be.reverted;
 
             await mErc20Mock.mintTo(signer.address, 100);
-            await mErc20Mock.approve(mtapiocaOFT0.address, ethers.constants.MaxUint256);
+            await mErc20Mock.approve(
+                mtapiocaOFT0.address,
+                ethers.constants.MaxUint256,
+            );
             await mtapiocaOFT0.wrap(signer.address, signer.address, 100);
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
@@ -251,8 +265,7 @@ describe('Balancer', () => {
 
             const balance = await mErc20Mock.balanceOf(vault);
             expect(balance.eq(amount.add(101))).to.be.true;
-            
-          
+
             await expect(
                 balancer.rebalance(
                     mtapiocaOFT0.address,
@@ -275,11 +288,18 @@ describe('Balancer', () => {
             ).to.be.revertedWithCustomError(balancer, 'RebalanceAmountNotSet');
 
             await mErc20Mock.mintTo(signer.address, amount);
-            await mErc20Mock.approve(mtapiocaOFT0.address, ethers.constants.MaxUint256);
+            await mErc20Mock.approve(
+                mtapiocaOFT0.address,
+                ethers.constants.MaxUint256,
+            );
             await mtapiocaOFT0.wrap(signer.address, signer.address, amount);
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
 
-            let checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
+            let checkerInfo = await balancer.checker(
+                mtapiocaOFT0.address,
+                1,
+                1e4,
+            );
             expect(checkerInfo.canExec).to.be.true;
             let oftInfo = (
                 await balancer.connectedOFTs(mtapiocaOFT0.address, 1)
@@ -313,7 +333,6 @@ describe('Balancer', () => {
                 stargateRouterMock,
             } = await loadFixture(setupFixture);
 
-
             const ownerStateData = {
                 stargateRouter: stargateRouterMock.address,
                 mintFee: 0,
@@ -338,8 +357,11 @@ describe('Balancer', () => {
                 ),
             ).to.not.be.reverted;
             const amount = ethers.utils.parseEther('1');
-            await mErc20Mock.mintTo(signer.address,amount);
-            await mErc20Mock.approve(mtapiocaOFT0.address, ethers.constants.MaxUint256);
+            await mErc20Mock.mintTo(signer.address, amount);
+            await mErc20Mock.approve(
+                mtapiocaOFT0.address,
+                ethers.constants.MaxUint256,
+            );
             await mtapiocaOFT0.wrap(signer.address, signer.address, amount);
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
 
@@ -384,7 +406,11 @@ describe('Balancer', () => {
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
 
-            const checkerInfo = await balancer.checker(mtapiocaOFT0.address, 1, 1e4);
+            const checkerInfo = await balancer.checker(
+                mtapiocaOFT0.address,
+                1,
+                1e4,
+            );
             expect(checkerInfo.canExec).to.be.true;
 
             await expect(

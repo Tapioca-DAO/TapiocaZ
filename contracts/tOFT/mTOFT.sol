@@ -282,7 +282,6 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
             if (totalSupply() + _amount > mintCap) revert mTOFT_CapNotValid();
         }
 
-
         uint256 feeAmount = _checkAndExtractFees(_amount);
         if (erc20 == address(0)) {
             _wrapNative(_toAddress, _amount, feeAmount);
