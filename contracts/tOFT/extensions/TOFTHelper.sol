@@ -1,19 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// External
-import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
-
 // Tapioca
 import {
     ITOFT,
-    YieldBoxApproveAllMsg,
-    MarketPermitActionMsg,
     MarketBorrowMsg,
     MarketRemoveCollateralMsg,
     SendParamsMsg,
     ExerciseOptionsMsg,
-    YieldBoxApproveAssetMsg,
     LeverageUpActionMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
@@ -22,8 +16,13 @@ import {
     PrepareLzCallReturn,
     ComposeMsgData
 } from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
-import {BaseTOFTTokenMsgType} from "../BaseTOFTTokenMsgType.sol";
+import {
+    YieldBoxApproveAllMsg,
+    MarketPermitActionMsg,
+    YieldBoxApproveAssetMsg
+} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
+import {BaseTOFTTokenMsgType} from "../BaseTOFTTokenMsgType.sol";
 
 /*
 
@@ -63,7 +62,6 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
         return TOFTMsgCodec.buildSendParamsMsg(_msg);
     }
 
-
     /**
      * @notice Encodes the message for the PT_YB_SEND_SGL_BORROW operation.
      *
@@ -85,49 +83,6 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
     }
 
     /**
-     * @notice Encode the message for the _marketPermitBorrowReceiver() & _marketPermitLendReceiver operations.
-     * @param _marketPermitActionMsg The Market permit lend/borrow approval message.
-     */
-    function buildMarketPermitApprovalMsg(MarketPermitActionMsg memory _marketPermitActionMsg)
-        public
-        pure
-        returns (bytes memory msg_)
-    {
-        msg_ = TOFTMsgCodec.buildMarketPermitApprovalMsg(_marketPermitActionMsg);
-    }
-
-    /**
-     * @notice Encode the message for the _yieldBoxPermitAllReceiver() & _yieldBoxRevokeAllReceiver operations.
-     * @param _yieldBoxApprovalAllMsg The YieldBox permit/revoke approval message.
-     */
-    function buildYieldBoxApproveAllMsg(YieldBoxApproveAllMsg memory _yieldBoxApprovalAllMsg)
-        public
-        pure
-        returns (bytes memory msg_)
-    {
-        msg_ = TOFTMsgCodec.buildYieldBoxApproveAllMsg(_yieldBoxApprovalAllMsg);
-    }
-
-    /**
-     * @notice Encode the message for the `PT_YB_APPROVE_ASSET` operation,
-     *   _yieldBoxRevokeAssetReceiver() & _yieldBoxApproveAssetReceiver operations.
-     * @param _approvalMsg The YieldBoxApproveAssetMsg messages.
-     */
-    function buildYieldBoxApproveAssetMsg(YieldBoxApproveAssetMsg[] memory _approvalMsg)
-        public
-        pure
-        returns (bytes memory msg_)
-    {
-        uint256 approvalsLength = _approvalMsg.length;
-        for (uint256 i; i < approvalsLength;) {
-            msg_ = abi.encodePacked(msg_, TOFTMsgCodec.buildYieldBoxPermitAssetMsg(_approvalMsg[i]));
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /**
      * @dev Sanitizes the message type to match one of the Tapioca supported ones.
      * @param _msgType The message type, custom ones with `PT_` as a prefix.
      */
@@ -136,6 +91,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
             _msgType == MSG_YB_APPROVE_ASSET || _msgType == MSG_YB_APPROVE_ALL || _msgType == MSG_MARKET_PERMIT
                 || _msgType == MSG_MARKET_REMOVE_COLLATERAL || _msgType == MSG_YB_SEND_SGL_BORROW
                 || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS || _msgType == MSG_LEVERAGE_UP
+
         ) {
             return true;
         }

@@ -7,36 +7,32 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { BN, getERC20PermitSignature } from '../scripts/utils';
 import { setupFixture } from './fixtures';
-import {LZEndpointMock__factory, YieldBoxMock__factory} from '@tapioca-sdk/typechain/tapioca-mocks';
+import {
+    LZEndpointMock__factory,
+    YieldBoxMock__factory,
+} from '@tapioca-sdk/typechain/tapioca-mocks';
 import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
 
 describe('mTapiocaOFT', () => {
     describe('extractFees()', () => {
         it('should extract fees', async () => {
-            const {
-                signer,
-                mErc20Mock,
-                mintAndApprove,
-                dummyAmount,
-            } = await loadFixture(setupFixture);
+            const { signer, mErc20Mock, mintAndApprove, dummyAmount } =
+                await loadFixture(setupFixture);
 
             const mToftFactory = await ethers.getContractFactory('mTOFT');
 
             const Cluster = new Cluster__factory(signer);
-            const Cluster_0 = await Cluster.deploy(
-                31337,
-                signer.address,
-            );
+            const Cluster_0 = await Cluster.deploy(31337, signer.address);
 
             const YieldBoxMock = new YieldBoxMock__factory(signer);
             const YieldBox_0 = await YieldBoxMock.deploy();
 
             const LZEndpointMock = new LZEndpointMock__factory(signer);
-            const lzEndpoint0 =  await LZEndpointMock.deploy(31337);
+            const lzEndpoint0 = await LZEndpointMock.deploy(31337);
 
-            let initStruct = {
-                name: "mtapiocaOFT",
-                symbol: "mt",
+            const initStruct = {
+                name: 'mtapiocaOFT',
+                symbol: 'mt',
                 endpoint: lzEndpoint0.address,
                 delegate: signer.address,
                 yieldBox: YieldBox_0.address,
@@ -45,13 +41,23 @@ describe('mTapiocaOFT', () => {
                 hostEid: 10,
                 extExec: ethers.constants.AddressZero,
             };
-            const mtoftSender = await (await ethers.getContractFactory('TOFTSender')).deploy(initStruct);
-            const mtoftReceiver = await (await ethers.getContractFactory('TOFTReceiver')).deploy(initStruct);
-            const mtoftGenericReceiver = await (await ethers.getContractFactory('TOFTGenericReceiverModule')).deploy(initStruct);
-            const mtoftMarketReceiver = await (await ethers.getContractFactory('TOFTMarketReceiverModule')).deploy(initStruct);
-            const mtoftOptionsReceiver = await (await ethers.getContractFactory('TOFTOptionsReceiverModule')).deploy(initStruct);
+            const mtoftSender = await (
+                await ethers.getContractFactory('TOFTSender')
+            ).deploy(initStruct);
+            const mtoftReceiver = await (
+                await ethers.getContractFactory('TOFTReceiver')
+            ).deploy(initStruct);
+            const mtoftGenericReceiver = await (
+                await ethers.getContractFactory('TOFTGenericReceiverModule')
+            ).deploy(initStruct);
+            const mtoftMarketReceiver = await (
+                await ethers.getContractFactory('TOFTMarketReceiverModule')
+            ).deploy(initStruct);
+            const mtoftOptionsReceiver = await (
+                await ethers.getContractFactory('TOFTOptionsReceiverModule')
+            ).deploy(initStruct);
             const mtapiocaOFT = await mToftFactory.deploy(
-                initStruct, 
+                initStruct,
                 {
                     tOFTSenderModule: mtoftSender.address,
                     tOFTReceiverModule: mtoftReceiver.address,
@@ -59,12 +65,9 @@ describe('mTapiocaOFT', () => {
                     optionsReceiverModule: mtoftOptionsReceiver.address,
                     genericReceiverModule: mtoftGenericReceiver.address,
                 },
-                ethers.constants.AddressZero
+                ethers.constants.AddressZero,
             );
             await mtapiocaOFT.deployed();
-
-    
-
             const fee = 1e4;
             let ownerStateData = {
                 stargateRouter: ethers.constants.AddressZero,
@@ -74,15 +77,10 @@ describe('mTapiocaOFT', () => {
                 connectedChainState: true,
                 balancerStateAddress: ethers.constants.AddressZero,
                 balancerState: false,
-            }
+            };
             await mtapiocaOFT.setOwnerState(ownerStateData);
 
-            await mintAndApprove(
-                mErc20Mock,
-                mtapiocaOFT,
-                signer,
-                dummyAmount,
-            );
+            await mintAndApprove(mErc20Mock, mtapiocaOFT, signer, dummyAmount);
 
             const balTOFTSignerBefore = await mtapiocaOFT.balanceOf(
                 signer.address,
@@ -95,11 +93,7 @@ describe('mTapiocaOFT', () => {
                 vault.address,
             );
 
-            await mtapiocaOFT.wrap(
-                signer.address,
-                signer.address,
-                dummyAmount,
-            );
+            await mtapiocaOFT.wrap(signer.address, signer.address, dummyAmount);
 
             const balTOFTSignerAfter = await mtapiocaOFT.balanceOf(
                 signer.address,
@@ -135,10 +129,9 @@ describe('mTapiocaOFT', () => {
                 balancerStateAddress: ethers.constants.AddressZero,
                 balancerState: false,
             };
-            await expect(
-                mtapiocaOFT.setOwnerState(ownerStateData)
-            ).to.be.reverted;
-            
+            await expect(mtapiocaOFT.setOwnerState(ownerStateData)).to.be
+                .reverted;
+
             ownerStateData = {
                 stargateRouter: ethers.constants.AddressZero,
                 mintFee: 1e4,
@@ -148,23 +141,18 @@ describe('mTapiocaOFT', () => {
                 balancerStateAddress: ethers.constants.AddressZero,
                 balancerState: false,
             };
-            await expect(
-                mtapiocaOFT.setOwnerState(ownerStateData)
-            ).to.not.be.reverted;
-            
+            await expect(mtapiocaOFT.setOwnerState(ownerStateData)).to.not.be
+                .reverted;
 
-            await mintAndApprove(
-                mErc20Mock,
-                mtapiocaOFT,
-                signer,
-                dummyAmount,
-            );
+            await mintAndApprove(mErc20Mock, mtapiocaOFT, signer, dummyAmount);
             await expect(
                 mtapiocaOFT.wrap(signer.address, signer.address, dummyAmount),
             ).to.be.revertedWithCustomError(mtapiocaOFT, 'mTOFT_CapNotValid');
 
-      
-            await mtapiocaOFT.withdrawFees(signer.address, await vault.viewFees());
+            await mtapiocaOFT.withdrawFees(
+                signer.address,
+                await vault.viewFees(),
+            );
 
             const viewFees = await vault.viewFees();
             expect(viewFees.eq(0)).to.be.true;
@@ -172,8 +160,9 @@ describe('mTapiocaOFT', () => {
     });
     describe('extractUnderlying()', () => {
         it('should fail for unknown balance', async () => {
-            const { signer, mtapiocaOFT0, mErc20Mock } =
-                await loadFixture(setupFixture);
+            const { signer, mtapiocaOFT0, mErc20Mock } = await loadFixture(
+                setupFixture,
+            );
 
             let balancerStatus = await mtapiocaOFT0.balancers(signer.address);
             expect(balancerStatus).to.be.false;
@@ -190,7 +179,6 @@ describe('mTapiocaOFT', () => {
                 balancerState: true,
             };
             await mtapiocaOFT0.setOwnerState(ownerStateData);
-
 
             balancerStatus = await mtapiocaOFT0.balancers(signer.address);
             expect(balancerStatus).to.be.true;
@@ -345,16 +333,11 @@ describe('mTapiocaOFT', () => {
 
     describe('unwrap()', () => {
         it('Should fail if not on the same chain', async () => {
-            const {
-                signer,
-                mtapiocaOFT0,
-                mtapiocaOFT10,
-                dummyAmount,
-            } = await loadFixture(setupFixture);
+            const { signer, mtapiocaOFT0, mtapiocaOFT10, dummyAmount } =
+                await loadFixture(setupFixture);
 
             await expect(mtapiocaOFT10.unwrap(signer.address, dummyAmount)).to
                 .be.reverted;
-
         });
 
         it('Should unwrap and give a 1:1 ratio amount of tokens', async () => {

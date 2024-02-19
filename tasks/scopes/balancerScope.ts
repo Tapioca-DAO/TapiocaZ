@@ -13,7 +13,6 @@ import { redeemRemoteOnBalancer__task } from '../exec/balancer/08-balancer-redee
 
 const balancerScope = scope('balancer', 'Balancer.sol tasks');
 
-
 balancerScope.task(
     'toggleSwapEth',
     'Disable/Enable swap eth on balancer',

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
-// LZ
-import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
@@ -19,12 +16,9 @@ import {
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {ISwapper} from "tapioca-periph/interfaces/periph/ISwapper.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {IUsdo} from "tapioca-periph/interfaces/oft/IUsdo.sol";
 import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
 /*

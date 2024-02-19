@@ -28,13 +28,15 @@ import {
     MarketRemoveCollateralMsg,
     SendParamsMsg,
     ExerciseOptionsMsg,
-    YieldBoxApproveAllMsg,
-    YieldBoxApproveAssetMsg,
-    MarketPermitActionMsg,
     IBorrowParams,
     IRemoveParams,
     LeverageUpActionMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {
+    YieldBoxApproveAllMsg,
+    MarketPermitActionMsg,
+    YieldBoxApproveAssetMsg
+} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
 import {
     ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
@@ -107,9 +109,9 @@ contract TOFTTest is TOFTTestHelper {
 
     uint16 internal constant SEND = 1; // Send LZ message type
     uint16 internal constant PT_APPROVALS = 500; // Use for ERC20Permit approvals
-    uint16 internal constant PT_YB_APPROVE_ASSET = 600; // Use for YieldBox 'setApprovalForAsset(true)' operation
-    uint16 internal constant PT_YB_APPROVE_ALL = 601; // Use for YieldBox 'setApprovalForAll(true)' operation
-    uint16 internal constant PT_MARKET_PERMIT = 602; // Use for market.permitLend() operation
+    uint16 internal constant PT_YB_APPROVE_ASSET = 503; // Use for YieldBox 'setApprovalForAsset(true)' operation
+    uint16 internal constant PT_YB_APPROVE_ALL = 504; // Use for YieldBox 'setApprovalForAll(true)' operation
+    uint16 internal constant PT_MARKET_PERMIT = 505; // Use for market.permitLend() operation
     uint16 internal constant PT_REMOTE_TRANSFER = 700; // Use for transferring tokens from the contract from another chain
     uint16 internal constant PT_MARKET_REMOVE_COLLATERAL = 800; // Use for remove collateral from a market available on another chain
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 801; // Use fror send to YB and/or borrow from a market available on another chain
@@ -127,6 +129,7 @@ contract TOFTTest is TOFTTestHelper {
      * @dev Setup the OApps by deploying them and setting up the endpoints.
      */
     function setUp() public override {
+
         vm.deal(userA, 1000 ether);
         vm.deal(userB, 1000 ether);
         vm.label(userA, "userA");
@@ -153,8 +156,9 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(magnetar), "Magnetar");
         }
 
-        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec();
 
+        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+        TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",
             symbol: "TNKA",
@@ -163,6 +167,7 @@ contract TOFTTest is TOFTTestHelper {
             yieldBox: address(yieldBox),
             cluster: address(cluster),
             erc20: address(aERC20),
+            vault: address(aTOFTVault),
             hostEid: aEid,
             extExec: address(toftExtExec)
         });
@@ -184,12 +189,14 @@ contract TOFTTest is TOFTTestHelper {
                 optionsReceiverModule: address(aTOFTMarketReceiverModule),
                 genericReceiverModule: address(aTOFTGenericReceiverModule)
             });
+
             aTOFT = TOFTMock(
                 payable(_deployOApp(type(TOFTMock).creationCode, abi.encode(aTOFTInitStruct, aTOFTModulesInitStruct)))
             );
             vm.label(address(aTOFT), "aTOFT");
         }
         
+        TOFTVault bTOFTVault = new TOFTVault(address(bERC20));
         TOFTInitStruct memory bTOFTInitStruct = TOFTInitStruct({
             name: "Token B",
             symbol: "TNKB",
@@ -198,6 +205,7 @@ contract TOFTTest is TOFTTestHelper {
             yieldBox: address(yieldBox),
             cluster: address(cluster),
             erc20: address(bERC20),
+            vault: address(bTOFTVault),
             hostEid: bEid,
             extExec: address(toftExtExec)
         });

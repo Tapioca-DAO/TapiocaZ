@@ -3,10 +3,9 @@ import _ from 'lodash';
 import inquirer from 'inquirer';
 
 export const setStargateRouterOnOft__task = async (
-    args: { address: string;},
+    args: { address: string },
     hre: HardhatRuntimeEnvironment,
 ) => {
-
     const tOFT = await hre.ethers.getContractAt('mTOFT', args.address);
 
     const { router } = await inquirer.prompt({
