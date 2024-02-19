@@ -8,6 +8,7 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+
 contract SingularityMock is EIP712 {
     using SafeERC20 for IERC20;
 
@@ -111,6 +112,57 @@ contract SingularityMock is EIP712 {
 
     function removeCollateral(address, address to, uint256 share) external {
         yieldBox.transfer(address(this), to, collateralId, share);
+    }
+
+
+    struct _BuyCollateralCalldata {
+        address from;
+        uint256 borrowAmount;
+        uint256 supplyAmount;
+        bytes data;
+    }
+       
+
+    function buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, bytes calldata data) public returns (uint256 amountOut) {
+         // Stack too deep fix
+        _BuyCollateralCalldata memory calldata_;
+        {
+            calldata_.from = from;
+            calldata_.borrowAmount = borrowAmount;
+            calldata_.supplyAmount = supplyAmount;
+            calldata_.data = data;
+        }
+
+
+        // Let this fail first to save gas:
+        uint256 supplyShare = yieldBox.toShare(assetId, calldata_.supplyAmount, true);
+        uint256 supplyShareToAmount;
+        if (supplyShare > 0) {
+            (supplyShareToAmount,) =
+                yieldBox.withdraw(assetId, calldata_.from, address(this), 0, supplyShare);
+        }
+
+
+        userBorrowPart[from] += calldata_.borrowAmount;
+
+        (uint256 borrowShareToAmount,) =
+            yieldBox.withdraw(assetId, address(this), address(this), calldata_.borrowAmount, 0);
+
+        //swap 1:1
+        uint256 collateralAmount  = borrowShareToAmount;
+
+        // @dev !Contract needs to be prefunded with the right amount of collateral!
+        // yieldBox.depositAsset(collateralId, address(this), address(this), collateralAmount, 0); 
+
+        uint256 collateralShare = yieldBox.toShare(collateralId, collateralAmount, false);
+
+        uint256 oldTotalCollateralShare = totalCollateralShare;
+        userCollateralShare[from] += collateralShare;
+        totalCollateralShare = oldTotalCollateralShare + collateralShare;
+
+        _addTokens(address(this), from, collateralId, collateralShare, oldTotalCollateralShare, false);
+
+        return collateralAmount;
     }
 
     function _addTokens(address from, address, uint256 _assetId, uint256 share, uint256 total, bool skim) internal {

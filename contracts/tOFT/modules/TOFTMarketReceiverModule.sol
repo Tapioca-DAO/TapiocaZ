@@ -10,7 +10,7 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
-import {TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, LeverageUpActionMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
     IMagnetar,
     MagnetarCall,
@@ -56,9 +56,43 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
     event RemoveCollateralReceived(address indexed user, address indexed market, uint256 indexed amount, bool withdraw);
 
-    event LeverageDownReceived(address indexed user, address indexed market, uint256 indexed amount);
+    event LeverageUpReceived(address indexed user, address indexed market, uint256 indexed amount, uint256 supplyAmount);
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
+
+     /**
+     * @notice Calls `buyCollateral` on a market
+     * @param _data The call data containing info about the operation.
+     *      - user::address: Address to leverage for.
+     *      - market::address: Address of the market.
+     *      - borrowAmount::address: Borrow amount to leverage with.
+     *      - supplyAmount::address: Extra asset amount used for the leverage operation.
+     *      - executorData::bytes: Leverage executor data.
+     */
+    function leverageUpReceiver(bytes memory _data) public payable {
+        /// @dev decode received message
+        LeverageUpActionMsg  memory msg_ = TOFTMsgCodec.decodeLeverageUpMsg(_data);
+
+           /// @dev 'market'
+        _checkWhitelistStatus(msg_.market);
+
+        msg_.borrowAmount = _toLD(msg_.borrowAmount.toUint64());
+        if (msg_.supplyAmount > 0) {
+            msg_.supplyAmount = _toLD(msg_.supplyAmount.toUint64());
+        }
+
+
+        approve(address(msg_.market), type(uint256).max);
+        IMarket(msg_.market).buyCollateral(msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData);
+        approve(address(msg_.market), 0);
+
+        emit LeverageUpReceived(
+            msg_.user,
+            msg_.market,
+            msg_.borrowAmount,
+            msg_.supplyAmount
+        );
+    }
 
     /**
      * @notice Calls depositAddCollateralAndBorrowFromMarket on Magnetar

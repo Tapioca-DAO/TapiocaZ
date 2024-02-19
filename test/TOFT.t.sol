@@ -9,17 +9,11 @@ import {
     MessagingReceipt,
     OFTReceipt
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
-import {OFTComposeMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTComposeMsgCodec.sol";
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
-import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
-import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 
 // External
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 // Tapioca
 import {
@@ -38,7 +32,8 @@ import {
     YieldBoxApproveAssetMsg,
     MarketPermitActionMsg,
     IBorrowParams,
-    IRemoveParams
+    IRemoveParams,
+    LeverageUpActionMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
     ITapiocaOptionBroker, IExerciseOptionsData
@@ -49,17 +44,15 @@ import {
     PrepareLzCallReturn,
     ComposeMsgData
 } from "contracts/tOFT/extensions/TOFTHelper.sol";
-import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
-import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsReceiverModule.sol";
+import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
 import {TOFTGenericReceiverModule} from "contracts/tOFT/modules/TOFTGenericReceiverModule.sol";
+import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsReceiverModule.sol";
+import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
-import {ICommonData} from "tapioca-periph/interfaces/common/ICommonData.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
-import {TOFTExtExec} from "contracts/tOFT/extensions/TOFTExtExec.sol";
-import {TOFTReceiver} from "contracts/tOFT/modules/TOFTReceiver.sol";
+import {mTOFTReceiver} from "contracts/tOFT/modules/mTOFTReceiver.sol";
+import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
-import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
 // Tapioca Tests
@@ -67,11 +60,10 @@ import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
 import {TOFTTestHelper} from "./TOFTTestHelper.t.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
-import {ERC721Mock} from "./ERC721Mock.sol";
-import {TOFTMock} from "./TOFTMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
+import {TOFTVault} from "contracts/tOFT/TOFTVault.sol";
+import {TOFTMock} from "./TOFTMock.sol";
 
-import "forge-std/Test.sol";
 
 contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
@@ -123,6 +115,7 @@ contract TOFTTest is TOFTTestHelper {
     uint16 internal constant PT_YB_SEND_SGL_BORROW = 801; // Use fror send to YB and/or borrow from a market available on another chain
     uint16 internal constant PT_TAP_EXERCISE = 802; // Use for exercise options on tOB available on another chain
     uint16 internal constant PT_SEND_PARAMS = 803; // Use for perform a normal OFT send but with a custom payload
+    uint16 internal constant PT_LEVERAGE_UP = 805;
 
     /**
      * @dev TOFT global event checks
@@ -160,7 +153,8 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(magnetar), "Magnetar");
         }
 
-        TOFTExtExec toftExtExec = new TOFTExtExec();
+        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec();
+
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",
             symbol: "TNKA",
@@ -174,7 +168,7 @@ contract TOFTTest is TOFTTestHelper {
         });
         {
             TOFTSender aTOFTSender = new TOFTSender(aTOFTInitStruct);
-            TOFTReceiver aTOFTReceiver = new TOFTReceiver(aTOFTInitStruct);
+            mTOFTReceiver aTOFTReceiver = new mTOFTReceiver(aTOFTInitStruct);
             TOFTMarketReceiverModule aTOFTMarketReceiverModule = new TOFTMarketReceiverModule(aTOFTInitStruct);
             TOFTOptionsReceiverModule aTOFTOptionsReceiverModule = new TOFTOptionsReceiverModule(aTOFTInitStruct);
             TOFTGenericReceiverModule aTOFTGenericReceiverModule = new TOFTGenericReceiverModule(aTOFTInitStruct);
@@ -195,7 +189,7 @@ contract TOFTTest is TOFTTestHelper {
             );
             vm.label(address(aTOFT), "aTOFT");
         }
-
+        
         TOFTInitStruct memory bTOFTInitStruct = TOFTInitStruct({
             name: "Token B",
             symbol: "TNKB",
@@ -209,7 +203,7 @@ contract TOFTTest is TOFTTestHelper {
         });
         {
             TOFTSender bTOFTSender = new TOFTSender(bTOFTInitStruct);
-            TOFTReceiver bTOFTReceiver = new TOFTReceiver(bTOFTInitStruct);
+            mTOFTReceiver bTOFTReceiver = new mTOFTReceiver(bTOFTInitStruct);
             TOFTMarketReceiverModule bTOFTMarketReceiverModule = new TOFTMarketReceiverModule(bTOFTInitStruct);
             TOFTOptionsReceiverModule bTOFTOptionsReceiverModule = new TOFTOptionsReceiverModule(bTOFTInitStruct);
             TOFTGenericReceiverModule bTOFTGenericReceiverModule = new TOFTGenericReceiverModule(bTOFTInitStruct);
@@ -346,6 +340,114 @@ contract TOFTTest is TOFTTestHelper {
         assertEq(aTOFT.allowance(userA, userB), 1e18);
         assertEq(aTOFT.nonces(userA), 1);
     }
+
+
+    function test_leverage_up() public {
+        uint256 erc20Amount_ = 1 ether;
+
+        //setup
+        {
+            deal(address(aTOFT), address(this), erc20Amount_);
+            aTOFT.approve(address(yieldBox), type(uint256).max);
+            yieldBox.depositAsset(aTOFTYieldBoxId, address(this), address(singularity), erc20Amount_, 0);
+
+            deal(address(bTOFT), address(this), erc20Amount_);
+            bTOFT.approve(address(yieldBox), type(uint256).max);
+            yieldBox.depositAsset(bTOFTYieldBoxId, address(this), address(singularity), erc20Amount_, 0);
+        }
+
+        //useful in case of withdraw after borrow
+        LZSendParam memory withdrawLzSendParam_;
+        MessagingFee memory withdrawMsgFee_; // Will be used as value for the composed msg
+
+        {
+            // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
+            PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTHelper.prepareLzCall( // B->A data
+                ITOFT(address(bTOFT)),
+                PrepareLzCallData({
+                    dstEid: aEid,
+                    recipient: OFTMsgCodec.addressToBytes32(address(this)),
+                    amountToSendLD: erc20Amount_,
+                    minAmountToCreditLD: erc20Amount_,
+                    msgType: SEND,
+                    composeMsgData: ComposeMsgData({
+                        index: 0,
+                        gas: 0,
+                        value: 0,
+                        data: bytes(""),
+                        prevData: bytes(""),
+                        prevOptionsData: bytes("")
+                    }),
+                    lzReceiveGas: 500_000,
+                    lzReceiveValue: 0
+                })
+            );
+            withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
+            withdrawMsgFee_ = prepareLzCallReturn1_.msgFee;
+        }
+
+        /**
+         * Actions
+         */
+        uint256 tokenAmountSD = tOFTHelper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
+
+        //approve magnetar
+        LeverageUpActionMsg  memory leverageMsg = LeverageUpActionMsg({
+            user: address(this),
+            market: address(singularity),
+            borrowAmount: tokenAmountSD,
+            supplyAmount: 0,
+            executorData: "0x"
+        });
+       
+        bytes memory sendMsg_ = tOFTHelper.buildLeverageUpMsg(leverageMsg);
+
+        PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
+            ITOFT(address(aTOFT)),
+            PrepareLzCallData({
+                dstEid: bEid,
+                recipient: OFTMsgCodec.addressToBytes32(address(this)),
+                amountToSendLD: 0,
+                minAmountToCreditLD: 0,
+                msgType: PT_LEVERAGE_UP,
+                composeMsgData: ComposeMsgData({
+                    index: 0,
+                    gas: 500_000,
+                    value: uint128(withdrawMsgFee_.nativeFee),
+                    data: sendMsg_,
+                    prevData: bytes(""),
+                    prevOptionsData: bytes("")
+                }),
+                lzReceiveGas: 500_000,
+                lzReceiveValue: 0
+            })
+        );
+        bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
+        bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
+        MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
+        LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+
+        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+
+        {
+            verifyPackets(uint32(bEid), address(bTOFT));
+
+            __callLzCompose(
+                LzOFTComposedData(
+                    PT_LEVERAGE_UP,
+                    msgReceipt_.guid,
+                    composeMsg_,
+                    bEid,
+                    address(bTOFT), // Compose creator (at lzReceive)
+                    address(bTOFT), // Compose receiver (at lzCompose)
+                    address(this),
+                    oftMsgOptions_
+                )
+            );
+        }
+       
+    }
+
 
     /**
      * ERC20 APPROVALS

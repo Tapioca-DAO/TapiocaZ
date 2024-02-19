@@ -2,7 +2,8 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TOFTInitStruct, LeverageUpActionMsg, ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TOFTMarketReceiverModule} from "./TOFTMarketReceiverModule.sol";
 import {BaseTOFTReceiver} from "./BaseTOFTReceiver.sol";
 
 /*
@@ -16,16 +17,25 @@ import {BaseTOFTReceiver} from "./BaseTOFTReceiver.sol";
    
 */
 
-contract TOFTReceiver is BaseTOFTReceiver {
+contract mTOFTReceiver is BaseTOFTReceiver {
     constructor(TOFTInitStruct memory _data) BaseTOFTReceiver(_data) {}
 
-    function _toftCustomComposeReceiver(uint16, address, bytes memory)
+    function _toftCustomComposeReceiver(uint16 _msgType, address, bytes memory _toeComposeMsg)
         internal
-        pure
         override
         returns (bool success)
     {
-        return false;
+        if (_msgType == MSG_LEVERAGE_UP) {
+            _executeModule(
+                uint8(ITOFT.Module.TOFTMarketReceiver),
+                abi.encodeWithSelector(
+                    TOFTMarketReceiverModule.leverageUpReceiver.selector, _toeComposeMsg
+                ),
+                false
+            );
+            return true;
+        } else {
+            return false;
+        }
     }
-    
 }

@@ -13,7 +13,8 @@ import {
     MarketRemoveCollateralMsg,
     SendParamsMsg,
     ExerciseOptionsMsg,
-    YieldBoxApproveAssetMsg
+    YieldBoxApproveAssetMsg,
+    LeverageUpActionMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
     TapiocaOmnichainEngineHelper,
@@ -39,8 +40,15 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
     /// =======================
     /// Builder functions
     /// =======================
-    /**
+     /**
      * @notice Encodes the message for the PT_SEND_PARAMS operation.
+     *
+     */
+    function buildLeverageUpMsg(LeverageUpActionMsg calldata _msg) public pure returns (bytes memory) {
+        return TOFTMsgCodec.buildLeverageUpMsg(_msg);
+    }
+    /**
+     * @notice Encodes the message for the exercise options operation.
      *
      */
     function buildExerciseOptionMsg(ExerciseOptionsMsg calldata _msg) public pure returns (bytes memory) {
@@ -127,7 +135,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
         if (
             _msgType == MSG_YB_APPROVE_ASSET || _msgType == MSG_YB_APPROVE_ALL || _msgType == MSG_MARKET_PERMIT
                 || _msgType == MSG_MARKET_REMOVE_COLLATERAL || _msgType == MSG_YB_SEND_SGL_BORROW
-                || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS
+                || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS || _msgType == MSG_LEVERAGE_UP
         ) {
             return true;
         }
