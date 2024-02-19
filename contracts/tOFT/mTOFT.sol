@@ -20,7 +20,8 @@ import {
     TOFTInitStruct,
     TOFTModulesInitStruct,
     LZSendParam,
-    ERC20PermitStruct
+    ERC20PermitStruct,
+    IToftVault
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {IStargateReceiver} from "tapioca-periph/interfaces/external/stargate/IStargateReceiver.sol";
@@ -128,6 +129,11 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
         _setModule(uint8(ITOFT.Module.TOFTGenericReceiver), _modulesData.genericReceiverModule);
 
         _stargateRouter = _stgRouter;
+
+        vault = IToftVault(_tOFTData.vault);
+        vault.claimOwnership();
+
+        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**

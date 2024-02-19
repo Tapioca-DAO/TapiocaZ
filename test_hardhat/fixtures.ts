@@ -210,6 +210,7 @@ export const setupFixture = async () => {
     await mtapiocaOFT10.setOwnerState(ownerStateData);
 
     // Deploy TapiocaOFT0
+    const vault00 = await vaultFactory.deploy(erc20Mock.address);
     initStruct0 = {
         name: 'tapiocaOFT0',
         symbol: 't0',
@@ -218,7 +219,7 @@ export const setupFixture = async () => {
         yieldBox: YieldBox_0.address,
         cluster: Cluster_0.address,
         erc20: erc20Mock.address,
-        vault: vault0.address,
+        vault: vault00.address,
         hostEid: 31337,
         extExec: hre.ethers.constants.AddressZero,
     };
@@ -247,6 +248,7 @@ export const setupFixture = async () => {
     await tapiocaOFT0.deployed();
 
     // Deploy TapiocaOFT10
+    const vault1010 = await vaultFactory.deploy(erc20Mock.address);
     initStruct10 = {
         name: 'tapiocaOFT10',
         symbol: 't10',
@@ -255,7 +257,7 @@ export const setupFixture = async () => {
         yieldBox: YieldBox_10.address,
         cluster: Cluster_10.address,
         erc20: erc20Mock.address,
-        vault: vault10.address,
+        vault: vault1010.address,
         hostEid: 10,
         extExec: hre.ethers.constants.AddressZero,
     };

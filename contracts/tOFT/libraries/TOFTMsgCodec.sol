@@ -8,7 +8,8 @@ import {
     MarketRemoveCollateralMsg,
     MarketBorrowMsg,
     ExerciseOptionsMsg,
-    SendParamsMsg
+    SendParamsMsg,
+    LeverageUpActionMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {LockAndParticipateData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
@@ -114,4 +115,19 @@ library TOFTMsgCodec {
     {
         return abi.decode(_msg, (LockAndParticipateData));
     }
+
+      /**
+     * @notice Encodes the message for the `TOFTMarketReceiverModule.leverageUpReceiver()` operation.
+     */
+    function buildLeverageUpMsg(LeverageUpActionMsg memory _marketMsg) internal pure returns (bytes memory) {
+        return abi.encode(_marketMsg);
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTMarketReceiverModule.leverageUpReceiver()` operation.
+     */
+    function decodeLeverageUpMsg(bytes memory _msg) internal pure returns (LeverageUpActionMsg memory marketMsg_) {
+        return abi.decode(_msg, (LeverageUpActionMsg));
+    }
+
 }

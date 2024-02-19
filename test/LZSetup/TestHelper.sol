@@ -34,9 +34,6 @@ import {SendUln302Mock as SendUln302} from "./mocks/SendUln302Mock.sol";
 import {SimpleMessageLibMock} from "./mocks/SimpleMessageLibMock.sol";
 import "./mocks/ExecutorFeeLibMock.sol";
 
-// solhint-disable-next-line
-import "forge-std/console.sol";
-
 contract TestHelper is Test, OptionsHelper {
     using OptionsBuilder for bytes;
 
