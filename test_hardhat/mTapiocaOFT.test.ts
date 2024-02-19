@@ -12,6 +12,7 @@ import {
     YieldBoxMock__factory,
 } from '@tapioca-sdk/typechain/tapioca-mocks';
 import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
+import { TOFTVault__factory } from '@typechain/index';
 
 describe('mTapiocaOFT', () => {
     describe('extractFees()', () => {
@@ -30,6 +31,9 @@ describe('mTapiocaOFT', () => {
             const LZEndpointMock = new LZEndpointMock__factory(signer);
             const lzEndpoint0 = await LZEndpointMock.deploy(31337);
 
+            const vaultFactory = new TOFTVault__factory(signer);
+            const deployedVault = await vaultFactory.deploy(mErc20Mock.address);
+
             const initStruct = {
                 name: 'mtapiocaOFT',
                 symbol: 'mt',
@@ -40,6 +44,7 @@ describe('mTapiocaOFT', () => {
                 erc20: mErc20Mock.address,
                 hostEid: 10,
                 extExec: ethers.constants.AddressZero,
+                vault: deployedVault.address
             };
             const mtoftSender = await (
                 await ethers.getContractFactory('TOFTSender')
