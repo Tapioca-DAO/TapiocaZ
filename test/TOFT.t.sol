@@ -52,9 +52,11 @@ import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsRecei
 import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
+import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {mTOFTReceiver} from "contracts/tOFT/modules/mTOFTReceiver.sol";
 import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
+import {Pearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
 // Tapioca Tests
@@ -67,7 +69,6 @@ import {MagnetarMock} from "./MagnetarMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
 
-
 contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
     using OFTMsgCodec for bytes32;
@@ -76,6 +77,7 @@ contract TOFTTest is TOFTTestHelper {
     uint32 aEid = 1;
     uint32 bEid = 2;
 
+    Pearlmit pearlmit;
     YieldBox yieldBox;
     Cluster cluster;
     ERC20Mock aERC20;
@@ -131,7 +133,6 @@ contract TOFTTest is TOFTTestHelper {
      * @dev Setup the OApps by deploying them and setting up the endpoints.
      */
     function setUp() public override {
-
         vm.deal(userA, 1000 ether);
         vm.deal(userB, 1000 ether);
         vm.label(userA, "userA");
@@ -146,9 +147,11 @@ contract TOFTTest is TOFTTestHelper {
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
 
+        pearlmit = new Pearlmit("Pearlmit", "1");
         yieldBox = createYieldBox();
         cluster = createCluster(aEid, __owner);
-        magnetar = createMagnetar(address(cluster));
+        pearlmit = new Pearlmit("Pearlmit", "1");
+        magnetar = createMagnetar(address(cluster), IPearlmit(address(pearlmit)));
 
         {
             vm.label(address(endpoints[aEid]), "aEndpoint");
@@ -157,7 +160,6 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(cluster), "Cluster");
             vm.label(address(magnetar), "Magnetar");
         }
-
 
         TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
         TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
@@ -171,7 +173,8 @@ contract TOFTTest is TOFTTestHelper {
             erc20: address(aERC20),
             vault: address(aTOFTVault),
             hostEid: aEid,
-            extExec: address(toftExtExec)
+            extExec: address(toftExtExec),
+            pearlmit: IPearlmit(address(pearlmit))
         });
         {
             TOFTSender aTOFTSender = new TOFTSender(aTOFTInitStruct);
@@ -197,7 +200,7 @@ contract TOFTTest is TOFTTestHelper {
             );
             vm.label(address(aTOFT), "aTOFT");
         }
-        
+
         TOFTVault bTOFTVault = new TOFTVault(address(bERC20));
         TOFTInitStruct memory bTOFTInitStruct = TOFTInitStruct({
             name: "Token B",
@@ -209,7 +212,8 @@ contract TOFTTest is TOFTTestHelper {
             erc20: address(bERC20),
             vault: address(bTOFTVault),
             hostEid: bEid,
-            extExec: address(toftExtExec)
+            extExec: address(toftExtExec),
+            pearlmit: IPearlmit(address(pearlmit))
         });
         {
             TOFTSender bTOFTSender = new TOFTSender(bTOFTInitStruct);
@@ -255,7 +259,7 @@ contract TOFTTest is TOFTTestHelper {
             createSingularity(address(yieldBox), bTOFTYieldBoxId, aTOFTYieldBoxId, address(bTOFT), address(aTOFT));
         vm.label(address(singularity), "Singularity");
 
-        tOB = new TapiocaOptionsBrokerMock(address(tapOFT));
+        tOB = new TapiocaOptionsBrokerMock(address(tapOFT), IPearlmit(address(pearlmit)));
 
         marketHelper = new MarketHelperMock();
 
@@ -355,7 +359,6 @@ contract TOFTTest is TOFTTestHelper {
         assertEq(aTOFT.nonces(userA), 1);
     }
 
-
     function test_leverage_up() public {
         uint256 erc20Amount_ = 1 ether;
 
@@ -406,7 +409,7 @@ contract TOFTTest is TOFTTestHelper {
         uint256 tokenAmountSD = tOFTHelper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
-        LeverageUpActionMsg  memory leverageMsg = LeverageUpActionMsg({
+        LeverageUpActionMsg memory leverageMsg = LeverageUpActionMsg({
             user: address(this),
             market: address(singularity),
             marketHelper: address(marketHelper),
@@ -414,7 +417,7 @@ contract TOFTTest is TOFTTestHelper {
             supplyAmount: 0,
             executorData: "0x"
         });
-       
+
         bytes memory sendMsg_ = tOFTHelper.buildLeverageUpMsg(leverageMsg);
 
         PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
@@ -460,9 +463,7 @@ contract TOFTTest is TOFTTestHelper {
                 )
             );
         }
-       
     }
-
 
     /**
      * ERC20 APPROVALS

@@ -18,7 +18,8 @@ remappings = [
 	"forge-std/=lib/forge-std/src/",
 	"tapioca-sdk/=gitmodule/tapioca-sdk/contracts/",
 	"tapioca-periph/=gitmodule/tapioca-periph/contracts/",
-	"yieldbox/=gitmodule/tap-yieldbox/contracts/"
+	"yieldbox/=gitmodule/tap-yieldbox/contracts/",
+	"permitc/=gitmodule/tapioca-periph/gitmodule/permitc/src/", # Needs to be init in the periph repo
 ]
 
 # forge-dpeloy

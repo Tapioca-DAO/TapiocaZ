@@ -2,14 +2,15 @@
 pragma solidity 0.8.22;
 
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {PearlmitHandler, IPearlmit} from "./../gitmodule/tapioca-periph/contracts/pearlmit/PearlmitHandler.sol";
 
-contract TapiocaOptionsBrokerMock {
+contract TapiocaOptionsBrokerMock is PearlmitHandler {
     using SafeERC20 for IERC20;
 
     address public tapOFT;
     uint256 public paymentTokenAmount;
 
-    constructor(address _tap) {
+    constructor(address _tap, IPearlmit _pearlmit) PearlmitHandler(_pearlmit) {
         tapOFT = _tap;
     }
 
@@ -23,7 +24,8 @@ contract TapiocaOptionsBrokerMock {
         // @dev 10% is subtracted to test out payment token refund
         uint256 actualPaymentTokenAmount = paymentTokenAmount - paymentTokenAmount * 1e4 / 1e5;
 
-        IERC20(address(_paymentToken)).safeTransferFrom(msg.sender, address(this), actualPaymentTokenAmount);
+        // IERC20(address(_paymentToken)).safeTransferFrom(msg.sender, address(this), actualPaymentTokenAmount);
+        pearlmit.transferFromERC20(msg.sender, address(this), address(_paymentToken), actualPaymentTokenAmount);
         IERC20(tapOFT).safeTransfer(msg.sender, _tapAmount);
     }
 }
