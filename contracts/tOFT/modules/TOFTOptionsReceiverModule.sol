@@ -154,15 +154,17 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);
 
             /// @dev call exerciseOption() with address(this) as the payment token
-            _approve(address(this), _options.target, 0);
-            _approve(address(this), _options.target, _options.paymentTokenAmount);
+            // _approve(address(this), _options.target, _options.paymentTokenAmount);
+            pearlmit.approve(
+                address(this), 0, _options.target, uint200(_options.paymentTokenAmount), uint48(block.timestamp + 1)
+            ); // Atomic approval
+
             uint256 bBefore = balanceOf(address(this));
             ITapiocaOptionBroker(_options.target).exerciseOption(
                 _options.oTAPTokenID,
                 address(this), //payment token
                 _options.tapAmount
             );
-            _approve(address(this), _options.target, 0);
             uint256 bAfter = balanceOf(address(this));
 
             // Refund if less was used.
