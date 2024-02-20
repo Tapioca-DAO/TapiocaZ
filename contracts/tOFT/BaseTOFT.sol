@@ -7,8 +7,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
-import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {TOFTInitStruct, IToftVault} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {PearlmitHandler} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
 import {BaseTOFTTokenMsgType} from "./BaseTOFTTokenMsgType.sol";
@@ -30,7 +30,7 @@ import {ModuleManager} from "./modules/ModuleManager.sol";
  * @author TapiocaDAO
  * @notice Base TOFT contract for LZ V2
  */
-abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, PearlmitHandler, BaseTOFTTokenMsgType {
+abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnichainEngine, BaseTOFTTokenMsgType {
     using SafeERC20 for IERC20;
 
     IYieldBox public immutable yieldBox;
@@ -45,8 +45,7 @@ abstract contract BaseTOFT is ModuleManager, BaseTapiocaOmnichainEngine, Pearlmi
     error TOFT_VaultWrongOwner();
 
     constructor(TOFTInitStruct memory _data)
-        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate, _data.extExec)
-        PearlmitHandler(_data.pearlmit)
+        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate, _data.extExec, _data.pearlmit)
     {
         yieldBox = IYieldBox(_data.yieldBox);
         cluster = ICluster(_data.cluster);

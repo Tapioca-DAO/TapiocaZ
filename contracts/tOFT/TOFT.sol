@@ -8,7 +8,7 @@ import {OAppReceiver} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OAppRec
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 
 // External
-import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
@@ -21,6 +21,7 @@ import {
     ERC20PermitStruct,
     IToftVault
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {TOFTReceiver} from "./modules/TOFTReceiver.sol";
 import {TOFTSender} from "./modules/TOFTSender.sol";
@@ -93,6 +94,14 @@ contract TOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
     }
 
     receive() external payable {}
+
+    function transferFrom(address from, address to, uint256 value)
+        public
+        override(BaseTapiocaOmnichainEngine, ERC20)
+        returns (bool)
+    {
+        return BaseTapiocaOmnichainEngine.transferFrom(from, to, value);
+    }
 
     /**
      * @dev Slightly modified version of the OFT _lzReceive() operation.
