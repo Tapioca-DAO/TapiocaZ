@@ -18,7 +18,7 @@ import {
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {LockAndParticipateData, IMagnetar, MagnetarCall, MagnetarAction} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {MagnetarMintModule} from "tapioca-periph/Magnetar/modules/MagnetarMintModule.sol";
+import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
@@ -78,12 +78,12 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         }
 
         bytes memory call = abi.encodeWithSelector(
-            MagnetarMintModule.lockAndParticipate.selector,
+            MagnetarMintXChainModule.lockAndParticipate.selector,
             msg_
         );
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
-            id: MagnetarAction.MintModule,
+            id: MagnetarAction.MintXChainModule,
             target: msg_.magnetar,
             value: msg.value,
             allowFailure: false,
