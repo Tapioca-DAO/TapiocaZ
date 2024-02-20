@@ -122,6 +122,7 @@ contract TOFTTest is TOFTTestHelper {
     uint16 internal constant PT_TAP_EXERCISE = 802; // Use for exercise options on tOB available on another chain
     uint16 internal constant PT_SEND_PARAMS = 803; // Use for perform a normal OFT send but with a custom payload
     uint16 internal constant PT_LEVERAGE_UP = 805;
+    uint16 internal constant PT_XCHAIN_LEND_XCHAIN_LOCK = 806; // Use for `magnetar.mintFromBBAndSendForLending` step 2 call
 
     /**
      * @dev TOFT global event checks

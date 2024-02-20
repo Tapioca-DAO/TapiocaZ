@@ -7,7 +7,12 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
-import {TOFTInitStruct, MarketBorrowMsg, MarketRemoveCollateralMsg, LeverageUpActionMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {
+    TOFTInitStruct,
+    MarketBorrowMsg,
+    MarketRemoveCollateralMsg,
+    LeverageUpActionMsg
+} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
     IMagnetar,
     MagnetarCall,
@@ -51,11 +56,13 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
     event RemoveCollateralReceived(address indexed user, address indexed market, uint256 indexed amount, bool withdraw);
 
-    event LeverageUpReceived(address indexed user, address indexed market, uint256 indexed amount, uint256 supplyAmount);
+    event LeverageUpReceived(
+        address indexed user, address indexed market, uint256 indexed amount, uint256 supplyAmount
+    );
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
-     /**
+    /**
      * @notice Calls `buyCollateral` on a market
      * @param _data The call data containing info about the operation.
      *      - user::address: Address to leverage for.
@@ -66,9 +73,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      */
     function leverageUpReceiver(bytes memory _data) public payable {
         /// @dev decode received message
-        LeverageUpActionMsg  memory msg_ = TOFTMsgCodec.decodeLeverageUpMsg(_data);
+        LeverageUpActionMsg memory msg_ = TOFTMsgCodec.decodeLeverageUpMsg(_data);
 
-           /// @dev 'market'
+        /// @dev 'market'
         _checkWhitelistStatus(msg_.market);
 
         msg_.borrowAmount = _toLD(msg_.borrowAmount.toUint64());
@@ -76,23 +83,18 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             msg_.supplyAmount = _toLD(msg_.supplyAmount.toUint64());
         }
 
-
         approve(address(msg_.market), type(uint256).max);
 
         {
-            (Module[] memory modules, bytes[] memory calls) =
-                IMarketHelper(msg_.marketHelper).buyCollateral(msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData);
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.marketHelper).buyCollateral(
+                msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData
+            );
             IMarket(msg_.market).execute(modules, calls, true);
         }
-        
+
         approve(address(msg_.market), 0);
 
-        emit LeverageUpReceived(
-            msg_.user,
-            msg_.market,
-            msg_.borrowAmount,
-            msg_.supplyAmount
-        );
+        emit LeverageUpReceived(msg_.user, msg_.market, msg_.borrowAmount, msg_.supplyAmount);
     }
 
     /**
@@ -171,8 +173,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
             approve(msg_.removeParams.market, share);
 
-            (Module[] memory modules, bytes[] memory calls) =
-                IMarketHelper(msg_.removeParams.marketHelper).removeCollateral(msg_.user, msg_.withdrawParams.withdraw ? msg_.removeParams.magnetar : msg_.user, share);
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.removeParams.marketHelper)
+                .removeCollateral(msg_.user, msg_.withdrawParams.withdraw ? msg_.removeParams.magnetar : msg_.user, share);
             IMarket(msg_.removeParams.market).execute(modules, calls, true);
         }
 

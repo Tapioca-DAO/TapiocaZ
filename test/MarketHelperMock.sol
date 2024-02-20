@@ -14,7 +14,6 @@ import {SingularityMock} from "./SingularityMock.sol";
 contract MarketHelperMock {
     error ExchangeRateNotValid();
 
-
     /// @notice Adds `collateral` from msg.sender to the account `to`.
     /// @param from Account to transfer shares from.
     /// @param to The receiver of the tokens.
@@ -67,7 +66,6 @@ contract MarketHelperMock {
         (part, share) = abi.decode(result, (uint256, uint256));
     }
 
-
     /// @notice Lever up: Borrow more and buy collateral with it.
     /// @param from The user who buys
     /// @param borrowAmount Amount of extra asset borrowed
@@ -81,7 +79,8 @@ contract MarketHelperMock {
         modules = new Module[](1);
         calls = new bytes[](1);
         modules[0] = Module.Leverage;
-        calls[0] = abi.encodeWithSelector(SingularityMock.buyCollateral.selector, from, borrowAmount, supplyAmount, data);
+        calls[0] =
+            abi.encodeWithSelector(SingularityMock.buyCollateral.selector, from, borrowAmount, supplyAmount, data);
     }
 
     /// @notice view the result of a buyCollateral operation.

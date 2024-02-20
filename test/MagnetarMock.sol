@@ -110,6 +110,12 @@ contract MagnetarMock is PearlmitHandler {
             }
 
             /// @dev Modules will not return result data.
+            if (_action.id == MagnetarAction.MintXChainModule) {
+                _executeModule(MagnetarModule.MintXChainModule, _action.call);
+                continue; // skip the rest of the loop
+            }
+
+            /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.OptionModule) {
                 _executeModule(MagnetarModule.OptionModule, _action.call);
                 continue; // skip the rest of the loop

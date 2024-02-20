@@ -11,10 +11,7 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // Tapioca
-import {
-    ITOFT,
-    TOFTInitStruct
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
     YieldBoxApproveAllMsg,
     MarketPermitActionMsg,
@@ -64,7 +61,7 @@ abstract contract BaseTOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
      * @inheritdoc TapiocaOmnichainReceiver
      */
     function _toeComposeReceiver(uint16 _msgType, address _srcChainSender, bytes memory _toeComposeMsg)
-        internal 
+        internal
         override
         returns (bool success)
     {
@@ -99,9 +96,7 @@ abstract contract BaseTOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
         } else if (_msgType == MSG_LOCK_AND_PARTICIPATE) {
             _executeModule(
                 uint8(ITOFT.Module.TOFTOptionsReceiver),
-                abi.encodeWithSelector(
-                    TOFTOptionsReceiverModule.lockAndParticipateReceiver.selector, _toeComposeMsg
-                ),
+                abi.encodeWithSelector(TOFTOptionsReceiverModule.lockAndParticipateReceiver.selector, _toeComposeMsg),
                 false
             );
         } else {
@@ -111,7 +106,7 @@ abstract contract BaseTOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
     }
 
     function _toftCustomComposeReceiver(uint16 _msgType, address _srcChainSender, bytes memory _toeComposeMsg)
-        internal 
+        internal
         virtual
         returns (bool success);
 
