@@ -7,6 +7,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 
 
 contract SingularityMock is EIP712 {
@@ -41,6 +42,8 @@ contract SingularityMock is EIP712 {
     mapping(address => uint256) private _nonces;
 
     error SingularityMock_TooMuch();
+    error SingularityMock_ModuleNotSet();
+    error SingularityMock_NotValid();
 
     constructor(address _yieldBox, uint256 _collateralId, uint256 _assetId, address _collateral, address _asset)
         EIP712("Tapioca Singularity", "1")
@@ -218,5 +221,38 @@ contract SingularityMock is EIP712 {
 
     function _approve(address owner, address spender, uint256 amount) internal {
         allowance[owner][spender] = amount;
+    }
+
+
+    function execute(Module[] calldata modules, bytes[] calldata calls, bool revertOnFail)
+        external
+        returns (bool[] memory successes, bytes[] memory results)
+    {
+        successes = new bool[](calls.length);
+        results = new bytes[](calls.length);
+        if (modules.length != calls.length) revert SingularityMock_NotValid();
+        unchecked {
+            for (uint256 i; i < calls.length; i++) {
+                (bool success, bytes memory result) = address(this).delegatecall(calls[i]);
+
+                if (!success && revertOnFail) {
+                    revert(abi.decode(_getRevertMsg(result), (string)));
+                }
+                successes[i] = success;
+                results[i] = !success ? _getRevertMsg(result) : result;
+            }
+        }
+    }
+
+    function _getRevertMsg(bytes memory _returnData) internal pure returns (bytes memory) {
+        if (_returnData.length > 1000) return "Market: reason too long";
+        // If the _res length is less than 68, then the transaction failed silently (without a revert message)
+        if (_returnData.length < 68) return "Market: no return data";
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            // Slice the sighash.
+            _returnData := add(_returnData, 0x04)
+        }
+        return _returnData; // All that remains is the revert string
     }
 }

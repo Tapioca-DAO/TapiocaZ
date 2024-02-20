@@ -16,9 +16,10 @@ import {
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
 import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
+import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
+import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
-import {IMarket} from "tapioca-periph/interfaces/bar/IMarket.sol";
 import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
 /*
@@ -77,7 +78,13 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
 
         approve(address(msg_.market), type(uint256).max);
-        IMarket(msg_.market).buyCollateral(msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData);
+
+        {
+            (Module[] memory modules, bytes[] memory calls) =
+                IMarketHelper(msg_.marketHelper).buyCollateral(msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData);
+            IMarket(msg_.market).execute(modules, calls, true);
+        }
+        
         approve(address(msg_.market), 0);
 
         emit LeverageUpReceived(
@@ -100,21 +107,21 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         /// @dev decode received message
         MarketBorrowMsg memory msg_ = TOFTMsgCodec.decodeMarketBorrowMsg(_data);
 
-        /// @dev sanitize 'borrowParams.marketHelper' and 'borrowParams.market'
         _checkWhitelistStatus(msg_.borrowParams.marketHelper);
+        _checkWhitelistStatus(msg_.borrowParams.magnetar);
         _checkWhitelistStatus(msg_.borrowParams.market);
 
         msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
         msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
 
         /// @dev use market helper to deposit, add collateral to market and withdrawTo
-        /// @dev 'borrowParams.marketHelper' is MagnetarV2 contract
-        approve(address(msg_.borrowParams.marketHelper), msg_.borrowParams.amount);
+        approve(address(msg_.borrowParams.magnetar), msg_.borrowParams.amount);
 
         bytes memory call = abi.encodeWithSelector(
             MagnetarCollateralModule.depositAddCollateralAndBorrowFromMarket.selector,
             DepositAddCollateralAndBorrowFromMarketData(
                 msg_.borrowParams.market,
+                msg_.borrowParams.marketHelper,
                 msg_.user,
                 msg_.borrowParams.amount,
                 msg_.borrowParams.borrowAmount,
@@ -130,7 +137,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             allowFailure: false,
             call: call
         });
-        IMagnetar(payable(msg_.borrowParams.marketHelper)).burst{value: msg.value}(magnetarCall);
+        IMagnetar(payable(msg_.borrowParams.magnetar)).burst{value: msg.value}(magnetarCall);
 
         emit BorrowReceived(
             msg_.user,
@@ -163,14 +170,15 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         {
             uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
             approve(msg_.removeParams.market, share);
-            IMarket(msg_.removeParams.market).removeCollateral(
-                msg_.user, msg_.withdrawParams.withdraw ? msg_.removeParams.marketHelper : msg_.user, share
-            );
+
+            (Module[] memory modules, bytes[] memory calls) =
+                IMarketHelper(msg_.removeParams.marketHelper).removeCollateral(msg_.user, msg_.withdrawParams.withdraw ? msg_.removeParams.magnetar : msg_.user, share);
+            IMarket(msg_.removeParams.market).execute(modules, calls, true);
         }
 
         {
             if (msg_.withdrawParams.withdraw) {
-                _checkWhitelistStatus(msg_.removeParams.marketHelper);
+                _checkWhitelistStatus(msg_.removeParams.magnetar);
 
                 bytes memory call =
                     abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, msg_.withdrawParams);
@@ -182,7 +190,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
                     allowFailure: false,
                     call: call
                 });
-                IMagnetar(payable(msg_.removeParams.marketHelper)).burst{value: msg.value}(magnetarCall);
+                IMagnetar(payable(msg_.removeParams.magnetar)).burst{value: msg.value}(magnetarCall);
             }
         }
 
