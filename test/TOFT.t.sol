@@ -59,11 +59,12 @@ import {YieldBox} from "yieldbox/YieldBox.sol";
 
 // Tapioca Tests
 import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
+import {MarketHelperMock} from "./MarketHelperMock.sol";
+import {TOFTVault} from "contracts/tOFT/TOFTVault.sol";
 import {TOFTTestHelper} from "./TOFTTestHelper.t.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
-import {TOFTVault} from "contracts/tOFT/TOFTVault.sol";
 import {TOFTMock} from "./TOFTMock.sol";
 
 
@@ -86,6 +87,7 @@ contract TOFTTest is TOFTTestHelper {
     // MagnetarV2 magnetar;
     MagnetarMock magnetar;
     SingularityMock singularity;
+    MarketHelperMock marketHelper;
 
     TOFTHelper tOFTHelper;
 
@@ -255,14 +257,18 @@ contract TOFTTest is TOFTTestHelper {
 
         tOB = new TapiocaOptionsBrokerMock(address(tapOFT));
 
+        marketHelper = new MarketHelperMock();
+
         cluster.updateContract(aEid, address(yieldBox), true);
         cluster.updateContract(aEid, address(singularity), true);
         cluster.updateContract(aEid, address(magnetar), true);
         cluster.updateContract(aEid, address(tOB), true);
+        cluster.updateContract(aEid, address(marketHelper), true);
         cluster.updateContract(bEid, address(yieldBox), true);
         cluster.updateContract(bEid, address(singularity), true);
         cluster.updateContract(bEid, address(magnetar), true);
         cluster.updateContract(bEid, address(tOB), true);
+        cluster.updateContract(bEid, address(marketHelper), true);
     }
 
     /**
@@ -403,6 +409,7 @@ contract TOFTTest is TOFTTestHelper {
         LeverageUpActionMsg  memory leverageMsg = LeverageUpActionMsg({
             user: address(this),
             market: address(singularity),
+            marketHelper: address(marketHelper),
             borrowAmount: tokenAmountSD,
             supplyAmount: 0,
             executorData: "0x"
@@ -718,7 +725,8 @@ contract TOFTTest is TOFTTestHelper {
             borrowParams: IBorrowParams({
                 amount: tokenAmountSD,
                 borrowAmount: tokenAmountSD,
-                marketHelper: address(magnetar),
+                magnetar: address(magnetar),
+                marketHelper: address(marketHelper),
                 market: address(singularity),
                 deposit: true
             }),
@@ -856,7 +864,8 @@ contract TOFTTest is TOFTTestHelper {
             user: address(this),
             removeParams: IRemoveParams({
                 amount: tokenAmountSD,
-                marketHelper: address(magnetar),
+                magnetar: address(magnetar),
+                marketHelper: address(marketHelper),
                 market: address(singularity)
             }),
             withdrawParams: MagnetarWithdrawData({
