@@ -9,7 +9,6 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
 
-
 contract SingularityMock is EIP712 {
     using SafeERC20 for IERC20;
 
@@ -117,17 +116,18 @@ contract SingularityMock is EIP712 {
         yieldBox.transfer(address(this), to, collateralId, share);
     }
 
-
     struct _BuyCollateralCalldata {
         address from;
         uint256 borrowAmount;
         uint256 supplyAmount;
         bytes data;
     }
-       
 
-    function buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, bytes calldata data) public returns (uint256 amountOut) {
-         // Stack too deep fix
+    function buyCollateral(address from, uint256 borrowAmount, uint256 supplyAmount, bytes calldata data)
+        public
+        returns (uint256 amountOut)
+    {
+        // Stack too deep fix
         _BuyCollateralCalldata memory calldata_;
         {
             calldata_.from = from;
@@ -136,15 +136,12 @@ contract SingularityMock is EIP712 {
             calldata_.data = data;
         }
 
-
         // Let this fail first to save gas:
         uint256 supplyShare = yieldBox.toShare(assetId, calldata_.supplyAmount, true);
         uint256 supplyShareToAmount;
         if (supplyShare > 0) {
-            (supplyShareToAmount,) =
-                yieldBox.withdraw(assetId, calldata_.from, address(this), 0, supplyShare);
+            (supplyShareToAmount,) = yieldBox.withdraw(assetId, calldata_.from, address(this), 0, supplyShare);
         }
-
 
         userBorrowPart[from] += calldata_.borrowAmount;
 
@@ -152,10 +149,10 @@ contract SingularityMock is EIP712 {
             yieldBox.withdraw(assetId, address(this), address(this), calldata_.borrowAmount, 0);
 
         //swap 1:1
-        uint256 collateralAmount  = borrowShareToAmount;
+        uint256 collateralAmount = borrowShareToAmount;
 
         // @dev !Contract needs to be prefunded with the right amount of collateral!
-        // yieldBox.depositAsset(collateralId, address(this), address(this), collateralAmount, 0); 
+        // yieldBox.depositAsset(collateralId, address(this), address(this), collateralAmount, 0);
 
         uint256 collateralShare = yieldBox.toShare(collateralId, collateralAmount, false);
 
@@ -222,7 +219,6 @@ contract SingularityMock is EIP712 {
     function _approve(address owner, address spender, uint256 amount) internal {
         allowance[owner][spender] = amount;
     }
-
 
     function execute(Module[] calldata modules, bytes[] calldata calls, bool revertOnFail)
         external

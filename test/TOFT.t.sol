@@ -67,7 +67,6 @@ import {MagnetarMock} from "./MagnetarMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
 
-
 contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
     using OFTMsgCodec for bytes32;
@@ -120,6 +119,7 @@ contract TOFTTest is TOFTTestHelper {
     uint16 internal constant PT_TAP_EXERCISE = 802; // Use for exercise options on tOB available on another chain
     uint16 internal constant PT_SEND_PARAMS = 803; // Use for perform a normal OFT send but with a custom payload
     uint16 internal constant PT_LEVERAGE_UP = 805;
+    uint16 internal constant PT_XCHAIN_LEND_XCHAIN_LOCK = 806; // Use for `magnetar.mintFromBBAndSendForLending` step 2 call
 
     /**
      * @dev TOFT global event checks
@@ -131,7 +131,6 @@ contract TOFTTest is TOFTTestHelper {
      * @dev Setup the OApps by deploying them and setting up the endpoints.
      */
     function setUp() public override {
-
         vm.deal(userA, 1000 ether);
         vm.deal(userB, 1000 ether);
         vm.label(userA, "userA");
@@ -157,7 +156,6 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(cluster), "Cluster");
             vm.label(address(magnetar), "Magnetar");
         }
-
 
         TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
         TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
@@ -197,7 +195,7 @@ contract TOFTTest is TOFTTestHelper {
             );
             vm.label(address(aTOFT), "aTOFT");
         }
-        
+
         TOFTVault bTOFTVault = new TOFTVault(address(bERC20));
         TOFTInitStruct memory bTOFTInitStruct = TOFTInitStruct({
             name: "Token B",
@@ -355,7 +353,6 @@ contract TOFTTest is TOFTTestHelper {
         assertEq(aTOFT.nonces(userA), 1);
     }
 
-
     function test_leverage_up() public {
         uint256 erc20Amount_ = 1 ether;
 
@@ -406,7 +403,7 @@ contract TOFTTest is TOFTTestHelper {
         uint256 tokenAmountSD = tOFTHelper.toSD(erc20Amount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
-        LeverageUpActionMsg  memory leverageMsg = LeverageUpActionMsg({
+        LeverageUpActionMsg memory leverageMsg = LeverageUpActionMsg({
             user: address(this),
             market: address(singularity),
             marketHelper: address(marketHelper),
@@ -414,7 +411,7 @@ contract TOFTTest is TOFTTestHelper {
             supplyAmount: 0,
             executorData: "0x"
         });
-       
+
         bytes memory sendMsg_ = tOFTHelper.buildLeverageUpMsg(leverageMsg);
 
         PrepareLzCallReturn memory prepareLzCallReturn2_ = tOFTHelper.prepareLzCall(
@@ -460,9 +457,7 @@ contract TOFTTest is TOFTTestHelper {
                 )
             );
         }
-       
     }
-
 
     /**
      * ERC20 APPROVALS

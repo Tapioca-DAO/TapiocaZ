@@ -14,7 +14,6 @@ import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/Ta
 import {TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {BaseTOFTReceiver} from "./BaseTOFTReceiver.sol";
 
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -29,13 +28,7 @@ import {BaseTOFTReceiver} from "./BaseTOFTReceiver.sol";
 contract TOFTReceiver is BaseTOFTReceiver {
     constructor(TOFTInitStruct memory _data) BaseTOFTReceiver(_data) {}
 
-    function _toftCustomComposeReceiver(uint16, address, bytes memory)
-        internal
-        pure
-        override
-        returns (bool success)
-    {
+    function _toftCustomComposeReceiver(uint16, address, bytes memory) internal pure override returns (bool success) {
         return false;
     }
-    
 }

@@ -14,9 +14,15 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
 import {
+    LockAndParticipateData,
+    IMagnetar,
+    MagnetarCall,
+    MagnetarAction,
+    CrossChainMintFromBBAndLendOnSGLData
+} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {
     ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
-import {LockAndParticipateData, IMagnetar, MagnetarCall, MagnetarAction} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
@@ -51,6 +57,41 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
     /**
+     * @notice cross-chain receiver to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
+     * @dev Cross chain flow:
+     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
+     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
+     *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
+     * @param _data.user the user to perform the operation for
+     * @param _data.bigBang the BB address
+     * @param _data.mintData the data needed to mint on BB
+     * @param _data.lendSendParams LZ send params for lending on another layer
+     */
+    function mintLendXChainSGLXChainLockAndParticipateReceiver(bytes memory _data) public payable {
+        // Decode received message.
+        CrossChainMintFromBBAndLendOnSGLData memory msg_ =
+            TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
+
+        _checkWhitelistStatus(msg_.bigBang);
+        _checkWhitelistStatus(msg_.magnetar);
+
+        if (msg_.mintData.mintAmount > 0) {
+            msg_.mintData.mintAmount = _toLD(msg_.mintData.mintAmount.toUint64());
+        }
+
+        bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
+        MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
+        magnetarCall[0] = MagnetarCall({
+            id: MagnetarAction.MintXChainModule,
+            target: address(this),
+            value: msg.value,
+            allowFailure: false,
+            call: call
+        });
+        IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+    }
+
+    /**
      * @notice Execute `magnetar.lockAndParticipate`
      * @dev Lock on tOB and/or participate on tOLP
      * @param _data The call data containing info about the operation.
@@ -77,10 +118,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             msg_.fraction = _toLD(msg_.fraction.toUint64());
         }
 
-        bytes memory call = abi.encodeWithSelector(
-            MagnetarMintXChainModule.lockAndParticipate.selector,
-            msg_
-        );
+        bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
             id: MagnetarAction.MintXChainModule,
@@ -92,7 +130,6 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
     }
 
-    
     /**
      * @notice Exercise tOB option
      * @param _data The call data containing info about the operation.
