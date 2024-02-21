@@ -663,13 +663,10 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-
-            vm.prank(address(this));
             pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
             aERC20.approve(address(pearlmit), uint200(erc20Amount_));
             aTOFT.wrap(address(this), address(this), erc20Amount_);
 
-            vm.prank(address(this));
             pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
@@ -677,7 +674,6 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aTOFT.balanceOf(address(this)), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
 
-            vm.prank(address(this));
             aTOFT.approve(address(yieldBox), erc20Amount_);
             yieldBox.depositAsset(aTOFTYieldBoxId, address(this), address(singularity), erc20Amount_, 0);
             assertGt(yieldBox.balanceOf(address(singularity), aTOFTYieldBoxId), 0);
@@ -725,7 +721,6 @@ contract TOFTTest is TOFTTestHelper {
         uint256 tokenAmountSD = tOFTHelper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
-        vm.prank(address(this));
         pearlmit.approve(address(bTOFT), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
         bTOFT.approve(address(pearlmit), type(uint200).max);
 
@@ -968,10 +963,9 @@ contract TOFTTest is TOFTTestHelper {
             deal(address(bERC20), address(this), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            vm.prank(address(this));
             pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
-            bTOFT.wrap(address(this), address(this), erc20Amount_); 
+            bTOFT.wrap(address(this), address(this), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(bTOFT.vault())), erc20Amount_);
         }
@@ -1193,7 +1187,6 @@ contract TOFTTest is TOFTTestHelper {
         LZSendParam memory withdrawLzSendParam_;
         MessagingFee memory withdrawMsgFee_; // Will be used as value for the composed msg
 
-        vm.prank(address(this));
         pearlmit.approve(address(bTOFT), 0, address(tOB), type(uint200).max, uint48(block.timestamp + 1));
 
         {
