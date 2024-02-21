@@ -26,6 +26,7 @@ import {
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
 import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
+import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 
 /*
@@ -47,6 +48,7 @@ import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
 contract TOFTOptionsReceiverModule is BaseTOFT {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
+    using SafeApprove for address;
 
     error TOFTOptionsReceiverModule_NotAuthorized(address invalidAddress);
 
@@ -154,10 +156,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);
 
             /// @dev call exerciseOption() with address(this) as the payment token
-            // _approve(address(this), _options.target, _options.paymentTokenAmount);
             pearlmit.approve(
                 address(this), 0, _options.target, uint200(_options.paymentTokenAmount), uint48(block.timestamp + 1)
             ); // Atomic approval
+            address(this).safeApprove(address(pearlmit), _options.paymentTokenAmount);
 
             uint256 bBefore = balanceOf(address(this));
             ITapiocaOptionBroker(_options.target).exerciseOption(

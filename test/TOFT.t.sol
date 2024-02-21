@@ -663,15 +663,21 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            aERC20.approve(address(aTOFT), erc20Amount_);
-            bERC20.approve(address(bTOFT), erc20Amount_);
 
+            vm.prank(address(this));
+            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            aERC20.approve(address(pearlmit), uint200(erc20Amount_));
             aTOFT.wrap(address(this), address(this), erc20Amount_);
+
+            vm.prank(address(this));
+            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
 
             assertEq(aTOFT.balanceOf(address(this)), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
 
+            vm.prank(address(this));
             aTOFT.approve(address(yieldBox), erc20Amount_);
             yieldBox.depositAsset(aTOFTYieldBoxId, address(this), address(singularity), erc20Amount_, 0);
             assertGt(yieldBox.balanceOf(address(singularity), aTOFTYieldBoxId), 0);
@@ -719,8 +725,9 @@ contract TOFTTest is TOFTTestHelper {
         uint256 tokenAmountSD = tOFTHelper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
-        bTOFT.approve(address(magnetar), type(uint256).max);
-        bTOFT.approve(address(bTOFT), type(uint256).max);
+        vm.prank(address(this));
+        pearlmit.approve(address(bTOFT), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        bTOFT.approve(address(pearlmit), type(uint200).max);
 
         MarketBorrowMsg memory marketBorrowMsg = MarketBorrowMsg({
             user: address(this),
@@ -961,9 +968,12 @@ contract TOFTTest is TOFTTestHelper {
             deal(address(bERC20), address(this), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            bERC20.approve(address(bTOFT), erc20Amount_);
-            bTOFT.wrap(address(this), address(this), erc20Amount_);
+            vm.prank(address(this));
+            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(erc20Amount_));
+            bTOFT.wrap(address(this), address(this), erc20Amount_); 
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
+            assertEq(bERC20.balanceOf(address(bTOFT.vault())), erc20Amount_);
         }
 
         //useful in case of withdraw after borrow
@@ -1055,7 +1065,7 @@ contract TOFTTest is TOFTTestHelper {
         }
     }
 
-    function test_receive_with_params_userA() public {
+    function test_reaaaaaceive_with_params_userA() public {
         uint256 erc20Amount_ = 1 ether;
 
         //setup
@@ -1066,7 +1076,8 @@ contract TOFTTest is TOFTTestHelper {
             deal(address(bERC20), address(this), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            bERC20.approve(address(bTOFT), erc20Amount_);
+            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
         }
@@ -1181,6 +1192,9 @@ contract TOFTTest is TOFTTestHelper {
         //useful in case of withdraw after borrow
         LZSendParam memory withdrawLzSendParam_;
         MessagingFee memory withdrawMsgFee_; // Will be used as value for the composed msg
+
+        vm.prank(address(this));
+        pearlmit.approve(address(bTOFT), 0, address(tOB), type(uint200).max, uint48(block.timestamp + 1));
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
