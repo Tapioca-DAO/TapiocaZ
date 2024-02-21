@@ -24,6 +24,8 @@ contract TapiocaOptionsBrokerMock is PearlmitHandler {
         // @dev 10% is subtracted to test out payment token refund
         uint256 actualPaymentTokenAmount = paymentTokenAmount - paymentTokenAmount * 1e4 / 1e5;
 
+        (uint256 allowedAmount,) = pearlmit.allowance(msg.sender, address(this), address(_paymentToken), 0); // Returns 0 if not approved or expired
+
         // IERC20(address(_paymentToken)).safeTransferFrom(msg.sender, address(this), actualPaymentTokenAmount);
         pearlmit.transferFromERC20(msg.sender, address(this), address(_paymentToken), actualPaymentTokenAmount);
         IERC20(tapOFT).safeTransfer(msg.sender, _tapAmount);
