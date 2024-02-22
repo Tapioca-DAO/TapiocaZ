@@ -70,7 +70,8 @@ abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnicha
         }
         if (_amount == 0) revert TOFT_NotValid();
         // IERC20(erc20).safeTransferFrom(_fromAddress, address(vault), _amount);
-        pearlmit.transferFromERC20(_fromAddress, address(vault), erc20, _amount);
+        bool isErr = pearlmit.transferFromERC20(_fromAddress, address(vault), erc20, _amount);
+        if (isErr) revert TOFT_NotValid();
         _mint(_toAddress, _amount - _feeAmount);
     }
 
