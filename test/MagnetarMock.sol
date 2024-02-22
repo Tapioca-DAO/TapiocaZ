@@ -283,7 +283,8 @@ contract MagnetarMock is PearlmitHandler {
     function _extractTokens(address _from, address _token, uint256 _amount) private returns (uint256) {
         uint256 balanceBefore = IERC20(_token).balanceOf(address(this));
         // IERC20(_token).safeTransferFrom(_from, address(this), _amount);
-        pearlmit.transferFromERC20(_from, address(this), _token, _amount);
+        bool isErr = pearlmit.transferFromERC20(_from, address(this), _token, _amount);
+        if (isErr) revert MagnetarMock_NotAuthorized();
         uint256 balanceAfter = IERC20(_token).balanceOf(address(this));
         if (balanceAfter <= balanceBefore) revert MagnetarMock_Failed();
         return balanceAfter - balanceBefore;
