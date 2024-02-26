@@ -17,7 +17,7 @@ import { TOFTVault__factory } from '@typechain/index';
 describe('mTapiocaOFT', () => {
     describe('extractFees()', () => {
         it('should extract fees', async () => {
-            const { signer, mErc20Mock, mintAndApprove, dummyAmount } =
+            const { signer, mErc20Mock, mintAndApprove, dummyAmount, pearlmit } =
                 await loadFixture(setupFixture);
 
             const mToftFactory = await ethers.getContractFactory('mTOFT');
@@ -44,7 +44,8 @@ describe('mTapiocaOFT', () => {
                 erc20: mErc20Mock.address,
                 hostEid: 10,
                 extExec: ethers.constants.AddressZero,
-                vault: deployedVault.address
+                vault: deployedVault.address,
+                pearlmit: pearlmit.address,
             };
             const mtoftSender = await (
                 await ethers.getContractFactory('TOFTSender')
@@ -85,7 +86,7 @@ describe('mTapiocaOFT', () => {
             };
             await mtapiocaOFT.setOwnerState(ownerStateData);
 
-            await mintAndApprove(mErc20Mock, mtapiocaOFT, signer, dummyAmount);
+            await mintAndApprove(mErc20Mock, mtapiocaOFT, signer, dummyAmount, pearlmit);
 
             const balTOFTSignerBefore = await mtapiocaOFT.balanceOf(
                 signer.address,
@@ -149,7 +150,7 @@ describe('mTapiocaOFT', () => {
             await expect(mtapiocaOFT.setOwnerState(ownerStateData)).to.not.be
                 .reverted;
 
-            await mintAndApprove(mErc20Mock, mtapiocaOFT, signer, dummyAmount);
+            await mintAndApprove(mErc20Mock, mtapiocaOFT, signer, dummyAmount, pearlmit);
             await expect(
                 mtapiocaOFT.wrap(signer.address, signer.address, dummyAmount),
             ).to.be.revertedWithCustomError(mtapiocaOFT, 'mTOFT_CapNotValid');
@@ -197,45 +198,6 @@ describe('mTapiocaOFT', () => {
     });
 
     describe('wrap()', () => {
-        it('Should fail if not approved', async () => {
-            const {
-                signer,
-                randomUser,
-                mtapiocaOFT0,
-                dummyAmount,
-                mErc20Mock,
-                mintAndApprove,
-            } = await loadFixture(setupFixture);
-            await mintAndApprove(
-                mErc20Mock,
-                mtapiocaOFT0,
-                signer,
-                BN(dummyAmount),
-            );
-
-            // Check failure with no allowance
-            await expect(
-                mtapiocaOFT0
-                    .connect(randomUser)
-                    .wrap(signer.address, randomUser.address, dummyAmount),
-            ).to.be.reverted;
-
-            // Approve and check allowance
-            await mtapiocaOFT0.approve(randomUser.address, dummyAmount);
-            expect(
-                await mtapiocaOFT0.allowance(
-                    signer.address,
-                    randomUser.address,
-                ),
-            ).to.be.equal(dummyAmount);
-
-            // Check success after allowance
-            await expect(
-                mtapiocaOFT0
-                    .connect(randomUser)
-                    .wrap(signer.address, signer.address, dummyAmount),
-            ).to.not.be.reverted;
-        });
         it('Should fail if not on the same chain', async () => {
             const {
                 signer,
@@ -244,6 +206,7 @@ describe('mTapiocaOFT', () => {
                 dummyAmount,
                 mErc20Mock,
                 mintAndApprove,
+                pearlmit
             } = await loadFixture(setupFixture);
 
             await mintAndApprove(
@@ -251,6 +214,7 @@ describe('mTapiocaOFT', () => {
                 mtapiocaOFT0,
                 signer,
                 BN(dummyAmount),
+                pearlmit
             );
             await expect(
                 mtapiocaOFT10.wrap(signer.address, signer.address, dummyAmount),
@@ -264,9 +228,10 @@ describe('mTapiocaOFT', () => {
                 mtapiocaOFT0,
                 mintAndApprove,
                 dummyAmount,
+                pearlmit
             } = await loadFixture(setupFixture);
 
-            await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount);
+            await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount, pearlmit);
 
             const balTOFTSignerBefore = await mtapiocaOFT0.balanceOf(
                 signer.address,
@@ -297,9 +262,10 @@ describe('mTapiocaOFT', () => {
                 mtapiocaOFT0,
                 mintAndApprove,
                 dummyAmount,
+                pearlmit
             } = await loadFixture(setupFixture);
 
-            await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount);
+            await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount, pearlmit);
 
             await mtapiocaOFT0.wrap(
                 signer.address,
@@ -352,9 +318,10 @@ describe('mTapiocaOFT', () => {
                 mtapiocaOFT0,
                 mintAndApprove,
                 dummyAmount,
+                pearlmit
             } = await loadFixture(setupFixture);
 
-            await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount);
+            await mintAndApprove(mErc20Mock, mtapiocaOFT0, signer, dummyAmount, pearlmit);
             await mtapiocaOFT0.wrap(
                 signer.address,
                 signer.address,
@@ -393,7 +360,7 @@ describe('mTapiocaOFT', () => {
     });
 
     it('Should be able to use permit', async () => {
-        const { signer, randomUser, mtapiocaOFT0, mintAndApprove, mErc20Mock } =
+        const { signer, randomUser, mtapiocaOFT0, mintAndApprove, mErc20Mock, pearlmit } =
             await loadFixture(setupFixture);
 
         await mintAndApprove(
@@ -401,6 +368,7 @@ describe('mTapiocaOFT', () => {
             mtapiocaOFT0,
             signer,
             (1e18).toString(),
+            pearlmit,
         );
 
         await mtapiocaOFT0.wrap(

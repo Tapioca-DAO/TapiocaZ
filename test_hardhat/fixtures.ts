@@ -18,7 +18,7 @@ import {
 } from '@tapioca-sdk/typechain/tapioca-mocks';
 
 import { Cluster__factory } from '@tapioca-sdk/typechain/tapioca-periphery';
-import { TOFTVault__factory } from '@typechain/index';
+import { Pearlmit, TOFTVault__factory } from '@typechain/index';
 
 export const setupFixture = async () => {
     const signer = (await hre.ethers.getSigners())[0];
@@ -111,6 +111,10 @@ export const setupFixture = async () => {
     const toftFactory = await hre.ethers.getContractFactory('TOFT');
 
     const vaultFactory = new TOFTVault__factory(signer);
+    
+    const pearlmitFactory = await hre.ethers.getContractFactory('Pearlmit');
+    const pearlmit = await pearlmitFactory.deploy("Pearlmit", "1");
+    await pearlmit.deployed;
 
     //Deploy mTapiocaOFT0
     const vault0 = await vaultFactory.deploy(mErc20Mock.address);
@@ -125,6 +129,7 @@ export const setupFixture = async () => {
         vault: vault0.address,
         hostEid: 31337,
         extExec: hre.ethers.constants.AddressZero,
+        pearlmit: pearlmit.address
     };
     const mtoftSender0 = await (
         await hre.ethers.getContractFactory('TOFTSender')
@@ -178,6 +183,7 @@ export const setupFixture = async () => {
         vault: vault10.address,
         hostEid: 10,
         extExec: hre.ethers.constants.AddressZero,
+        pearlmit: pearlmit.address
     };
     const mtoftSender10 = await (
         await hre.ethers.getContractFactory('TOFTSender')
@@ -222,6 +228,7 @@ export const setupFixture = async () => {
         vault: vault00.address,
         hostEid: 31337,
         extExec: hre.ethers.constants.AddressZero,
+        pearlmit: pearlmit.address
     };
     const toftSender0 = await (
         await hre.ethers.getContractFactory('TOFTSender')
@@ -260,6 +267,7 @@ export const setupFixture = async () => {
         vault: vault1010.address,
         hostEid: 10,
         extExec: hre.ethers.constants.AddressZero,
+        pearlmit: pearlmit.address
     };
     const toftSender10 = await (
         await hre.ethers.getContractFactory('TOFTSender')
@@ -293,10 +301,13 @@ export const setupFixture = async () => {
         toft: BaseTOFT,
         signer: SignerWithAddress,
         amount: BigNumberish,
+        pearlmit: Pearlmit
     ) => {
         await time.increase(86401);
         await erc20Mock.freeMint(amount);
-        await erc20Mock.approve(toft.address, amount);
+
+        await pearlmit.approve(erc20Mock.address, 0, toft.address, amount, '9000000000');
+        await erc20Mock.approve(pearlmit.address, amount);
     };
     const vars = {
         signer,
@@ -317,6 +328,7 @@ export const setupFixture = async () => {
         balancer,
         stargateRouterMock,
         stargateRouterETHMock,
+        pearlmit,
     };
     const functions = {
         mintAndApprove,
