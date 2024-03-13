@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 // External
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
@@ -30,7 +31,7 @@ import {ModuleManager} from "./modules/ModuleManager.sol";
  * @author TapiocaDAO
  * @notice Base TOFT contract for LZ V2
  */
-abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnichainEngine, BaseTOFTTokenMsgType {
+abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnichainEngine, BaseTOFTTokenMsgType, Pausable {
     using SafeERC20 for IERC20;
 
     IYieldBox public immutable yieldBox;
@@ -59,6 +60,17 @@ abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnicha
      */
     function setCluster(address _cluster) external virtual onlyOwner {
         cluster = ICluster(_cluster);
+    }
+
+    /**
+     * @notice Un/Pauses this contract.
+     */
+    function setPause(bool _pauseState) external onlyOwner {
+        if (_pauseState) {
+            _pause();
+        } else {
+            _unpause();
+        }
     }
 
     function _wrap(address _fromAddress, address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {

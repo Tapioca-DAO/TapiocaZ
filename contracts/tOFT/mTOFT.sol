@@ -12,7 +12,6 @@ import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
 import {
@@ -47,7 +46,7 @@ import {BaseTOFT} from "./BaseTOFT.sol";
  * @notice Tapioca OFT wrapper contract that is connected with multiple chains
  * @dev It can be wrapped and unwrapped on multiple connected chains
  */
-contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateReceiver {
+contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     using SafeERC20 for IERC20;
 
     /**

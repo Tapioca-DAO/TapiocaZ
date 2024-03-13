@@ -259,9 +259,9 @@ contract TOFTTest is TOFTTestHelper {
         }
 
         {
-            TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
-            TOFTVault bTOFTVault = new TOFTVault(address(bERC20));
-            TOFTInitStruct memory bTOFTInitStruct = TOFTInitStruct({
+            toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+            bTOFTVault = new TOFTVault(address(bERC20));
+            bTOFTInitStruct = TOFTInitStruct({
                 name: "Token B",
                 symbol: "TNKB",
                 endpoint: address(endpoints[aEid]),
