@@ -30,7 +30,8 @@ import {
     ExerciseOptionsMsg,
     IBorrowParams,
     IRemoveParams,
-    LeverageUpActionMsg
+    LeverageUpActionMsg,
+    IToftVault
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
     YieldBoxApproveAllMsg,
@@ -57,6 +58,7 @@ import {mTOFTReceiver} from "contracts/tOFT/modules/mTOFTReceiver.sol";
 import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
+import {mTOFT} from "contracts/tOFT/mTOFT.sol";
 
 // Tapioca Tests
 import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
@@ -67,6 +69,8 @@ import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
+
+import "forge-std/console.sol";
 
 contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
@@ -85,6 +89,11 @@ contract TOFTTest is TOFTTestHelper {
 
     TOFTMock aTOFT;
     TOFTMock bTOFT;
+
+    mTOFT mTOFTA;
+    mTOFT mTOFTB;
+    mTOFT wrongHostTOFT;
+
     // MagnetarV2 magnetar;
     MagnetarMock magnetar;
     SingularityMock singularity;
@@ -199,6 +208,11 @@ contract TOFTTest is TOFTTestHelper {
                 payable(_deployOApp(type(TOFTMock).creationCode, abi.encode(aTOFTInitStruct, aTOFTModulesInitStruct)))
             );
             vm.label(address(aTOFT), "aTOFT");
+
+            // mTOFTA = mTOFT(
+            //     payable(_deployOApp(type(mTOFT).creationCode, abi.encode(aTOFTInitStruct, aTOFTModulesInitStruct, address(0))))
+            // );
+            // vm.label(address(mTOFTA), "mTOFTA");
         }
 
         TOFTVault bTOFTVault = new TOFTVault(address(bERC20));
@@ -237,6 +251,47 @@ contract TOFTTest is TOFTTestHelper {
                 payable(_deployOApp(type(TOFTMock).creationCode, abi.encode(bTOFTInitStruct, bTOFTModulesInitStruct)))
             );
             vm.label(address(bTOFT), "bTOFT");
+
+            // mTOFTB = mTOFT(
+            //     payable(_deployOApp(type(mTOFT).creationCode, abi.encode(bTOFTInitStruct, bTOFTModulesInitStruct, address(0))))
+            // );
+            // vm.label(address(mTOFTB), "mTOFTB");
+        }
+
+        {
+            TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+            TOFTVault bTOFTVault = new TOFTVault(address(bERC20));
+            TOFTInitStruct memory bTOFTInitStruct = TOFTInitStruct({
+                name: "Token B",
+                symbol: "TNKB",
+                endpoint: address(endpoints[aEid]),
+                delegate: __owner,
+                yieldBox: address(yieldBox),
+                cluster: address(cluster),
+                erc20: address(bERC20),
+                vault: address(bTOFTVault),
+                hostEid: bEid,
+                extExec: address(toftExtExec),
+                pearlmit: IPearlmit(address(pearlmit))
+            });
+
+            TOFTSender bTOFTSender = new TOFTSender(bTOFTInitStruct);
+            mTOFTReceiver bTOFTReceiver = new mTOFTReceiver(bTOFTInitStruct);
+            TOFTMarketReceiverModule bTOFTMarketReceiverModule = new TOFTMarketReceiverModule(bTOFTInitStruct);
+            TOFTOptionsReceiverModule bTOFTOptionsReceiverModule = new TOFTOptionsReceiverModule(bTOFTInitStruct);
+            TOFTGenericReceiverModule bTOFTGenericReceiverModule = new TOFTGenericReceiverModule(bTOFTInitStruct);
+        
+            TOFTModulesInitStruct memory bTOFTModulesInitStruct = TOFTModulesInitStruct({
+                tOFTSenderModule: address(bTOFTSender),
+                tOFTReceiverModule: address(bTOFTReceiver),
+                marketReceiverModule: address(bTOFTMarketReceiverModule),
+                optionsReceiverModule: address(bTOFTOptionsReceiverModule),
+                genericReceiverModule: address(bTOFTGenericReceiverModule)
+            });
+            wrongHostTOFT = mTOFT(
+                payable(_deployOApp(type(mTOFT).creationCode, abi.encode(bTOFTInitStruct, bTOFTModulesInitStruct, address(0))))
+            );
+            vm.label(address(wrongHostTOFT), "mTOFT_not_host");
         }
 
         tOFTHelper = new TOFTHelper();
@@ -337,6 +392,123 @@ contract TOFTTest is TOFTTestHelper {
         assertEq(address(aTOFT.erc20()), address(aERC20));
         assertEq(aTOFT.hostEid(), aEid);
     }
+
+    function test_toft_decimals() public {
+        assertEq(aTOFT.decimals(), aERC20.decimals());
+    }
+
+    function test_wrap_fail() public {
+        uint256 erc20Amount_ = 1 ether;
+        pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+        bERC20.approve(address(pearlmit), uint200(erc20Amount_));
+
+        vm.expectRevert();
+        wrongHostTOFT.wrap(address(this), address(this), erc20Amount_);
+
+        vm.expectRevert();
+        wrongHostTOFT.unwrap(address(this), erc20Amount_);
+    }
+
+    function test_wrap() public {
+        uint256 erc20Amount_ = 1 ether;
+
+        // wrap
+        {
+            deal(address(aERC20), address(this), erc20Amount_);
+            deal(address(bERC20), address(this), erc20Amount_);
+
+            assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
+            assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
+
+            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            aERC20.approve(address(pearlmit), uint200(erc20Amount_));
+            aTOFT.wrap(address(this), address(this), erc20Amount_);
+            
+            assertEq(aTOFT.balanceOf(address(this)), erc20Amount_);
+            assertEq(aERC20.balanceOf(address(this)), 0);
+        }
+
+        // unwrap
+        {
+            aTOFT.unwrap(address(this), erc20Amount_);
+            assertEq(aTOFT.balanceOf(address(this)), 0);
+            assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
+        }
+    }
+
+    function test_extract_fees() public {
+        uint256 erc20Amount_ = 1 ether;
+
+        // set fee
+        {
+            mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
+                stargateRouter: address(0),
+                mintFee: 1e4,
+                mintCap: wrongHostTOFT.mintCap(),
+                connectedChain: aEid,
+                connectedChainState: true,
+                balancerStateAddress: address(0),
+                balancerState: false
+            });
+            wrongHostTOFT.setOwnerState(dataA);
+        }
+
+        // wrap
+        uint256 feeAmount = erc20Amount_  * 1e4 / 1e5;
+        {
+            deal(address(bERC20), address(this), erc20Amount_);
+
+            assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
+
+            pearlmit.approve(address(bERC20), 0, address(wrongHostTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(erc20Amount_));
+            wrongHostTOFT.wrap(address(this), address(this), erc20Amount_);
+            
+            assertLt(wrongHostTOFT.balanceOf(address(this)), erc20Amount_);
+            assertEq(wrongHostTOFT.balanceOf(address(this)), erc20Amount_ - feeAmount);
+        }
+
+        // extract
+        {
+            IToftVault vault = wrongHostTOFT.vault(); 
+            uint256 viewFeesAmount = vault.viewFees();
+            assertGt(viewFeesAmount, 0);
+            wrongHostTOFT.withdrawFees(address(tapOFT), vault.viewFees());
+            assertEq(bERC20.balanceOf(address(tapOFT)), feeAmount);
+        }
+    }
+
+    function test_extract_underlying() public {
+        bool balancerStatus = wrongHostTOFT.balancers(address(this));
+        assertFalse(balancerStatus);
+
+        vm.expectRevert();
+        wrongHostTOFT.extractUnderlying(1);
+
+        {
+            mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
+                stargateRouter: address(0),
+                mintFee: 0,
+                mintCap: wrongHostTOFT.mintCap(),
+                connectedChain: 0,
+                connectedChainState: false,
+                balancerStateAddress: address(this),
+                balancerState: true
+            });
+            wrongHostTOFT.setOwnerState(dataA);
+        }
+       
+       
+        balancerStatus = wrongHostTOFT.balancers(address(this));
+        assertTrue(balancerStatus);
+
+        IToftVault vault = wrongHostTOFT.vault(); 
+        deal(address(bERC20), address(vault), 1);
+
+        wrongHostTOFT.extractUnderlying(1);
+        assertEq(bERC20.balanceOf(address(this)), 1);
+    }
+
 
     function test_erc20_permit() public {
         ERC20PermitStruct memory permit_ =

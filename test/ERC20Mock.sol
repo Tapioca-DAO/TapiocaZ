@@ -13,4 +13,10 @@ contract ERC20Mock is ERC20 {
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
     }
+
+    // for tests support
+    // when the ERC20 is acting as a TOFT
+    function erc20() external view returns (address) {
+        return address(this);
+    }
 }

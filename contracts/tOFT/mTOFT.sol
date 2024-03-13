@@ -73,19 +73,7 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
 
     address private _stargateRouter;
 
-    event StargateRouterUpdated(address indexed _old, address indexed _new);
-
-    /**
-     * @notice event emitted when a connected chain is reigstered or unregistered
-     */
-    event ConnectedChainStatusUpdated(uint256 indexed _chain, bool indexed _old, bool indexed _new);
-
-    /**
-     * @notice event emitted when balancer status is updated
-     */
-    event BalancerStatusUpdated(address indexed _balancer, bool indexed _bool, bool indexed _new);
-
-    /**
+    /*
      * @notice event emitted when rebalancing is performed
      */
     event Rebalancing(address indexed _balancer, uint256 indexed _amount, bool indexed _isNative);
