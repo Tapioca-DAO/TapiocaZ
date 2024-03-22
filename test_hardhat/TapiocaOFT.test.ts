@@ -47,9 +47,10 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0,
                 mintAndApprove,
                 dummyAmount,
+                pearlmit
             } = await loadFixture(setupFixture);
 
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount, pearlmit);
             const vault = await tapiocaOFT0.vault();
 
             const balTOFTSignerBefore = await tapiocaOFT0.balanceOf(
@@ -88,9 +89,10 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0,
                 mintAndApprove,
                 dummyAmount,
+                pearlmit
             } = await loadFixture(setupFixture);
 
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount, pearlmit);
             await tapiocaOFT0.wrap(signer.address, signer.address, dummyAmount);
 
             const vault = await tapiocaOFT0.vault();
@@ -135,9 +137,10 @@ describe('TapiocaOFT', () => {
                 tapiocaOFT0,
                 mintAndApprove,
                 dummyAmount,
+                pearlmit
             } = await loadFixture(setupFixture);
 
-            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount);
+            await mintAndApprove(erc20Mock, tapiocaOFT0, signer, dummyAmount, pearlmit);
             await tapiocaOFT0.wrap(signer.address, signer.address, dummyAmount);
 
             const balTOFTSignerBefore = await tapiocaOFT0.balanceOf(

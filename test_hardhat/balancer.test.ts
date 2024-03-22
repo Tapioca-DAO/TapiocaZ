@@ -167,6 +167,7 @@ describe('Balancer', () => {
                 balancer,
                 mErc20Mock,
                 signer,
+                pearlmit,
             } = await loadFixture(setupFixture);
 
             let checkData = await balancer.checker(
@@ -196,6 +197,9 @@ describe('Balancer', () => {
                 mtapiocaOFT0.address,
                 ethers.constants.MaxUint256,
             );
+            
+            await pearlmit.approve(mErc20Mock.address, 0, mtapiocaOFT0.address, 100, '9000000000');
+            await mErc20Mock.approve(pearlmit.address, 100);
             await mtapiocaOFT0.wrap(signer.address, signer.address, 100);
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
@@ -212,6 +216,7 @@ describe('Balancer', () => {
                 stargateRouterMock,
                 mErc20Mock,
                 signer,
+                pearlmit
             } = await loadFixture(setupFixture);
 
             const ownerStateData = {
@@ -239,10 +244,13 @@ describe('Balancer', () => {
             ).to.not.be.reverted;
 
             await mErc20Mock.mintTo(signer.address, 100);
+
             await mErc20Mock.approve(
                 mtapiocaOFT0.address,
                 ethers.constants.MaxUint256,
             );
+            await pearlmit.approve(mErc20Mock.address, 0, mtapiocaOFT0.address, 100, '9000000000');
+            await mErc20Mock.approve(pearlmit.address, 100);
             await mtapiocaOFT0.wrap(signer.address, signer.address, 100);
 
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
@@ -292,7 +300,10 @@ describe('Balancer', () => {
                 mtapiocaOFT0.address,
                 ethers.constants.MaxUint256,
             );
+            await pearlmit.approve(mErc20Mock.address, 0, mtapiocaOFT0.address, amount, '9000000000');
+            await mErc20Mock.approve(pearlmit.address, amount);
             await mtapiocaOFT0.wrap(signer.address, signer.address, amount);
+
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, amount);
 
             let checkerInfo = await balancer.checker(
@@ -331,6 +342,7 @@ describe('Balancer', () => {
                 balancer,
                 mErc20Mock,
                 stargateRouterMock,
+                pearlmit,
             } = await loadFixture(setupFixture);
 
             const ownerStateData = {
@@ -362,7 +374,10 @@ describe('Balancer', () => {
                 mtapiocaOFT0.address,
                 ethers.constants.MaxUint256,
             );
+            await pearlmit.approve(mErc20Mock.address, 0, mtapiocaOFT0.address, amount, '9000000000');
+            await mErc20Mock.approve(pearlmit.address, amount);
             await mtapiocaOFT0.wrap(signer.address, signer.address, amount);
+
             await balancer.addRebalanceAmount(mtapiocaOFT0.address, 1, 1);
 
             await expect(

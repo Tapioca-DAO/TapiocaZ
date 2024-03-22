@@ -56,7 +56,6 @@ import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {mTOFTReceiver} from "contracts/tOFT/modules/mTOFTReceiver.sol";
 import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
-import {Pearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
 // Tapioca Tests
