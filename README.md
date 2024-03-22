@@ -1,66 +1,8 @@
-## Foundry
+All rights are reserved and the Tapioca codebase is not Open Source or Free. You cannot modify or redistribute this code without explicit written permission from the copyright holder (Tapioca Foundation & BoringCrypto [where applicable]).
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+# TapiocaZ 🍹 🤙
 
-Foundry consists of:
+Tapioca harnessing LayerZero omni-chain infrastructure 🤯
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- [TapiocaWrapper](docs/TapiocaWrapper.md) Handle the deployment of `TOFT` contracts and execution of its `onlyOwner` functions.
+- [TapiocaOFT](docs/TapiocaOFT.md) `OFT20`, Layer-Zero superset of `ERC20`. Handles the `wrap` and `unwrap` of a desired `ERC20`
