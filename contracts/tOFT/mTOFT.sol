@@ -12,7 +12,6 @@ import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
 import {
@@ -47,7 +46,7 @@ import {BaseTOFT} from "./BaseTOFT.sol";
  * @notice Tapioca OFT wrapper contract that is connected with multiple chains
  * @dev It can be wrapped and unwrapped on multiple connected chains
  */
-contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateReceiver {
+contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     using SafeERC20 for IERC20;
 
     /**
@@ -73,19 +72,7 @@ contract mTOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit, IStargateRec
 
     address private _stargateRouter;
 
-    event StargateRouterUpdated(address indexed _old, address indexed _new);
-
-    /**
-     * @notice event emitted when a connected chain is reigstered or unregistered
-     */
-    event ConnectedChainStatusUpdated(uint256 indexed _chain, bool indexed _old, bool indexed _new);
-
-    /**
-     * @notice event emitted when balancer status is updated
-     */
-    event BalancerStatusUpdated(address indexed _balancer, bool indexed _bool, bool indexed _new);
-
-    /**
+    /*
      * @notice event emitted when rebalancing is performed
      */
     event Rebalancing(address indexed _balancer, uint256 indexed _amount, bool indexed _isNative);

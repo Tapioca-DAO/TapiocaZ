@@ -10,7 +10,6 @@ import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 // External
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // Tapioca
 import {
@@ -44,7 +43,7 @@ import {BaseTOFT} from "./BaseTOFT.sol";
  * @notice Tapioca OFT wrapper contract
  * @dev It can be wrapped and unwrapped only on host chain
  */
-contract TOFT is BaseTOFT, Pausable, ReentrancyGuard, ERC20Permit {
+contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
     error TOFT_OnlyHostChain();
     error TOFT_NotNative();
     error TOFT_Failed();
