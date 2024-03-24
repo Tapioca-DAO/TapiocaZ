@@ -192,6 +192,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
                 if (_send.minAmountLD > amountToSend) {
                     _send.minAmountLD = amountToSend;
                 }
+                _send.amountLD = amountToSend;
+                
+                msg_.lzSendParams.sendParam = _send;
 
                 // Sends to source and preserve source `msg.sender` (`from` in this case).
                 _sendPacket(msg_.lzSendParams, msg_.composeMsg, _options.from);
