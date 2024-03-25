@@ -269,13 +269,9 @@ contract Balancer is Ownable {
     function _sendNative(address payable _oft, uint256 _amount, uint16 _dstChainId, uint256 _slippage) private {
         if (address(this).balance < _amount) revert ExceedsBalance();
         uint256 valueAmount = msg.value + _amount;
-        routerETH.swapETH{value: valueAmount}(
-            _dstChainId,
-            payable(this),
-            abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
-            _amount,
-            _computeMinAmount(_amount, _slippage)
-        );
+        IStargateRouterBase.SwapAmount memory swapAmounts = IStargateRouterBase.SwapAmount({amountLD: _amount, minAmountLD: _computeMinAmount(_amount, _slippage)});
+        IStargateRouterBase.lzTxObj memory lzTxObj = IStargateRouterBase.lzTxObj({dstGasForCall: 0, dstNativeAmount: 0, dstNativeAddr: "0x0"});
+        routerETH.swapETHAndCall{value: valueAmount}(_dstChainId, payable(this), abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft), swapAmounts, lzTxObj, "0x");
     }
 
     function _sendToken(
