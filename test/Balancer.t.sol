@@ -211,11 +211,11 @@ contract TOFTTest is TOFTTestHelper {
     function test_balancer_should_fail_to_rebalance() public {
         vm.startPrank(userA);
         vm.expectRevert();
-        balancer.rebalance(payable(address(aERC20)), 1, 1, 1, "");
+        balancer.rebalance(payable(address(aERC20)), 1, 1, 1);
         vm.stopPrank();
 
         vm.expectRevert(Balancer.DestinationNotValid.selector);
-        balancer.rebalance(payable(address(aERC20)), 100, 1, 1, "");
+        balancer.rebalance(payable(address(aERC20)), 100, 1, 1);
     }
 
     function test_balancer_rebalance() public {
@@ -273,7 +273,7 @@ contract TOFTTest is TOFTTestHelper {
 
         {
             uint256 bERC20BalanceBefore = bERC20.balanceOf(address(bTOFT.vault()));
-            balancer.rebalance{value: 1e17}(payable(address(aTOFT)), uint16(bEid), 1e3, erc20Amount_, abi.encode(1, 1));
+            balancer.rebalance{value: 1e17}(payable(address(aTOFT)), uint16(bEid), 1e3, erc20Amount_);
             uint256 bERC20BalanceAfter = bERC20.balanceOf(address(bTOFT.vault()));
             assertGt(bERC20BalanceAfter, bERC20BalanceBefore);
         }
