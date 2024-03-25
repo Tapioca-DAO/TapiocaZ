@@ -7,7 +7,7 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // Tapioca
-import {IStargateRouter, IStargateRouterBase} from "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
+import {IStargateRouter, IStargateRouterBase, IStargateFactory, IStargatePool} from "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
 import {IStargateEthVault} from "tapioca-periph/interfaces/external/stargate/IStargateEthVault.sol";
 import {ITOFTVault} from "tapioca-periph/interfaces/tapiocaz/ITOFTVault.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
@@ -55,6 +55,7 @@ contract Balancer is Ownable {
 
     IStargateRouter public immutable routerETH;
     IStargateRouter public immutable router;
+    IStargateFactory public immutable stargateFactory;
 
     address public rebalancer;
 
@@ -63,7 +64,7 @@ contract Balancer is Ownable {
 
     event ConnectedChainUpdated(address indexed _srcOft, uint16 indexed _dstChainId, address indexed _dstOft);
     event Rebalanced(
-        address indexed _srcOft, uint16 indexed _dstChainId, uint256 indexed _slippage, uint256 _amount, bool _isNative
+        address indexed _srcOft, uint16 indexed _dstChainId, uint256 indexed _slippage, uint256 _amount, uint256 _convertedAmount, bool _isNative
     );
     event RebalanceAmountUpdated(
         address indexed _srcOft, uint16 indexed _dstChainId, uint256 indexed _amount, uint256 _totalAmount
@@ -98,11 +99,12 @@ contract Balancer is Ownable {
         _;
     }
 
-    constructor(address _routerETH, address _router, address _owner) {
+    constructor(address _routerETH, address _router, address _factory, address _owner) {
         if (_router == address(0)) revert RouterNotValid();
         if (_routerETH == address(0)) revert RouterNotValid();
         routerETH = IStargateRouter(_routerETH);
         router = IStargateRouter(_router);
+        stargateFactory = IStargateFactory(_factory);
 
         transferOwnership(_owner);
         rebalancer = _owner;
@@ -179,6 +181,15 @@ contract Balancer is Ownable {
             revert RebalanceAmountNotSet();
         }
 
+        uint256 convertedAmount = _amount;
+        address stargatePool = stargateFactory.getPool(connectedOFTs[_srcOft][_dstChainId].srcPoolId);
+        uint256 sharedDecimals = IStargatePool(stargatePool).sharedDecimals();
+        uint256 convertRate = IStargatePool(stargatePool).convertRate();
+        if (convertRate != 1) { 
+            // ex: for 10e18 and 6 shared decimals => 10e18 / 1e12 * 1e6, 10e12
+            convertedAmount = (_amount / convertRate) * (10 ** sharedDecimals); 
+        }
+
         //extract
         ITOFT(_srcOft).extractUnderlying(_amount);
 
@@ -188,13 +199,13 @@ contract Balancer is Ownable {
             if (msg.value == 0) revert FeeAmountNotSet();
             if (_isNative) {
                 if (disableEth) revert SwapNotEnabled();
-                _sendNative(_srcOft, _amount, _dstChainId, _slippage);
+                _sendNative(_srcOft, convertedAmount, _dstChainId, _slippage);
             } else {
-                _sendToken(_srcOft, _amount, _dstChainId, _slippage, _ercData);
+                _sendToken(_srcOft, convertedAmount, _dstChainId, _slippage, _ercData);
             }
 
-            connectedOFTs[_srcOft][_dstChainId].rebalanceable -= _amount;
-            emit Rebalanced(_srcOft, _dstChainId, _slippage, _amount, _isNative);
+            connectedOFTs[_srcOft][_dstChainId].rebalanceable -= _amount ;
+            emit Rebalanced(_srcOft, _dstChainId, _slippage, _amount, convertedAmount, _isNative);
         }
     }
 
