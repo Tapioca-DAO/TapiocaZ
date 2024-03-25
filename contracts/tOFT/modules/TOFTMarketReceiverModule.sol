@@ -72,6 +72,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      *      - executorData::bytes: Leverage executor data.
      */
     function leverageUpReceiver(bytes memory _data) public payable {
+        //make sure sender is LZ endpoint
+        _checkWhitelistStatus(msg.sender); 
+
         /// @dev decode received message
         LeverageUpActionMsg memory msg_ = TOFTMsgCodec.decodeLeverageUpMsg(_data);
 
@@ -106,6 +109,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      *      - withdrawParams::struct: Withdraw related params.
      */
     function marketBorrowReceiver(bytes memory _data) public payable {
+        //make sure sender is LZ endpoint
+        _checkWhitelistStatus(msg.sender); 
+
         /// @dev decode received message
         MarketBorrowMsg memory msg_ = TOFTMsgCodec.decodeMarketBorrowMsg(_data);
 
@@ -159,6 +165,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      *      - withdrawParams::struct: Withdraw related params.
      */
     function marketRemoveCollateralReceiver(bytes memory _data) public payable {
+        //make sure sender is LZ endpoint
+        _checkWhitelistStatus(msg.sender); 
+
         /// @dev decode received message
         MarketRemoveCollateralMsg memory msg_ = TOFTMsgCodec.decodeMarketRemoveCollateralMsg(_data);
 

@@ -323,11 +323,15 @@ contract TOFTTest is TOFTTestHelper {
         cluster.updateContract(aEid, address(magnetar), true);
         cluster.updateContract(aEid, address(tOB), true);
         cluster.updateContract(aEid, address(marketHelper), true);
+        cluster.updateContract(aEid, endpoints[aEid], true);
+        cluster.updateContract(aEid, endpoints[bEid], true);
         cluster.updateContract(bEid, address(yieldBox), true);
         cluster.updateContract(bEid, address(singularity), true);
         cluster.updateContract(bEid, address(magnetar), true);
         cluster.updateContract(bEid, address(tOB), true);
         cluster.updateContract(bEid, address(marketHelper), true);
+        cluster.updateContract(bEid, endpoints[aEid], true);
+        cluster.updateContract(bEid, endpoints[bEid], true);
     }
 
     /**

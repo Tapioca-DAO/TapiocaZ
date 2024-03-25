@@ -70,6 +70,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      * @param _data.lendSendParams LZ send params for lending on another layer
      */
     function mintLendXChainSGLXChainLockAndParticipateReceiver(bytes memory _data) public payable {
+        //make sure sender is LZ endpoint
+        _checkWhitelistStatus(msg.sender); 
+
         // Decode received message.
         CrossChainMintFromBBAndLendOnSGLData memory msg_ =
             TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
@@ -104,6 +107,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      * @param _data.participateData the data needed to participate on tOLP
      */
     function lockAndParticipateReceiver(bytes memory _data) public payable {
+        //make sure sender is LZ endpoint
+        _checkWhitelistStatus(msg.sender); 
+
         // Decode receive message
         LockAndParticipateData memory msg_ = TOFTMsgCodec.decodeLockAndParticipateMsg(_data);
 
@@ -140,6 +146,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      *      - composeMsg::bytes: Further compose data.
      */
     function exerciseOptionsReceiver(address srcChainSender, bytes memory _data) public payable {
+        //make sure sender is LZ endpoint
+        _checkWhitelistStatus(msg.sender); 
+
         // Decode received message.
         ExerciseOptionsMsg memory msg_ = TOFTMsgCodec.decodeExerciseOptionsMsg(_data);
 
@@ -193,7 +202,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
                     _send.minAmountLD = amountToSend;
                 }
                 _send.amountLD = amountToSend;
-                
+
                 msg_.lzSendParams.sendParam = _send;
 
                 // Sends to source and preserve source `msg.sender` (`from` in this case).
