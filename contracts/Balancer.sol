@@ -317,6 +317,7 @@ contract Balancer is Ownable {
             _dst,
             "0x"
         );
+        IERC20(_erc20).safeApprove(address(router), 0);
     }
 
     function _computeMinAmount(uint256 _amount, uint256 _slippage) private pure returns (uint256) {
