@@ -80,6 +80,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         if (msg_.mintData.mintAmount > 0) {
             msg_.mintData.mintAmount = _toLD(msg_.mintData.mintAmount.toUint64());
         }
+        if (msg_.mintData.collateralDepositData.amount > 0) {
+            msg_.mintData.collateralDepositData.amount = _toLD(msg_.mintData.collateralDepositData.amount.toUint64());
+        }
 
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
@@ -111,6 +114,8 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         _checkWhitelistStatus(msg_.singularity);
         if (msg_.lockData.lock) {
             _checkWhitelistStatus(msg_.lockData.target);
+            if (msg_.lockData.amount > 0) msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
+            if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
         }
         if (msg_.participateData.participate) {
             _checkWhitelistStatus(msg_.participateData.target);
