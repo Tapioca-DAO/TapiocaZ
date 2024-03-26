@@ -173,7 +173,7 @@ contract Balancer is Ownable {
         uint256 _amount,
         bytes memory _ercData
     ) external payable onlyValidDestination(_srcOft, _dstChainId) onlyValidSlippage(_slippage) {
-        if (msg.sender != owner() || msg.sender != rebalancer) revert NotAuthorized();
+        if (msg.sender != owner() && msg.sender != rebalancer) revert NotAuthorized();
 
         if (connectedOFTs[_srcOft][_dstChainId].rebalanceable < _amount) {
             revert RebalanceAmountNotSet();
