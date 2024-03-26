@@ -10,6 +10,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
@@ -163,6 +164,11 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
             /// @dev call exerciseOption() with address(this) as the payment token
             uint256 bBefore = balanceOf(address(this));
+            address oTap = ITapiocaOptionBroker(_options.target).oTAP();
+            address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
+
+            if (oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner,_options.from) && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
+
             ITapiocaOptionBroker(_options.target).exerciseOption(
                 _options.oTAPTokenID,
                 address(this), //payment token
