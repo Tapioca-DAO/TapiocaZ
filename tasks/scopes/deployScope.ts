@@ -1,8 +1,8 @@
 import '@nomiclabs/hardhat-ethers';
 import { glob } from 'glob';
 import { scope } from 'hardhat/config';
-import { deployBalancer__task } from 'tasks/deploy/deployBalancer';
-import { deployTOFT__task } from 'tasks/deploy/deployTOFT';
+import { deployBalancer__task } from 'tasks/deploy/deprecated/deployBalancer';
+import { deployTOFT__task } from 'tasks/deploy/deprecated/deployTOFT';
 
 const deployScope = scope('oft', 'TOFT & mTOFT tasks');
 
