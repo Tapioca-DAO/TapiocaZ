@@ -172,7 +172,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             uint256 bAfter = balanceOf(address(this));
 
             // Refund if less was used.
-            if (bBefore > bAfter) {
+            if (bBefore >= bAfter) {
                 uint256 diff = bBefore - bAfter;
                 if (diff < _options.paymentTokenAmount) {
                     IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
