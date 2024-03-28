@@ -1,18 +1,16 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { IDependentOn } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
-import { mTOFT__factory } from '@typechain/index';
+import { MTOFT__factory } from '@typechain/index';
 
 export const buildMTOFT = async (
     hre: HardhatRuntimeEnvironment,
     deploymentName: string,
-    args: Parameters<mTOFT__factory['deploy']>,
+    args: Parameters<MTOFT__factory['deploy']>,
     dependsOn: IDependentOn[],
-): Promise<IDeployerVMAdd<mTOFT__factory>> => {
+): Promise<IDeployerVMAdd<MTOFT__factory>> => {
     return {
-        contract: (await hre.ethers.getContractFactory(
-            'mTOFT',
-        )) as mTOFT__factory,
+        contract: await hre.ethers.getContractFactory('MTOFT'),
         deploymentName,
         args,
         dependsOn,
