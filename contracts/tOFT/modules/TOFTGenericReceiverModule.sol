@@ -32,6 +32,7 @@ contract TOFTGenericReceiverModule is BaseTOFT {
 
     error TOFTGenericReceiverModule_NotAuthorized(address invalidAddress);
     error TOFTGenericReceiverModule_TransferFailed();
+    error TOFTGenericReceiverModule_AmountMismatch();
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
@@ -60,6 +61,7 @@ contract TOFTGenericReceiverModule is BaseTOFT {
             if (toftERC20 != address(0)) {
                 IERC20(toftERC20).safeTransfer(msg_.receiver, msg_.amount);
             } else {
+                if (msg.value != msg_.amount) revert TOFTGenericReceiverModule_AmountMismatch()
                 (bool sent,) = msg_.receiver.call{value: msg_.amount}("");
                 if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
             }
