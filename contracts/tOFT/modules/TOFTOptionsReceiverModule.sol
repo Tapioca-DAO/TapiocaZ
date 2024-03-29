@@ -64,12 +64,13 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
      *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
      *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data.user the user to perform the operation for
      * @param _data.bigBang the BB address
      * @param _data.mintData the data needed to mint on BB
      * @param _data.lendSendParams LZ send params for lending on another layer
      */
-    function mintLendXChainSGLXChainLockAndParticipateReceiver(bytes memory _data) public payable {
+    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data) public payable {
         // Decode received message.
         CrossChainMintFromBBAndLendOnSGLData memory msg_ =
             TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
@@ -79,6 +80,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
         if (msg_.mintData.mintAmount > 0) {
             msg_.mintData.mintAmount = _toLD(msg_.mintData.mintAmount.toUint64());
+        }
+
+        if (msg_.user != srcChainSender) {
+            _spendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
         }
 
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
@@ -96,6 +101,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     /**
      * @notice Execute `magnetar.lockAndParticipate`
      * @dev Lock on tOB and/or participate on tOLP
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      * @param _data.user the user to perform the operation for
      * @param _data.singularity the SGL address
@@ -103,7 +109,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      * @param _data.lockData the data needed to lock on tOB
      * @param _data.participateData the data needed to participate on tOLP
      */
-    function lockAndParticipateReceiver(bytes memory _data) public payable {
+    function lockAndParticipateReceiver(address srcChainSender, bytes memory _data) public payable {
         // Decode receive message
         LockAndParticipateData memory msg_ = TOFTMsgCodec.decodeLockAndParticipateMsg(_data);
 
@@ -120,6 +126,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             msg_.fraction = _toLD(msg_.fraction.toUint64());
         }
 
+        if (msg_.user != srcChainSender) {
+            _spendAllowance(msg_.user, srcChainSender, msg_.fraction);
+        }
+
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
@@ -134,6 +144,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
     /**
      * @notice Exercise tOB option
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      *      - optionsData::address: TapiocaOptionsBroker exercise params.
      *      - lzSendParams::struct: LZ v2 send to source params.
