@@ -11,34 +11,44 @@ export const DEPLOYMENT_NAMES = {
     TOFT_GENERIC_RECEIVER_MODULE: 'TOFT_GENERIC_RECEIVER_MODULE',
     TOFT_VAULT: 'TOFT_VAULT',
     // mTOFT
-    MTOFT_WETH: 'MTOFT_WETH',
+    mtWETH: 'mtWETH',
     // tOFT BB
-    TOFT_WS_T_ETH: 'TOFT_WS_T_ETH',
-    TOFT_RETH: 'TOFT_RETH',
+    tWSTETH: 'tWSTETH',
+    tRETH: 'tRETH',
     // tOFT SGL
     TOFT_S_DAI: 'TOFT_S_DAI',
     TOFT_GLP: 'TOFT_GLP',
 };
 
 type TPostLbp = {
-    [key in EChainID]?: { WETH: string };
+    [key in EChainID]?: { WETH: string; wstETH: string; reth: string };
 };
 
 const POST_LBP: TPostLbp = {
     [EChainID.ARBITRUM]: {
         WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        wstETH: '0x5979D7b546E38E414F7E9822514be443A4800529',
+        reth: '',
     },
     [EChainID.MAINNET]: {
         WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        wstETH: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+        reth: '0xae78736Cd615f374D3085123A210448E74Fc6393',
     },
     [EChainID.ARBITRUM_SEPOLIA]: {
         WETH: '0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E',
+        wstETH: '',
+        reth: '',
     },
     [EChainID.SEPOLIA]: {
         WETH: '0xD8a79b479b0c47675E3882A1DAA494b6775CE227',
+        wstETH: '',
+        reth: '',
     },
     [EChainID.OPTIMISM_SEPOLIA]: {
         WETH: '0x4fB538Ed1a085200bD08F66083B72c0bfEb29112',
+        wstETH: '',
+        reth: '',
     },
 };
 POST_LBP['31337' as EChainID] = POST_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum
