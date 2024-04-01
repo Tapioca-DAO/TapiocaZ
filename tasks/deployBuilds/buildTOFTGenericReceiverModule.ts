@@ -9,7 +9,7 @@ export const buildTOFTGenericReceiverModule = async (
 ): Promise<IDeployerVMAdd<TOFTGenericReceiverModule__factory>> => {
     return {
         contract: await hre.ethers.getContractFactory(
-            'buildTOFTGenericReceiverModule',
+            'TOFTGenericReceiverModule',
         ),
         deploymentName,
         args,

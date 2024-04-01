@@ -31,7 +31,13 @@ import {ModuleManager} from "./modules/ModuleManager.sol";
  * @author TapiocaDAO
  * @notice Base TOFT contract for LZ V2
  */
-abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnichainEngine, BaseTOFTTokenMsgType, Pausable {
+abstract contract BaseTOFT is
+    ModuleManager,
+    PearlmitHandler,
+    BaseTapiocaOmnichainEngine,
+    BaseTOFTTokenMsgType,
+    Pausable
+{
     using SafeERC20 for IERC20;
 
     IYieldBox public immutable yieldBox;
@@ -52,6 +58,8 @@ abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnicha
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
+
+        _transferOwnership(_data.delegate);
     }
 
     /**

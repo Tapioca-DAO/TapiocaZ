@@ -6,16 +6,16 @@ import {
 
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { useNetwork } from '../../scripts/utils';
-import { loadVM } from '../utils';
-import { CHAIN_TOFTS, STARGATE_ROUTER } from './DEPLOY_CONFIG';
-import { buildTOFT } from '../deployBuilds/buildTOFT';
-import { buildMTOFT } from '../deployBuilds/buildMTOFT';
-import { buildTOFTSenderModule } from '../deployBuilds/buildTOFTSenderModule';
-import { buildTOFTReceiverModule } from '../deployBuilds/buildTOFTReceiverModule';
-import { buildTOFTMarketReceiverModule } from '../deployBuilds/buildTOFTMarketReceiverModule';
-import { buildTOFTOptionsReceiverModule } from '../deployBuilds/buildTOFTOptionsReceiverModule';
-import { buildTOFTGenericReceiverModule } from '../deployBuilds/buildTOFTGenericReceiverModule';
+import { useNetwork } from '../../../scripts/utils';
+import { loadVM } from '../../utils';
+import { CHAIN_TOFTS, STARGATE_ROUTER } from '../DEPLOY_CONFIG';
+import { buildTOFT } from '../../deployBuilds/buildTOFT';
+import { buildMTOFT } from '../../deployBuilds/buildMTOFT';
+import { buildTOFTSenderModule } from '../../deployBuilds/buildTOFTSenderModule';
+import { buildTOFTReceiverModule } from '../../deployBuilds/buildTOFTReceiverModule';
+import { buildTOFTMarketReceiverModule } from '../../deployBuilds/buildTOFTMarketReceiverModule';
+import { buildTOFTOptionsReceiverModule } from '../../deployBuilds/buildTOFTOptionsReceiverModule';
+import { buildTOFTGenericReceiverModule } from '../../deployBuilds/buildTOFTGenericReceiverModule';
 
 export const deployTOFT__task = async (
     args: {
