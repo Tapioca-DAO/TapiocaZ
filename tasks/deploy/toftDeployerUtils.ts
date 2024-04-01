@@ -1,7 +1,6 @@
 import * as PERIPH_DEPLOY_CONFIG from '@tapioca-periph/config';
 
 import SUPPORTED_CHAINS from '@tapioca-sdk/SUPPORTED_CHAINS';
-import { getChainBy } from '@tapioca-sdk/api/utils';
 import { IDependentOn } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
 import {
     TOFTInitStructStruct,
@@ -9,7 +8,6 @@ import {
 } from '@typechain/contracts/tOFT/TOFT';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadGlobalContract, loadLocalContract } from 'tapioca-sdk';
-import { TAPIOCA_PROJECTS_NAME } from 'tapioca-sdk/dist/api/config';
 import { DeployerVM } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { buildExtExec } from 'tasks/deployBuilds/buildExtExec';
 import { buildTOFTGenericReceiverModule } from 'tasks/deployBuilds/buildTOFTGenericReceiverModule';
@@ -18,43 +16,44 @@ import { buildTOFTOptionsReceiverModule } from 'tasks/deployBuilds/buildTOFTOpti
 import { buildTOFTReceiverModule } from 'tasks/deployBuilds/buildTOFTReceiverModule';
 import { buildTOFTSenderModule } from 'tasks/deployBuilds/buildTOFTSenderModule';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import { getChainBy } from '@tapioca-sdk/api/utils';
 
 export async function VMAddToftModule(params: {
     hre: HardhatRuntimeEnvironment;
     VM: DeployerVM;
     owner: string;
+    tag: string;
 }) {
-    const { hre, VM, owner } = params;
-    const addrZero = hre.ethers.constants.AddressZero;
+    const { hre, tag, VM, owner } = params;
+    const addrOne = '0x0000000000000000000000000000000000000001';
     const initStruct: TOFTInitStructStruct = {
-        cluster: addrZero,
-        delegate: addrZero,
-        endpoint: addrZero,
-        erc20: addrZero,
-        extExec: addrZero,
+        cluster: addrOne,
+        delegate: addrOne,
+        endpoint: hre.SDK.chainInfo.address, // Needs to be a real or mocked endpoint because of the external call made to it on construction
+        erc20: addrOne,
+        extExec: addrOne,
         hostEid: 0,
         name: 'TOFT Module',
-        pearlmit: addrZero,
+        pearlmit: addrOne,
         symbol: 'TOFT Module',
-        vault: addrZero,
-        yieldBox: addrZero,
+        vault: addrOne,
+        yieldBox: addrOne,
     };
+    const { cluster } = await getExternalContracts({
+        hre,
+        tag,
+    });
 
     VM.add(
         await buildExtExec(
             hre,
             DEPLOYMENT_NAMES.TOFT_EXT_EXEC,
             [
-                addrZero, // Cluster
+                cluster.address, // Cluster
                 owner, // Owner
             ],
-            [
-                {
-                    argPosition: 0,
-                    deploymentName:
-                        PERIPH_DEPLOY_CONFIG.DEPLOYMENT_NAMES.CLUSTER,
-                },
-            ],
+            [],
         ),
     )
         .add(
@@ -107,6 +106,7 @@ export async function getExternalContracts(params: {
         PERIPH_DEPLOY_CONFIG.DEPLOYMENT_NAMES.YieldBox,
         tag,
     );
+
     const cluster = loadGlobalContract(
         hre,
         TAPIOCA_PROJECTS_NAME.TapiocaPeriph,
@@ -175,6 +175,7 @@ export async function getInitStruct(params: {
         hre,
         tag,
     });
+
     return [
         {
             cluster: cluster.address,
@@ -210,6 +211,7 @@ export function getModuleStruct(params: {
     const { hre } = params;
     const addrZero = hre.ethers.constants.AddressZero;
 
+    // Arg position 1 is the second argument of the constructor for mTOFT/TOFT
     return [
         {
             genericReceiverModule: addrZero,
@@ -220,27 +222,27 @@ export function getModuleStruct(params: {
         },
         [
             {
-                argPosition: 0,
+                argPosition: 1,
                 keyName: 'genericReceiverModule',
                 deploymentName: DEPLOYMENT_NAMES.TOFT_GENERIC_RECEIVER_MODULE,
             },
             {
-                argPosition: 0,
+                argPosition: 1,
                 keyName: 'marketReceiverModule',
                 deploymentName: DEPLOYMENT_NAMES.TOFT_MARKET_RECEIVER_MODULE,
             },
             {
-                argPosition: 0,
+                argPosition: 1,
                 keyName: 'optionsReceiverModule',
                 deploymentName: DEPLOYMENT_NAMES.TOFT_OPTIONS_RECEIVER_MODULE,
             },
             {
-                argPosition: 0,
+                argPosition: 1,
                 keyName: 'tOFTReceiverModule',
                 deploymentName: DEPLOYMENT_NAMES.TOFT_RECEIVER_MODULE,
             },
             {
-                argPosition: 0,
+                argPosition: 1,
                 keyName: 'tOFTSenderModule',
                 deploymentName: DEPLOYMENT_NAMES.TOFT_SENDER_MODULE,
             },

@@ -10,7 +10,7 @@ export const buildMTOFT = async (
     dependsOn: IDependentOn[],
 ): Promise<IDeployerVMAdd<MTOFT__factory>> => {
     return {
-        contract: await hre.ethers.getContractFactory('MTOFT'),
+        contract: new MTOFT__factory(hre.ethers.provider.getSigner(0)),
         deploymentName,
         args,
         dependsOn,

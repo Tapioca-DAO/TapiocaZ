@@ -4,15 +4,14 @@ import {
     TTapiocaDeployerVmPass,
 } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { buildMTOFT } from 'tasks/deployBuilds/buildMTOFT';
+import { buildTOFT } from 'tasks/deployBuilds/buildTOFT';
 import { buildToftVault } from 'tasks/deployBuilds/buildToftVault';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import {
     VMAddToftModule,
-    areModulesDeployed,
     getInitStruct,
     getModuleStruct,
 } from './toftDeployerUtils';
-import { buildTOFT } from 'tasks/deployBuilds/buildTOFT';
 
 export type TToftDeployerTaskArgs = TTapiocaDeployTaskArgs & {
     erc20: string;
@@ -20,6 +19,7 @@ export type TToftDeployerTaskArgs = TTapiocaDeployTaskArgs & {
     deploymentName: string;
     name: string;
     symbol: string;
+    noModuleDeploy?: boolean;
 };
 export const toftDeployer__task = async (
     _taskArgs: TToftDeployerTaskArgs,
@@ -33,18 +33,12 @@ export async function VMAddToft(
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet, chainInfo } =
         params;
-    const { tag, deploymentName, erc20, name, symbol, target } = taskArgs;
+    const { tag, deploymentName, erc20, name, symbol, target, noModuleDeploy } =
+        taskArgs;
     const owner = tapiocaMulticallAddr;
 
-    // Add TOFT modules
-    if (!areModulesDeployed({ hre, tag })) {
-        await VMAddToftModule({ hre, VM, owner });
-    } else {
-        console.log('[+] Reusing TOFT modules');
-        VM.load(
-            hre.SDK.db.loadLocalDeployment(tag, hre.SDK.eChainId)?.contracts ??
-                [],
-        );
+    if (!noModuleDeploy) {
+        await VMAddToftModule({ hre, VM, owner, tag });
     }
 
     const vaultDeploymentName = `${DEPLOYMENT_NAMES.TOFT_VAULT}/${deploymentName}`;
@@ -73,6 +67,7 @@ export async function VMAddToft(
             ),
         );
     } else if (target === 'mtoft') {
+        const toft = await hre.ethers.getContractFactory('TOFT');
         VM.add(
             await buildMTOFT(
                 hre,
