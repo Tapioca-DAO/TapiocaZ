@@ -131,27 +131,6 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
     }
 
     /**
-     * @notice Execute a call to a module.
-     * @dev Example on how `_data` should be encoded:
-     *      - abi.encodeCall(IERC20.transfer, (to, amount));
-     * @dev Use abi.encodeCall to encode the function call and its parameters with type safety.
-     *
-     * @param _module The module to execute.
-     * @param _data The data to execute. Should be ABI encoded with the selector.
-     * @param _forwardRevert If true, forward the revert message from the module.
-     *
-     * @return returnData The return data from the module execution, if any.
-     */
-    function executeModule(ITOFT.Module _module, bytes memory _data, bool _forwardRevert)
-        external
-        payable
-        whenNotPaused
-        returns (bytes memory returnData)
-    {
-        return _executeModule(uint8(_module), _data, _forwardRevert);
-    }
-
-    /**
      * @dev Slightly modified version of the OFT send() operation. Includes a `_msgType` parameter.
      * The `_buildMsgAndOptionsByType()` appends the packet type to the message.
      * @dev Executes the send operation.
