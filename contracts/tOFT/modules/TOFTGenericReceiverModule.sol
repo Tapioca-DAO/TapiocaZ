@@ -45,9 +45,6 @@ contract TOFTGenericReceiverModule is BaseTOFT {
      *      - amount::uint256: Amount to unwrap.
      */
     function receiveWithParamsReceiver(address srcChainSender, bytes memory _data) public payable {
-        //make sure sender is LZ endpoint
-        _checkWhitelistStatus(msg.sender); 
-
         SendParamsMsg memory msg_ = TOFTMsgCodec.decodeSendParamsMsg(_data);
 
         msg_.amount = _toLD(msg_.amount.toUint64());
@@ -83,13 +80,5 @@ contract TOFTGenericReceiverModule is BaseTOFT {
         }
 
         _transfer(_owner, address(this), _amount);
-    }
-
-    function _checkWhitelistStatus(address _addr) private view {
-        if (_addr != address(0)) {
-            if (!cluster.isWhitelisted(0, _addr)) {
-                revert TOFTGenericReceiverModule_NotAuthorized(_addr);
-            }
-        }
     }
 }
