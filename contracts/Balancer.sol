@@ -88,6 +88,7 @@ contract Balancer is Ownable {
     error SwapNotEnabled();
     error AlreadyInitialized();
     error RebalanceAmountNotValid();
+    error GasNotValid();
 
     modifier onlyValidDestination(address _srcOft, uint16 _dstChainId) {
         if (connectedOFTs[_srcOft][_dstChainId].dstOft == address(0)) {
@@ -319,6 +320,8 @@ contract Balancer is Ownable {
     function _routerSwap(
         __RouterSwapInternal memory swapInternal
     ) private {
+        uint256 gas = _sgReceiveGas[swapInternal._dstChainId];
+        if (gas == 0) revert GasNotValid();
         IERC20(swapInternal._erc20).safeApprove(address(router), swapInternal._amount);
         router.swap{value: msg.value}(
             swapInternal._dstChainId,
@@ -327,7 +330,7 @@ contract Balancer is Ownable {
             payable(this),
             swapInternal._amount,
             _computeMinAmount(swapInternal._amount, swapInternal._slippage),
-            IStargateRouterBase.lzTxObj({dstGasForCall: _sgReceiveGas[swapInternal._dstChainId], dstNativeAmount: 0, dstNativeAddr: "0x0"}),
+            IStargateRouterBase.lzTxObj({dstGasForCall: gas, dstNativeAmount: 0, dstNativeAddr: "0x0"}),
             abi.encodePacked(connectedOFTs[swapInternal._oft][swapInternal._dstChainId].dstOft),
             "0x"
         );
