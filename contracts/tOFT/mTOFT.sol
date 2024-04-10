@@ -300,10 +300,13 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of tokens to unwrap.
      */
-    function unwrap(address _toAddress, uint256 _amount) external nonReentrant whenNotPaused {
+    function unwrap(address _toAddress, uint256 _amount) external nonReentrant whenNotPaused returns (uint256 unwrapped) {
         if (!connectedChains[_getChainId()]) revert mTOFT_NotHost();
         if (balancers[msg.sender]) revert mTOFT_BalancerNotAuthorized();
         _unwrap(_toAddress, _amount);
+
+        //TODO: implement fee
+        return _amount;
     }
 
     /**

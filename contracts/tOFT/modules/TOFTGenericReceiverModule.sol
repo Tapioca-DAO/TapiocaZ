@@ -55,12 +55,12 @@ contract TOFTGenericReceiverModule is BaseTOFT {
 
             /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
             _internalTransferWithAllowance(msg_.receiver, srcChainSender, msg_.amount);
-            tOFT.unwrap(address(this), msg_.amount);
+            uint256 unwrapped = tOFT.unwrap(address(this), msg_.amount);
 
             if (toftERC20 != address(0)) {
-                IERC20(toftERC20).safeTransfer(msg_.receiver, msg_.amount);
+                IERC20(toftERC20).safeTransfer(msg_.receiver, unwrapped);
             } else {
-                (bool sent,) = msg_.receiver.call{value: msg_.amount}("");
+                (bool sent,) = msg_.receiver.call{value: unwrapped}("");
                 if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
             }
         }
