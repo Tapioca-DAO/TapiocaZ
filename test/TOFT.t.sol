@@ -435,6 +435,99 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
         }
     }
+    
+    function test_unwrap_fees() public {
+        uint256 liquidityAmount_ = 50 ether;
+        uint256 unwrapAmount_ = 1 ether;
+
+        // set fee
+        {
+            mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
+                stargateRouter: address(0),
+                mintFee: 0,
+                mintCap: wrongHostTOFT.mintCap(),
+                connectedChain: aEid,
+                connectedChainState: true,
+                balancerStateAddress: address(0),
+                balancerState: false
+            });
+            wrongHostTOFT.setOwnerState(dataA);
+        }
+
+        IToftVault vault = wrongHostTOFT.vault(); 
+
+        // range 0-100
+        {
+            // test wrap
+            deal(address(bERC20), address(this), liquidityAmount_);
+            assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
+
+            pearlmit.approve(address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+            wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
+
+            uint256 supply = vault.viewSupply();
+            assertEq(supply, liquidityAmount_);
+
+            uint256 multiplier = wrongHostTOFT.getMultiplier(liquidityAmount_);
+            assertEq(multiplier, 0);
+
+            uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, liquidityAmount_);
+            assertEq(feeAmount, 0);
+
+            uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+            assertEq(unwrapped, unwrapAmount_);
+
+        }
+
+        // range 100-1000
+        {
+            liquidityAmount_ = 500 ether;
+            deal(address(bERC20), address(this), liquidityAmount_);
+            assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
+
+            pearlmit.approve(address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+            wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
+
+            uint256 supply = vault.viewSupply();
+            assertGt(supply, liquidityAmount_);
+
+            uint256 multiplier = wrongHostTOFT.getMultiplier(vault.viewSupply());
+            assertEq(multiplier, 5);
+
+            uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, vault.viewSupply());
+            assertGt(feeAmount, 0);
+
+            uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+            assertLt(unwrapped, unwrapAmount_);
+            assertEq(unwrapped, unwrapAmount_ - feeAmount);
+        }
+
+        // range 1000-10000
+        {
+            liquidityAmount_ = 50_000 ether;
+            deal(address(bERC20), address(this), liquidityAmount_);
+            assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
+
+            pearlmit.approve(address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+            wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
+
+            uint256 supply = vault.viewSupply();
+            assertGt(supply, liquidityAmount_);
+
+            uint256 multiplier = wrongHostTOFT.getMultiplier(vault.viewSupply());
+            assertEq(multiplier, 10);
+
+            uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, vault.viewSupply());
+            assertGt(feeAmount, 0);
+
+            uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+            assertLt(unwrapped, unwrapAmount_);
+            assertEq(unwrapped, unwrapAmount_ - feeAmount);
+        }
+    }
 
     function test_extract_fees() public {
         uint256 erc20Amount_ = 1 ether;
