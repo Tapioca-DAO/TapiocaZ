@@ -29,8 +29,6 @@ import {TOFTReceiver} from "./modules/TOFTReceiver.sol";
 import {TOFTSender} from "./modules/TOFTSender.sol";
 import {BaseTOFT} from "./BaseTOFT.sol";
 
-import "forge-std/console.sol";
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -79,6 +77,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         uint256 end;
         uint256 multiplier;
     }
+
     MultiplierRange[] private _ranges;
 
     /*
@@ -131,7 +130,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         vault.claimOwnership();
 
         if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
-        
+
         //default ranges
         _ranges.push(MultiplierRange(0, 100 ether, 0));
         _ranges.push(MultiplierRange(101 ether, 9999 ether, 5));
@@ -283,9 +282,9 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     function getMultiplier(uint256 amount) public view returns (uint256) {
         uint256 len = _ranges.length;
         uint256 multiplier = 50;
-        for(uint256 i; i < len; i++) {
+        for (uint256 i; i < len; i++) {
             MultiplierRange memory _range = _ranges[i];
-            if(amount >= _range.start && amount <= _range.end) {
+            if (amount >= _range.start && amount <= _range.end) {
                 multiplier = _range.multiplier;
                 break;
             }
@@ -294,7 +293,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         return multiplier;
     }
 
-    /// @notice computes unwrap fee 
+    /// @notice computes unwrap fee
     /// @dev fees are 0 on host chain
     /// @param _amount the unwrap amount
     /// @param _liquidity the total active liquidity
@@ -305,7 +304,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         }
 
         if (_liquidity > 0) {
-            uint256 impact = (_amount * 1e18 / _liquidity) * getMultiplier(_liquidity) ;
+            uint256 impact = (_amount * 1e18 / _liquidity) * getMultiplier(_liquidity);
             feeAmount = _amount * impact / 1e18;
         }
     }
@@ -351,7 +350,12 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of tokens to unwrap.
      */
-    function unwrap(address _toAddress, uint256 _amount) external nonReentrant whenNotPaused returns (uint256 unwrapped) {
+    function unwrap(address _toAddress, uint256 _amount)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (uint256 unwrapped)
+    {
         if (!connectedChains[_getChainId()]) revert mTOFT_NotHost();
         if (balancers[msg.sender]) revert mTOFT_BalancerNotAuthorized();
 
@@ -486,17 +490,15 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     function _checkAndRegisterUnwrapFees(uint256 _amount) private returns (uint256 feeAmount) {
         uint256 totalLiquidity = vault.viewSupply();
         feeAmount = computeUnwrapFees(_amount, totalLiquidity);
-        
+
         if (feeAmount > 0) {
             vault.registerFees(feeAmount);
         }
-        
     }
 
     /**
      * @notice Return the current chain EID.
      */
-
     function _getChainId() internal view override returns (uint32) {
         return IMessagingChannel(endpoint).eid();
     }
