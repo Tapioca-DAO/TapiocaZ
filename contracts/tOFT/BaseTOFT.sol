@@ -88,7 +88,7 @@ abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnicha
     }
 
     function _wrapNative(address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {
-        vault.depositNative{value: _amount}();
+        vault.depositNative{value: _amount - _feeAmount}();
         _mint(_toAddress, _amount - _feeAmount);
     }
 
