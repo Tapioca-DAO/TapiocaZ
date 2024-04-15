@@ -1230,7 +1230,7 @@ contract TOFTTest is TOFTTestHelper {
         }
     }
 
-    function test_reaaaaaceive_with_params_userA() public {
+    function test_receive_with_params_userA() public {
         uint256 erc20Amount_ = 1 ether;
 
         //setup
