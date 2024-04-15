@@ -61,10 +61,12 @@ contract TOFTGenericReceiverModule is BaseTOFT {
             if (toftERC20 != address(0)) {
                 IERC20(toftERC20).safeTransfer(msg_.receiver, msg_.amount);
             } else {
-                if (msg.value != msg_.amount) revert TOFTGenericReceiverModule_AmountMismatch()
+                if (msg.value != msg_.amount) revert TOFTGenericReceiverModule_AmountMismatch();
                 (bool sent,) = msg_.receiver.call{value: msg_.amount}("");
                 if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
             }
+        } else {
+            if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();                                                                                                                                                                                                                   
         }
     }
 
