@@ -515,25 +515,25 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@layerzerolabs/lz-evm-messagelib-v2@^2.0.2":
-  version "2.0.25"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.0.25.tgz#08df421a5a61719e00e30ba65ea58006aa1dbb21"
-  integrity sha512-qvWQr+zXkA4WeaMv96OlUC2Y22gF89YLDZ4Nr3BzfImP/51S3L7s7P9AJlMKGn3SSBeyswuFL/S5FgmZP9WN4g==
+"@layerzerolabs/lz-evm-messagelib-v2@^2.1.25":
+  version "2.2.4"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-messagelib-v2/-/lz-evm-messagelib-v2-2.2.4.tgz#aa43d83f68b9a3b8f831714157c862041bbdee87"
+  integrity sha512-RssRpUTU/Bu9h12UDqw72DyXz3WfqRZsip2JmKZZutEd9W05C/lOq8m5QoeWiAPbewUwl61TWi5/31RuHQ6jEg==
 
-"@layerzerolabs/lz-evm-oapp-v2@^2.0.2":
-  version "2.0.25"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.0.25.tgz#a10c89ec988630c712d115098ccc519f240f3436"
-  integrity sha512-UW5HY1/2eXj1jOvqCnVhKxcdyaptFppeDFOo8AuF6ZfOj7xO6Dj/vaXaJYFHgDbxm1r9XwzcXH27xYPqVjCOTg==
+"@layerzerolabs/lz-evm-oapp-v2@^2.1.25":
+  version "2.2.4"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-oapp-v2/-/lz-evm-oapp-v2-2.2.4.tgz#30bc02cef20c32e008226e51f30a1d228d69fd2b"
+  integrity sha512-Y466lfR6tKAT7lRMsLXRhAIG7CN7vZ1e0mdrnLDLhyCXBT45uS4yQutCJnb8REL1hLLzjlDAlczSlDkMkeD19g==
 
-"@layerzerolabs/lz-evm-protocol-v2@^2.0.2":
-  version "2.0.25"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.0.25.tgz#c070d2a4ba83d4db22198fc54cce9088ec1de69c"
-  integrity sha512-EyyieamTgu2yFd5hLJ6B/vMCMKItGIHUPaa2X1NbdJTUEKyYWGupxXZUY7N/EXedfJhYdUVcNt1ZYjp6HgsYlw==
+"@layerzerolabs/lz-evm-protocol-v2@^2.1.25":
+  version "2.2.4"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-protocol-v2/-/lz-evm-protocol-v2-2.2.4.tgz#fa6009f9ff2ce63da533cb68d78213473f42109b"
+  integrity sha512-M+4ldmFIhFvt7/z+R6/QYIxHKbKE1a7n8Q2A2BZXB/grAcMjmv41lMRX/vZ44mcrxPOIe2RxDee0EaRxmN/XtQ==
 
-"@layerzerolabs/lz-evm-v1-0.7@^2.0.25":
-  version "2.0.25"
-  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.0.25.tgz#2cbdf482058342364a9836717c703ef14795a06a"
-  integrity sha512-Kex5kvG9iD1UDcHSIyVMXBV6sck9Qnl+FblwEfqOZSThf8XwXRKV47OptNuI8e4VpCxAq90MlsbmbMCXWm/XxA==
+"@layerzerolabs/lz-evm-v1-0.7@^2.1.25":
+  version "2.2.4"
+  resolved "https://registry.npmjs.org/@layerzerolabs/lz-evm-v1-0.7/-/lz-evm-v1-0.7-2.2.4.tgz#290a8aa978bf3f9089ca4e799f63cf9c6446a71f"
+  integrity sha512-G8qQEaEbPEgvx5JXNzz2K/ezrw0f1ZaBFMsPSEfTnEOLikOx9jTtmB7bIGr0lzwHn5AYYp8ht93pFaqxz0Q0UA==
 
 "@layerzerolabs/solidity-bytes-utils@^0.8.0":
   version "0.8.0"

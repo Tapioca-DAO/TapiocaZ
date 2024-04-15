@@ -257,8 +257,9 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of tokens to unwrap.
      */
-    function unwrap(address _toAddress, uint256 _amount) external onlyHostChain nonReentrant {
+    function unwrap(address _toAddress, uint256 _amount) external onlyHostChain nonReentrant returns (uint256 unwrapped) {
         _unwrap(_toAddress, _amount);
+        return _amount;
     }
 
     /**

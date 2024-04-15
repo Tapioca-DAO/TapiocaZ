@@ -203,11 +203,7 @@ contract Balancer is Ownable {
                 if (disableEth) revert SwapNotEnabled();
                 _sendNative(_srcOft, convertedAmount, _dstChainId, _slippage);
             } else {
-<<<<<<< HEAD
                 _sendToken(_srcOft, _amount, _dstChainId, _slippage);
-=======
-                _sendToken(_srcOft, convertedAmount, _dstChainId, _slippage, _ercData);
->>>>>>> a2206391e61bd7140ee8a11e7c8e2ffb3ce9e033
             }
 
             connectedOFTs[_srcOft][_dstChainId].rebalanceable -= _amount ;
@@ -304,16 +300,13 @@ contract Balancer is Ownable {
             revert ExceedsBalance();
         }
         {
-            (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(_data, (uint256, uint256));
-            _routerSwap(__RouterSwapInternal(_dstChainId, _srcPoolId, _dstPoolId, _amount, _slippage, _oft, erc20));
+            _routerSwap(__RouterSwapInternal(_dstChainId, _amount, _slippage, _oft, erc20));
         }
 
     }
 
     struct __RouterSwapInternal {
         uint16 _dstChainId;
-        uint256 _srcPoolId;
-        uint256 _dstPoolId;
         uint256 _amount;
         uint256 _slippage;
         address payable _oft;
@@ -327,8 +320,8 @@ contract Balancer is Ownable {
         IERC20(swapInternal._erc20).safeApprove(address(router), swapInternal._amount);
         router.swap{value: msg.value}(
             swapInternal._dstChainId,
-            connectedOFTs[_oft][_dstChainId].srcPoolId,
-            connectedOFTs[_oft][_dstChainId].dstPoolId,
+            connectedOFTs[swapInternal._oft][swapInternal._dstChainId].srcPoolId,
+            connectedOFTs[swapInternal._oft][swapInternal._dstChainId].dstPoolId,
             payable(this),
             swapInternal._amount,
             _computeMinAmount(swapInternal._amount, swapInternal._slippage),
@@ -336,7 +329,7 @@ contract Balancer is Ownable {
             abi.encodePacked(connectedOFTs[swapInternal._oft][swapInternal._dstChainId].dstOft),
             "0x"
         );
-        IERC20(_erc20).safeApprove(address(router), 0);
+        IERC20(swapInternal._erc20).safeApprove(address(router), 0);
     }
 
     function _computeMinAmount(uint256 _amount, uint256 _slippage) private pure returns (uint256) {

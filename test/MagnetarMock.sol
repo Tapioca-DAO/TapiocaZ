@@ -86,10 +86,10 @@ contract MagnetarMock is PearlmitHandler {
                 continue; // skip the rest of the loop
             }
 
-            /// @dev Tap singular operations
-            if (_action.id == MagnetarAction.TapToken) {
-                continue; // skip the rest of the loop
-            }
+            // /// @dev Tap singular operations
+            // if (_action.id == MagnetarAction.TapToken) {
+            //     continue; // skip the rest of the loop
+            // }
 
             /// @dev Modules will not return result data.
             if (_action.id == MagnetarAction.AssetModule) {
