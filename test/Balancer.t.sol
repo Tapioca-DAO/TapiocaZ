@@ -112,7 +112,7 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(cluster), "Cluster");
         }
 
-        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec();
         TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",

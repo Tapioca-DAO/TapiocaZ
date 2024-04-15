@@ -102,6 +102,7 @@ contract TOFTTest is TOFTTestHelper {
     TOFTHelper tOFTHelper;
 
     TapiocaOptionsBrokerMock tOB;
+    TapiocaOmnichainExtExec toftExtExec;
 
     uint256 aTOFTYieldBoxId;
     uint256 bTOFTYieldBoxId;
@@ -170,7 +171,7 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(magnetar), "Magnetar");
         }
 
-        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+        toftExtExec = new TapiocaOmnichainExtExec();
         TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",
@@ -259,7 +260,7 @@ contract TOFTTest is TOFTTestHelper {
         }
 
         {
-            toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+            toftExtExec = new TapiocaOmnichainExtExec();
             bTOFTVault = new TOFTVault(address(bERC20));
             bTOFTInitStruct = TOFTInitStruct({
                 name: "Token B",
@@ -328,6 +329,11 @@ contract TOFTTest is TOFTTestHelper {
         cluster.updateContract(bEid, address(magnetar), true);
         cluster.updateContract(bEid, address(tOB), true);
         cluster.updateContract(bEid, address(marketHelper), true);
+        cluster.updateContract(0, address(yieldBox), true);
+        cluster.updateContract(0, address(singularity), true);
+        cluster.updateContract(0, address(magnetar), true);
+        cluster.updateContract(0, address(tOB), true);
+        cluster.updateContract(0, address(marketHelper), true);
     }
 
     /**
@@ -1881,6 +1887,8 @@ contract TOFTTest is TOFTTestHelper {
     }
 
     function test_tOFT_market_permit_asset() public {
+
+        cluster.updateContract(0, address(singularity), true);
         bytes memory approvalMsg_;
         {
             // @dev v,r,s will be completed on `__getMarketPermitData`

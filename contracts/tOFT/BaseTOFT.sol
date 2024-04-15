@@ -46,20 +46,12 @@ abstract contract BaseTOFT is ModuleManager, PearlmitHandler, BaseTapiocaOmnicha
     error TOFT_VaultWrongOwner();
 
     constructor(TOFTInitStruct memory _data)
-        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate, _data.extExec, _data.pearlmit)
+        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate, _data.extExec, _data.pearlmit, ICluster(_data.cluster))
     {
         yieldBox = IYieldBox(_data.yieldBox);
         cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
-    }
-
-    /**
-     * @notice set the Cluster address.
-     * @param _cluster the new Cluster address
-     */
-    function setCluster(address _cluster) external virtual onlyOwner {
-        cluster = ICluster(_cluster);
     }
 
     /**
