@@ -336,6 +336,7 @@ contract Balancer is Ownable {
             abi.encodePacked(connectedOFTs[swapInternal._oft][swapInternal._dstChainId].dstOft),
             "0x"
         );
+        IERC20(_erc20).safeApprove(address(router), 0);
     }
 
     function _computeMinAmount(uint256 _amount, uint256 _slippage) private pure returns (uint256) {
