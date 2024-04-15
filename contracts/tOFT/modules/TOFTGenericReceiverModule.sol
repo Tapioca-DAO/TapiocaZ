@@ -67,7 +67,7 @@ contract TOFTGenericReceiverModule is BaseTOFT {
                 if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
             }
         } else {
-            if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();                                                                                                                                                                                                                   
+            if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();
         }
     }
 

@@ -1897,7 +1897,6 @@ contract TOFTTest is TOFTTestHelper {
     }
 
     function test_tOFT_market_permit_asset() public {
-
         cluster.updateContract(0, address(singularity), true);
         bytes memory approvalMsg_;
         {
