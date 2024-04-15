@@ -124,19 +124,10 @@ contract Balancer is Ownable {
         view
         returns (bool canExec, bytes memory execPayload)
     {
-        bytes memory ercData;
-        {
-            if (ITOFT(_srcOft).erc20() != address(0)) {
-                ercData = abi.encode(
-                    connectedOFTs[_srcOft][_dstChainId].srcPoolId, connectedOFTs[_srcOft][_dstChainId].dstPoolId
-                );
-            }
-        }
-
         canExec = connectedOFTs[_srcOft][_dstChainId].rebalanceable > 0;
         execPayload = abi.encodeCall(
             Balancer.rebalance,
-            (_srcOft, _dstChainId, _slippage, connectedOFTs[_srcOft][_dstChainId].rebalanceable, ercData)
+            (_srcOft, _dstChainId, _slippage, connectedOFTs[_srcOft][_dstChainId].rebalanceable)
         );
     }
 
@@ -177,14 +168,12 @@ contract Balancer is Ownable {
      * @param _dstChainId the destination LayerZero id
      * @param _slippage the destination LayerZero id
      * @param _amount the rebalanced amount
-     * @param _ercData custom send data
      */
     function rebalance(
         address payable _srcOft,
         uint16 _dstChainId,
         uint256 _slippage,
-        uint256 _amount,
-        bytes memory _ercData
+        uint256 _amount
     ) external payable onlyValidDestination(_srcOft, _dstChainId) onlyValidSlippage(_slippage) {
         if (msg.sender != owner() || msg.sender != rebalancer) revert NotAuthorized();
 
@@ -203,7 +192,7 @@ contract Balancer is Ownable {
                 if (disableEth) revert SwapNotEnabled();
                 _sendNative(_srcOft, _amount, _dstChainId, _slippage);
             } else {
-                _sendToken(_srcOft, _amount, _dstChainId, _slippage, _ercData);
+                _sendToken(_srcOft, _amount, _dstChainId, _slippage);
             }
 
             connectedOFTs[_srcOft][_dstChainId].rebalanceable -= _amount;
@@ -293,17 +282,20 @@ contract Balancer is Ownable {
         address payable _oft,
         uint256 _amount,
         uint16 _dstChainId,
-        uint256 _slippage,
-        bytes memory _data
+        uint256 _slippage
     ) private {
         address erc20 = ITOFT(_oft).erc20();
         if (IERC20Metadata(erc20).balanceOf(address(this)) < _amount) {
             revert ExceedsBalance();
         }
+<<<<<<< HEAD
         {
             (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(_data, (uint256, uint256));
             _routerSwap(__RouterSwapInternal(_dstChainId, _srcPoolId, _dstPoolId, _amount, _slippage, _oft, erc20));
         }
+=======
+        _routerSwap(_dstChainId, _amount, _slippage, _oft, erc20);
+>>>>>>> abd1bce3cea33ee71f8da206e64d364f97965908
     }
 
     struct __RouterSwapInternal {
@@ -323,8 +315,8 @@ contract Balancer is Ownable {
         IERC20(swapInternal._erc20).safeApprove(address(router), swapInternal._amount);
         router.swap{value: msg.value}(
             swapInternal._dstChainId,
-            swapInternal._srcPoolId,
-            swapInternal._dstPoolId,
+            connectedOFTs[_oft][_dstChainId].srcPoolId,
+            connectedOFTs[_oft][_dstChainId].dstPoolId,
             payable(this),
             swapInternal._amount,
             _computeMinAmount(swapInternal._amount, swapInternal._slippage),
