@@ -75,7 +75,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     function leverageUpReceiver(address srcChainSender, bytes memory _data) public payable {
         /// @dev decode received message
         LeverageUpActionMsg memory msg_ = TOFTMsgCodec.decodeLeverageUpMsg(_data);
-   
+
         /// @dev 'market'
         _checkWhitelistStatus(msg_.market);
         _checkWhitelistStatus(msg_.marketHelper);
@@ -128,7 +128,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             uint256 allowanceAmount = msg_.borrowParams.amount + msg_.borrowParams.borrowAmount;
             _spendAllowance(msg_.user, srcChainSender, allowanceAmount);
         }
-
 
         /// @dev use market helper to deposit, add collateral to market and withdrawTo
         approve(address(msg_.borrowParams.magnetar), msg_.borrowParams.amount);
@@ -184,7 +183,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
-        
+
         if (msg_.user != srcChainSender) {
             _spendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
         }
@@ -223,7 +222,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
     function _checkWhitelistStatus(address _addr) private view {
         if (_addr != address(0)) {
-            if (!cluster.isWhitelisted(0, _addr)) {
+            if (!getCluster().isWhitelisted(0, _addr)) {
                 revert TOFTMarketReceiverModule_NotAuthorized(_addr);
             }
         }
