@@ -8,7 +8,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {TestHelper} from "./LZSetup/TestHelper.sol";
 
 import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
-import {StargateRouterMock} from "./StargateRouterMock.sol";
+import {StargateRouterMock, StargateFactoryMock} from "./StargateRouterMock.sol";
 import {Balancer} from "contracts/Balancer.sol";
 import {TestUtils} from "./TestUtils.t.sol";
 
@@ -45,6 +45,7 @@ contract TOFTTest is TOFTTestHelper {
     Balancer balancer;
     StargateRouterMock routerA;
     StargateRouterMock routerB;
+    StargateFactoryMock factory;
 
     uint32 aEid = 1;
     uint32 bEid = 2;
@@ -89,12 +90,14 @@ contract TOFTTest is TOFTTestHelper {
 
         routerA = new StargateRouterMock(aERC20);
         routerB = new StargateRouterMock(bERC20);
+        factory = new StargateFactoryMock();
         vm.label(address(routerA), "routerA");
         vm.label(address(routerB), "routerB");
+        vm.label(address(factory), "factory");
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
 
-        balancer = new Balancer(routerEth, address(routerA), address(this));
+        balancer = new Balancer(routerEth, address(routerA), address(factory), address(this));
         vm.label(address(balancer), "Balancer");
 
         pearlmit = new Pearlmit("Pearlmit", "1");
