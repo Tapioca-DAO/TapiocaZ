@@ -568,7 +568,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -609,7 +610,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -688,7 +690,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -754,7 +757,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             remoteLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -785,7 +789,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -879,7 +884,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -951,7 +957,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1021,7 +1028,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1089,7 +1097,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1164,7 +1173,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1197,7 +1207,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1270,7 +1281,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1303,7 +1315,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1379,7 +1392,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1436,7 +1450,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1503,7 +1518,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1564,7 +1580,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1644,7 +1661,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1732,7 +1750,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1807,7 +1826,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1874,7 +1894,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
