@@ -72,7 +72,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      * @param _data.mintData the data needed to mint on BB
      * @param _data.lendSendParams LZ send params for lending on another layer
      */
-    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data) public payable {
+    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data)
+        public
+        payable
+    {
         // Decode received message.
         CrossChainMintFromBBAndLendOnSGLData memory msg_ =
             TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
@@ -122,7 +125,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         _checkWhitelistStatus(msg_.singularity);
         if (msg_.lockData.lock) {
             _checkWhitelistStatus(msg_.lockData.target);
-            if (msg_.lockData.amount > 0) msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
+            if (msg_.lockData.amount > 0) {
+                msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
+            }
             if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
         }
         if (msg_.participateData.participate) {
@@ -167,8 +172,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         {
             // _data declared for visibility.
             IExerciseOptionsData memory _options = msg_.optionsData;
-            if (_options.tapAmount > 0) { _options.tapAmount = _toLD(_options.tapAmount.toUint64()); }
-            if (_options.paymentTokenAmount > 0) { _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64()); }
+            if (_options.tapAmount > 0) _options.tapAmount = _toLD(_options.tapAmount.toUint64());
+            if (_options.paymentTokenAmount > 0) {
+                _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
+            }
 
             // @dev retrieve paymentToken amount
             _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);
@@ -184,7 +191,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             address oTap = ITapiocaOptionBroker(_options.target).oTAP();
             address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
 
-            if (oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner,_options.from) && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
+            if (
+                oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner, _options.from)
+                    && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from
+            ) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
 
             ITapiocaOptionBroker(_options.target).exerciseOption(
                 _options.oTAPTokenID,
@@ -218,7 +228,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
                     _send.minAmountLD = amountToSend;
                 }
                 _send.amountLD = amountToSend;
-                
+
                 msg_.lzSendParams.sendParam = _send;
 
                 // Sends to source and preserve source `msg.sender` (`from` in this case).
@@ -237,7 +247,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
     function _checkWhitelistStatus(address _addr) private view {
         if (_addr != address(0)) {
-            if (!cluster.isWhitelisted(0, _addr)) {
+            if (!getCluster().isWhitelisted(0, _addr)) {
                 revert TOFTOptionsReceiverModule_NotAuthorized(_addr);
             }
         }
@@ -250,8 +260,12 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         /// @dev Applies the token transfers regarding this send() operation.
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
         // - amountToCreditLD is the amount in local decimals that will be credited to the recipient on the remote OFT instance.
-        (uint256 amountDebitedLD, uint256 amountToCreditLD) =
-            _debit(msg.sender, _lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid);
+        (uint256 amountDebitedLD, uint256 amountToCreditLD) = _debit(
+            msg.sender,
+            _lzSendParam.sendParam.amountLD,
+            _lzSendParam.sendParam.minAmountLD,
+            _lzSendParam.sendParam.dstEid
+        );
 
         /// @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptionsMemory(
