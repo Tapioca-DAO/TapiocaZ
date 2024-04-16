@@ -72,7 +72,7 @@ const config: HardhatUserConfig & { dodoc: any } = {
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 100,
+                        runs: 50,
                     },
                 },
             },
@@ -82,7 +82,17 @@ const config: HardhatUserConfig & { dodoc: any } = {
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 7500,
+                        runs: 500,
+                    },
+                },
+            },
+            'contracts/tOFT/modules/TOFTMarketReceiverModule.sol': {
+                version: '0.8.22',
+                settings: {
+                    evmVersion: 'paris', // Latest before Shanghai
+                    optimizer: {
+                        enabled: true,
+                        runs: 2000,
                     },
                 },
             },
