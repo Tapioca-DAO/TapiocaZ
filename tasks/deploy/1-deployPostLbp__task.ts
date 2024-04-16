@@ -88,6 +88,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
                 DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
                 DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
+                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_FACTORY!,
                 owner,
             ]),
         );

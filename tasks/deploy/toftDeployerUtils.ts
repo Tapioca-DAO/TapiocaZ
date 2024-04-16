@@ -45,17 +45,7 @@ export async function VMAddToftModule(params: {
         tag,
     });
 
-    VM.add(
-        await buildExtExec(
-            hre,
-            DEPLOYMENT_NAMES.TOFT_EXT_EXEC,
-            [
-                cluster.address, // Cluster
-                owner, // Owner
-            ],
-            [],
-        ),
-    )
+    VM.add(await buildExtExec(hre, DEPLOYMENT_NAMES.TOFT_EXT_EXEC, [], []))
         .add(
             await buildTOFTGenericReceiverModule(
                 hre,
