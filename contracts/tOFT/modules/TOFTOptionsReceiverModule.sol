@@ -10,6 +10,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
@@ -51,6 +52,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     using SafeApprove for address;
 
     error TOFTOptionsReceiverModule_NotAuthorized(address invalidAddress);
+    error TOFTOptionsReceiverModule_Reentrancy();
 
     event ExerciseOptionsReceived(
         address indexed user, address indexed target, uint256 indexed oTapTokenId, uint256 paymentTokenAmount
@@ -64,12 +66,16 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
      *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
      *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data.user the user to perform the operation for
      * @param _data.bigBang the BB address
      * @param _data.mintData the data needed to mint on BB
      * @param _data.lendSendParams LZ send params for lending on another layer
      */
-    function mintLendXChainSGLXChainLockAndParticipateReceiver(bytes memory _data) public payable {
+    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data)
+        public
+        payable
+    {
         // Decode received message.
         CrossChainMintFromBBAndLendOnSGLData memory msg_ =
             TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
@@ -79,6 +85,13 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
         if (msg_.mintData.mintAmount > 0) {
             msg_.mintData.mintAmount = _toLD(msg_.mintData.mintAmount.toUint64());
+        }
+        if (msg_.mintData.collateralDepositData.amount > 0) {
+            msg_.mintData.collateralDepositData.amount = _toLD(msg_.mintData.collateralDepositData.amount.toUint64());
+        }
+
+        if (msg_.user != srcChainSender) {
+            _spendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
         }
 
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
@@ -96,6 +109,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     /**
      * @notice Execute `magnetar.lockAndParticipate`
      * @dev Lock on tOB and/or participate on tOLP
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      * @param _data.user the user to perform the operation for
      * @param _data.singularity the SGL address
@@ -103,7 +117,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      * @param _data.lockData the data needed to lock on tOB
      * @param _data.participateData the data needed to participate on tOLP
      */
-    function lockAndParticipateReceiver(bytes memory _data) public payable {
+    function lockAndParticipateReceiver(address srcChainSender, bytes memory _data) public payable {
         // Decode receive message
         LockAndParticipateData memory msg_ = TOFTMsgCodec.decodeLockAndParticipateMsg(_data);
 
@@ -111,6 +125,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         _checkWhitelistStatus(msg_.singularity);
         if (msg_.lockData.lock) {
             _checkWhitelistStatus(msg_.lockData.target);
+            if (msg_.lockData.amount > 0) {
+                msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
+            }
+            if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
         }
         if (msg_.participateData.participate) {
             _checkWhitelistStatus(msg_.participateData.target);
@@ -118,6 +136,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
         if (msg_.fraction > 0) {
             msg_.fraction = _toLD(msg_.fraction.toUint64());
+        }
+
+        if (msg_.user != srcChainSender) {
+            _spendAllowance(msg_.user, srcChainSender, msg_.fraction);
         }
 
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
@@ -134,6 +156,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
     /**
      * @notice Exercise tOB option
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      *      - optionsData::address: TapiocaOptionsBroker exercise params.
      *      - lzSendParams::struct: LZ v2 send to source params.
@@ -149,8 +172,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         {
             // _data declared for visibility.
             IExerciseOptionsData memory _options = msg_.optionsData;
-            _options.tapAmount = _toLD(_options.tapAmount.toUint64());
-            _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
+            if (_options.tapAmount > 0) _options.tapAmount = _toLD(_options.tapAmount.toUint64());
+            if (_options.paymentTokenAmount > 0) {
+                _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
+            }
 
             // @dev retrieve paymentToken amount
             _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);
@@ -163,6 +188,14 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
             /// @dev call exerciseOption() with address(this) as the payment token
             uint256 bBefore = balanceOf(address(this));
+            address oTap = ITapiocaOptionBroker(_options.target).oTAP();
+            address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
+
+            if (
+                oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner, _options.from)
+                    && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from
+            ) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
+
             ITapiocaOptionBroker(_options.target).exerciseOption(
                 _options.oTAPTokenID,
                 address(this), //payment token
@@ -172,7 +205,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             uint256 bAfter = balanceOf(address(this));
 
             // Refund if less was used.
-            if (bBefore > bAfter) {
+            if (bBefore >= bAfter) {
                 uint256 diff = bBefore - bAfter;
                 if (diff < _options.paymentTokenAmount) {
                     IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
@@ -186,30 +219,35 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             SendParam memory _send = msg_.lzSendParams.sendParam;
 
             address tapOft = ITapiocaOptionBroker(_options.target).tapOFT();
+            uint256 tapBalance = IERC20(tapOft).balanceOf(address(this));
             if (msg_.withdrawOnOtherChain) {
                 /// @dev determine the right amount to send back to source
-                uint256 amountToSend = _send.amountLD > _options.tapAmount ? _options.tapAmount : _send.amountLD;
+
+                uint256 amountToSend = _send.amountLD > tapBalance ? tapBalance : _send.amountLD;
                 if (_send.minAmountLD > amountToSend) {
                     _send.minAmountLD = amountToSend;
                 }
+                _send.amountLD = amountToSend;
+
+                msg_.lzSendParams.sendParam = _send;
 
                 // Sends to source and preserve source `msg.sender` (`from` in this case).
                 _sendPacket(msg_.lzSendParams, msg_.composeMsg, _options.from);
 
                 // Refund extra amounts
-                if (_options.tapAmount - amountToSend > 0) {
-                    IERC20(tapOft).safeTransfer(_options.from, _options.tapAmount - amountToSend);
+                if (tapBalance - amountToSend > 0) {
+                    IERC20(tapOft).safeTransfer(_options.from, tapBalance - amountToSend);
                 }
             } else {
                 //send on this chain
-                IERC20(tapOft).safeTransfer(_options.from, _options.tapAmount);
+                IERC20(tapOft).safeTransfer(_options.from, tapBalance);
             }
         }
     }
 
     function _checkWhitelistStatus(address _addr) private view {
         if (_addr != address(0)) {
-            if (!cluster.isWhitelisted(0, _addr)) {
+            if (!getCluster().isWhitelisted(0, _addr)) {
                 revert TOFTOptionsReceiverModule_NotAuthorized(_addr);
             }
         }
@@ -222,8 +260,12 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         /// @dev Applies the token transfers regarding this send() operation.
         // - amountDebitedLD is the amount in local decimals that was ACTUALLY debited from the sender.
         // - amountToCreditLD is the amount in local decimals that will be credited to the recipient on the remote OFT instance.
-        (uint256 amountDebitedLD, uint256 amountToCreditLD) =
-            _debit(_lzSendParam.sendParam.amountLD, _lzSendParam.sendParam.minAmountLD, _lzSendParam.sendParam.dstEid);
+        (uint256 amountDebitedLD, uint256 amountToCreditLD) = _debit(
+            msg.sender,
+            _lzSendParam.sendParam.amountLD,
+            _lzSendParam.sendParam.minAmountLD,
+            _lzSendParam.sendParam.dstEid
+        );
 
         /// @dev Builds the options and OFT message to quote in the endpoint.
         (bytes memory message, bytes memory options) = _buildOFTMsgAndOptionsMemory(
@@ -236,7 +278,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         /// @dev Formulate the OFT receipt.
         oftReceipt = OFTReceipt(amountDebitedLD, amountToCreditLD);
 
-        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD);
+        emit OFTSent(msgReceipt.guid, _lzSendParam.sendParam.dstEid, msg.sender, amountDebitedLD, amountToCreditLD);
     }
     /**
      * @dev For details about this function, check `BaseTapiocaOmnichainEngine._buildOFTMsgAndOptions()`.

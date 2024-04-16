@@ -102,6 +102,7 @@ contract TOFTTest is TOFTTestHelper {
     TOFTHelper tOFTHelper;
 
     TapiocaOptionsBrokerMock tOB;
+    TapiocaOmnichainExtExec toftExtExec;
 
     uint256 aTOFTYieldBoxId;
     uint256 bTOFTYieldBoxId;
@@ -170,7 +171,8 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(magnetar), "Magnetar");
         }
 
-        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+        toftExtExec = new TapiocaOmnichainExtExec();
+
         TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",
@@ -259,7 +261,7 @@ contract TOFTTest is TOFTTestHelper {
         }
 
         {
-            toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+            toftExtExec = new TapiocaOmnichainExtExec();
             bTOFTVault = new TOFTVault(address(bERC20));
             bTOFTInitStruct = TOFTInitStruct({
                 name: "Token B",
@@ -332,6 +334,11 @@ contract TOFTTest is TOFTTestHelper {
         cluster.updateContract(bEid, address(magnetar), true);
         cluster.updateContract(bEid, address(tOB), true);
         cluster.updateContract(bEid, address(marketHelper), true);
+        cluster.updateContract(0, address(yieldBox), true);
+        cluster.updateContract(0, address(singularity), true);
+        cluster.updateContract(0, address(magnetar), true);
+        cluster.updateContract(0, address(tOB), true);
+        cluster.updateContract(0, address(marketHelper), true);
     }
 
     /**
@@ -392,7 +399,7 @@ contract TOFTTest is TOFTTestHelper {
 
     function test_constructor() public {
         assertEq(address(aTOFT.yieldBox()), address(yieldBox));
-        assertEq(address(aTOFT.cluster()), address(cluster));
+        assertEq(address(aTOFT.getCluster()), address(cluster));
         assertEq(address(aTOFT.erc20()), address(aERC20));
         assertEq(aTOFT.hostEid(), aEid);
     }
@@ -437,6 +444,104 @@ contract TOFTTest is TOFTTestHelper {
             aTOFT.unwrap(address(this), erc20Amount_);
             assertEq(aTOFT.balanceOf(address(this)), 0);
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
+        }
+    }
+
+    function test_unwrap_fees() public {
+        uint256 liquidityAmount_ = 50 ether;
+        uint256 unwrapAmount_ = 1 ether;
+
+        // set fee
+        {
+            mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
+                stargateRouter: address(0),
+                mintFee: 0,
+                mintCap: wrongHostTOFT.mintCap(),
+                connectedChain: aEid,
+                connectedChainState: true,
+                balancerStateAddress: address(0),
+                balancerState: false
+            });
+            wrongHostTOFT.setOwnerState(dataA);
+        }
+
+        IToftVault vault = wrongHostTOFT.vault();
+
+        // range 0-100
+        {
+            // test wrap
+            deal(address(bERC20), address(this), liquidityAmount_);
+            assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
+
+            pearlmit.approve(
+                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)
+            ); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+            wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
+
+            uint256 supply = vault.viewSupply();
+            assertEq(supply, liquidityAmount_);
+
+            uint256 multiplier = wrongHostTOFT.getMultiplier(liquidityAmount_);
+            assertEq(multiplier, 0);
+
+            uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, liquidityAmount_);
+            assertEq(feeAmount, 0);
+
+            uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+            assertEq(unwrapped, unwrapAmount_);
+        }
+
+        // range 100-1000
+        {
+            liquidityAmount_ = 500 ether;
+            deal(address(bERC20), address(this), liquidityAmount_);
+            assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
+
+            pearlmit.approve(
+                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)
+            ); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+            wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
+
+            uint256 supply = vault.viewSupply();
+            assertGt(supply, liquidityAmount_);
+
+            uint256 multiplier = wrongHostTOFT.getMultiplier(vault.viewSupply());
+            assertEq(multiplier, 5);
+
+            uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, vault.viewSupply());
+            assertGt(feeAmount, 0);
+
+            uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+            assertLt(unwrapped, unwrapAmount_);
+            assertEq(unwrapped, unwrapAmount_ - feeAmount);
+        }
+
+        // range 1000-10000
+        {
+            liquidityAmount_ = 50_000 ether;
+            deal(address(bERC20), address(this), liquidityAmount_);
+            assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
+
+            pearlmit.approve(
+                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)
+            ); // Atomic approval
+            bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+            wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
+
+            uint256 supply = vault.viewSupply();
+            assertGt(supply, liquidityAmount_);
+
+            uint256 multiplier = wrongHostTOFT.getMultiplier(vault.viewSupply());
+            assertEq(multiplier, 10);
+
+            uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, vault.viewSupply());
+            assertGt(feeAmount, 0);
+
+            uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+            assertLt(unwrapped, unwrapAmount_);
+            assertEq(unwrapped, unwrapAmount_ - feeAmount);
         }
     }
 
@@ -572,7 +677,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -613,7 +719,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -692,7 +799,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -758,7 +866,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             remoteLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -789,7 +898,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -883,7 +993,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -913,7 +1024,7 @@ contract TOFTTest is TOFTTestHelper {
                 withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: aTOFTYieldBoxId,
-                unwrap: false,
+                compose: false,
                 lzSendParams: LZSendParam({
                     refundAddress: address(this),
                     fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
@@ -955,7 +1066,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1025,7 +1137,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1051,7 +1164,7 @@ contract TOFTTest is TOFTTestHelper {
                 withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: bTOFTYieldBoxId,
-                unwrap: false,
+                compose: false,
                 lzSendParams: LZSendParam({
                     refundAddress: address(this),
                     fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
@@ -1093,7 +1206,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1168,7 +1282,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1201,7 +1316,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1234,7 +1350,7 @@ contract TOFTTest is TOFTTestHelper {
         }
     }
 
-    function test_reaaaaaceive_with_params_userA() public {
+    function test_receive_with_params_userA() public {
         uint256 erc20Amount_ = 1 ether;
 
         //setup
@@ -1274,7 +1390,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1307,7 +1424,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1383,7 +1501,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1440,7 +1559,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
@@ -1507,7 +1627,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1568,7 +1689,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1648,7 +1770,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1736,7 +1859,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1773,6 +1897,7 @@ contract TOFTTest is TOFTTestHelper {
     }
 
     function test_tOFT_market_permit_asset() public {
+        cluster.updateContract(0, address(singularity), true);
         bytes memory approvalMsg_;
         {
             // @dev v,r,s will be completed on `__getMarketPermitData`
@@ -1811,7 +1936,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1878,7 +2004,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;

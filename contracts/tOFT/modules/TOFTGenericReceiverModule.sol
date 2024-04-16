@@ -32,6 +32,7 @@ contract TOFTGenericReceiverModule is BaseTOFT {
 
     error TOFTGenericReceiverModule_NotAuthorized(address invalidAddress);
     error TOFTGenericReceiverModule_TransferFailed();
+    error TOFTGenericReceiverModule_AmountMismatch();
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
@@ -55,14 +56,18 @@ contract TOFTGenericReceiverModule is BaseTOFT {
 
             /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
             _internalTransferWithAllowance(msg_.receiver, srcChainSender, msg_.amount);
-            tOFT.unwrap(address(this), msg_.amount);
+            uint256 unwrapped = tOFT.unwrap(address(this), msg_.amount);
 
             if (toftERC20 != address(0)) {
-                IERC20(toftERC20).safeTransfer(msg_.receiver, msg_.amount);
+                IERC20(toftERC20).safeTransfer(msg_.receiver, unwrapped);
             } else {
-                (bool sent,) = msg_.receiver.call{value: msg_.amount}("");
+                if (msg.value != msg_.amount) revert TOFTGenericReceiverModule_AmountMismatch();
+                (bool sent,) = msg_.receiver.call{value: unwrapped}("");
+
                 if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
             }
+        } else {
+            if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();
         }
     }
 

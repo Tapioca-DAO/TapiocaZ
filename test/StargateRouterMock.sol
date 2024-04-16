@@ -28,6 +28,32 @@ interface IToftMock {
     function sgReceive(uint16, bytes memory, uint256, address, uint256 amountLD, bytes memory) external;
 }
 
+contract StargateFactoryMock {
+    address public pool;
+
+    constructor() {
+        pool = address(new StargatePoolMock());
+    }
+
+    function getPool(uint256) external view returns (address) {
+        return pool;
+    }
+}
+
+contract StargatePoolMock {
+    function localDecimals() external pure returns (uint256) {
+        return 18;
+    }
+
+    function sharedDecimals() external pure returns (uint256) {
+        return 18;
+    }
+
+    function convertRate() external pure returns (uint256) {
+        return 1;
+    }
+}
+
 contract StargateRouterMock is IStargateRouterMock {
     IERC20 public token;
 
