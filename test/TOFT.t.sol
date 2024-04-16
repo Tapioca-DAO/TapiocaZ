@@ -1024,7 +1024,7 @@ contract TOFTTest is TOFTTestHelper {
                 withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: aTOFTYieldBoxId,
-                unwrap: false,
+                compose: false,
                 lzSendParams: LZSendParam({
                     refundAddress: address(this),
                     fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
@@ -1164,7 +1164,7 @@ contract TOFTTest is TOFTTestHelper {
                 withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: bTOFTYieldBoxId,
-                unwrap: false,
+                compose: false,
                 lzSendParams: LZSendParam({
                     refundAddress: address(this),
                     fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
