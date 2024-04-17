@@ -96,6 +96,12 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.marketHelper).buyCollateral(
                 msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData
             );
+            if (msg_.supplyAmount > 0) {
+                IYieldBox yb = IYieldBox(IMarket(msg_.market).yieldBox());
+
+                IERC20(address(this)).approve(address(yb), msg_.supplyAmount);
+                yb.depositAsset(IMarket(msg_.market).assetId(), msg_.user, msg_.user, msg_.supplyAmount, 0);
+            }
             IMarket(msg_.market).execute(modules, calls, true);
         }
 
