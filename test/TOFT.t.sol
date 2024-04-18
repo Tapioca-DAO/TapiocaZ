@@ -1537,8 +1537,7 @@ contract TOFTTest is TOFTTestHelper {
                 fee: MessagingFee({nativeFee: 0, lzTokenFee: 0}),
                 extraOptions: "0x",
                 refundAddress: address(this)
-            }),
-            composeMsg: "0x"
+            })
         });
         bytes memory sendMsg_ = tOFTHelper.buildExerciseOptionMsg(exerciseMsg);
 
