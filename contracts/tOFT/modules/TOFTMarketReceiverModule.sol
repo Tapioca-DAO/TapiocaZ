@@ -179,8 +179,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         _checkWhitelistStatus(msg_.removeParams.market);
         _checkWhitelistStatus(msg_.removeParams.marketHelper);
 
-        address ybAddress = IMarket(msg_.removeParams.market).yieldBox();
-        uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
+        address ybAddress = IMarket(msg_.removeParams.market)._yieldBox();
+        uint256 assetId = IMarket(msg_.removeParams.market)._collateralId();
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
 

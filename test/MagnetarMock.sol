@@ -167,9 +167,9 @@ contract MagnetarMock is PearlmitHandler {
     {
         if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.market))) revert MagnetarMock_NotAuthorized();
 
-        IYieldBox yieldBox = IYieldBox(IMarket(_data.market).yieldBox());
+        IYieldBox yieldBox = IYieldBox(IMarket(_data.market)._yieldBox());
 
-        uint256 collateralId = IMarket(_data.market).collateralId();
+        uint256 collateralId = IMarket(_data.market)._collateralId();
         (, address collateralAddress,,) = yieldBox.assets(collateralId);
 
         uint256 _share = yieldBox.toShare(collateralId, _data.collateralAmount, false);

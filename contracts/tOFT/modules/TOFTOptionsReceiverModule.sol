@@ -231,8 +231,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
                 msg_.lzSendParams.sendParam = _send;
 
-                // Sends to source and preserve source `msg.sender` (`from` in this case).
-                _sendPacket(msg_.lzSendParams, msg_.composeMsg, _options.from);
+                _sendPacket(msg_.lzSendParams, "", srcChainSender);
 
                 // Refund extra amounts
                 if (tapBalance - amountToSend > 0) {
