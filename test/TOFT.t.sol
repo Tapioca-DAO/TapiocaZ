@@ -1043,7 +1043,6 @@ contract TOFTTest is TOFTTestHelper {
                 composeGas: 0,
                 sendVal: 0,
                 composeVal: 0,
-                composeMsg: "0x",
                 composeMsgType: 0
             })
         });
@@ -1183,7 +1182,6 @@ contract TOFTTest is TOFTTestHelper {
                 composeGas: 0,
                 sendVal: 0,
                 composeVal: 0,
-                composeMsg: "0x",
                 composeMsgType: 0
             })
         });
