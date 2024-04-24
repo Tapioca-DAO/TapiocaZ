@@ -47,7 +47,7 @@ contract MagnetarMock is PearlmitHandler {
     error MagnetarMock_TargetNotWhitelisted(address target);
     error MagnetarMock_GasMismatch(uint256 expected, uint256 received);
     error MagnetarMock_UnknownReason();
-    error MagnetarMock_ActionNotValid(MagnetarAction action, bytes actionCalldata); // Burst did not find what to execute
+    error MagnetarMock_ActionNotValid(uint8 action, bytes actionCalldata); // Burst did not find what to execute
 
     ICluster public cluster;
 
@@ -71,18 +71,18 @@ contract MagnetarMock is PearlmitHandler {
             valAccumulator += _action.value;
 
             /// @dev Permit on YB, or an SGL/BB market
-            if (_action.id == MagnetarAction.Permit) {
+            if (_action.id == uint8(MagnetarAction.Permit)) {
                 _processPermitOperation(_action.target, _action.call, _action.allowFailure);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Wrap/unwrap singular operations
-            if (_action.id == MagnetarAction.Wrap) {
+            if (_action.id == uint8(MagnetarAction.Wrap)) {
                 continue; // skip the rest of the loop
             }
 
             /// @dev Market singular operations
-            if (_action.id == MagnetarAction.Market) {
+            if (_action.id == uint8(MagnetarAction.Market)) {
                 continue; // skip the rest of the loop
             }
 
@@ -92,37 +92,37 @@ contract MagnetarMock is PearlmitHandler {
             // }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.AssetModule) {
+            if (_action.id == uint8(MagnetarAction.AssetModule)) {
                 _executeModule(MagnetarModule.YieldBoxModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.CollateralModule) {
+            if (_action.id == uint8(MagnetarAction.CollateralModule)) {
                 _executeModule(MagnetarModule.CollateralModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.MintModule) {
+            if (_action.id == uint8(MagnetarAction.MintModule)) {
                 _executeModule(MagnetarModule.MintModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.MintXChainModule) {
+            if (_action.id == uint8(MagnetarAction.MintXChainModule)) {
                 _executeModule(MagnetarModule.MintXChainModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.OptionModule) {
+            if (_action.id == uint8(MagnetarAction.OptionModule)) {
                 _executeModule(MagnetarModule.OptionModule, _action.call);
                 continue; // skip the rest of the loop
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == MagnetarAction.YieldBoxModule) {
+            if (_action.id == uint8(MagnetarAction.YieldBoxModule)) {
                 _executeModule(MagnetarModule.YieldBoxModule, _action.call);
                 continue; // skip the rest of the loop
             }
@@ -158,7 +158,7 @@ contract MagnetarMock is PearlmitHandler {
             _executeCall(_target, _actionCalldata, 0, _allowFailure);
             return;
         }
-        revert MagnetarMock_ActionNotValid(MagnetarAction.Permit, _actionCalldata);
+        revert MagnetarMock_ActionNotValid(uint8(MagnetarAction.Permit), _actionCalldata);
     }
 
     function depositAddCollateralAndBorrowFromMarket(DepositAddCollateralAndBorrowFromMarketData memory _data)
