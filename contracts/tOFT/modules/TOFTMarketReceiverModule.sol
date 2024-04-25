@@ -155,7 +155,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             id: MagnetarAction.CollateralModule,
             target: msg_.borrowParams.market,
             value: msg.value,
-            allowFailure: false,
             call: call
         });
         IMagnetar(payable(msg_.borrowParams.magnetar)).burst{value: msg.value}(magnetarCall);
@@ -214,7 +213,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
                     id: MagnetarAction.YieldBoxModule,
                     target: address(this),
                     value: msg.value,
-                    allowFailure: false,
                     call: call
                 });
                 IMagnetar(payable(msg_.removeParams.magnetar)).burst{value: msg.value}(magnetarCall);
