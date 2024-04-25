@@ -64,6 +64,8 @@ abstract contract BaseTOFT is
         yieldBox = IYieldBox(_data.yieldBox);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
+
+        _transferOwnership(_data.delegate);
     }
 
     /**

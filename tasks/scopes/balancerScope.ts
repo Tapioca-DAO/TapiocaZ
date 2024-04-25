@@ -10,8 +10,18 @@ import { retryRevertOnBalancer__task } from '../exec/balancer/05-balancer-retryR
 import { instantRedeemLocalOnBalancer__task } from '../exec/balancer/06-balancer-instantRedeemLocal';
 import { redeemLocalOnBalancer__task } from '../exec/balancer/07-balancer-redeemLocal';
 import { redeemRemoteOnBalancer__task } from '../exec/balancer/08-balancer-redeemRemote';
+import { TAP_TASK } from 'tapioca-sdk';
+import { balancerInnitConnectedOft__task } from 'tasks/exec/balancer/balancerInnitConnectedOft__task';
 
 const balancerScope = scope('balancer', 'Balancer.sol tasks');
+
+TAP_TASK(
+    balancerScope.task(
+        'initConnectedOFT',
+        'Init a connected OFT on Balancer',
+        balancerInnitConnectedOft__task,
+    ),
+);
 
 balancerScope.task(
     'toggleSwapEth',
@@ -25,11 +35,11 @@ balancerScope.task(
     emergencySaveTokens__task,
 );
 
-balancerScope.task(
-    'initConnectedOFT',
-    'Init a connected OFT on Balancer',
-    initConnectedOFT__task,
-);
+// balancerScope.task(
+//     'initConnectedOFT',
+//     'Init a connected OFT on Balancer',
+//     initConnectedOFT__task,
+// );
 
 balancerScope.task(
     'setRebalanceAmount',
