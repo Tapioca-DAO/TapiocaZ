@@ -7,8 +7,8 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
 import {ITOFT, TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
-import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
+import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "../BaseTOFT.sol";
 
 /*
 
