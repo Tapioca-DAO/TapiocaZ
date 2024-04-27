@@ -46,6 +46,7 @@ contract Balancer is Ownable {
      */
     mapping(address => mapping(uint16 => OFTData)) public connectedOFTs;
 
+    /// @dev Most of the time, srcPoolId and dstPoolId are the same. Check https://stargateprotocol.gitbook.io/stargate/developers/pool-ids
     struct OFTData {
         uint256 srcPoolId;
         uint256 dstPoolId;
@@ -121,8 +122,7 @@ contract Balancer is Ownable {
     {
         canExec = connectedOFTs[_srcOft][_dstChainId].rebalanceable > 0;
         execPayload = abi.encodeCall(
-            Balancer.rebalance,
-            (_srcOft, _dstChainId, _slippage, connectedOFTs[_srcOft][_dstChainId].rebalanceable)
+            Balancer.rebalance, (_srcOft, _dstChainId, _slippage, connectedOFTs[_srcOft][_dstChainId].rebalanceable)
         );
     }
 
@@ -156,12 +156,12 @@ contract Balancer is Ownable {
      * @param _slippage the destination LayerZero id
      * @param _amount the rebalanced amount
      */
-    function rebalance(
-        address payable _srcOft,
-        uint16 _dstChainId,
-        uint256 _slippage,
-        uint256 _amount
-    ) external payable onlyValidDestination(_srcOft, _dstChainId) onlyValidSlippage(_slippage) {
+    function rebalance(address payable _srcOft, uint16 _dstChainId, uint256 _slippage, uint256 _amount)
+        external
+        payable
+        onlyValidDestination(_srcOft, _dstChainId)
+        onlyValidSlippage(_slippage)
+    {
         if (msg.sender != owner() || msg.sender != rebalancer) revert NotAuthorized();
 
         if (connectedOFTs[_srcOft][_dstChainId].rebalanceable < _amount) {
@@ -204,16 +204,22 @@ contract Balancer is Ownable {
     }
 
     /**
-     * @notice registeres mTapiocaOFT for rebalancing
+     * @notice Register mTapiocaOFT for rebalancing
+     * @dev Most of the time, srcPoolId and dstPoolId are the same. Check https://stargateprotocol.gitbook.io/stargate/developers/pool-ids
+     *
      * @param _srcOft the source TOFT address
+     * @param _poolId the source pool id
      * @param _dstChainId the destination LayerZero id
      * @param _dstOft the destination TOFT address
      * @param _ercData custom send data
      */
-    function initConnectedOFT(address _srcOft, uint16 _dstChainId, address _dstOft, bytes memory _ercData)
-        external
-        onlyOwner
-    {
+    function initConnectedOFT(
+        address _srcOft,
+        uint256 _poolId,
+        uint16 _dstChainId,
+        address _dstOft,
+        bytes memory _ercData
+    ) external onlyOwner {
         if (connectedOFTs[_srcOft][_dstChainId].rebalanceable > 0) {
             revert AlreadyInitialized();
         }
@@ -222,8 +228,7 @@ contract Balancer is Ownable {
 
         (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(_ercData, (uint256, uint256));
 
-        OFTData memory oftData =
-            OFTData({srcPoolId: _srcPoolId, dstPoolId: _dstPoolId, dstOft: _dstOft, rebalanceable: 0});
+        OFTData memory oftData = OFTData({srcPoolId: _poolId, dstPoolId: _poolId, dstOft: _dstOft, rebalanceable: 0});
 
         connectedOFTs[_srcOft][_dstChainId] = oftData;
         emit ConnectedChainUpdated(_srcOft, _dstChainId, _dstOft);
@@ -267,12 +272,7 @@ contract Balancer is Ownable {
         );
     }
 
-    function _sendToken(
-        address payable _oft,
-        uint256 _amount,
-        uint16 _dstChainId,
-        uint256 _slippage
-    ) private {
+    function _sendToken(address payable _oft, uint256 _amount, uint16 _dstChainId, uint256 _slippage) private {
         address erc20 = ITOFT(_oft).erc20();
         if (IERC20Metadata(erc20).balanceOf(address(this)) < _amount) {
             revert ExceedsBalance();
@@ -280,19 +280,16 @@ contract Balancer is Ownable {
         _routerSwap(_dstChainId, _amount, _slippage, _oft, erc20);
     }
 
-    function _routerSwap(
-        uint16 _dstChainId,
-        uint256 _amount,
-        uint256 _slippage,
-        address payable _oft,
-        address _erc20
-    ) private {
+    function _routerSwap(uint16 _dstChainId, uint256 _amount, uint256 _slippage, address payable _oft, address _erc20)
+        private
+    {
         bytes memory _dst = abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft);
+        OFTData memory oftData = connectedOFTs[_oft][_dstChainId];
         IERC20(_erc20).safeApprove(address(router), _amount);
         router.swap{value: msg.value}(
             _dstChainId,
-            connectedOFTs[_oft][_dstChainId].srcPoolId,
-            connectedOFTs[_oft][_dstChainId].dstPoolId,
+            oftData.srcPoolId,
+            oftData.dstOft,
             payable(this),
             _amount,
             _computeMinAmount(_amount, _slippage),
