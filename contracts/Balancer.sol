@@ -62,6 +62,8 @@ contract Balancer is Ownable {
     // @dev swapEth is not available on some chains
     bool public disableEth;
 
+    mapping(uint16 => uint256) private _sgReceiveGas;
+
     event ConnectedChainUpdated(address indexed _srcOft, uint16 indexed _dstChainId, address indexed _dstOft);
     event Rebalanced(
         address indexed _srcOft, uint16 indexed _dstChainId, uint256 indexed _slippage, uint256 _amount, bool _isNative
@@ -85,6 +87,7 @@ contract Balancer is Ownable {
     error SwapNotEnabled();
     error AlreadyInitialized();
     error RebalanceAmountNotValid();
+    error GasNotValid();
 
     modifier onlyValidDestination(address _srcOft, uint16 _dstChainId) {
         if (connectedOFTs[_srcOft][_dstChainId].dstOft == address(0)) {
@@ -129,6 +132,14 @@ contract Balancer is Ownable {
     /// =====================
     /// Owner
     /// =====================
+    /**
+     * @notice set lzTxObj `dstGasForCall`
+     * @param eid the endpoint address
+     * @param gas the gas amount
+     */
+    function setSgReceiveGas(uint16 eid, uint256 gas) external onlyOwner {
+        _sgReceiveGas[eid] = gas;
+    }
 
     /**
      * @notice set rebalancer role
@@ -263,12 +274,19 @@ contract Balancer is Ownable {
     function _sendNative(address payable _oft, uint256 _amount, uint16 _dstChainId, uint256 _slippage) private {
         if (address(this).balance < _amount) revert ExceedsBalance();
         uint256 valueAmount = msg.value + _amount;
-        routerETH.swapETH{value: valueAmount}(
+        uint256 gas = _sgReceiveGas[_dstChainId];
+        if (gas == 0) revert GasNotValid();
+        IStargateRouterBase.SwapAmount memory swapAmounts =
+            IStargateRouterBase.SwapAmount({amountLD: _amount, minAmountLD: _computeMinAmount(_amount, _slippage)});
+        IStargateRouterBase.lzTxObj memory lzTxObj =
+            IStargateRouterBase.lzTxObj({dstGasForCall: gas, dstNativeAmount: 0, dstNativeAddr: "0x0"});
+        routerETH.swapETHAndCall{value: valueAmount}(
             _dstChainId,
             payable(this),
             abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
-            _amount,
-            _computeMinAmount(_amount, _slippage)
+            swapAmounts,
+            lzTxObj,
+            "0x"
         );
     }
 
@@ -289,7 +307,7 @@ contract Balancer is Ownable {
         router.swap{value: msg.value}(
             _dstChainId,
             oftData.srcPoolId,
-            oftData.dstOft,
+            oftData.dstPoolId,
             payable(this),
             _amount,
             _computeMinAmount(_amount, _slippage),

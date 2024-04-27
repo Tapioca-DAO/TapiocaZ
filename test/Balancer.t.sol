@@ -254,6 +254,8 @@ contract TOFTTest is TOFTTestHelper {
 
         balancer.initConnectedOFT(address(aTOFT), uint16(bEid), address(bTOFT), abi.encode(uint256(1), uint256(1)));
         balancer.addRebalanceAmount(address(aTOFT), uint16(bEid), erc20Amount_);
+        balancer.setSgReceiveGas(uint16(aEid), 500_000);
+        balancer.setSgReceiveGas(uint16(bEid), 500_000);
 
         mTOFT.SetOwnerStateData memory dataB = mTOFT.SetOwnerStateData({
             stargateRouter: address(routerA),
