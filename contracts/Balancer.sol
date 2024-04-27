@@ -46,6 +46,7 @@ contract Balancer is Ownable {
      */
     mapping(address => mapping(uint16 => OFTData)) public connectedOFTs;
 
+
     struct OFTData {
         uint256 srcPoolId;
         uint256 dstPoolId;
@@ -60,6 +61,9 @@ contract Balancer is Ownable {
 
     // @dev swapEth is not available on some chains
     bool public disableEth;
+
+    mapping(uint16 => uint256) private _sgReceiveGas;
+
 
     event ConnectedChainUpdated(address indexed _srcOft, uint16 indexed _dstChainId, address indexed _dstOft);
     event Rebalanced(
@@ -84,6 +88,7 @@ contract Balancer is Ownable {
     error SwapNotEnabled();
     error AlreadyInitialized();
     error RebalanceAmountNotValid();
+    error GasNotValid();
 
     modifier onlyValidDestination(address _srcOft, uint16 _dstChainId) {
         if (connectedOFTs[_srcOft][_dstChainId].dstOft == address(0)) {
@@ -138,6 +143,14 @@ contract Balancer is Ownable {
     /// =====================
     /// Owner
     /// =====================
+    /**
+     * @notice set lzTxObj `dstGasForCall` 
+     * @param eid the endpoint address
+     * @param gas the gas amount
+    */
+    function setSgReceiveGas(uint16 eid, uint256 gas) external onlyOwner {
+        _sgReceiveGas[eid] = gas;
+    }
 
     /**
      * @notice set rebalancer role
@@ -269,13 +282,11 @@ contract Balancer is Ownable {
     function _sendNative(address payable _oft, uint256 _amount, uint16 _dstChainId, uint256 _slippage) private {
         if (address(this).balance < _amount) revert ExceedsBalance();
         uint256 valueAmount = msg.value + _amount;
-        routerETH.swapETH{value: valueAmount}(
-            _dstChainId,
-            payable(this),
-            abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
-            _amount,
-            _computeMinAmount(_amount, _slippage)
-        );
+        uint256 gas = _sgReceiveGas[_dstChainId];
+        if (gas == 0) revert GasNotValid();
+        IStargateRouterBase.SwapAmount memory swapAmounts = IStargateRouterBase.SwapAmount({amountLD: _amount, minAmountLD: _computeMinAmount(_amount, _slippage)});
+        IStargateRouterBase.lzTxObj memory lzTxObj = IStargateRouterBase.lzTxObj({dstGasForCall: gas, dstNativeAmount: 0, dstNativeAddr: "0x0"});
+        routerETH.swapETHAndCall{value: valueAmount}(_dstChainId, payable(this), abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft), swapAmounts, lzTxObj, "0x");
     }
 
     function _sendToken(
@@ -291,30 +302,34 @@ contract Balancer is Ownable {
         }
         {
             (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(_data, (uint256, uint256));
-            _routerSwap(_dstChainId, _srcPoolId, _dstPoolId, _amount, _slippage, _oft, erc20);
+            _routerSwap(__RouterSwapInternal(_dstChainId, _srcPoolId, _dstPoolId, _amount, _slippage, _oft, erc20));
         }
     }
 
+    struct __RouterSwapInternal {
+        uint16 _dstChainId;
+        uint256 _srcPoolId;
+        uint256 _dstPoolId;
+        uint256 _amount;
+        uint256 _slippage;
+        address payable _oft;
+        address _erc20;
+    }
     function _routerSwap(
-        uint16 _dstChainId,
-        uint256 _srcPoolId,
-        uint256 _dstPoolId,
-        uint256 _amount,
-        uint256 _slippage,
-        address payable _oft,
-        address _erc20
+        __RouterSwapInternal memory swapInternal
     ) private {
-        bytes memory _dst = abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft);
-        IERC20(_erc20).safeApprove(address(router), _amount);
+        uint256 gas = _sgReceiveGas[swapInternal._dstChainId];
+        if (gas == 0) revert GasNotValid();
+        IERC20(swapInternal._erc20).safeApprove(address(router), swapInternal._amount);
         router.swap{value: msg.value}(
-            _dstChainId,
-            _srcPoolId,
-            _dstPoolId,
+            swapInternal._dstChainId,
+            swapInternal._srcPoolId,
+            swapInternal._dstPoolId,
             payable(this),
-            _amount,
-            _computeMinAmount(_amount, _slippage),
-            IStargateRouterBase.lzTxObj({dstGasForCall: 0, dstNativeAmount: 0, dstNativeAddr: "0x0"}),
-            _dst,
+            swapInternal._amount,
+            _computeMinAmount(swapInternal._amount, swapInternal._slippage),
+            IStargateRouterBase.lzTxObj({dstGasForCall: gas, dstNativeAmount: 0, dstNativeAddr: "0x0"}),
+            abi.encodePacked(connectedOFTs[swapInternal._oft][swapInternal._dstChainId].dstOft),
             "0x"
         );
     }
