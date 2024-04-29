@@ -98,8 +98,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             );
             if (msg_.supplyAmount > 0) {
                 IYieldBox yb = IYieldBox(IMarket(msg_.market)._yieldBox());
-
-                IERC20(address(this)).approve(address(yb), msg_.supplyAmount);
                 yb.depositAsset(IMarket(msg_.market)._assetId(), msg_.user, msg_.user, msg_.supplyAmount, 0);
             }
             IMarket(msg_.market).execute(modules, calls, true);
