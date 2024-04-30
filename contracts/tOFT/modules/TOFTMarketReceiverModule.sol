@@ -146,7 +146,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         );
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
-            id: MagnetarAction.CollateralModule,
+            id: uint8(MagnetarAction.CollateralModule),
             target: msg_.borrowParams.market,
             value: msg.value,
             call: call
@@ -204,7 +204,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
                     abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, msg_.withdrawParams);
                 MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
                 magnetarCall[0] = MagnetarCall({
-                    id: MagnetarAction.YieldBoxModule,
+                    id: uint8(MagnetarAction.YieldBoxModule),
                     target: address(this),
                     value: msg.value,
                     call: call

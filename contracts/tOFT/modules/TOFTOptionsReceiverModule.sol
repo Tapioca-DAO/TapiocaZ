@@ -97,7 +97,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
-            id: MagnetarAction.MintXChainModule,
+            id: uint8(MagnetarAction.MintXChainModule),
             target: address(this),
             value: msg.value,
             call: call
@@ -144,7 +144,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
-            id: MagnetarAction.MintXChainModule,
+            id: uint8(MagnetarAction.MintXChainModule),
             target: msg_.magnetar,
             value: msg.value,
             call: call
