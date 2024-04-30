@@ -62,17 +62,12 @@ contract MagnetarMock is PearlmitHandler {
 
         for (uint256 i; i < length; i++) {
             MagnetarCall calldata _action = calls[i];
-            if (!_action.allowFailure) {
-                require(
-                    _action.call.length > 0,
-                    string.concat("Magnetar: Missing call for action with index", string(abi.encode(i)))
-                );
-            }
+            
             valAccumulator += _action.value;
 
             /// @dev Permit on YB, or an SGL/BB market
             if (_action.id == MagnetarAction.Permit) {
-                _processPermitOperation(_action.target, _action.call, _action.allowFailure);
+                _processPermitOperation(_action.target, _action.call);
                 continue; // skip the rest of the loop
             }
 
@@ -135,9 +130,8 @@ contract MagnetarMock is PearlmitHandler {
      *
      * @param _target The contract address to call.
      * @param _actionCalldata The calldata to send to the target.
-     * @param _allowFailure Whether to allow the call to fail.
      */
-    function _processPermitOperation(address _target, bytes calldata _actionCalldata, bool _allowFailure) private {
+    function _processPermitOperation(address _target, bytes calldata _actionCalldata) private {
         /// @dev owner address should always be first param.
         // permitAction(bytes,uint16)
         // permit(address owner...)
@@ -155,7 +149,7 @@ contract MagnetarMock is PearlmitHandler {
             /// @dev Owner param check. See Warning above.
             _checkSender(abi.decode(_actionCalldata[4:36], (address)));
             // No need to send value on permit
-            _executeCall(_target, _actionCalldata, 0, _allowFailure);
+            _executeCall(_target, _actionCalldata, 0);
             return;
         }
         revert MagnetarMock_ActionNotValid(MagnetarAction.Permit, _actionCalldata);
@@ -218,7 +212,7 @@ contract MagnetarMock is PearlmitHandler {
     /**
      * @dev Executes a call to an address, optionally reverting on failure. Make sure to sanitize prior to calling.
      */
-    function _executeCall(address _target, bytes calldata _actionCalldata, uint256 _actionValue, bool _allowFailure)
+    function _executeCall(address _target, bytes calldata _actionCalldata, uint256 _actionValue)
         private
     {
         bool success;
@@ -230,7 +224,7 @@ contract MagnetarMock is PearlmitHandler {
             (success, returnData) = _target.call(_actionCalldata);
         }
 
-        if (!success && !_allowFailure) {
+        if (!success) {
             _getRevertMsg(returnData);
         }
     }
