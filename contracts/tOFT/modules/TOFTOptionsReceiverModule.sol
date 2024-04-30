@@ -100,7 +100,6 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             id: uint8(MagnetarAction.MintXChainModule),
             target: address(this),
             value: msg.value,
-            allowFailure: false,
             call: call
         });
         IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
@@ -148,7 +147,6 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             id: uint8(MagnetarAction.MintXChainModule),
             target: msg_.magnetar,
             value: msg.value,
-            allowFailure: false,
             call: call
         });
         IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
