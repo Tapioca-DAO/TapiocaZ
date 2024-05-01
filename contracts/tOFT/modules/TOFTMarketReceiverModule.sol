@@ -24,8 +24,8 @@ import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYi
 import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
-import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
+import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
 
 /*
 

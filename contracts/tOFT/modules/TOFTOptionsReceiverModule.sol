@@ -26,9 +26,9 @@ import {
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
+import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
-import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
+import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
 
 /*
 
