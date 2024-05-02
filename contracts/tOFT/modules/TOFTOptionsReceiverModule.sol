@@ -52,6 +52,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     using SafeApprove for address;
 
     error TOFTOptionsReceiverModule_NotAuthorized(address invalidAddress);
+    error TOFTOptionsReceiverModule_Reentrancy();
 
     event ExerciseOptionsReceived(
         address indexed user, address indexed target, uint256 indexed oTapTokenId, uint256 paymentTokenAmount
@@ -155,8 +156,8 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         {
             // _data declared for visibility.
             IExerciseOptionsData memory _options = msg_.optionsData;
-            _options.tapAmount = _toLD(_options.tapAmount.toUint64());
-            _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
+            if (_options.tapAmount > 0) { _options.tapAmount = _toLD(_options.tapAmount.toUint64()); }
+            if (_options.paymentTokenAmount > 0) { _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64()); }
 
             // @dev retrieve paymentToken amount
             _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);
@@ -197,9 +198,11 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             SendParam memory _send = msg_.lzSendParams.sendParam;
 
             address tapOft = ITapiocaOptionBroker(_options.target).tapOFT();
+            uint256 tapBalance = IERC20(tapOft).balanceOf(address(this));
             if (msg_.withdrawOnOtherChain) {
                 /// @dev determine the right amount to send back to source
-                uint256 amountToSend = _send.amountLD > _options.tapAmount ? _options.tapAmount : _send.amountLD;
+
+                uint256 amountToSend = _send.amountLD > tapBalance ? tapBalance : _send.amountLD;
                 if (_send.minAmountLD > amountToSend) {
                     _send.minAmountLD = amountToSend;
                 }
@@ -211,12 +214,12 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
                 _sendPacket(msg_.lzSendParams, msg_.composeMsg, _options.from);
 
                 // Refund extra amounts
-                if (_options.tapAmount - amountToSend > 0) {
-                    IERC20(tapOft).safeTransfer(_options.from, _options.tapAmount - amountToSend);
+                if (tapBalance - amountToSend > 0) {
+                    IERC20(tapOft).safeTransfer(_options.from, tapBalance - amountToSend);
                 }
             } else {
                 //send on this chain
-                IERC20(tapOft).safeTransfer(_options.from, _options.tapAmount);
+                IERC20(tapOft).safeTransfer(_options.from, tapBalance);
             }
         }
     }
