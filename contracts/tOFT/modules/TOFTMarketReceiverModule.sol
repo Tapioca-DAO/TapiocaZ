@@ -204,6 +204,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             if (msg_.withdrawParams.withdraw) {
                 _checkWhitelistStatus(msg_.removeParams.magnetar);
 
+                /*
                 bytes memory call =
                     abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, msg_.withdrawParams);
                 MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
@@ -214,6 +215,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
                     call: call
                 });
                 IMagnetar(payable(msg_.removeParams.magnetar)).burst{value: msg.value}(magnetarCall);
+                */
             }
         }
 
