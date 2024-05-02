@@ -60,52 +60,6 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
     /**
-     * @notice cross-chain receiver to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
-     * @dev Cross chain flow:
-     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
-     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
-     *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _data.user the user to perform the operation for
-     * @param _data.bigBang the BB address
-     * @param _data.mintData the data needed to mint on BB
-     * @param _data.lendSendParams LZ send params for lending on another layer
-     */
-    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data)
-        public
-        payable
-    {
-        // Decode received message.
-        CrossChainMintFromBBAndLendOnSGLData memory msg_ =
-            TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
-
-        _checkWhitelistStatus(msg_.bigBang);
-        _checkWhitelistStatus(msg_.magnetar);
-
-        if (msg_.mintData.mintAmount > 0) {
-            msg_.mintData.mintAmount = _toLD(msg_.mintData.mintAmount.toUint64());
-        }
-        if (msg_.mintData.collateralDepositData.amount > 0) {
-            msg_.mintData.collateralDepositData.amount = _toLD(msg_.mintData.collateralDepositData.amount.toUint64());
-        }
-
-        if (msg_.user != srcChainSender) {
-            _spendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
-        }
-        /*
-        bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
-        MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
-        magnetarCall[0] = MagnetarCall({
-            id: uint8(MagnetarAction.MintXChainModule),
-            target: address(this),
-            value: msg.value,
-            call: call
-        });
-        IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
-        */
-    }
-
-    /**
      * @notice Execute `magnetar.lockAndParticipate`
      * @dev Lock on tOB and/or participate on tOLP
      * @param srcChainSender The address of the sender on the source chain.

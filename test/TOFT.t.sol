@@ -1024,26 +1024,9 @@ contract TOFTTest is TOFTTestHelper {
                 withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: aTOFTYieldBoxId,
-                compose: false,
-                lzSendParams: LZSendParam({
-                    refundAddress: address(this),
-                    fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                    extraOptions: "0x",
-                    sendParam: SendParam({
-                        amountLD: tokenAmount_,
-                        composeMsg: "0x",
-                        dstEid: 0,
-                        extraOptions: "0x",
-                        minAmountLD: 0,
-                        oftCmd: "0x",
-                        to: OFTMsgCodec.addressToBytes32(address(this))
-                    })
-                }),
-                sendGas: 0,
-                composeGas: 0,
-                sendVal: 0,
-                composeVal: 0,
-                composeMsgType: 0
+                amount: tokenAmount_,
+                unwrap: false,
+                receiver: address(this)
             })
         });
         bytes memory marketBorrowMsg_ = tOFTHelper.buildMarketBorrowMsg(marketBorrowMsg);
@@ -1163,26 +1146,9 @@ contract TOFTTest is TOFTTestHelper {
                 withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: bTOFTYieldBoxId,
-                compose: false,
-                lzSendParams: LZSendParam({
-                    refundAddress: address(this),
-                    fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                    extraOptions: "0x",
-                    sendParam: SendParam({
-                        amountLD: tokenAmount_,
-                        composeMsg: "0x",
-                        dstEid: 0,
-                        extraOptions: "0x",
-                        minAmountLD: 0,
-                        oftCmd: "0x",
-                        to: OFTMsgCodec.addressToBytes32(address(this))
-                    })
-                }),
-                sendGas: 0,
-                composeGas: 0,
-                sendVal: 0,
-                composeVal: 0,
-                composeMsgType: 0
+                unwrap: false,
+                amount: tokenAmount_,
+                receiver: address(this)
             })
         });
         bytes memory marketMsg_ = tOFTHelper.buildMarketRemoveCollateralMsg(marketMsg);
