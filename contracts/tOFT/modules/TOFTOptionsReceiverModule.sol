@@ -25,7 +25,6 @@ import {
     ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "../BaseTOFT.sol";
@@ -93,7 +92,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         if (msg_.user != srcChainSender) {
             _spendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
         }
-
+        /*
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
@@ -103,6 +102,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             call: call
         });
         IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+        */
     }
 
     /**
@@ -141,6 +141,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             _spendAllowance(msg_.user, srcChainSender, msg_.fraction);
         }
 
+        /*
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
@@ -150,6 +151,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             call: call
         });
         IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+        */
     }
 
     /**
