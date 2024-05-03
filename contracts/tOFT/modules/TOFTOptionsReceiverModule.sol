@@ -10,6 +10,7 @@ import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTM
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
@@ -51,6 +52,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     using SafeApprove for address;
 
     error TOFTOptionsReceiverModule_NotAuthorized(address invalidAddress);
+    error TOFTOptionsReceiverModule_Reentrancy();
 
     event ExerciseOptionsReceived(
         address indexed user, address indexed target, uint256 indexed oTapTokenId, uint256 paymentTokenAmount
@@ -79,6 +81,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
         if (msg_.mintData.mintAmount > 0) {
             msg_.mintData.mintAmount = _toLD(msg_.mintData.mintAmount.toUint64());
+        }
+        if (msg_.mintData.collateralDepositData.amount > 0) {
+            msg_.mintData.collateralDepositData.amount = _toLD(msg_.mintData.collateralDepositData.amount.toUint64());
         }
 
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
@@ -111,6 +116,8 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         _checkWhitelistStatus(msg_.singularity);
         if (msg_.lockData.lock) {
             _checkWhitelistStatus(msg_.lockData.target);
+            if (msg_.lockData.amount > 0) msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
+            if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
         }
         if (msg_.participateData.participate) {
             _checkWhitelistStatus(msg_.participateData.target);
@@ -149,8 +156,8 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         {
             // _data declared for visibility.
             IExerciseOptionsData memory _options = msg_.optionsData;
-            _options.tapAmount = _toLD(_options.tapAmount.toUint64());
-            _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
+            if (_options.tapAmount > 0) { _options.tapAmount = _toLD(_options.tapAmount.toUint64()); }
+            if (_options.paymentTokenAmount > 0) { _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64()); }
 
             // @dev retrieve paymentToken amount
             _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);
@@ -163,6 +170,11 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
             /// @dev call exerciseOption() with address(this) as the payment token
             uint256 bBefore = balanceOf(address(this));
+            address oTap = ITapiocaOptionBroker(_options.target).oTAP();
+            address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
+
+            if (oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner,_options.from) && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
+
             ITapiocaOptionBroker(_options.target).exerciseOption(
                 _options.oTAPTokenID,
                 address(this), //payment token
@@ -172,7 +184,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             uint256 bAfter = balanceOf(address(this));
 
             // Refund if less was used.
-            if (bBefore > bAfter) {
+            if (bBefore >= bAfter) {
                 uint256 diff = bBefore - bAfter;
                 if (diff < _options.paymentTokenAmount) {
                     IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
@@ -186,23 +198,28 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             SendParam memory _send = msg_.lzSendParams.sendParam;
 
             address tapOft = ITapiocaOptionBroker(_options.target).tapOFT();
+            uint256 tapBalance = IERC20(tapOft).balanceOf(address(this));
             if (msg_.withdrawOnOtherChain) {
                 /// @dev determine the right amount to send back to source
-                uint256 amountToSend = _send.amountLD > _options.tapAmount ? _options.tapAmount : _send.amountLD;
+
+                uint256 amountToSend = _send.amountLD > tapBalance ? tapBalance : _send.amountLD;
                 if (_send.minAmountLD > amountToSend) {
                     _send.minAmountLD = amountToSend;
                 }
+                _send.amountLD = amountToSend;
+                
+                msg_.lzSendParams.sendParam = _send;
 
                 // Sends to source and preserve source `msg.sender` (`from` in this case).
                 _sendPacket(msg_.lzSendParams, msg_.composeMsg, _options.from);
 
                 // Refund extra amounts
-                if (_options.tapAmount - amountToSend > 0) {
-                    IERC20(tapOft).safeTransfer(_options.from, _options.tapAmount - amountToSend);
+                if (tapBalance - amountToSend > 0) {
+                    IERC20(tapOft).safeTransfer(_options.from, tapBalance - amountToSend);
                 }
             } else {
                 //send on this chain
-                IERC20(tapOft).safeTransfer(_options.from, _options.tapAmount);
+                IERC20(tapOft).safeTransfer(_options.from, tapBalance);
             }
         }
     }

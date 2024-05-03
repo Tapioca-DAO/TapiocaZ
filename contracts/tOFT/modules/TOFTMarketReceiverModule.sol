@@ -77,6 +77,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
         /// @dev 'market'
         _checkWhitelistStatus(msg_.market);
+        _checkWhitelistStatus(msg_.marketHelper);
 
         msg_.borrowAmount = _toLD(msg_.borrowAmount.toUint64());
         if (msg_.supplyAmount > 0) {
@@ -163,6 +164,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         MarketRemoveCollateralMsg memory msg_ = TOFTMsgCodec.decodeMarketRemoveCollateralMsg(_data);
 
         _checkWhitelistStatus(msg_.removeParams.market);
+        _checkWhitelistStatus(msg_.removeParams.marketHelper);
 
         address ybAddress = IMarket(msg_.removeParams.market).yieldBox();
         uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
