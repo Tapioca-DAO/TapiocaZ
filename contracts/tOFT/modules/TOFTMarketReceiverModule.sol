@@ -75,7 +75,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     function leverageUpReceiver(address srcChainSender, bytes memory _data) public payable {
         /// @dev decode received message
         LeverageUpActionMsg memory msg_ = TOFTMsgCodec.decodeLeverageUpMsg(_data);
-   
+
         /// @dev 'market'
         _checkWhitelistStatus(msg_.market);
 
@@ -84,10 +84,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             msg_.supplyAmount = _toLD(msg_.supplyAmount.toUint64());
         }
 
-        if (msg_.user != srcChainSender) {
-            uint256 allowanceAmount = msg_.borrowAmount + msg_.supplyAmount;
-            _spendAllowance(msg_.user, srcChainSender, allowanceAmount);
-        }
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowAmount);
 
         approve(address(msg_.market), type(uint256).max);
 
@@ -123,11 +120,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
         msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
 
-        if (msg_.user != srcChainSender) {
-            uint256 allowanceAmount = msg_.borrowParams.amount + msg_.borrowParams.borrowAmount;
-            _spendAllowance(msg_.user, srcChainSender, allowanceAmount);
-        }
-
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowParams.amount);
 
         /// @dev use market helper to deposit, add collateral to market and withdrawTo
         approve(address(msg_.borrowParams.magnetar), msg_.borrowParams.amount);
@@ -182,10 +175,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
-        
-        if (msg_.user != srcChainSender) {
-            _spendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
-        }
+
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
 
         {
             uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);

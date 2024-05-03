@@ -70,7 +70,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      * @param _data.mintData the data needed to mint on BB
      * @param _data.lendSendParams LZ send params for lending on another layer
      */
-    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data) public payable {
+    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data)
+        public
+        payable
+    {
         // Decode received message.
         CrossChainMintFromBBAndLendOnSGLData memory msg_ =
             TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
@@ -82,9 +85,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             msg_.mintData.mintAmount = _toLD(msg_.mintData.mintAmount.toUint64());
         }
 
-        if (msg_.user != srcChainSender) {
-            _spendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
-        }
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
 
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
@@ -126,9 +127,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             msg_.fraction = _toLD(msg_.fraction.toUint64());
         }
 
-        if (msg_.user != srcChainSender) {
-            _spendAllowance(msg_.user, srcChainSender, msg_.fraction);
-        }
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.fraction);
 
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
@@ -276,21 +275,5 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         if (msgInspector != address(0)) {
             IOAppMsgInspector(msgInspector).inspect(message, options);
         }
-    }
-
-    /**
-     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
-     * @dev Can only transfer to this address.
-     *
-     * @param _owner The account to transfer from.
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _amount The amount to transfer
-     */
-    function _internalTransferWithAllowance(address _owner, address srcChainSender, uint256 _amount) internal {
-        if (_owner != srcChainSender) {
-            _spendAllowance(_owner, srcChainSender, _amount);
-        }
-
-        _transfer(_owner, address(this), _amount);
     }
 }
