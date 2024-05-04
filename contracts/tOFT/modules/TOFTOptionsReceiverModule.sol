@@ -66,12 +66,16 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
      *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
      *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data.user the user to perform the operation for
      * @param _data.bigBang the BB address
      * @param _data.mintData the data needed to mint on BB
      * @param _data.lendSendParams LZ send params for lending on another layer
      */
-    function mintLendXChainSGLXChainLockAndParticipateReceiver(bytes memory _data) public payable {
+    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data)
+        public
+        payable
+    {
         // Decode received message.
         CrossChainMintFromBBAndLendOnSGLData memory msg_ =
             TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
@@ -85,6 +89,8 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         if (msg_.mintData.collateralDepositData.amount > 0) {
             msg_.mintData.collateralDepositData.amount = _toLD(msg_.mintData.collateralDepositData.amount.toUint64());
         }
+
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
 
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
@@ -101,6 +107,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     /**
      * @notice Execute `magnetar.lockAndParticipate`
      * @dev Lock on tOB and/or participate on tOLP
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      * @param _data.user the user to perform the operation for
      * @param _data.singularity the SGL address
@@ -108,7 +115,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      * @param _data.lockData the data needed to lock on tOB
      * @param _data.participateData the data needed to participate on tOLP
      */
-    function lockAndParticipateReceiver(bytes memory _data) public payable {
+    function lockAndParticipateReceiver(address srcChainSender, bytes memory _data) public payable {
         // Decode receive message
         LockAndParticipateData memory msg_ = TOFTMsgCodec.decodeLockAndParticipateMsg(_data);
 
@@ -127,6 +134,8 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             msg_.fraction = _toLD(msg_.fraction.toUint64());
         }
 
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.fraction);
+
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
@@ -141,6 +150,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
     /**
      * @notice Exercise tOB option
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      *      - optionsData::address: TapiocaOptionsBroker exercise params.
      *      - lzSendParams::struct: LZ v2 send to source params.
@@ -282,21 +292,5 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         if (msgInspector != address(0)) {
             IOAppMsgInspector(msgInspector).inspect(message, options);
         }
-    }
-
-    /**
-     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
-     * @dev Can only transfer to this address.
-     *
-     * @param _owner The account to transfer from.
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _amount The amount to transfer
-     */
-    function _internalTransferWithAllowance(address _owner, address srcChainSender, uint256 _amount) internal {
-        if (_owner != srcChainSender) {
-            _spendAllowance(_owner, srcChainSender, _amount);
-        }
-
-        _transfer(_owner, address(this), _amount);
     }
 }

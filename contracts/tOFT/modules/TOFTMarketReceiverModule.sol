@@ -64,6 +64,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
     /**
      * @notice Calls `buyCollateral` on a market
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      *      - user::address: Address to leverage for.
      *      - market::address: Address of the market.
@@ -71,7 +72,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      *      - supplyAmount::address: Extra asset amount used for the leverage operation.
      *      - executorData::bytes: Leverage executor data.
      */
-    function leverageUpReceiver(bytes memory _data) public payable {
+    function leverageUpReceiver(address srcChainSender, bytes memory _data) public payable {
         /// @dev decode received message
         LeverageUpActionMsg memory msg_ = TOFTMsgCodec.decodeLeverageUpMsg(_data);
 
@@ -83,6 +84,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         if (msg_.supplyAmount > 0) {
             msg_.supplyAmount = _toLD(msg_.supplyAmount.toUint64());
         }
+
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowAmount);
 
         approve(address(msg_.market), type(uint256).max);
 
@@ -100,13 +103,14 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
     /**
      * @notice Calls depositAddCollateralAndBorrowFromMarket on Magnetar
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      *      - from::address: Address to debit tokens from.
      *      - to::address: Address to execute operations on.
      *      - borrowParams::struct: Borrow operation related params.
      *      - withdrawParams::struct: Withdraw related params.
      */
-    function marketBorrowReceiver(bytes memory _data) public payable {
+    function marketBorrowReceiver(address srcChainSender, bytes memory _data) public payable {
         /// @dev decode received message
         MarketBorrowMsg memory msg_ = TOFTMsgCodec.decodeMarketBorrowMsg(_data);
 
@@ -116,6 +120,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
         msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
         msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
+
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowParams.amount);
 
         /// @dev use market helper to deposit, add collateral to market and withdrawTo
         approve(address(msg_.borrowParams.magnetar), msg_.borrowParams.amount);
@@ -153,13 +159,14 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
     /**
      * @notice Performs market.removeCollateral()
+     * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      *      - from::address: Address to debit tokens from.
      *      - to::address: Address to execute operations on.
      *      - removeParams::struct: Remove collateral operation related params.
      *      - withdrawParams::struct: Withdraw related params.
      */
-    function marketRemoveCollateralReceiver(bytes memory _data) public payable {
+    function marketRemoveCollateralReceiver(address srcChainSender, bytes memory _data) public payable {
         /// @dev decode received message
         MarketRemoveCollateralMsg memory msg_ = TOFTMsgCodec.decodeMarketRemoveCollateralMsg(_data);
 
@@ -170,6 +177,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
+
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
 
         {
             uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
