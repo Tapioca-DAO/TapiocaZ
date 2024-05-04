@@ -35,7 +35,7 @@ contract mTOFTReceiver is BaseTOFTReceiver {
                 false
             );
             return true;
-        } 
+        }
         return false;
     }
 }

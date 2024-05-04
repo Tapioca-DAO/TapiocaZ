@@ -62,7 +62,7 @@ contract MagnetarMock is PearlmitHandler {
 
         for (uint256 i; i < length; i++) {
             MagnetarCall calldata _action = calls[i];
-            
+
             valAccumulator += _action.value;
 
             /// @dev Permit on YB, or an SGL/BB market
@@ -206,9 +206,7 @@ contract MagnetarMock is PearlmitHandler {
     /**
      * @dev Executes a call to an address, optionally reverting on failure. Make sure to sanitize prior to calling.
      */
-    function _executeCall(address _target, bytes calldata _actionCalldata, uint256 _actionValue)
-        private
-    {
+    function _executeCall(address _target, bytes calldata _actionCalldata, uint256 _actionValue) private {
         bool success;
         bytes memory returnData;
 
@@ -251,6 +249,7 @@ contract MagnetarMock is PearlmitHandler {
     function _withdrawHere(IYieldBox _yieldBox, uint256 _assetId, address _to, uint256 _amount) private {
         _yieldBox.withdraw(_assetId, address(this), _to, _amount, 0);
     }
+
     function _executeModule(MagnetarModule, bytes memory _data) internal returns (bytes memory returnData) {
         bool success = true;
 

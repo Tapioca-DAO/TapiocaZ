@@ -34,6 +34,8 @@ contract TOFTGenericReceiverModule is BaseTOFT {
     error TOFTGenericReceiverModule_TransferFailed();
     error TOFTGenericReceiverModule_AmountMismatch();
 
+    event WithParamsReceived(uint256 amount, address receiver, address srcChainSender);
+
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
     /**
@@ -48,29 +50,35 @@ contract TOFTGenericReceiverModule is BaseTOFT {
     function receiveWithParamsReceiver(address srcChainSender, bytes memory _data) public payable {
         SendParamsMsg memory msg_ = TOFTMsgCodec.decodeSendParamsMsg(_data);
 
-        msg_.amount = _toLD(msg_.amount.toUint64());
+        /**
+        * @dev validate data
+        */
+        msg_ = _validateReceiveWithParams(msg_);
 
+        /**
+        * @dev executes unwrap or revert
+        */
+        _unwrapInReceiveWithParams(msg_, srcChainSender);
+
+        emit WithParamsReceived(msg_.amount, msg_.receiver, srcChainSender);
+    }
+
+    function _validateReceiveWithParams(SendParamsMsg memory msg_) private view returns (SendParamsMsg memory) {
+        msg_.amount = _toLD(msg_.amount.toUint64());
+        return msg_;
+    }
+
+    function _unwrapInReceiveWithParams(SendParamsMsg memory msg_, address srcChainSender) private {
         if (msg_.unwrap) {
             ITOFT tOFT = ITOFT(address(this));
-            address toftERC20 = tOFT.erc20();
 
             /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
             _internalTransferWithAllowance(msg_.receiver, srcChainSender, msg_.amount);
-            uint256 unwrapped = tOFT.unwrap(address(this), msg_.amount);
-
-            if (toftERC20 != address(0)) {
-                IERC20(toftERC20).safeTransfer(msg_.receiver, unwrapped);
-            } else {
-                if (msg.value != msg_.amount) revert TOFTGenericReceiverModule_AmountMismatch();
-                (bool sent,) = msg_.receiver.call{value: unwrapped}("");
-
-                if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
-            }
+            tOFT.unwrap(msg_.receiver, msg_.amount);
         } else {
             if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();
         }
     }
-
     /**
      * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
      * @dev Can only transfer to this address.
