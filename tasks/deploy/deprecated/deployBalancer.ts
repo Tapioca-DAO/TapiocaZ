@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { STARGATE_ROUTERS } from '../constants';
-import { loadVM } from '../utils';
+import { STARGATE_ROUTERS } from '../../constants';
+import { loadVM } from '../../utils';
 
 export const deployBalancer__task = async (
     taskArgs: { overwrite?: boolean },

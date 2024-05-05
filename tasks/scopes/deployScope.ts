@@ -1,21 +1,14 @@
 import '@nomiclabs/hardhat-ethers';
-import { glob } from 'glob';
 import { scope } from 'hardhat/config';
-import { deployBalancer__task } from 'tasks/deploy/deployBalancer';
-import { deployTOFT__task } from 'tasks/deploy/deployTOFT';
+import { TAP_TASK } from 'tapioca-sdk';
+import { deployPostLbp__task } from 'tasks/deploy/1-deployPostLbp__task';
 
-const deployScope = scope('oft', 'TOFT & mTOFT tasks');
+const deployScope = scope('deploys', 'Deployment tasks');
 
-deployScope
-    .task(
-        'deployBalancer',
-        'Deploy a mTOFT Balancer contract',
-        deployBalancer__task,
-    )
-    .addFlag('overwrite', 'If the deployment should be overwritten');
-
-deployScope
-    .task('deployTOFT', 'Deploy a TOFT', deployTOFT__task)
-    .addOptionalParam('tag', 'Deployment tag')
-    .addFlag('onHost', 'Deploy for host tokens')
-    .addFlag('overrideOptions', 'Override options');
+TAP_TASK(
+    deployScope.task(
+        'postLbp',
+        'Will deploy Balancer, mtETH, tWSTETH, and tRETH. Will also set the LzPeer for each.',
+        deployPostLbp__task,
+    ),
+);
