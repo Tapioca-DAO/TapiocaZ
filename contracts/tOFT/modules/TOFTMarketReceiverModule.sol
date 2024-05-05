@@ -24,8 +24,8 @@ import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYi
 import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
 import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
 import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
-import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
+import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
 
 /*
 
@@ -93,6 +93,12 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.marketHelper).buyCollateral(
                 msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData
             );
+            if (msg_.supplyAmount > 0) {
+                IYieldBox yb = IYieldBox(IMarket(msg_.market).yieldBox());
+
+                IERC20(address(this)).approve(address(yb), msg_.supplyAmount);
+                yb.depositAsset(IMarket(msg_.market).assetId(), msg_.user, msg_.user, msg_.supplyAmount, 0);
+            }
             IMarket(msg_.market).execute(modules, calls, true);
         }
 
@@ -140,10 +146,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         );
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
-            id: MagnetarAction.CollateralModule,
+            id: uint8(MagnetarAction.CollateralModule),
             target: msg_.borrowParams.market,
             value: msg.value,
-            allowFailure: false,
             call: call
         });
         IMagnetar(payable(msg_.borrowParams.magnetar)).burst{value: msg.value}(magnetarCall);
@@ -173,8 +178,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         _checkWhitelistStatus(msg_.removeParams.market);
         _checkWhitelistStatus(msg_.removeParams.marketHelper);
 
-        address ybAddress = IMarket(msg_.removeParams.market).yieldBox();
-        uint256 assetId = IMarket(msg_.removeParams.market).collateralId();
+        address ybAddress = IMarket(msg_.removeParams.market)._yieldBox();
+        uint256 assetId = IMarket(msg_.removeParams.market)._collateralId();
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
 
@@ -197,10 +202,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
                     abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, msg_.withdrawParams);
                 MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
                 magnetarCall[0] = MagnetarCall({
-                    id: MagnetarAction.YieldBoxModule,
+                    id: uint8(MagnetarAction.YieldBoxModule),
                     target: address(this),
                     value: msg.value,
-                    allowFailure: false,
                     call: call
                 });
                 IMagnetar(payable(msg_.removeParams.magnetar)).burst{value: msg.value}(magnetarCall);
@@ -214,7 +218,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
     function _checkWhitelistStatus(address _addr) private view {
         if (_addr != address(0)) {
-            if (!cluster.isWhitelisted(0, _addr)) {
+            if (!getCluster().isWhitelisted(0, _addr)) {
                 revert TOFTMarketReceiverModule_NotAuthorized(_addr);
             }
         }

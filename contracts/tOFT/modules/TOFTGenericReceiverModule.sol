@@ -7,8 +7,8 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 // Tapioca
 import {ITOFT, TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
-import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
+import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
 
 /*
 
@@ -62,7 +62,8 @@ contract TOFTGenericReceiverModule is BaseTOFT {
                 IERC20(toftERC20).safeTransfer(msg_.receiver, unwrapped);
             } else {
                 if (msg.value != msg_.amount) revert TOFTGenericReceiverModule_AmountMismatch();
-                (bool sent,) = msg_.receiver.call{value: msg_.amount}("");
+                (bool sent,) = msg_.receiver.call{value: unwrapped}("");
+
                 if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
             }
         } else {

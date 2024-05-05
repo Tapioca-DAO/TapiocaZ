@@ -5,7 +5,6 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {PearlmitHandler, IPearlmit} from "./../gitmodule/tapioca-periph/contracts/pearlmit/PearlmitHandler.sol";
 
 contract OTapMock {
-
     // IERC721(oTap).isApprovedForAll(oTapOwner,_options.from)
     function ownerOf(uint256) external view returns (address) {
         return msg.sender;

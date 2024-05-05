@@ -9,7 +9,7 @@ import {TestHelper} from "./LZSetup/TestHelper.sol";
 
 import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {StargateRouterMock, StargateFactoryMock} from "./StargateRouterMock.sol";
-import {Balancer} from "contracts/Balancer.sol";
+import {Balancer} from "tapiocaz/Balancer.sol";
 import {TestUtils} from "./TestUtils.t.sol";
 
 import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
@@ -18,24 +18,24 @@ import {
     PrepareLzCallData,
     PrepareLzCallReturn,
     ComposeMsgData
-} from "contracts/tOFT/extensions/TOFTHelper.sol";
+} from "tapiocaz/tOFT/extensions/TOFTHelper.sol";
 import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
-import {TOFTGenericReceiverModule} from "contracts/tOFT/modules/TOFTGenericReceiverModule.sol";
-import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsReceiverModule.sol";
-import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
+import {TOFTGenericReceiverModule} from "tapiocaz/tOFT/modules/TOFTGenericReceiverModule.sol";
+import {TOFTOptionsReceiverModule} from "tapiocaz/tOFT/modules/TOFTOptionsReceiverModule.sol";
+import {TOFTMarketReceiverModule} from "tapiocaz/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
-import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
+import {TOFTSender} from "tapiocaz/tOFT/modules/TOFTSender.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 
 // Tapioca Tests
 import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
-import {mTOFTReceiver} from "contracts/tOFT/modules/mTOFTReceiver.sol";
+import {mTOFTReceiver} from "tapiocaz/tOFT/modules/mTOFTReceiver.sol";
 import {MarketHelperMock} from "./MarketHelperMock.sol";
-import {TOFTVault} from "contracts/tOFT/TOFTVault.sol";
+import {TOFTVault} from "tapiocaz/tOFT/TOFTVault.sol";
 import {TOFTTestHelper} from "./TOFTTestHelper.t.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
-import {mTOFT} from "contracts/tOFT/mTOFT.sol";
+import {mTOFT} from "tapiocaz/tOFT/mTOFT.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
 
@@ -112,7 +112,7 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(cluster), "Cluster");
         }
 
-        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec();
         TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",

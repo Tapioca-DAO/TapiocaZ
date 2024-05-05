@@ -29,7 +29,9 @@ contract mTOFTReceiver is BaseTOFTReceiver {
         if (_msgType == MSG_LEVERAGE_UP) {
             _executeModule(
                 uint8(ITOFT.Module.TOFTMarketReceiver),
-                abi.encodeWithSelector(TOFTMarketReceiverModule.leverageUpReceiver.selector, _srcChainSender, _toeComposeMsg),
+                abi.encodeWithSelector(
+                    TOFTMarketReceiverModule.leverageUpReceiver.selector, _srcChainSender, _toeComposeMsg
+                ),
                 false
             );
             return true;
@@ -37,7 +39,9 @@ contract mTOFTReceiver is BaseTOFTReceiver {
             _executeModule(
                 uint8(ITOFT.Module.TOFTOptionsReceiver),
                 abi.encodeWithSelector(
-                    TOFTOptionsReceiverModule.mintLendXChainSGLXChainLockAndParticipateReceiver.selector, _srcChainSender, _toeComposeMsg
+                    TOFTOptionsReceiverModule.mintLendXChainSGLXChainLockAndParticipateReceiver.selector,
+                    _srcChainSender,
+                    _toeComposeMsg
                 ),
                 false
             );

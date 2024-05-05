@@ -185,7 +185,7 @@ contract Balancer is Ownable {
         onlyValidDestination(_srcOft, _dstChainId)
         onlyValidSlippage(_slippage)
     {
-        if (msg.sender != owner() || msg.sender != rebalancer) revert NotAuthorized();
+        if (msg.sender != owner() && msg.sender != rebalancer) revert NotAuthorized();
 
         if (connectedOFTs[_srcOft][_dstChainId].rebalanceable < _amount) {
             revert RebalanceAmountNotSet();
@@ -301,14 +301,7 @@ contract Balancer is Ownable {
             IStargateRouterBase.SwapAmount({amountLD: _amount, minAmountLD: _computeMinAmount(_amount, _slippage)});
         IStargateRouterBase.lzTxObj memory lzTxObj =
             IStargateRouterBase.lzTxObj({dstGasForCall: gas, dstNativeAmount: 0, dstNativeAddr: "0x0"});
-        routerETH.swapETHAndCall{value: valueAmount}(
-            _dstChainId,
-            payable(this),
-            abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
-            swapAmounts,
-            lzTxObj,
-            "0x"
-        );
+        routerETH.swapETHAndCall{value: valueAmount}(_dstChainId, payable(this), swapAmounts, lzTxObj, "0x");
     }
 
     function _sendToken(address payable _oft, uint256 _amount, uint16 _dstChainId, uint256 _slippage) private {
@@ -336,7 +329,7 @@ contract Balancer is Ownable {
             _dst,
             "0x"
         );
-        IERC20(_erc20).safeApprove(address(router), 0);
+        IERC20(swapInternal._erc20).safeApprove(address(router), 0);
     }
 
     function _computeMinAmount(uint256 _amount, uint256 _slippage) private pure returns (uint256) {
