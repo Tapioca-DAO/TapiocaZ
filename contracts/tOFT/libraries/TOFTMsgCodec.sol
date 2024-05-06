@@ -12,8 +12,7 @@ import {
     LeverageUpActionMsg
 } from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
-    LockAndParticipateData,
-    CrossChainMintFromBBAndLendOnSGLData
+    LockAndParticipateData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 
