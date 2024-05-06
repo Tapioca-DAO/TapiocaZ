@@ -12,6 +12,7 @@
     "paths": {
       "@tapioca-sdk/*": ["gitmodule/tapioca-sdk/src/*"],
       "@typechain/*": ["gen/typechain/*"],
+      "@tapioca-periph/config":["gitmodule/tapioca-periph/tasks/deploy/DEPLOY_CONFIG.ts"],
     }
   },
   "include": [

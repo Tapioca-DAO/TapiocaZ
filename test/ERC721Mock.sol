@@ -13,4 +13,13 @@ contract ERC721Mock is ERC721, ERC721Permit {
     function mint(address to, uint256 tokenId) external {
         _mint(to, tokenId);
     }
+
+    function _afterTokenTransfer(
+          address from,
+          address to,
+          uint256 firstTokenId,
+          uint256 batchSize
+      ) internal override(ERC721Permit, ERC721) {
+          super._afterTokenTransfer(from, to, firstTokenId, batchSize);
+      } 
 }

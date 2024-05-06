@@ -1,16 +1,18 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { IDeployerVMAdd } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { IDependentOn } from '@tapioca-sdk/ethers/hardhat/DeployerVM';
-import { TOFT__factory } from '@typechain/index';
+import { TapiocaOmnichainExtExec__factory } from '@typechain/index';
 
-export const buildTOFT = async (
+export const buildExtExec = async (
     hre: HardhatRuntimeEnvironment,
     deploymentName: string,
-    args: Parameters<TOFT__factory['deploy']>,
+    args: Parameters<TapiocaOmnichainExtExec__factory['deploy']>,
     dependsOn: IDependentOn[],
-): Promise<IDeployerVMAdd<TOFT__factory>> => {
+): Promise<IDeployerVMAdd<TapiocaOmnichainExtExec__factory>> => {
     return {
-        contract: await hre.ethers.getContractFactory('TOFT'),
+        contract: await hre.ethers.getContractFactory(
+            'TapiocaOmnichainExtExec',
+        ),
         deploymentName,
         args,
         dependsOn,

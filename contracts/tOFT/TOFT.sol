@@ -226,6 +226,7 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         returns (uint256 minted)
     {
         if (erc20 == address(0)) {
+            if (msg.value != _amount) revert TOFT_Failed();
             _wrapNative(_toAddress, _amount, 0);
         } else {
             if (msg.value > 0) revert TOFT_NotNative();

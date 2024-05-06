@@ -64,6 +64,8 @@ abstract contract BaseTOFT is
         yieldBox = IYieldBox(_data.yieldBox);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
+
+        _transferOwnership(_data.delegate);
     }
 
     /**
@@ -92,7 +94,7 @@ abstract contract BaseTOFT is
     }
 
     function _wrapNative(address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {
-        vault.depositNative{value: _amount}();
+        vault.depositNative{value: _amount - _feeAmount}();
         _mint(_toAddress, _amount - _feeAmount);
     }
 

@@ -105,12 +105,6 @@ contract MagnetarMock is PearlmitHandler {
             }
 
             /// @dev Modules will not return result data.
-            if (_action.id == uint8(MagnetarAction.MintXChainModule)) {
-                _executeModule(MagnetarModule.MintXChainModule, _action.call);
-                continue; // skip the rest of the loop
-            }
-
-            /// @dev Modules will not return result data.
             if (_action.id == uint8(MagnetarAction.OptionModule)) {
                 _executeModule(MagnetarModule.OptionModule, _action.call);
                 continue; // skip the rest of the loop
@@ -205,7 +199,7 @@ contract MagnetarMock is PearlmitHandler {
         yieldBox.setApprovalForAll(address(_data.market), false);
     }
 
-    function withdrawToChain(MagnetarWithdrawData memory data) external payable {
+    function withdrawHere(MagnetarWithdrawData memory data) external payable {
         _withdrawToChain(data);
     }
 
@@ -239,37 +233,7 @@ contract MagnetarMock is PearlmitHandler {
         }
         IYieldBox _yieldBox = IYieldBox(data.yieldBox);
 
-        // perform a same chain withdrawal
-        if (data.lzSendParams.sendParam.dstEid == 0) {
-            _withdrawHere(_yieldBox, data.assetId, data.lzSendParams.sendParam.to, data.lzSendParams.sendParam.amountLD);
-            return;
-        }
-
-        if (msg.value > 0) {
-            if (msg.value != data.composeGas) revert MagnetarMock_GasMismatch(data.composeGas, msg.value);
-        }
-
-        // perform a cross chain withdrawal
-        (, address asset,,) = _yieldBox.assets(data.assetId);
-        if (!cluster.isWhitelisted(0, asset)) {
-            revert MagnetarMock_TargetNotWhitelisted(asset);
-        }
-
-        _yieldBox.withdraw(data.assetId, address(this), address(this), data.lzSendParams.sendParam.amountLD, 0);
-        // TODO: decide about try-catch here
-        if (data.compose) {
-            _lzCustomWithdraw(
-                asset,
-                data.lzSendParams,
-                data.sendGas,
-                data.sendVal,
-                data.composeGas,
-                data.composeVal,
-                data.composeMsgType
-            );
-        } else {
-            _lzWithdraw(asset, data.lzSendParams, data.sendGas, data.sendVal);
-        }
+        _withdrawHere(_yieldBox, data.assetId, data.receiver, data.amount);
     }
 
     function _extractTokens(address _from, address _token, uint256 _amount) private returns (uint256) {
@@ -282,93 +246,8 @@ contract MagnetarMock is PearlmitHandler {
         return balanceAfter - balanceBefore;
     }
 
-    function _withdrawHere(IYieldBox _yieldBox, uint256 _assetId, bytes32 _to, uint256 _amount) private {
-        _yieldBox.withdraw(_assetId, address(this), OFTMsgCodec.bytes32ToAddress(_to), _amount, 0);
-    }
-
-    function _lzWithdraw(address _asset, LZSendParam memory _lzSendParam, uint128 _lzSendGas, uint128 _lzSendVal)
-        private
-    {
-        PrepareLzCallReturn memory prepareLzCallReturn = _prepareLzSend(_asset, _lzSendParam, _lzSendGas, _lzSendVal);
-
-        if (msg.value < prepareLzCallReturn.msgFee.nativeFee) {
-            revert MagnetarMock_GasMismatch(prepareLzCallReturn.msgFee.nativeFee, msg.value);
-        }
-
-        IOftSender(_asset).sendPacket{value: prepareLzCallReturn.msgFee.nativeFee}(
-            prepareLzCallReturn.lzSendParam, prepareLzCallReturn.composeMsg
-        );
-    }
-
-    function _lzCustomWithdraw(
-        address _asset,
-        LZSendParam memory _lzSendParam,
-        uint128 _lzSendGas,
-        uint128 _lzSendVal,
-        uint128 _lzComposeGas,
-        uint128 _lzComposeVal,
-        uint16 _lzComposeMsgType
-    ) private {
-        PrepareLzCallReturn memory prepareLzCallReturn = _prepareLzSend(_asset, _lzSendParam, _lzSendGas, _lzSendVal);
-
-        TapiocaOmnichainEngineHelper _toeHelper = new TapiocaOmnichainEngineHelper();
-        PrepareLzCallReturn memory prepareLzCallReturn2 = _toeHelper.prepareLzCall(
-            ITapiocaOmnichainEngine(_asset),
-            PrepareLzCallData({
-                dstEid: _lzSendParam.sendParam.dstEid,
-                recipient: _lzSendParam.sendParam.to,
-                amountToSendLD: 0,
-                minAmountToCreditLD: 0,
-                msgType: _lzComposeMsgType,
-                composeMsgData: ComposeMsgData({
-                    index: 0,
-                    gas: _lzComposeGas,
-                    value: prepareLzCallReturn.msgFee.nativeFee.toUint128(),
-                    data: _lzSendParam.sendParam.composeMsg,
-                    prevData: bytes(""),
-                    prevOptionsData: bytes("")
-                }),
-                lzReceiveGas: _lzSendGas + _lzComposeGas,
-                lzReceiveValue: _lzComposeVal,
-                refundAddress: address(this)
-            })
-        );
-
-        if (msg.value < prepareLzCallReturn2.msgFee.nativeFee) {
-            revert MagnetarMock_GasMismatch(prepareLzCallReturn2.msgFee.nativeFee, msg.value);
-        }
-
-        IOftSender(_asset).sendPacket{value: prepareLzCallReturn2.msgFee.nativeFee}(
-            prepareLzCallReturn2.lzSendParam, prepareLzCallReturn2.composeMsg
-        );
-    }
-
-    function _prepareLzSend(address _asset, LZSendParam memory _lzSendParam, uint128 _lzSendGas, uint128 _lzSendVal)
-        private
-        returns (PrepareLzCallReturn memory prepareLzCallReturn)
-    {
-        TapiocaOmnichainEngineHelper _toeHelper = new TapiocaOmnichainEngineHelper();
-        prepareLzCallReturn = _toeHelper.prepareLzCall(
-            ITapiocaOmnichainEngine(_asset),
-            PrepareLzCallData({
-                dstEid: _lzSendParam.sendParam.dstEid,
-                recipient: _lzSendParam.sendParam.to,
-                amountToSendLD: _lzSendParam.sendParam.amountLD,
-                minAmountToCreditLD: _lzSendParam.sendParam.minAmountLD,
-                msgType: 1, // SEND
-                composeMsgData: ComposeMsgData({
-                    index: 0,
-                    gas: 0,
-                    value: 0,
-                    data: bytes(""),
-                    prevData: bytes(""),
-                    prevOptionsData: bytes("")
-                }),
-                lzReceiveGas: _lzSendGas,
-                lzReceiveValue: _lzSendVal,
-                refundAddress: address(this)
-            })
-        );
+    function _withdrawHere(IYieldBox _yieldBox, uint256 _assetId, address _to, uint256 _amount) private {
+        _yieldBox.withdraw(_assetId, address(this), _to, _amount, 0);
     }
 
     function _executeModule(MagnetarModule, bytes memory _data) internal returns (bytes memory returnData) {

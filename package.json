@@ -24,10 +24,10 @@
         "@boringcrypto/boring-solidity": "https://github.com/boringcrypto/BoringSolidity.git",
         "@ethersproject/abi": "^5.7.0",
         "@ethersproject/providers": "^5.7.0",
-        "@layerzerolabs/lz-evm-messagelib-v2": "2.1.25",
-        "@layerzerolabs/lz-evm-oapp-v2": "2.1.25",
-        "@layerzerolabs/lz-evm-protocol-v2": "2.1.25",
-        "@layerzerolabs/lz-evm-v1-0.7": "2.1.25",
+        "@layerzerolabs/lz-evm-messagelib-v2": "2.3.3",
+        "@layerzerolabs/lz-evm-oapp-v2": "^2.3.3",
+        "@layerzerolabs/lz-evm-protocol-v2": "2.3.3",
+        "@layerzerolabs/lz-evm-v1-0.7": "2.3.3",
         "@layerzerolabs/solidity-bytes-utils": "^0.8.0",
         "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
         "@nomicfoundation/hardhat-foundry": "^1.1.1",
@@ -79,7 +79,7 @@
         "inquirer": "^8.2.5",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
-        "tapioca-sdk": "^1.6.14",
+        "tapioca-sdk": "^1.7.31",
         "uuid": "^9.0.0"
     }
 }

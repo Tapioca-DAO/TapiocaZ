@@ -18,17 +18,17 @@ import {
     LockAndParticipateData,
     IMagnetar,
     MagnetarCall,
-    MagnetarAction,
-    CrossChainMintFromBBAndLendOnSGLData
+    MagnetarAction
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
 import {
     ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {TOFTInitStruct, ExerciseOptionsMsg, LZSendParam} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {MagnetarMintXChainModule} from "tapioca-periph/Magnetar/modules/MagnetarMintXChainModule.sol";
-import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
 import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
-import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
+import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "../BaseTOFT.sol";
+
 
 /*
 
@@ -57,53 +57,17 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     event ExerciseOptionsReceived(
         address indexed user, address indexed target, uint256 indexed oTapTokenId, uint256 paymentTokenAmount
     );
+    event LockAndParticipateReceived(
+        address indexed user,
+        address indexed srcChainSender,
+        bool lock,
+        address indexed lockTarget,
+        uint256 fraction,
+        bool participate,
+        address participateTarget
+    );
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
-
-    /**
-     * @notice cross-chain receiver to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
-     * @dev Cross chain flow:
-     *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
-     *         step 2: IUsdo compose call calls magnetar.depositYBLendSGLLockXchainTOLP (chain B) -->
-     *              step 3: IToft(sglReceipt) compose call calls magnetar.lockAndParticipate (chain X)
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _data.user the user to perform the operation for
-     * @param _data.bigBang the BB address
-     * @param _data.mintData the data needed to mint on BB
-     * @param _data.lendSendParams LZ send params for lending on another layer
-     */
-    function mintLendXChainSGLXChainLockAndParticipateReceiver(address srcChainSender, bytes memory _data)
-        public
-        payable
-    {
-        // Decode received message.
-        CrossChainMintFromBBAndLendOnSGLData memory msg_ =
-            TOFTMsgCodec.decodeMintLendXChainSGLXChainLockAndParticipateMsg(_data);
-
-        _checkWhitelistStatus(msg_.bigBang);
-        _checkWhitelistStatus(msg_.magnetar);
-
-        if (msg_.mintData.mintAmount > 0) {
-            msg_.mintData.mintAmount = _toLD(msg_.mintData.mintAmount.toUint64());
-        }
-        if (msg_.mintData.collateralDepositData.amount > 0) {
-            msg_.mintData.collateralDepositData.amount = _toLD(msg_.mintData.collateralDepositData.amount.toUint64());
-        }
-
-        if (msg_.user != srcChainSender) {
-            _spendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
-        }
-
-        bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
-        MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
-        magnetarCall[0] = MagnetarCall({
-            id: uint8(MagnetarAction.MintXChainModule),
-            target: address(this),
-            value: msg.value,
-            call: call
-        });
-        IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
-    }
 
     /**
      * @notice Execute `magnetar.lockAndParticipate`
@@ -120,36 +84,25 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         // Decode receive message
         LockAndParticipateData memory msg_ = TOFTMsgCodec.decodeLockAndParticipateMsg(_data);
 
-        _checkWhitelistStatus(msg_.magnetar);
-        _checkWhitelistStatus(msg_.singularity);
-        if (msg_.lockData.lock) {
-            _checkWhitelistStatus(msg_.lockData.target);
-            if (msg_.lockData.amount > 0) {
-                msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
-            }
-            if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
-        }
-        if (msg_.participateData.participate) {
-            _checkWhitelistStatus(msg_.participateData.target);
-        }
+        /**
+        * @dev validate data
+        */
+        msg_ = _validateLockAndParticipate(msg_, srcChainSender);
 
-        if (msg_.fraction > 0) {
-            msg_.fraction = _toLD(msg_.fraction.toUint64());
-        }
+        /**
+        * @dev execute through `Magnetar`
+        */
+        _lockAndParticipate(msg_);
 
-        if (msg_.user != srcChainSender) {
-            _spendAllowance(msg_.user, srcChainSender, msg_.fraction);
-        }
-
-        bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
-        MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
-        magnetarCall[0] = MagnetarCall({
-            id: uint8(MagnetarAction.MintXChainModule),
-            target: msg_.magnetar,
-            value: msg.value,
-            call: call
-        });
-        IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+        emit LockAndParticipateReceived(
+            msg_.user,
+            srcChainSender,
+            msg_.lockData.lock,
+            msg_.lockData.target,
+            msg_.lockData.fraction,
+            msg_.participateData.participate,
+            msg_.participateData.target
+        );
     }
 
     /**
@@ -164,81 +117,130 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         // Decode received message.
         ExerciseOptionsMsg memory msg_ = TOFTMsgCodec.decodeExerciseOptionsMsg(_data);
 
-        _checkWhitelistStatus(msg_.optionsData.target);
-        _checkWhitelistStatus(OFTMsgCodec.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
+        /**
+        * @dev validate data
+        */
+        msg_ = _validateExerciseOptionReceiver(msg_);
 
-        {
-            // _data declared for visibility.
-            IExerciseOptionsData memory _options = msg_.optionsData;
-            if (_options.tapAmount > 0) _options.tapAmount = _toLD(_options.tapAmount.toUint64());
-            if (_options.paymentTokenAmount > 0) {
-                _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
+        /**
+        * @dev retrieve paymentToken amount
+        */
+        _internalTransferWithAllowance(msg_.optionsData.from, srcChainSender, msg_.optionsData.paymentTokenAmount);
+
+        /**
+        * @dev call exerciseOption() with address(this) as the payment token
+        */
+        pearlmit.approve(
+            address(this), 0, msg_.optionsData.target, uint200(msg_.optionsData.paymentTokenAmount), uint48(block.timestamp + 1)
+        ); // Atomic approval
+        address(this).safeApprove(address(pearlmit), msg_.optionsData.paymentTokenAmount);
+
+        /**
+        * @dev exercise and refund if less paymentToken amount was used
+        */
+        _exerciseAndRefund(msg_.optionsData);
+
+        /**
+        * @dev retrieve exercised amount
+        */
+        _withdrawExercised(msg_, srcChainSender);
+
+        emit ExerciseOptionsReceived(
+            msg_.optionsData.from, msg_.optionsData.target, msg_.optionsData.oTAPTokenID, msg_.optionsData.paymentTokenAmount
+        );
+    }
+
+    function _validateLockAndParticipate(LockAndParticipateData memory msg_, address srcChainSender) private returns (LockAndParticipateData memory) {
+        _checkWhitelistStatus(msg_.magnetar);
+        _checkWhitelistStatus(msg_.singularity);
+        if (msg_.lockData.lock) {
+            _checkWhitelistStatus(msg_.lockData.target);
+            if (msg_.lockData.amount > 0) {
+                msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
             }
-
-            // @dev retrieve paymentToken amount
-            _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);
-
-            /// Does this: _approve(address(this), _options.target, _options.paymentTokenAmount);
-            pearlmit.approve(
-                address(this), 0, _options.target, uint200(_options.paymentTokenAmount), uint48(block.timestamp + 1)
-            ); // Atomic approval
-            address(this).safeApprove(address(pearlmit), _options.paymentTokenAmount);
-
-            /// @dev call exerciseOption() with address(this) as the payment token
-            uint256 bBefore = balanceOf(address(this));
-            address oTap = ITapiocaOptionBroker(_options.target).oTAP();
-            address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
-
-            if (
-                oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner, _options.from)
-                    && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from
-            ) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
-
-            ITapiocaOptionBroker(_options.target).exerciseOption(
-                _options.oTAPTokenID,
-                address(this), //payment token
-                _options.tapAmount
-            );
-            address(this).safeApprove(address(pearlmit), 0); // Clear approval
-            uint256 bAfter = balanceOf(address(this));
-
-            // Refund if less was used.
-            if (bBefore >= bAfter) {
-                uint256 diff = bBefore - bAfter;
-                if (diff < _options.paymentTokenAmount) {
-                    IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
-                }
-            }
+            if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
         }
 
-        {
-            // _data declared for visibility.
-            IExerciseOptionsData memory _options = msg_.optionsData;
-            SendParam memory _send = msg_.lzSendParams.sendParam;
+        if (msg_.participateData.participate) {
+            _checkWhitelistStatus(msg_.participateData.target);
+        }
 
-            address tapOft = ITapiocaOptionBroker(_options.target).tapOFT();
-            uint256 tapBalance = IERC20(tapOft).balanceOf(address(this));
-            if (msg_.withdrawOnOtherChain) {
-                /// @dev determine the right amount to send back to source
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.lockData.fraction);
 
-                uint256 amountToSend = _send.amountLD > tapBalance ? tapBalance : _send.amountLD;
-                if (_send.minAmountLD > amountToSend) {
-                    _send.minAmountLD = amountToSend;
-                }
-                _send.amountLD = amountToSend;
+        return msg_;
+    }
+    
+    function _lockAndParticipate(LockAndParticipateData memory msg_) private {
+        bytes memory call = abi.encodeWithSelector(MagnetarOptionModule.lockAndParticipate.selector, msg_);
+        MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
+        magnetarCall[0] =
+            MagnetarCall({id: uint8(MagnetarAction.OptionModule), target: msg_.magnetar, value: msg.value, call: call});
+        IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+    }
 
-                msg_.lzSendParams.sendParam = _send;
+    function _validateExerciseOptionReceiver(ExerciseOptionsMsg memory msg_) private view returns (ExerciseOptionsMsg memory) {
+        _checkWhitelistStatus(msg_.optionsData.target);
 
-                _sendPacket(msg_.lzSendParams, "", srcChainSender);
+        if (msg_.optionsData.tapAmount > 0)
+            msg_.optionsData.tapAmount = _toLD(msg_.optionsData.tapAmount.toUint64());
 
-                // Refund extra amounts
-                if (tapBalance - amountToSend > 0) {
-                    IERC20(tapOft).safeTransfer(_options.from, tapBalance - amountToSend);
-                }
-            } else {
-                //send on this chain
-                IERC20(tapOft).safeTransfer(_options.from, tapBalance);
+        if (msg_.optionsData.paymentTokenAmount > 0)
+            msg_.optionsData.paymentTokenAmount = _toLD(msg_.optionsData.paymentTokenAmount.toUint64());
+
+        return msg_;
+    }
+
+    function _exerciseAndRefund(IExerciseOptionsData memory _options) private {
+        uint256 bBefore = balanceOf(address(this));
+        address oTap = ITapiocaOptionBroker(_options.target).oTAP();
+        address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
+
+        if (
+            oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner, _options.from)
+                && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from
+        ) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
+        ITapiocaOptionBroker(_options.target).exerciseOption(
+            _options.oTAPTokenID,
+            address(this), //payment token
+            _options.tapAmount
+        );
+        _approve(address(this), address(pearlmit), 0);
+        uint256 bAfter = balanceOf(address(this));
+
+        // Refund if less was used.
+        if (bBefore >= bAfter) {
+            uint256 diff = bBefore - bAfter;
+            if (diff < _options.paymentTokenAmount) {
+                IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
             }
+        }
+    }
+
+    function _withdrawExercised(ExerciseOptionsMsg memory msg_, address srcChainSender) private {
+        SendParam memory _send = msg_.lzSendParams.sendParam;
+
+        address tapOft = ITapiocaOptionBroker(msg_.optionsData.target).tapOFT();
+        uint256 tapBalance = IERC20(tapOft).balanceOf(address(this));
+        if (msg_.withdrawOnOtherChain) {
+            /// @dev determine the right amount to send back to source
+
+            uint256 amountToSend = _send.amountLD > tapBalance ? tapBalance : _send.amountLD;
+            if (_send.minAmountLD > amountToSend) {
+                _send.minAmountLD = amountToSend;
+            }
+            _send.amountLD = amountToSend;
+
+            msg_.lzSendParams.sendParam = _send;
+
+            _sendPacket(msg_.lzSendParams, "", srcChainSender);
+
+            // Refund extra amounts
+            if (tapBalance - amountToSend > 0) {
+                IERC20(tapOft).safeTransfer(msg_.optionsData.from, tapBalance - amountToSend);
+            }
+        } else {
+            //send on this chain
+            IERC20(tapOft).safeTransfer(msg_.optionsData.from, tapBalance);
         }
     }
 
@@ -304,21 +306,5 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         if (msgInspector != address(0)) {
             IOAppMsgInspector(msgInspector).inspect(message, options);
         }
-    }
-
-    /**
-     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
-     * @dev Can only transfer to this address.
-     *
-     * @param _owner The account to transfer from.
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _amount The amount to transfer
-     */
-    function _internalTransferWithAllowance(address _owner, address srcChainSender, uint256 _amount) internal {
-        if (_owner != srcChainSender) {
-            _spendAllowance(_owner, srcChainSender, _amount);
-        }
-
-        _transfer(_owner, address(this), _amount);
     }
 }

@@ -310,6 +310,7 @@ contract Balancer is Ownable {
         if (IERC20Metadata(erc20).balanceOf(address(this)) < _amount) {
             revert ExceedsBalance();
         }
+
         {
             _routerSwap(__RouterSwapInternal(_dstChainId, _amount, _slippage, _oft, erc20));
         }

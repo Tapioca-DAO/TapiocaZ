@@ -315,6 +315,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
 
         uint256 feeAmount = _checkAndExtractWrapFees(_amount);
         if (erc20 == address(0)) {
+            if (msg.value != _amount) revert mTOFT_Failed();
             _wrapNative(_toAddress, _amount, feeAmount);
         } else {
             if (msg.value > 0) revert mTOFT_NotNative();

@@ -21,7 +21,8 @@ import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/Ta
 import {TOFTGenericReceiverModule} from "./TOFTGenericReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "./TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "./TOFTMarketReceiverModule.sol";
-import {BaseTOFT} from "tapiocaz/tOFT/BaseTOFT.sol";
+import {BaseTOFT} from "../BaseTOFT.sol";
+
 
 /*
 
