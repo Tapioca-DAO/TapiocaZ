@@ -12,7 +12,7 @@ optimizer_runs = 30
 
 
 remappings = [
-    "contracts/=contracts/",
+    "tapiocaz/=contracts/",
 	'forge-deploy/=node_modules/forge-deploy/contracts/',
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
 	"forge-std/=lib/forge-std/src/",
