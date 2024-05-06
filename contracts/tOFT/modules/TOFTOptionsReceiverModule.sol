@@ -159,13 +159,13 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             }
             if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
         }
+
         if (msg_.participateData.participate) {
             _checkWhitelistStatus(msg_.participateData.target);
         }
 
-        if (msg_.user != srcChainSender) {
-            _spendAllowance(msg_.user, srcChainSender, msg_.lockData.fraction);
-        }
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.lockData.fraction);
+
         return msg_;
     }
     

@@ -154,6 +154,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     }
 
     function _validateLeverageUpReceiver(LeverageUpActionMsg memory msg_, address srcChainSender) private returns (LeverageUpActionMsg memory) {
+
         _checkWhitelistStatus(msg_.market);
         _checkWhitelistStatus(msg_.marketHelper);
 
@@ -162,10 +163,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             msg_.supplyAmount = _toLD(msg_.supplyAmount.toUint64());
         }
 
-        if (msg_.user != srcChainSender) {
-            uint256 allowanceAmount = msg_.borrowAmount + msg_.supplyAmount;
-            _spendAllowance(msg_.user, srcChainSender, allowanceAmount);
-        }
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowAmount);
 
         return msg_;
     }
@@ -191,10 +189,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
         msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
 
-        if (msg_.user != srcChainSender) {
-            uint256 allowanceAmount = msg_.borrowParams.amount + msg_.borrowParams.borrowAmount;
-            _spendAllowance(msg_.user, srcChainSender, allowanceAmount);
-        }
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowParams.amount);
 
         return msg_;
     }
@@ -231,9 +226,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
 
-         if (msg_.user != srcChainSender) {
-            _spendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
-        }
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
         
         return msg_;
     }
