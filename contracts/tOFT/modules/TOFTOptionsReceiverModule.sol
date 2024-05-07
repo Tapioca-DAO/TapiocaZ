@@ -70,8 +70,6 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
     /**
-     * <<<<<<< HEAD
-     * =======
      * @notice cross-chain receiver to deposit mint from BB, lend on SGL, lock on tOLP and participate on tOB
      * @dev Cross chain flow:
      *  step 1: magnetar.mintBBLendXChainSGL (chain A) -->
@@ -104,7 +102,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         if (msg_.user != srcChainSender) {
             _spendAllowance(msg_.user, srcChainSender, msg_.mintData.mintAmount);
         }
-
+        /*
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.mintBBLendXChainSGL.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
@@ -114,10 +112,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             call: call
         });
         IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+        */
     }
 
     /**
-     * >>>>>>> parent of 0421756 (chore: magnetar references)
      * @notice Execute `magnetar.lockAndParticipate`
      * @dev Lock on tOB and/or participate on tOLP
      * @param srcChainSender The address of the sender on the source chain.

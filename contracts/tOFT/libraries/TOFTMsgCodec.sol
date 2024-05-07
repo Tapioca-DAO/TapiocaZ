@@ -131,4 +131,26 @@ library TOFTMsgCodec {
     function decodeLeverageUpMsg(bytes memory _msg) internal pure returns (LeverageUpActionMsg memory marketMsg_) {
         return abi.decode(_msg, (LeverageUpActionMsg));
     }
+
+    /**
+     * @notice Encodes the message for the `TOFTOptionReceiverModule.mintLendXChainSGLXChainLockAndParticipateReceiver()` operation.
+     */
+    function buildMintLendXChainSGLXChainLockAndParticipateMsg(CrossChainMintFromBBAndLendOnSGLData memory _msg)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        return abi.encode(_msg);
+    }
+
+    /**
+     * @notice Decodes an encoded message for the `TOFTOptionReceiverModule.mintLendXChainSGLXChainLockAndParticipateReceiver()` operation.
+     */
+    function decodeMintLendXChainSGLXChainLockAndParticipateMsg(bytes memory _msg)
+        internal
+        pure
+        returns (CrossChainMintFromBBAndLendOnSGLData memory marketMsg_)
+    {
+        return abi.decode(_msg, (CrossChainMintFromBBAndLendOnSGLData));
+    }
 }

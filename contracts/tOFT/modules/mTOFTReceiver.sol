@@ -35,7 +35,18 @@ contract mTOFTReceiver is BaseTOFTReceiver {
                 false
             );
             return true;
+        } else if (_msgType == MSG_XCHAIN_LEND_XCHAIN_LOCK) {
+            _executeModule(
+                uint8(ITOFT.Module.TOFTOptionsReceiver),
+                abi.encodeWithSelector(
+                    TOFTOptionsReceiverModule.mintLendXChainSGLXChainLockAndParticipateReceiver.selector,
+                    _srcChainSender,
+                    _toeComposeMsg
+                ),
+                false
+            );
+        } else {
+            return false;
         }
-        return false;
     }
 }
