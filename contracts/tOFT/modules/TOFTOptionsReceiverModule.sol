@@ -20,7 +20,6 @@ import {
     MagnetarCall,
     MagnetarAction
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {MagnetarOptionModule} from "tapioca-periph/Magnetar/modules/MagnetarOptionModule.sol";
 import {
     ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
@@ -56,15 +55,6 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
     event ExerciseOptionsReceived(
         address indexed user, address indexed target, uint256 indexed oTapTokenId, uint256 paymentTokenAmount
-    );
-    event LockAndParticipateReceived(
-        address indexed user,
-        address indexed srcChainSender,
-        bool lock,
-        address indexed lockTarget,
-        uint256 fraction,
-        bool participate,
-        address participateTarget
     );
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
@@ -151,6 +141,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             _spendAllowance(msg_.user, srcChainSender, msg_.fraction);
         }
 
+        /*
         bytes memory call = abi.encodeWithSelector(MagnetarMintXChainModule.lockAndParticipate.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
@@ -160,6 +151,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             call: call
         });
         IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+        */
     }
 
     /**
@@ -174,146 +166,81 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         // Decode received message.
         ExerciseOptionsMsg memory msg_ = TOFTMsgCodec.decodeExerciseOptionsMsg(_data);
 
-        /**
-         * @dev validate data
-         */
-        msg_ = _validateExerciseOptionReceiver(msg_);
-
-        /**
-         * @dev retrieve paymentToken amount
-         */
-        _internalTransferWithAllowance(msg_.optionsData.from, srcChainSender, msg_.optionsData.paymentTokenAmount);
-
-        /**
-         * @dev call exerciseOption() with address(this) as the payment token
-         */
-        pearlmit.approve(
-            address(this),
-            0,
-            msg_.optionsData.target,
-            uint200(msg_.optionsData.paymentTokenAmount),
-            uint48(block.timestamp + 1)
-        ); // Atomic approval
-        address(this).safeApprove(address(pearlmit), msg_.optionsData.paymentTokenAmount);
-
-        /**
-         * @dev exercise and refund if less paymentToken amount was used
-         */
-        _exerciseAndRefund(msg_.optionsData);
-
-        /**
-         * @dev retrieve exercised amount
-         */
-        _withdrawExercised(msg_, srcChainSender);
-
-        emit ExerciseOptionsReceived(
-            msg_.optionsData.from,
-            msg_.optionsData.target,
-            msg_.optionsData.oTAPTokenID,
-            msg_.optionsData.paymentTokenAmount
-        );
-    }
-
-    function _validateLockAndParticipate(LockAndParticipateData memory msg_, address srcChainSender)
-        private
-        returns (LockAndParticipateData memory)
-    {
-        _checkWhitelistStatus(msg_.magnetar);
-        _checkWhitelistStatus(msg_.singularity);
-        if (msg_.lockData.lock) {
-            _checkWhitelistStatus(msg_.lockData.target);
-            if (msg_.lockData.amount > 0) {
-                msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
-            }
-            if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
-        }
-
-        if (msg_.participateData.participate) {
-            _checkWhitelistStatus(msg_.participateData.target);
-        }
-
-        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.lockData.fraction);
-
-        return msg_;
-    }
-
-    function _lockAndParticipate(LockAndParticipateData memory msg_) private {
-        bytes memory call = abi.encodeWithSelector(MagnetarOptionModule.lockAndParticipate.selector, msg_);
-        MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
-        magnetarCall[0] =
-            MagnetarCall({id: uint8(MagnetarAction.OptionModule), target: msg_.magnetar, value: msg.value, call: call});
-        IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
-    }
-
-    function _validateExerciseOptionReceiver(ExerciseOptionsMsg memory msg_)
-        private
-        view
-        returns (ExerciseOptionsMsg memory)
-    {
         _checkWhitelistStatus(msg_.optionsData.target);
+        _checkWhitelistStatus(OFTMsgCodec.bytes32ToAddress(msg_.lzSendParams.sendParam.to));
 
-        if (msg_.optionsData.tapAmount > 0) {
-            msg_.optionsData.tapAmount = _toLD(msg_.optionsData.tapAmount.toUint64());
-        }
+        {
+            // _data declared for visibility.
+            IExerciseOptionsData memory _options = msg_.optionsData;
+            if (_options.tapAmount > 0) _options.tapAmount = _toLD(_options.tapAmount.toUint64());
+            if (_options.paymentTokenAmount > 0) {
+                _options.paymentTokenAmount = _toLD(_options.paymentTokenAmount.toUint64());
+            }
 
-        if (msg_.optionsData.paymentTokenAmount > 0) {
-            msg_.optionsData.paymentTokenAmount = _toLD(msg_.optionsData.paymentTokenAmount.toUint64());
-        }
+            // @dev retrieve paymentToken amount
+            _internalTransferWithAllowance(_options.from, srcChainSender, _options.paymentTokenAmount);
 
-        return msg_;
-    }
+            /// Does this: _approve(address(this), _options.target, _options.paymentTokenAmount);
+            pearlmit.approve(
+                address(this), 0, _options.target, uint200(_options.paymentTokenAmount), uint48(block.timestamp + 1)
+            ); // Atomic approval
+            address(this).safeApprove(address(pearlmit), _options.paymentTokenAmount);
 
-    function _exerciseAndRefund(IExerciseOptionsData memory _options) private {
-        uint256 bBefore = balanceOf(address(this));
-        address oTap = ITapiocaOptionBroker(_options.target).oTAP();
-        address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
+            /// @dev call exerciseOption() with address(this) as the payment token
+            uint256 bBefore = balanceOf(address(this));
+            address oTap = ITapiocaOptionBroker(_options.target).oTAP();
+            address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
 
-        if (
-            oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner, _options.from)
-                && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from
-        ) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
-        ITapiocaOptionBroker(_options.target).exerciseOption(
-            _options.oTAPTokenID,
-            address(this), //payment token
-            _options.tapAmount
-        );
-        _approve(address(this), address(pearlmit), 0);
-        uint256 bAfter = balanceOf(address(this));
+            if (
+                oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner, _options.from)
+                    && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from
+            ) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
 
-        // Refund if less was used.
-        if (bBefore >= bAfter) {
-            uint256 diff = bBefore - bAfter;
-            if (diff < _options.paymentTokenAmount) {
-                IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
+            ITapiocaOptionBroker(_options.target).exerciseOption(
+                _options.oTAPTokenID,
+                address(this), //payment token
+                _options.tapAmount
+            );
+            address(this).safeApprove(address(pearlmit), 0); // Clear approval
+            uint256 bAfter = balanceOf(address(this));
+
+            // Refund if less was used.
+            if (bBefore >= bAfter) {
+                uint256 diff = bBefore - bAfter;
+                if (diff < _options.paymentTokenAmount) {
+                    IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
+                }
             }
         }
-    }
 
-    function _withdrawExercised(ExerciseOptionsMsg memory msg_, address srcChainSender) private {
-        SendParam memory _send = msg_.lzSendParams.sendParam;
+        {
+            // _data declared for visibility.
+            IExerciseOptionsData memory _options = msg_.optionsData;
+            SendParam memory _send = msg_.lzSendParams.sendParam;
 
-        address tapOft = ITapiocaOptionBroker(msg_.optionsData.target).tapOFT();
-        uint256 tapBalance = IERC20(tapOft).balanceOf(address(this));
-        if (msg_.withdrawOnOtherChain) {
-            /// @dev determine the right amount to send back to source
+            address tapOft = ITapiocaOptionBroker(_options.target).tapOFT();
+            uint256 tapBalance = IERC20(tapOft).balanceOf(address(this));
+            if (msg_.withdrawOnOtherChain) {
+                /// @dev determine the right amount to send back to source
 
-            uint256 amountToSend = _send.amountLD > tapBalance ? tapBalance : _send.amountLD;
-            if (_send.minAmountLD > amountToSend) {
-                _send.minAmountLD = amountToSend;
+                uint256 amountToSend = _send.amountLD > tapBalance ? tapBalance : _send.amountLD;
+                if (_send.minAmountLD > amountToSend) {
+                    _send.minAmountLD = amountToSend;
+                }
+                _send.amountLD = amountToSend;
+
+                msg_.lzSendParams.sendParam = _send;
+
+                _sendPacket(msg_.lzSendParams, "", srcChainSender);
+
+                // Refund extra amounts
+                if (tapBalance - amountToSend > 0) {
+                    IERC20(tapOft).safeTransfer(_options.from, tapBalance - amountToSend);
+                }
+            } else {
+                //send on this chain
+                IERC20(tapOft).safeTransfer(_options.from, tapBalance);
             }
-            _send.amountLD = amountToSend;
-
-            msg_.lzSendParams.sendParam = _send;
-
-            _sendPacket(msg_.lzSendParams, "", srcChainSender);
-
-            // Refund extra amounts
-            if (tapBalance - amountToSend > 0) {
-                IERC20(tapOft).safeTransfer(msg_.optionsData.from, tapBalance - amountToSend);
-            }
-        } else {
-            //send on this chain
-            IERC20(tapOft).safeTransfer(msg_.optionsData.from, tapBalance);
         }
     }
 

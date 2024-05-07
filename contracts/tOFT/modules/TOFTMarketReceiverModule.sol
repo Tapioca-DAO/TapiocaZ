@@ -73,17 +73,34 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      *      - executorData::bytes: Leverage executor data.
      */
     function leverageUpReceiver(address srcChainSender, bytes memory _data) public payable {
+        /// @dev decode received message
         LeverageUpActionMsg memory msg_ = TOFTMsgCodec.decodeLeverageUpMsg(_data);
 
-        /**
-         * @dev validate data
-         */
-        msg_ = _validateLeverageUpReceiver(msg_, srcChainSender);
+        /// @dev 'market'
+        _checkWhitelistStatus(msg_.market);
+        _checkWhitelistStatus(msg_.marketHelper);
 
-        /**
-         * @dev executes market action
-         */
-        _marketLeverage(msg_);
+        msg_.borrowAmount = _toLD(msg_.borrowAmount.toUint64());
+        if (msg_.supplyAmount > 0) {
+            msg_.supplyAmount = _toLD(msg_.supplyAmount.toUint64());
+        }
+
+        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowAmount);
+
+        approve(address(msg_.market), type(uint256).max);
+
+        {
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.marketHelper).buyCollateral(
+                msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData
+            );
+            if (msg_.supplyAmount > 0) {
+                IYieldBox yb = IYieldBox(IMarket(msg_.market)._yieldBox());
+                yb.depositAsset(IMarket(msg_.market)._assetId(), msg_.user, msg_.user, msg_.supplyAmount, 0);
+            }
+            IMarket(msg_.market).execute(modules, calls, true);
+        }
+
+        approve(address(msg_.market), 0);
 
         emit LeverageUpReceived(msg_.user, msg_.market, msg_.borrowAmount, msg_.supplyAmount);
     }
@@ -98,95 +115,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
      *      - withdrawParams::struct: Withdraw related params.
      */
     function marketBorrowReceiver(address srcChainSender, bytes memory _data) public payable {
+        /// @dev decode received message
         MarketBorrowMsg memory msg_ = TOFTMsgCodec.decodeMarketBorrowMsg(_data);
 
-        /**
-         * @dev validate data
-         */
-        msg_ = _validateMarketBorrowReceiver(msg_, srcChainSender);
-
-        /**
-         * @dev execute market's action
-         */
-        _marketBorrow(msg_);
-
-        emit BorrowReceived(
-            msg_.user,
-            msg_.borrowParams.market,
-            msg_.borrowParams.amount,
-            msg_.borrowParams.deposit,
-            msg_.withdrawParams.withdraw
-        );
-    }
-
-    /**
-     * @notice Performs market.removeCollateral()
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _data The call data containing info about the operation.
-     *      - from::address: Address to debit tokens from.
-     *      - to::address: Address to execute operations on.
-     *      - removeParams::struct: Remove collateral operation related params.
-     *      - withdrawParams::struct: Withdraw related params.
-     */
-    function marketRemoveCollateralReceiver(address srcChainSender, bytes memory _data) public payable {
-        MarketRemoveCollateralMsg memory msg_ = TOFTMsgCodec.decodeMarketRemoveCollateralMsg(_data);
-
-        /**
-         * @dev validate data
-         */
-        _validateMarketRemoveCollateral(msg_, srcChainSender);
-
-        /**
-         * @dev execute market's action
-         */
-        _marketRemoveCollateral(msg_);
-
-        /**
-         * @dev try withdraw through `Magnetar`
-         */
-        if (msg_.withdrawParams.withdraw) {
-            _magnetarWithdraw(msg_);
-        }
-
-        emit RemoveCollateralReceived(
-            msg_.user, msg_.removeParams.market, msg_.removeParams.amount, msg_.withdrawParams.withdraw
-        );
-    }
-
-    function _validateLeverageUpReceiver(LeverageUpActionMsg memory msg_, address srcChainSender)
-        private
-        returns (LeverageUpActionMsg memory)
-    {
-        _checkWhitelistStatus(msg_.market);
-        _checkWhitelistStatus(msg_.marketHelper);
-
-        msg_.borrowAmount = _toLD(msg_.borrowAmount.toUint64());
-        if (msg_.supplyAmount > 0) {
-            msg_.supplyAmount = _toLD(msg_.supplyAmount.toUint64());
-        }
-
-        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowAmount);
-
-        return msg_;
-    }
-
-    function _marketLeverage(LeverageUpActionMsg memory msg_) private {
-        approve(address(msg_.market), type(uint256).max);
-        (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.marketHelper).buyCollateral(
-            msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData
-        );
-        if (msg_.supplyAmount > 0) {
-            IYieldBox yb = IYieldBox(IMarket(msg_.market)._yieldBox());
-            yb.depositAsset(IMarket(msg_.market)._assetId(), msg_.user, msg_.user, msg_.supplyAmount, 0);
-        }
-        IMarket(msg_.market).execute(modules, calls, true);
-        approve(address(msg_.market), 0);
-    }
-
-    function _validateMarketBorrowReceiver(MarketBorrowMsg memory msg_, address srcChainSender)
-        private
-        returns (MarketBorrowMsg memory)
-    {
         _checkWhitelistStatus(msg_.borrowParams.marketHelper);
         _checkWhitelistStatus(msg_.borrowParams.magnetar);
         _checkWhitelistStatus(msg_.borrowParams.market);
@@ -196,10 +127,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
         _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowParams.amount);
 
-        return msg_;
-    }
-
-    function _marketBorrow(MarketBorrowMsg memory msg_) private {
+        /// @dev use market helper to deposit, add collateral to market and withdrawTo
         approve(address(msg_.borrowParams.magnetar), msg_.borrowParams.amount);
 
         bytes memory call = abi.encodeWithSelector(
@@ -222,34 +150,55 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             call: call
         });
         IMagnetar(payable(msg_.borrowParams.magnetar)).burst{value: msg.value}(magnetarCall);
+
+        emit BorrowReceived(
+            msg_.user,
+            msg_.borrowParams.market,
+            msg_.borrowParams.amount,
+            msg_.borrowParams.deposit,
+            msg_.withdrawParams.withdraw
+        );
     }
 
-    function _validateMarketRemoveCollateral(MarketRemoveCollateralMsg memory msg_, address srcChainSender)
-        private
-        returns (MarketRemoveCollateralMsg memory)
-    {
+    /**
+     * @notice Performs market.removeCollateral()
+     * @param srcChainSender The address of the sender on the source chain.
+     * @param _data The call data containing info about the operation.
+     *      - from::address: Address to debit tokens from.
+     *      - to::address: Address to execute operations on.
+     *      - removeParams::struct: Remove collateral operation related params.
+     *      - withdrawParams::struct: Withdraw related params.
+     */
+    function marketRemoveCollateralReceiver(address srcChainSender, bytes memory _data) public payable {
+        /// @dev decode received message
+        MarketRemoveCollateralMsg memory msg_ = TOFTMsgCodec.decodeMarketRemoveCollateralMsg(_data);
+
         _checkWhitelistStatus(msg_.removeParams.market);
         _checkWhitelistStatus(msg_.removeParams.marketHelper);
-        _checkWhitelistStatus(msg_.removeParams.magnetar);
 
-        msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
-
-        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
-
-        return msg_;
-    }
-
-    function _marketRemoveCollateral(MarketRemoveCollateralMsg memory msg_) private {
         address ybAddress = IMarket(msg_.removeParams.market)._yieldBox();
         uint256 assetId = IMarket(msg_.removeParams.market)._collateralId();
 
-        uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
-        approve(msg_.removeParams.market, share);
+        msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
+
+        if (msg_.user != srcChainSender) {
+            _spendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
+        }
+
+        {
+            uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
+            approve(msg_.removeParams.market, share);
+
+            (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.removeParams.marketHelper)
+                .removeCollateral(msg_.user, msg_.withdrawParams.withdraw ? msg_.removeParams.magnetar : msg_.user, share);
+            IMarket(msg_.removeParams.market).execute(modules, calls, true);
+        }
 
         {
             if (msg_.withdrawParams.withdraw) {
                 _checkWhitelistStatus(msg_.removeParams.magnetar);
 
+                /*
                 bytes memory call =
                     abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawToChain.selector, msg_.withdrawParams);
                 MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
@@ -260,6 +209,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
                     call: call
                 });
                 IMagnetar(payable(msg_.removeParams.magnetar)).burst{value: msg.value}(magnetarCall);
+                */
             }
         }
 
