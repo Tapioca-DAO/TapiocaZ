@@ -71,7 +71,6 @@ contract TOFTGenericReceiverModule is BaseTOFT {
             if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();
         }
     }
-
     /**
      * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
      * @dev Can only transfer to this address.
