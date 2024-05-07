@@ -10,7 +10,6 @@ import {ITOFT, TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/of
 import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "../BaseTOFT.sol";
 
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -70,20 +69,5 @@ contract TOFTGenericReceiverModule is BaseTOFT {
         } else {
             if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();
         }
-    }
-    /**
-     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
-     * @dev Can only transfer to this address.
-     *
-     * @param _owner The account to transfer from.
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _amount The amount to transfer
-     */
-    function _internalTransferWithAllowance(address _owner, address srcChainSender, uint256 _amount) internal {
-        if (_owner != srcChainSender) {
-            _spendAllowance(_owner, srcChainSender, _amount);
-        }
-
-        _transfer(_owner, address(this), _amount);
     }
 }
