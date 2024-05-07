@@ -18,7 +18,8 @@ import {
     LockAndParticipateData,
     IMagnetar,
     MagnetarCall,
-    MagnetarAction
+    MagnetarAction,
+    CrossChainMintFromBBAndLendOnSGLData
 } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {
     ITapiocaOptionBroker, IExerciseOptionsData
