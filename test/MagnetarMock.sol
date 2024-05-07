@@ -205,7 +205,7 @@ contract MagnetarMock is PearlmitHandler {
         yieldBox.setApprovalForAll(address(_data.market), false);
     }
 
-    function withdrawHere(MagnetarWithdrawData memory data) external payable {
+    function withdrawToChain(MagnetarWithdrawData memory data) external payable {
         _withdrawToChain(data);
     }
 
