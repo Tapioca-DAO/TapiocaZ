@@ -40,10 +40,13 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
         chainInfo.name === 'arbitrum_sepolia' ||
         chainInfo.name === 'optimism_sepolia'
     ) {
-        await balancerInnitConnectedOft__task(
-            { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
-            hre,
+        console.log(
+            '\n[+] Disabled setting Balancer connected OFT for mtETH...',
         );
+        // await balancerInnitConnectedOft__task(
+        //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
+        //     hre,
+        // );
     }
 }
 
