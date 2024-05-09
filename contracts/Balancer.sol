@@ -13,7 +13,6 @@ import {
     IStargateFactory,
     IStargatePool
 } from "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
-import {IStargateEthVault} from "tapioca-periph/interfaces/external/stargate/IStargateEthVault.sol";
 import {ITOFTVault} from "tapioca-periph/interfaces/tapiocaz/ITOFTVault.sol";
 import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 
@@ -57,9 +56,7 @@ contract Balancer is Ownable {
         address dstOft;
         uint256 rebalanceable;
     }
-
-    IStargateRouter public immutable routerETH;
-    IStargateRouter public immutable router;
+    IStargateRouter public immutable stargateComposer;
     IStargateFactory public immutable stargateFactory;
 
     address public rebalancer;
@@ -112,11 +109,9 @@ contract Balancer is Ownable {
         _;
     }
 
-    constructor(address _routerETH, address _router, address _factory, address _owner) {
-        if (_router == address(0)) revert RouterNotValid();
-        if (_routerETH == address(0)) revert RouterNotValid();
-        routerETH = IStargateRouter(_routerETH);
-        router = IStargateRouter(_router);
+    constructor(address _stargateComposer, address _factory, address _owner) {
+        if (_stargateComposer == address(0)) revert RouterNotValid();
+        stargateComposer = IStargateRouter(_stargateComposer);
         stargateFactory = IStargateFactory(_factory);
 
         transferOwnership(_owner);
@@ -192,15 +187,13 @@ contract Balancer is Ownable {
 
         uint256 convertedAmount = _amount;
         address stargatePool = stargateFactory.getPool(connectedOFTs[_srcOft][_dstChainId].srcPoolId);
-        uint256 sharedDecimals = IStargatePool(stargatePool).sharedDecimals();
         uint256 convertRate = IStargatePool(stargatePool).convertRate();
         if (convertRate != 1) {
-            // ex: for 10e18 and 6 shared decimals => 10e18 / 1e12 * 1e6, 10e12
-            convertedAmount = (_amount / convertRate) * (10 ** sharedDecimals);
+            convertedAmount = (_amount / convertRate) * convertRate;
         }
 
         //extract
-        ITOFT(_srcOft).extractUnderlying(_amount);
+        ITOFT(_srcOft).extractUnderlying(convertedAmount);
 
         //send
         {
@@ -210,10 +203,10 @@ contract Balancer is Ownable {
                 if (disableEth) revert SwapNotEnabled();
                 _sendNative(_srcOft, convertedAmount, _dstChainId, _slippage);
             } else {
-                _sendToken(_srcOft, _amount, _dstChainId, _slippage);
+                _sendToken(_srcOft, convertedAmount, _dstChainId, _slippage);
             }
 
-            connectedOFTs[_srcOft][_dstChainId].rebalanceable -= _amount;
+            connectedOFTs[_srcOft][_dstChainId].rebalanceable -= convertedAmount;
             emit Rebalanced(_srcOft, _dstChainId, _slippage, _amount, convertedAmount, _isNative);
         }
     }
@@ -279,10 +272,6 @@ contract Balancer is Ownable {
         emit RebalanceAmountUpdated(_srcOft, _dstChainId, _amount, connectedOFTs[_srcOft][_dstChainId].rebalanceable);
     }
 
-    function retryRevert(uint16 _srcChainId, bytes calldata _srcAddress, uint256 _nonce) external payable onlyOwner {
-        router.retryRevert{value: msg.value}(_srcChainId, _srcAddress, _nonce);
-    }
-
     /// =====================
     /// Private
     /// =====================
@@ -295,7 +284,7 @@ contract Balancer is Ownable {
             IStargateRouterBase.SwapAmount({amountLD: _amount, minAmountLD: _computeMinAmount(_amount, _slippage)});
         IStargateRouterBase.lzTxObj memory lzTxObj =
             IStargateRouterBase.lzTxObj({dstGasForCall: gas, dstNativeAmount: 0, dstNativeAddr: "0x0"});
-        routerETH.swapETHAndCall{value: valueAmount}(
+        stargateComposer.swapETHAndCall{value: valueAmount}(
             _dstChainId,
             payable(this),
             abi.encodePacked(connectedOFTs[_oft][_dstChainId].dstOft),
@@ -327,8 +316,8 @@ contract Balancer is Ownable {
     function _routerSwap(__RouterSwapInternal memory swapInternal) private {
         uint256 gas = _sgReceiveGas[swapInternal._dstChainId];
         if (gas == 0) revert GasNotValid();
-        IERC20(swapInternal._erc20).safeApprove(address(router), swapInternal._amount);
-        router.swap{value: msg.value}(
+        IERC20(swapInternal._erc20).safeApprove(address(stargateComposer), swapInternal._amount);
+        stargateComposer.swap{value: msg.value}(
             swapInternal._dstChainId,
             connectedOFTs[swapInternal._oft][swapInternal._dstChainId].srcPoolId,
             connectedOFTs[swapInternal._oft][swapInternal._dstChainId].dstPoolId,
@@ -339,7 +328,7 @@ contract Balancer is Ownable {
             abi.encodePacked(connectedOFTs[swapInternal._oft][swapInternal._dstChainId].dstOft),
             "0x"
         );
-        IERC20(swapInternal._erc20).safeApprove(address(router), 0);
+        IERC20(swapInternal._erc20).safeApprove(address(stargateComposer), 0);
     }
 
     function _computeMinAmount(uint256 _amount, uint256 _slippage) private pure returns (uint256) {
