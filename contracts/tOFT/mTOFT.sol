@@ -406,9 +406,9 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
             _unwrap(address(this), feeAmount);
 
             if (erc20 == address(0)) {
-                vault.depositNative{value: feeAmount}();
+                vault.registerFees{value: feeAmount}(feeAmount);
             } else {
-                IERC20(erc20).safeTransfer(address(vault), feeAmount);
+                vault.registerFees(feeAmount);
             }
         }
     }
