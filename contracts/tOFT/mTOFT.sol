@@ -25,6 +25,7 @@ import {
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {IStargateReceiver} from "tapioca-periph/interfaces/external/stargate/IStargateReceiver.sol";
+import {IMtoftFeeGetter} from "tapioca-periph/interfaces/oft/IMToftFeeGetter.sol";
 import {TOFTReceiver} from "./modules/TOFTReceiver.sol";
 import {TOFTSender} from "./modules/TOFTSender.sol";
 import {BaseTOFT} from "./BaseTOFT.sol";
@@ -65,20 +66,9 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
      */
     uint256 public mintCap;
 
-    /**
-     * @notice current non-host chain mint fee
-     */
-    uint256 public mintFee;
-
     address private _stargateRouter;
 
-    struct MultiplierRange {
-        uint256 start;
-        uint256 end;
-        uint256 multiplier;
-    }
-
-    MultiplierRange[] private _ranges;
+    IMtoftFeeGetter public feeGetter; // Wrap and Unwrap fees are pulled from this address
 
     /*
      * @notice event emitted when rebalancing is performed
@@ -101,7 +91,6 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         }
 
         mintCap = 1_000_000 * 1e18; // TOFT is always in 18 decimals
-        mintFee = 5e2; // 0.5%
 
         // Set TOFT execution modules
         if (_modulesData.tOFTSenderModule == address(0)) revert TOFT_NotValid();
@@ -130,16 +119,6 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         vault.claimOwnership();
 
         if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
-
-        //default ranges
-        _ranges.push(MultiplierRange(0, 100 ether, 0));
-        _ranges.push(MultiplierRange(101 ether, 9999 ether, 5));
-        _ranges.push(MultiplierRange(10_000 ether, 99_999 ether, 10));
-        _ranges.push(MultiplierRange(100_000 ether, 999_999 ether, 50));
-        _ranges.push(MultiplierRange(1_000_000 ether, 9_999_999 ether, 50));
-        _ranges.push(MultiplierRange(10_000_000 ether, 99_999_999 ether, 50));
-        _ranges.push(MultiplierRange(100_000_000 ether, 999_999_999 ether, 50));
-        _ranges.push(MultiplierRange(1_000_000_000 ether, 9_999_999_999 ether, 50));
     }
 
     /**
@@ -256,38 +235,6 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         return _hashTypedDataV4(structHash_);
     }
 
-    /// @notice returns unwrap fee multiplier for amount
-    /// @param amount the unwrap amount
-    function getMultiplier(uint256 amount) public view returns (uint256) {
-        uint256 len = _ranges.length;
-        uint256 multiplier = 50;
-        for (uint256 i; i < len; i++) {
-            MultiplierRange memory _range = _ranges[i];
-            if (amount >= _range.start && amount <= _range.end) {
-                multiplier = _range.multiplier;
-                break;
-            }
-        }
-
-        return multiplier;
-    }
-
-    /// @notice computes unwrap fee
-    /// @dev fees are 0 on host chain
-    /// @param _amount the unwrap amount
-    /// @param _liquidity the total active liquidity
-    function computeUnwrapFees(uint256 _amount, uint256 _liquidity) public view returns (uint256 feeAmount) {
-        feeAmount = 0;
-        if (_getChainId() == hostEid) {
-            return feeAmount;
-        }
-
-        if (_liquidity > 0) {
-            uint256 impact = (_amount * 1e18 / _liquidity) * getMultiplier(_liquidity);
-            feeAmount = _amount * impact / 1e18;
-        }
-    }
-
     /// =====================
     /// External
     /// =====================
@@ -342,16 +289,6 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         uint256 feeAmount = _checkAndRegisterUnwrapFees(_amount);
         unwrapped = _amount - feeAmount;
         _unwrap(_toAddress, unwrapped);
-
-        if (feeAmount > 0) {
-            _unwrap(address(this), feeAmount);
-
-            if (erc20 == address(0)) {
-                vault.depositNative{value: feeAmount}();
-            } else {
-                IERC20(erc20).safeTransfer(address(vault), feeAmount);
-            }
-        }
     }
 
     /**
@@ -371,15 +308,6 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     /// =====================
     /// Owner
     /// =====================
-    /**
-     * @notice updates multiplier for a specific index
-     * @param index the index to update for
-     * @param multiplier the new multiplire value
-     */
-    function updateMultiplier(uint256 index, uint256 multiplier) external onlyOwner {
-        if (index > _ranges.length) revert mTOFT_Failed();
-        _ranges[index].multiplier = multiplier;
-    }
 
     /**
      * @notice rescues unused ETH from the contract
@@ -396,7 +324,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
      */
     struct SetOwnerStateData {
         address stargateRouter;
-        uint256 mintFee;
+        IMtoftFeeGetter feeGetter;
         uint256 mintCap;
         // connected chains
         uint256 connectedChain;
@@ -410,8 +338,8 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         if (_stargateRouter != _data.stargateRouter) {
             _stargateRouter = _data.stargateRouter;
         }
-        if (mintFee != _data.mintFee) {
-            mintFee = _data.mintFee;
+        if (feeGetter != _data.feeGetter) {
+            feeGetter = _data.feeGetter;
         }
         if (mintCap != _data.mintCap) {
             if (_data.mintCap < totalSupply()) revert mTOFT_CapNotValid();
@@ -451,28 +379,37 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     /// Private
     /// =====================
     function _checkAndExtractWrapFees(uint256 _amount) private returns (uint256 feeAmount) {
-        feeAmount = 0;
+        if (address(feeGetter) == address(0)) {
+            return feeAmount;
+        }
+        feeAmount = feeGetter.getWrapFee(_amount);
 
         // not on host chain; extract fee
         // fees are used to rebalance liquidity to host chain
-        if (_getChainId() != hostEid && mintFee > 0) {
-            feeAmount = (_amount * mintFee) / 1e5;
-            if (feeAmount > 0) {
-                if (erc20 == address(0)) {
-                    vault.registerFees{value: feeAmount}(feeAmount);
-                } else {
-                    vault.registerFees(feeAmount);
-                }
+        if (feeAmount > 0) {
+            if (erc20 == address(0)) {
+                vault.registerFees{value: feeAmount}(feeAmount);
+            } else {
+                vault.registerFees(feeAmount);
             }
         }
     }
 
     function _checkAndRegisterUnwrapFees(uint256 _amount) private returns (uint256 feeAmount) {
-        uint256 totalLiquidity = vault.viewSupply();
-        feeAmount = computeUnwrapFees(_amount, totalLiquidity);
+        if (address(feeGetter) == address(0)) {
+            return feeAmount;
+        }
+
+        feeAmount = feeGetter.getUnwrapFee(_amount);
 
         if (feeAmount > 0) {
-            vault.registerFees(feeAmount);
+            _unwrap(address(this), feeAmount);
+
+            if (erc20 == address(0)) {
+                vault.depositNative{value: feeAmount}();
+            } else {
+                IERC20(erc20).safeTransfer(address(vault), feeAmount);
+            }
         }
     }
 
