@@ -104,6 +104,21 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         chainInfo.name === 'arbitrum_sepolia'
     ) {
         console.log('\n[+] Adding tOFT contracts');
+        // VM Add tETH
+        await VMAddToftWithArgs({
+            ...taskArgs,
+            target: 'toft',
+            deploymentName: DEPLOYMENT_NAMES.tETH,
+            erc20:
+                chainInfo.name === 'arbitrum_sepolia'
+                    ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
+                    : hre.ethers.constants.AddressZero, // Use WETH on testnet to be able to free mint with mock
+            name: 'tETH',
+            symbol: DEPLOYMENT_NAMES.tETH,
+            noModuleDeploy: false, // Modules are loaded here
+            tag,
+        });
+
         // VM Add tWSTETH
         await VMAddToftWithArgs({
             ...taskArgs,
