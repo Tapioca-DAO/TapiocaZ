@@ -67,7 +67,6 @@ export async function VMAddToft(
             ),
         );
     } else if (target === 'mtoft') {
-        const toft = await hre.ethers.getContractFactory('TOFT');
         VM.add(
             await buildMTOFT(
                 hre,

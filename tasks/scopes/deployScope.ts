@@ -8,7 +8,7 @@ const deployScope = scope('deploys', 'Deployment tasks');
 TAP_TASK(
     deployScope.task(
         'postLbp',
-        'Will deploy Balancer, mtETH, tWSTETH, and tRETH. Will also set the LzPeer for each.',
+        'Will deploy Balancer, mtETH, tWSTETH, and tRETH.',
         deployPostLbp__task,
     ),
 );

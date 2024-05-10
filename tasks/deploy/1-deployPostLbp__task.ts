@@ -7,7 +7,7 @@ import { buildBalancer } from 'tasks/deployBuilds/buildBalancer';
 import { balancerInnitConnectedOft__task } from 'tasks/exec/balancer/balancerInnitConnectedOft__task';
 
 /**
- * @notice Will deploy mtETH, tWSTETH, and tRETH. Will also set the LzPeer for each.
+ * @notice Will deploy mtETH, tWSTETH, and tRETH. Will also set the LzPeer for mtETH (disabled for prod).
  * @notice Will deploy Balancer contract.
  */
 export const deployPostLbp__task = async (
@@ -30,8 +30,6 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
     const { hre, taskArgs, VM, chainInfo } = params;
     const { tag } = taskArgs;
 
-    await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
-
     if (
         chainInfo.name === 'ethereum' ||
         chainInfo.name === 'arbitrum' ||
@@ -43,6 +41,8 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
         console.log(
             '\n[+] Disabled setting Balancer connected OFT for mtETH...',
         );
+        // await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
+
         // await balancerInnitConnectedOft__task(
         //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
         //     hre,
@@ -127,7 +127,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.wstETH,
             name: 'Tapioca OFT Lido Wrapped Staked Ether',
             symbol: DEPLOYMENT_NAMES.tWSTETH,
-            noModuleDeploy: false, // Modules are loaded here
+            noModuleDeploy: true, // Modules are loaded here
             tag,
         });
 
