@@ -40,22 +40,8 @@ export async function VMAddToftModule(params: {
         vault: addrOne,
         yieldBox: addrOne,
     };
-    const { cluster } = await getExternalContracts({
-        hre,
-        tag,
-    });
 
-    VM.add(
-        await buildExtExec(
-            hre,
-            DEPLOYMENT_NAMES.TOFT_EXT_EXEC,
-            [
-                cluster.address, // Cluster
-                owner, // Owner
-            ],
-            [],
-        ),
-    )
+    VM.add(await buildExtExec(hre, DEPLOYMENT_NAMES.TOFT_EXT_EXEC, [], []))
         .add(
             await buildTOFTGenericReceiverModule(
                 hre,
