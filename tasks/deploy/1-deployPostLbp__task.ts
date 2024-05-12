@@ -5,6 +5,7 @@ import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
 
 /**
+ * @notice Should be called after the LBP has ended. Before `Bar` `postLbp1`
  * @notice Will deploy mtETH, tWSTETH, and tRETH. Will also set the LzPeer for mtETH (disabled for prod).
  * @notice Will deploy Balancer contract.
  */
