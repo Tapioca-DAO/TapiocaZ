@@ -16,6 +16,7 @@ import {
 export type TToftDeployerTaskArgs = TTapiocaDeployTaskArgs & {
     erc20: string;
     target: 'toft' | 'mtoft';
+    hostEid: string | number;
     deploymentName: string;
     name: string;
     symbol: string;
@@ -47,6 +48,7 @@ export async function VMAddToft(
         tag,
         owner,
         erc20,
+        hostEid,
         name,
         symbol,
         vaultDeploymentName,
