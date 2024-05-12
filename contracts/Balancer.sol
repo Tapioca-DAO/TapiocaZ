@@ -248,8 +248,7 @@ contract Balancer is Ownable {
         if (connectedOFTs[_srcOft][_dstChainId].rebalanceable > 0) {
             revert AlreadyInitialized();
         }
-        bool isNative = ITOFT(_srcOft).erc20() == address(0);
-        if (!isNative && _ercData.length == 0) revert PoolInfoRequired();
+        if (_ercData.length == 0) revert PoolInfoRequired();
 
         (uint256 _srcPoolId, uint256 _dstPoolId) = abi.decode(_ercData, (uint256, uint256));
 
