@@ -34,8 +34,16 @@ export async function VMAddToft(
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet, chainInfo } =
         params;
-    const { tag, deploymentName, erc20, name, symbol, target, noModuleDeploy } =
-        taskArgs;
+    const {
+        tag,
+        deploymentName,
+        erc20,
+        name,
+        symbol,
+        target,
+        noModuleDeploy,
+        hostEid,
+    } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
     if (!noModuleDeploy) {

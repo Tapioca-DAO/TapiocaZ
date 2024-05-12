@@ -1,10 +1,8 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
+import { buildBalancer } from 'tasks/deployBuilds/buildBalancer';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
-import { setLzPeer__task } from 'tapioca-sdk';
-import { buildBalancer } from 'tasks/deployBuilds/buildBalancer';
-import { balancerInnitConnectedOft__task } from 'tasks/exec/balancer/balancerInnitConnectedOft__task';
 
 /**
  * @notice Will deploy mtETH, tWSTETH, and tRETH. Will also set the LzPeer for mtETH (disabled for prod).
