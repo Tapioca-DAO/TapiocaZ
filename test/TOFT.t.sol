@@ -2096,4 +2096,23 @@ contract TOFTTest is Test, TOFTTestHelper {
         aTOFT.transferFrom(address(userA), address(userB), aTOFTAmount);
     }
 
+    function test_transferFrom_success() public {
+        uint256 aTOFTAmount = 1000;
+        vm.startPrank(userA);
+        deal(address(aTOFT), userA, aTOFTAmount);
+        uint256 userABalance = aTOFT.balanceOf(userA);
+        aTOFT.approve(userA, aTOFTAmount);
+        aTOFT.transferFrom(userA, userB, aTOFTAmount);
+        assertEq(aTOFT.balanceOf(userA), 0);
+        assertEq(aTOFT.balanceOf(userB), aTOFTAmount);
+    }
+
+
+
+
+
+
+
+
+
 }
