@@ -2138,7 +2138,11 @@ contract TOFTTest is Test, TOFTTestHelper {
         aTOFT.rescueEth(15 ether, userA);
     }
 
-
+    function test_pause_revert_non_owner() public {
+        vm.startPrank(userA);
+        vm.expectRevert("Ownable: caller is not the owner");
+        aTOFT.setPause(true);
+    }
 
 
 }
