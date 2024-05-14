@@ -2144,5 +2144,11 @@ contract TOFTTest is Test, TOFTTestHelper {
         aTOFT.setPause(true);
     }
 
-
+    function test_pause_by_owner() public {
+        vm.startPrank(__owner);
+        aTOFT.setPause(true);
+        assertEq(aTOFT.paused(), true);
+        aTOFT.setPause(false);
+        assertEq(aTOFT.paused(), false);
+    }
 }
