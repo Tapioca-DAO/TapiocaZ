@@ -2107,6 +2107,19 @@ contract TOFTTest is Test, TOFTTestHelper {
         assertEq(aTOFT.balanceOf(userB), aTOFTAmount);
     }
 
+    function test_lzReceive_fail_when_called_by_non_endpoint() public {
+        vm.startPrank(address(userA));
+        address executor = address(0x789);
+        Origin memory origin = Origin(1, bytes32(uint256(uint160(address(endpoints[bEid])))), 45);
+        bytes32 guid = keccak256(abi.encodePacked(block.timestamp, __endpoint, userA));
+        bytes memory payload = abi.encode("payload");
+        bytes memory extraData = abi.encode("extraData");
+        vm.expectRevert("RevertMsgDecoder: no data");
+
+        aTOFT.lzReceive(origin, guid, payload, executor, extraData);
+
+        vm.stopPrank();
+    }
 
 
 
