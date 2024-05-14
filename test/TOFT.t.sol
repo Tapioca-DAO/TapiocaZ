@@ -2121,7 +2121,16 @@ contract TOFTTest is Test, TOFTTestHelper {
         vm.stopPrank();
     }
 
+    function test_rescueEth_called_by_owner() public {
+        vm.startPrank(__owner);
+        uint256 ownerInitialBalance = address(__owner).balance;
+        vm.deal(address(aTOFT), 15 ether);
 
+        assertEq(address(aTOFT).balance, 15 ether);
+        aTOFT.rescueEth(15 ether, __owner);
+        assertEq(address(aTOFT).balance, 0);
+        assertEq(address(__owner).balance, ownerInitialBalance + 15 ether);
+    }
 
 
 
