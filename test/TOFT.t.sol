@@ -11,6 +11,7 @@ import {
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
+import {Origin} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
 // External
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -42,10 +43,7 @@ import {
     ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {
-    TOFTHelper,
-    PrepareLzCallData,
-    PrepareLzCallReturn,
-    ComposeMsgData
+    TOFTHelper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData
 } from "tapiocaz/tOFT/extensions/TOFTHelper.sol";
 import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
 import {TOFTGenericReceiverModule} from "tapiocaz/tOFT/modules/TOFTGenericReceiverModule.sol";
@@ -71,8 +69,9 @@ import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
 
 import "forge-std/console.sol";
+import "forge-std/Test.sol";
 
-contract TOFTTest is TOFTTestHelper {
+contract TOFTTest is Test, TOFTTestHelper {
     using OptionsBuilder for bytes;
     using OFTMsgCodec for bytes32;
     using OFTMsgCodec for bytes;
@@ -2088,4 +2087,13 @@ contract TOFTTest is TOFTTestHelper {
             keccak256(abi.encode(typeHash, hashedName, hashedVersion, block.chainid, address(yieldBox)));
         return domainSeparator;
     }
+
+    function test_transferFrom_fails_when_not_approved() public {
+        uint256 aTOFTAmount = 1000;
+        vm.startPrank(userA);
+        deal(address(aTOFT), userA, aTOFTAmount);
+        vm.expectRevert(abi.encodeWithSignature("BaseTapiocaOmnichainEngine_PearlmitNotApproved()"));
+        aTOFT.transferFrom(address(userA), address(userB), aTOFTAmount);
+    }
+
 }
