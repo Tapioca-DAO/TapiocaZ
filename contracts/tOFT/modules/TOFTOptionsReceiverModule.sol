@@ -141,7 +141,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         /**
         * @dev retrieve exercised amount
         */
-        _withdrawExercised(msg_, srcChainSender);
+        _withdrawExercised(msg_);
 
         emit ExerciseOptionsReceived(
             msg_.optionsData.from, msg_.optionsData.target, msg_.optionsData.oTAPTokenID, msg_.optionsData.paymentTokenAmount
@@ -156,14 +156,16 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             if (msg_.lockData.amount > 0) {
                 msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
             }
-            if (msg_.lockData.fraction > 0) msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
+            if (msg_.lockData.fraction > 0) {
+                msg_.lockData.fraction = _toLD(msg_.lockData.fraction.toUint64());
+                _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.lockData.fraction);
+            }
         }
 
         if (msg_.participateData.participate) {
             _checkWhitelistStatus(msg_.participateData.target);
         }
 
-        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.lockData.fraction);
 
         return msg_;
     }
@@ -214,7 +216,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         }
     }
 
-    function _withdrawExercised(ExerciseOptionsMsg memory msg_, address srcChainSender) private {
+    function _withdrawExercised(ExerciseOptionsMsg memory msg_) private {
         SendParam memory _send = msg_.lzSendParams.sendParam;
 
         address tapOft = ITapiocaOptionBroker(msg_.optionsData.target).tapOFT();

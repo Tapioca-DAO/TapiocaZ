@@ -50,6 +50,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     using SafeCast for uint256;
 
     error TOFTMarketReceiverModule_NotAuthorized(address invalidAddress);
+    error TOFTMarketReceiverModule_AmountNotValid();
 
     event BorrowReceived(
         address indexed user, address indexed market, uint256 indexed amount, bool deposit, bool withdraw
@@ -155,7 +156,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     }
 
     function _validateLeverageUpReceiver(LeverageUpActionMsg memory msg_, address srcChainSender) private returns (LeverageUpActionMsg memory) {
-
         _checkWhitelistStatus(msg_.market);
         _checkWhitelistStatus(msg_.marketHelper);
 
@@ -164,6 +164,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             msg_.supplyAmount = _toLD(msg_.supplyAmount.toUint64());
         }
 
+        if (msg_.borrowAmount == 0) revert TOFTMarketReceiverModule_AmountNotValid();
         _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowAmount);
 
         return msg_;
@@ -188,6 +189,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
         msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
 
+        if (msg_.borrowParams.amount == 0) revert TOFTMarketReceiverModule_AmountNotValid();
         _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowParams.amount);
 
         return msg_;
@@ -223,6 +225,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
 
+        if (msg_.removeParams.amount == 0) revert TOFTMarketReceiverModule_AmountNotValid();
         _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.removeParams.amount);
         
         return msg_;
