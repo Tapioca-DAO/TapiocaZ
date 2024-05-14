@@ -189,8 +189,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
         msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
 
-        if (msg_.borrowParams.amount == 0) revert TOFTMarketReceiverModule_AmountNotValid();
-        _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowParams.amount);
+        if (msg_.borrowParams.deposit) {
+            _validateAndSpendAllowance(msg_.user, srcChainSender, msg_.borrowParams.amount);
+        }
 
         return msg_;
     }
