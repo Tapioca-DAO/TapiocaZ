@@ -134,6 +134,7 @@ export async function getInitStruct(params: {
     tag: string;
     owner: string;
     erc20: string;
+    hostEid: string | number;
     name: string;
     symbol: string;
     vaultDeploymentName: string;
@@ -144,7 +145,7 @@ export async function getInitStruct(params: {
         hre,
         tag,
         owner,
-        isTestnet,
+        hostEid,
         chainInfo,
         vaultDeploymentName,
         erc20,
@@ -153,9 +154,6 @@ export async function getInitStruct(params: {
     } = params;
 
     const addrZero = hre.ethers.constants.AddressZero;
-    const arbitrumEid = isTestnet
-        ? getChainBy('name', 'arbitrum').lzChainId
-        : getChainBy('name', 'arbitrum_sepolia').lzChainId;
 
     const { cluster, pearlmit, yieldBox } = await getExternalContracts({
         hre,
@@ -169,7 +167,7 @@ export async function getInitStruct(params: {
             endpoint: chainInfo.address,
             erc20,
             extExec: addrZero,
-            hostEid: arbitrumEid,
+            hostEid,
             name,
             pearlmit: pearlmit.address,
             symbol,
