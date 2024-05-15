@@ -1,13 +1,12 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
+import { buildBalancer } from 'tasks/deployBuilds/buildBalancer';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
-import { setLzPeer__task } from 'tapioca-sdk';
-import { buildBalancer } from 'tasks/deployBuilds/buildBalancer';
-import { balancerInnitConnectedOft__task } from 'tasks/exec/balancer/balancerInnitConnectedOft__task';
 
 /**
- * @notice Will deploy mtETH, tWSTETH, and tRETH. Will also set the LzPeer for each.
+ * @notice Should be called after the LBP has ended. Before `Bar` `postLbp1`
+ * @notice Will deploy mtETH, tWSTETH, and tRETH. Will also set the LzPeer for mtETH (disabled for prod).
  * @notice Will deploy Balancer contract.
  */
 export const deployPostLbp__task = async (
@@ -30,8 +29,6 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
     const { hre, taskArgs, VM, chainInfo } = params;
     const { tag } = taskArgs;
 
-    await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
-
     if (
         chainInfo.name === 'ethereum' ||
         chainInfo.name === 'arbitrum' ||
@@ -40,10 +37,15 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
         chainInfo.name === 'arbitrum_sepolia' ||
         chainInfo.name === 'optimism_sepolia'
     ) {
-        await balancerInnitConnectedOft__task(
-            { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
-            hre,
+        console.log(
+            '\n[+] Disabled setting Balancer connected OFT for mtETH...',
         );
+        // await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
+
+        // await balancerInnitConnectedOft__task(
+        //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
+        //     hre,
+        // );
     }
 }
 
@@ -108,7 +110,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.wstETH,
             name: 'Tapioca OFT Lido Wrapped Staked Ether',
             symbol: DEPLOYMENT_NAMES.tWSTETH,
-            noModuleDeploy: false, // Modules are loaded here
+            noModuleDeploy: true, // Modules are loaded here
             tag,
         });
 
