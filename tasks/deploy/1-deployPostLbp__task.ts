@@ -37,11 +37,7 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
         chainInfo.name === 'arbitrum_sepolia' ||
         chainInfo.name === 'optimism_sepolia'
     ) {
-        console.log(
-            '\n[+] Disabled setting Balancer connected OFT for mtETH...',
-        );
         // await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
-
         // await balancerInnitConnectedOft__task(
         //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
         //     hre,
@@ -81,7 +77,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             target: 'mtoft',
             deploymentName: DEPLOYMENT_NAMES.mtETH,
             erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH,
-            hostEid: chainInfo.lzChainId,
             name: 'MTOFT Wrapped Ether',
             symbol: DEPLOYMENT_NAMES.mtETH,
             tag,
@@ -91,7 +86,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
                 DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
                 DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
-                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_FACTORY!,
                 owner,
             ]),
         );
@@ -104,33 +98,12 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         chainInfo.name === 'arbitrum_sepolia'
     ) {
         console.log('\n[+] Adding tOFT contracts');
-        const hostEid = isTestnet
-            ? hre.SDK.utils.getChainBy('name', 'arbitrum_sepolia').lzChainId
-            : hre.SDK.utils.getChainBy('name', 'arbitrum').lzChainId;
-
-        // VM Add tETH
-        await VMAddToftWithArgs({
-            ...taskArgs,
-            target: 'toft',
-            deploymentName: DEPLOYMENT_NAMES.tETH,
-            erc20:
-                chainInfo.name === 'arbitrum_sepolia'
-                    ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
-                    : hre.ethers.constants.AddressZero, // Use WETH on testnet to be able to free mint with mock
-            hostEid,
-            name: 'tETH',
-            symbol: DEPLOYMENT_NAMES.tETH,
-            noModuleDeploy: false, // Modules are loaded here
-            tag,
-        });
-
         // VM Add tWSTETH
         await VMAddToftWithArgs({
             ...taskArgs,
             target: 'toft',
             deploymentName: DEPLOYMENT_NAMES.tWSTETH,
             erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.wstETH,
-            hostEid,
             name: 'Tapioca OFT Lido Wrapped Staked Ether',
             symbol: DEPLOYMENT_NAMES.tWSTETH,
             noModuleDeploy: true, // Modules are loaded here
@@ -143,7 +116,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             target: 'toft',
             deploymentName: DEPLOYMENT_NAMES.tRETH,
             erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.reth,
-            hostEid,
             name: 'Tapioca OFT Rocket Pool Ether',
             symbol: DEPLOYMENT_NAMES.tRETH,
             noModuleDeploy: true,
@@ -156,7 +128,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             target: 'toft',
             deploymentName: DEPLOYMENT_NAMES.tsGLP,
             erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.sDAI,
-            hostEid,
             name: 'Tapioca OFT Staked GLP',
             symbol: DEPLOYMENT_NAMES.tsGLP,
             noModuleDeploy: true,
@@ -169,10 +140,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         // testnet
         chainInfo.name === 'sepolia'
     ) {
-        const hostEid = isTestnet
-            ? hre.SDK.utils.getChainBy('name', 'optimism_sepolia').lzChainId
-            : hre.SDK.utils.getChainBy('name', 'ethereum').lzChainId;
-
         console.log('\n[+] Adding tOFT contracts');
         // VM Add sDAI
         await VMAddToftWithArgs({
@@ -180,7 +147,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             target: 'toft',
             deploymentName: DEPLOYMENT_NAMES.tsDAI,
             erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.sDAI,
-            hostEid,
             name: 'Tapioca OFT Staked DAI',
             symbol: DEPLOYMENT_NAMES.tsDAI,
             noModuleDeploy: true,
