@@ -94,14 +94,6 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
 
     receive() external payable {}
 
-    function transferFrom(address from, address to, uint256 value)
-        public
-        override(BaseTapiocaOmnichainEngine, ERC20)
-        returns (bool)
-    {
-        return BaseTapiocaOmnichainEngine.transferFrom(from, to, value);
-    }
-
     /**
      * @dev Slightly modified version of the OFT _lzReceive() operation.
      * The composed message is sent to `address(this)` instead of `toAddress`.
