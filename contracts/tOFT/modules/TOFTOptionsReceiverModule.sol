@@ -190,7 +190,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] =
             MagnetarCall({id: uint8(MagnetarAction.OptionModule), target: msg_.magnetar, value: msg.value, call: call});
-        IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
+        IMagnetar(payable(msg_.magnetar)).burst{value: msg_.value}(magnetarCall);
     }
 
     function _validateExerciseOptionReceiver(ExerciseOptionsMsg memory msg_)
