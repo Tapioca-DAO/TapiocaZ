@@ -65,6 +65,11 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             taskArgs: args,
         });
 
+    const hostChainInfo = hre.SDK.utils.getChainBy(
+        'name',
+        isTestnet ? 'arbitrum_sepolia' : 'arbitrum',
+    );
+
     // VM Add mtETH
     if (
         chainInfo.name === 'arbitrum' ||
@@ -83,12 +88,13 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH,
             name: 'MTOFT Wrapped Ether',
             symbol: DEPLOYMENT_NAMES.mtETH,
-            tag,
+            hostEid: hostChainInfo.lzChainId,
         });
 
         VM.add(
             await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
                 DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
+                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
                 DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
                 owner,
             ]),
@@ -111,7 +117,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             name: 'Tapioca OFT Lido Wrapped Staked Ether',
             symbol: DEPLOYMENT_NAMES.tWSTETH,
             noModuleDeploy: true, // Modules are loaded here
-            tag,
+            hostEid: hostChainInfo.lzChainId,
         });
 
         // VM Add tRETH
@@ -123,7 +129,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             name: 'Tapioca OFT Rocket Pool Ether',
             symbol: DEPLOYMENT_NAMES.tRETH,
             noModuleDeploy: true,
-            tag,
+            hostEid: hostChainInfo.lzChainId,
         });
 
         // VM Add sGLP
@@ -135,16 +141,21 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             name: 'Tapioca OFT Staked GLP',
             symbol: DEPLOYMENT_NAMES.tsGLP,
             noModuleDeploy: true,
-            tag,
+            hostEid: hostChainInfo.lzChainId,
         });
     }
 
     if (
         chainInfo.name === 'ethereum' ||
         // testnet
-        chainInfo.name === 'sepolia'
+        chainInfo.name === 'sepolia' ||
+        chainInfo.name === 'optimism_sepolia'
     ) {
         console.log('\n[+] Adding tOFT contracts');
+        const sideChainHostChainInfo = hre.SDK.utils.getChainBy(
+            'name',
+            isTestnet ? 'optimism_sepolia' : 'ethereum',
+        );
         // VM Add sDAI
         await VMAddToftWithArgs({
             ...taskArgs,
@@ -154,7 +165,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             name: 'Tapioca OFT Staked DAI',
             symbol: DEPLOYMENT_NAMES.tsDAI,
             noModuleDeploy: true,
-            tag,
+            hostEid: sideChainHostChainInfo.lzChainId,
         });
     }
 }
