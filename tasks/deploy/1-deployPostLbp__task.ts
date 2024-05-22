@@ -137,7 +137,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             ...taskArgs,
             target: 'toft',
             deploymentName: DEPLOYMENT_NAMES.tsGLP,
-            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.sDAI,
+            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.sGLP,
             name: 'Tapioca OFT Staked GLP',
             symbol: DEPLOYMENT_NAMES.tsGLP,
             noModuleDeploy: true,

@@ -38,7 +38,7 @@ const POST_LBP: TPostLbp = {
         WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         wstETH: '0x5979D7b546E38E414F7E9822514be443A4800529',
         reth: '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8',
-        sDAI: '0x0000000000000000000000000000000000000000', // We put address 0 because it's not the host chain
+        sDAI: '',
         sGLP: '0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf',
     },
     [EChainID.MAINNET]: {
@@ -52,15 +52,15 @@ const POST_LBP: TPostLbp = {
         WETH: '0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E',
         wstETH: '0x568567fb156cDf083FA9e4A672fB462aA49673e9',
         reth: '0x518746126A545cC7F31EeD92bF2b04eb99eD103B',
-        sDAI: '0x0000000000000000000000000000000000000000', // We put address 0 because it's not the host chain
-        sGLP: '0x1B460E311753fDB46451EF3d11d7B9eE5542b369', // Mock deployment
+        sDAI: '',
+        sGLP: '0x1B460E311753fDB46451EF3d11d7B9eE5542b369',
     },
     [EChainID.SEPOLIA]: {
-        WETH: '0xD8a79b479b0c47675E3882A1DAA494b6775CE227', // Mock deployment
-        wstETH: '0x0000000000000000000000000000000000000000', // We put address 0 because it's not the host chain
-        reth: '0x0000000000000000000000000000000000000000', // We put address 0 because it's not the host chain
+        WETH: '0xD8a79b479b0c47675E3882A1DAA494b6775CE227',
+        wstETH: '',
+        reth: '',
         sDAI: '0xC6EA2075314a58cf74DE8430b24714E600A21Dd8',
-        sGLP: '0x0000000000000000000000000000000000000000',
+        sGLP: '',
     },
     [EChainID.OPTIMISM_SEPOLIA]: {
         WETH: '0x4fB538Ed1a085200bD08F66083B72c0bfEb29112',
