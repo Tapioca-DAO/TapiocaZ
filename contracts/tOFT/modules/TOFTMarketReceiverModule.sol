@@ -170,7 +170,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     }
 
     function _marketLeverage(LeverageUpActionMsg memory msg_) private {
-        approve(address(msg_.market), type(uint256).max);
         (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.marketHelper).buyCollateral(
             msg_.user, msg_.borrowAmount, msg_.supplyAmount, msg_.executorData
         );
@@ -179,7 +178,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             yb.depositAsset(IMarket(msg_.market)._assetId(), msg_.user, msg_.user, msg_.supplyAmount, 0);
         }
         IMarket(msg_.market).execute(modules, calls, true);
-        approve(address(msg_.market), 0);
     }
 
      function _validateMarketBorrowReceiver(MarketBorrowMsg memory msg_, address srcChainSender) private returns (MarketBorrowMsg memory) {
@@ -196,8 +194,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     }
 
     function _marketBorrow(MarketBorrowMsg memory msg_) private {
-        approve(address(msg_.borrowParams.magnetar), msg_.borrowParams.amount);
-
         bytes memory call = abi.encodeWithSelector(
             MagnetarCollateralModule.depositAddCollateralAndBorrowFromMarket.selector,
             DepositAddCollateralAndBorrowFromMarketData(
@@ -237,7 +233,6 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         uint256 assetId = IMarket(msg_.removeParams.market)._collateralId();
 
         uint256 share = IYieldBox(ybAddress).toShare(assetId, msg_.removeParams.amount, false);
-        approve(msg_.removeParams.market, share);
 
         (Module[] memory modules, bytes[] memory calls) = IMarketHelper(msg_.removeParams.marketHelper)
             .removeCollateral(msg_.user, msg_.withdrawParams.withdraw ? msg_.removeParams.magnetar : msg_.user, share);
