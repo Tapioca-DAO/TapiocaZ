@@ -9,6 +9,7 @@ import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Tapioca
 import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
@@ -23,7 +24,6 @@ import {TOFTOptionsReceiverModule} from "./TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "./TOFTMarketReceiverModule.sol";
 import {BaseTOFT} from "../BaseTOFT.sol";
 
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -35,7 +35,7 @@ import {BaseTOFT} from "../BaseTOFT.sol";
    
 */
 
-abstract contract BaseTOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
+abstract contract BaseTOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver, ReentrancyGuard {
     using OFTMsgCodec for bytes;
     using OFTMsgCodec for bytes32;
     using SafeERC20 for IERC20;
@@ -63,6 +63,7 @@ abstract contract BaseTOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver {
     function _toeComposeReceiver(uint16 _msgType, address _srcChainSender, bytes memory _toeComposeMsg)
         internal
         override
+        nonReentrant
         returns (bool success)
     {
         if (_msgType == MSG_YB_SEND_SGL_BORROW) {
