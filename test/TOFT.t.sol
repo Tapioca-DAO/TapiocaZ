@@ -410,7 +410,7 @@ contract TOFTTest is TOFTTestHelper {
 
     function test_wrap_fail() public {
         uint256 erc20Amount_ = 1 ether;
-        pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
         bERC20.approve(address(pearlmit), uint200(erc20Amount_));
 
         vm.expectRevert();
@@ -431,7 +431,7 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             aERC20.approve(address(pearlmit), uint200(erc20Amount_));
             aTOFT.wrap(address(this), address(this), erc20Amount_);
 
@@ -474,7 +474,7 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
 
             pearlmit.approve(
-                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)
+                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp)
             ); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
             wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
@@ -499,7 +499,7 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
 
             pearlmit.approve(
-                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)
+                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp)
             ); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
             wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
@@ -525,7 +525,7 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
 
             pearlmit.approve(
-                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp + 1)
+                address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp)
             ); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
             wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
@@ -570,7 +570,7 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
             pearlmit.approve(
-                address(bERC20), 0, address(wrongHostTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)
+                address(bERC20), 0, address(wrongHostTOFT), uint200(erc20Amount_), uint48(block.timestamp)
             ); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             wrongHostTOFT.wrap(address(this), address(this), erc20Amount_);
@@ -948,11 +948,11 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             aERC20.approve(address(pearlmit), uint200(erc20Amount_));
             aTOFT.wrap(address(this), address(this), erc20Amount_);
 
-            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
 
@@ -1007,7 +1007,7 @@ contract TOFTTest is TOFTTestHelper {
         uint256 tokenAmountSD = tOFTHelper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
-        pearlmit.approve(address(bTOFT), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(address(bTOFT), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         bTOFT.approve(address(pearlmit), type(uint200).max);
 
         MarketBorrowMsg memory marketBorrowMsg = MarketBorrowMsg({
@@ -1218,7 +1218,7 @@ contract TOFTTest is TOFTTestHelper {
             deal(address(bERC20), address(this), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
@@ -1327,7 +1327,7 @@ contract TOFTTest is TOFTTestHelper {
             deal(address(bERC20), address(this), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
@@ -1446,7 +1446,7 @@ contract TOFTTest is TOFTTestHelper {
         LZSendParam memory withdrawLzSendParam_;
         MessagingFee memory withdrawMsgFee_; // Will be used as value for the composed msg
 
-        pearlmit.approve(address(bTOFT), 0, address(tOB), type(uint200).max, uint48(block.timestamp + 1));
+        pearlmit.approve(address(bTOFT), 0, address(tOB), type(uint200).max, uint48(block.timestamp));
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
