@@ -220,6 +220,13 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             _options.tapAmount
         );
 
+        // Clear Pearlmit ERC721 allowance post execution
+        {
+            address oTap = ITapiocaOptionBroker(_options.target).oTAP();
+            address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
+            pearlmit.clearAllowance(oTapOwner, oTap, _options.oTAPTokenID);
+        }
+
         uint256 bAfter = balanceOf(address(this));
 
         // Refund if less was used.
