@@ -27,7 +27,6 @@ import {SafeApprove} from "tapioca-periph/libraries/SafeApprove.sol";
 import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "../BaseTOFT.sol";
 
-
 /*
 
 ████████╗ █████╗ ██████╗ ██╗ ██████╗  ██████╗ █████╗ 
@@ -83,13 +82,13 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         LockAndParticipateData memory msg_ = TOFTMsgCodec.decodeLockAndParticipateMsg(_data);
 
         /**
-        * @dev validate data
-        */
+         * @dev validate data
+         */
         msg_ = _validateLockAndParticipate(msg_, srcChainSender);
 
         /**
-        * @dev execute through `Magnetar`
-        */
+         * @dev execute through `Magnetar`
+         */
         _lockAndParticipate(msg_);
 
         emit LockAndParticipateReceived(
@@ -116,39 +115,56 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         ExerciseOptionsMsg memory msg_ = TOFTMsgCodec.decodeExerciseOptionsMsg(_data);
 
         /**
-        * @dev validate data
-        */
+         * @dev validate data
+         */
         msg_ = _validateExerciseOptionReceiver(msg_);
 
         /**
-        * @dev retrieve paymentToken amount
-        */
+         * @dev Validate caller
+         */
+        _validateExerciseOptionCaller(msg_.optionsData, srcChainSender);
+
+        /**
+         * @dev retrieve paymentToken amount
+         */
         _internalTransferWithAllowance(msg_.optionsData.from, srcChainSender, msg_.optionsData.paymentTokenAmount);
 
         /**
-        * @dev call exerciseOption() with address(this) as the payment token
-        */
+         * @dev call exerciseOption() with address(this) as the payment token
+         */
+        // _approve(address(this), _options.target, _options.paymentTokenAmount);
         pearlmit.approve(
-            address(this), 0, msg_.optionsData.target, uint200(msg_.optionsData.paymentTokenAmount), uint48(block.timestamp + 1)
+            address(this),
+            0,
+            msg_.optionsData.target,
+            uint200(msg_.optionsData.paymentTokenAmount),
+            uint48(block.timestamp + 1)
         ); // Atomic approval
-        address(this).safeApprove(address(pearlmit), msg_.optionsData.paymentTokenAmount);
+        _approve(address(this), address(pearlmit), msg_.optionsData.paymentTokenAmount);
 
         /**
-        * @dev exercise and refund if less paymentToken amount was used
-        */
+         * @dev exercise and refund if less paymentToken amount was used
+         */
         _exerciseAndRefund(msg_.optionsData);
+        _approve(address(this), address(pearlmit), 0);
 
         /**
-        * @dev retrieve exercised amount
-        */
+         * @dev retrieve exercised amount
+         */
         _withdrawExercised(msg_);
 
         emit ExerciseOptionsReceived(
-            msg_.optionsData.from, msg_.optionsData.target, msg_.optionsData.oTAPTokenID, msg_.optionsData.paymentTokenAmount
+            msg_.optionsData.from,
+            msg_.optionsData.target,
+            msg_.optionsData.oTAPTokenID,
+            msg_.optionsData.paymentTokenAmount
         );
     }
 
-    function _validateLockAndParticipate(LockAndParticipateData memory msg_, address srcChainSender) private returns (LockAndParticipateData memory) {
+    function _validateLockAndParticipate(LockAndParticipateData memory msg_, address srcChainSender)
+        private
+        returns (LockAndParticipateData memory)
+    {
         _checkWhitelistStatus(msg_.magnetar);
         _checkWhitelistStatus(msg_.singularity);
         if (msg_.lockData.lock) {
@@ -166,10 +182,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
             _checkWhitelistStatus(msg_.participateData.target);
         }
 
-
         return msg_;
     }
-    
+
     function _lockAndParticipate(LockAndParticipateData memory msg_) private {
         bytes memory call = abi.encodeWithSelector(MagnetarOptionModule.lockAndParticipate.selector, msg_);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
@@ -178,33 +193,33 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         IMagnetar(payable(msg_.magnetar)).burst{value: msg.value}(magnetarCall);
     }
 
-    function _validateExerciseOptionReceiver(ExerciseOptionsMsg memory msg_) private view returns (ExerciseOptionsMsg memory) {
+    function _validateExerciseOptionReceiver(ExerciseOptionsMsg memory msg_)
+        private
+        view
+        returns (ExerciseOptionsMsg memory)
+    {
         _checkWhitelistStatus(msg_.optionsData.target);
 
-        if (msg_.optionsData.tapAmount > 0)
+        if (msg_.optionsData.tapAmount > 0) {
             msg_.optionsData.tapAmount = _toLD(msg_.optionsData.tapAmount.toUint64());
+        }
 
-        if (msg_.optionsData.paymentTokenAmount > 0)
+        if (msg_.optionsData.paymentTokenAmount > 0) {
             msg_.optionsData.paymentTokenAmount = _toLD(msg_.optionsData.paymentTokenAmount.toUint64());
+        }
 
         return msg_;
     }
 
     function _exerciseAndRefund(IExerciseOptionsData memory _options) private {
         uint256 bBefore = balanceOf(address(this));
-        address oTap = ITapiocaOptionBroker(_options.target).oTAP();
-        address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
 
-        if (
-            oTapOwner != _options.from && !IERC721(oTap).isApprovedForAll(oTapOwner, _options.from)
-                && IERC721(oTap).getApproved(_options.oTAPTokenID) != _options.from
-        ) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
         ITapiocaOptionBroker(_options.target).exerciseOption(
             _options.oTAPTokenID,
             address(this), //payment token
             _options.tapAmount
         );
-        _approve(address(this), address(pearlmit), 0);
+
         uint256 bAfter = balanceOf(address(this));
 
         // Refund if less was used.
@@ -214,6 +229,23 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
                 IERC20(address(this)).safeTransfer(_options.from, _options.paymentTokenAmount - diff);
             }
         }
+    }
+
+    /**
+     *   @notice checks that the caller is allowed by the owner of the token
+     */
+    function _validateExerciseOptionCaller(IExerciseOptionsData memory _options, address _srcChainSender) internal {
+        address oTap = ITapiocaOptionBroker(_options.target).oTAP();
+        address oTapOwner = IERC721(oTap).ownerOf(_options.oTAPTokenID);
+        if (oTapOwner != _srcChainSender || oTapOwner != _options.from) {
+            revert TOFTOptionsReceiverModule_NotAuthorized(_options.from);
+        }
+
+        bool isAllowed = isERC721Approved(oTapOwner, address(this), oTap, _options.oTAPTokenID);
+        if (!isAllowed) revert TOFTOptionsReceiverModule_NotAuthorized(oTapOwner);
+        /// @dev Clear the allowance once it's used
+        /// usage being the allowance check
+        pearlmit.clearAllowance(oTapOwner, oTap, _options.oTAPTokenID);
     }
 
     function _withdrawExercised(ExerciseOptionsMsg memory msg_) private {
