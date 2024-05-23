@@ -1027,7 +1027,8 @@ contract TOFTTest is TOFTTestHelper {
                 amount: tokenAmount_,
                 unwrap: false,
                 receiver: address(this)
-            })
+            }),
+            value: 0
         });
         bytes memory marketBorrowMsg_ = tOFTHelper.buildMarketBorrowMsg(marketBorrowMsg);
 
@@ -1149,7 +1150,8 @@ contract TOFTTest is TOFTTestHelper {
                 unwrap: false,
                 amount: tokenAmount_,
                 receiver: address(this)
-            })
+            }),
+            value: 0
         });
         bytes memory marketMsg_ = tOFTHelper.buildMarketRemoveCollateralMsg(marketMsg);
 

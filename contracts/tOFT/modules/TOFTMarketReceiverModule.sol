@@ -216,7 +216,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             value: msg.value,
             call: call
         });
-        IMagnetar(payable(msg_.borrowParams.magnetar)).burst{value: msg.value}(magnetarCall);
+        IMagnetar(payable(msg_.borrowParams.magnetar)).burst{value: msg_.value}(magnetarCall);
     }
 
     function _validateMarketRemoveCollateral(MarketRemoveCollateralMsg memory msg_, address srcChainSender) private returns (MarketRemoveCollateralMsg memory) {
@@ -252,7 +252,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
             value: msg.value,
             call: call
         });
-        IMagnetar(payable(msg_.removeParams.magnetar)).burst{value: msg.value}(magnetarCall);
+        IMagnetar(payable(msg_.removeParams.magnetar)).burst{value: msg_.value}(magnetarCall);
     }
 
     function _checkWhitelistStatus(address _addr) private view {
