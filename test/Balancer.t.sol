@@ -14,15 +14,13 @@ import {TestUtils} from "./TestUtils.t.sol";
 
 import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {
-    TOFTHelper,
-    PrepareLzCallData,
-    PrepareLzCallReturn,
-    ComposeMsgData
+    TOFTHelper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData
 } from "tapiocaz/tOFT/extensions/TOFTHelper.sol";
 import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
 import {TOFTGenericReceiverModule} from "tapiocaz/tOFT/modules/TOFTGenericReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "tapiocaz/tOFT/modules/TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "tapiocaz/tOFT/modules/TOFTMarketReceiverModule.sol";
+import {IMtoftFeeGetter} from "tapioca-periph/interfaces/oft/IMToftFeeGetter.sol";
 import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
 import {TOFTSender} from "tapiocaz/tOFT/modules/TOFTSender.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
@@ -100,10 +98,10 @@ contract TOFTTest is TOFTTestHelper {
         balancer = new Balancer(routerEth, address(routerA), address(factory), address(this));
         vm.label(address(balancer), "Balancer");
 
-        pearlmit = new Pearlmit("Pearlmit", "1");
+        pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
         yieldBox = createYieldBox();
         cluster = createCluster(aEid, __owner);
-        pearlmit = new Pearlmit("Pearlmit", "1");
+        pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
 
         {
             vm.label(address(endpoints[aEid]), "aEndpoint");
@@ -232,11 +230,11 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(20, address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             aERC20.approve(address(pearlmit), uint200(erc20Amount_));
             aTOFT.wrap(address(this), address(this), erc20Amount_);
 
-            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(20, address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
 
@@ -246,7 +244,7 @@ contract TOFTTest is TOFTTestHelper {
 
         mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
             stargateRouter: address(routerA),
-            mintFee: 0,
+            feeGetter: IMtoftFeeGetter(address(0)),
             mintCap: aTOFT.mintCap(),
             connectedChain: 0,
             connectedChainState: false,
@@ -262,7 +260,7 @@ contract TOFTTest is TOFTTestHelper {
 
         mTOFT.SetOwnerStateData memory dataB = mTOFT.SetOwnerStateData({
             stargateRouter: address(routerA),
-            mintFee: 0,
+            feeGetter: IMtoftFeeGetter(address(0)),
             mintCap: bTOFT.mintCap(),
             connectedChain: 0,
             connectedChainState: false,
@@ -304,11 +302,11 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(20, address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             aERC20.approve(address(pearlmit), uint200(erc20Amount_));
             aTOFT.wrap(address(this), address(this), erc20Amount_);
 
-            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
+            pearlmit.approve(20, address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
 
