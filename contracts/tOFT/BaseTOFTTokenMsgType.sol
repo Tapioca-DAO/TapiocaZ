@@ -19,5 +19,4 @@ abstract contract BaseTOFTTokenMsgType {
     uint16 internal constant MSG_SEND_PARAMS = 803; // Use for perform a normal OFT send but with a custom payload
     uint16 internal constant MSG_LOCK_AND_PARTICIPATE = 804; // Use for `magnetar.mintFromBBAndSendForLending` step 3 call
     uint16 internal constant MSG_LEVERAGE_UP = 805; // Use for leveraging up on a market availabl eon another chain
-    uint16 internal constant MSG_XCHAIN_LEND_XCHAIN_LOCK = 806; // Use for `magnetar.mintFromBBAndSendForLending` step 2 call
 }

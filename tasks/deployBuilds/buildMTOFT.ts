@@ -14,5 +14,8 @@ export const buildMTOFT = async (
         deploymentName,
         args,
         dependsOn,
+        meta: {
+            mtoft: true,
+        },
     };
 };

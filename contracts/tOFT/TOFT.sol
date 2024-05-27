@@ -2,8 +2,8 @@
 pragma solidity 0.8.22;
 
 //LZ
+import {MessagingReceipt, OFTReceipt, SendParam, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
-import {MessagingReceipt, OFTReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OAppReceiver} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OAppReceiver.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
 
@@ -94,14 +94,6 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
 
     receive() external payable {}
 
-    function transferFrom(address from, address to, uint256 value)
-        public
-        override(BaseTapiocaOmnichainEngine, ERC20)
-        returns (bool)
-    {
-        return BaseTapiocaOmnichainEngine.transferFrom(from, to, value);
-    }
-
     /**
      * @dev Slightly modified version of the OFT _lzReceive() operation.
      * The composed message is sent to `address(this)` instead of `toAddress`.
@@ -171,6 +163,16 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
             ),
             (MessagingReceipt, OFTReceipt)
         );
+    }
+
+    
+    /// @dev override default `send` behavior to add `whenNotPaused` modifier
+    function send(
+        SendParam calldata _sendParam,
+        MessagingFee calldata _fee,
+        address _refundAddress
+    ) external payable override whenNotPaused returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
+        this.send(_sendParam, _fee, _refundAddress);
     }
 
     /// =====================
