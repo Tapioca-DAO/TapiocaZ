@@ -77,11 +77,8 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         _setModule(uint8(ITOFT.Module.TOFTMarketReceiver), _modulesData.marketReceiverModule);
         _setModule(uint8(ITOFT.Module.TOFTOptionsReceiver), _modulesData.optionsReceiverModule);
         _setModule(uint8(ITOFT.Module.TOFTGenericReceiver), _modulesData.genericReceiverModule);
-
-        vault = IToftVault(_tOFTData.vault);
+        
         vault.claimOwnership();
-
-        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**
@@ -171,7 +168,7 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         SendParam calldata _sendParam,
         MessagingFee calldata _fee,
         address _refundAddress
-    ) external payable override whenNotPaused returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) {
+    ) external payable override whenNotPaused returns (MessagingReceipt memory, OFTReceipt memory) {
         this.send(_sendParam, _fee, _refundAddress);
     }
 
@@ -266,7 +263,7 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         nonReentrant
         returns (uint256 unwrapped)
     {
-        _unwrap(_toAddress, _amount);
+        _unwrap(msg.sender, _toAddress, _amount);
         return _amount;
     }
 

@@ -115,10 +115,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
 
         _stargateRouter = _stgRouter;
 
-        vault = IToftVault(_tOFTData.vault);
         vault.claimOwnership();
-
-        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**
@@ -280,7 +277,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
 
         uint256 feeAmount = _checkAndRegisterUnwrapFees(_amount);
         unwrapped = _amount - feeAmount;
-        _unwrap(_toAddress, unwrapped);
+        _unwrap(msg.sender, _toAddress, unwrapped);
     }
 
     /**
@@ -395,7 +392,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         feeAmount = feeGetter.getUnwrapFee(_amount);
 
         if (feeAmount > 0) {
-            _unwrap(address(this), feeAmount);
+            _unwrap(msg.sender, address(this), feeAmount);
 
             if (erc20 == address(0)) {
                 vault.registerFees{value: feeAmount}(feeAmount);
