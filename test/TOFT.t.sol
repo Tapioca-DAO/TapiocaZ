@@ -59,7 +59,7 @@ import {YieldBox} from "yieldbox/YieldBox.sol";
 import {mTOFT} from "tapiocaz/tOFT/mTOFT.sol";
 
 // Tapioca Tests
-import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
+import {TapiocaOptionsBrokerMock, OTapMock} from "./TapiocaOptionsBrokerMock.sol";
 import {MarketHelperMock} from "./MarketHelperMock.sol";
 import {TOFTVault} from "tapiocaz/tOFT/TOFTVault.sol";
 import {TOFTTestHelper} from "./TOFTTestHelper.t.sol";
@@ -67,8 +67,6 @@ import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
-
-import "forge-std/console.sol";
 
 contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
@@ -749,6 +747,8 @@ contract TOFTTest is TOFTTestHelper {
      */
     function test_tOFT_erc20_approvals() public {
         address userC_ = vm.addr(0x3);
+
+        cluster.updateContract(0, address(bTOFT), true);
 
         ERC20PermitApprovalMsg memory permitApprovalB_;
         ERC20PermitApprovalMsg memory permitApprovalC_;
@@ -1442,7 +1442,12 @@ contract TOFTTest is TOFTTestHelper {
         LZSendParam memory withdrawLzSendParam_;
         MessagingFee memory withdrawMsgFee_; // Will be used as value for the composed msg
 
+        address oTAP = tOB.oTAP();
+        OTapMock(oTAP).setOwner(address(this));
+
         pearlmit.approve(20, address(bTOFT), 0, address(tOB), type(uint200).max, uint48(block.timestamp));
+        pearlmit.approve(721, oTAP, 0, address(bTOFT), type(uint200).max, uint48(block.timestamp)); // Atomic approval
+
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
@@ -1531,6 +1536,7 @@ contract TOFTTest is TOFTTestHelper {
 
         (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
 
+
         {
             verifyPackets(uint32(bEid), address(bTOFT));
 
@@ -1564,7 +1570,7 @@ contract TOFTTest is TOFTTestHelper {
             ERC20PermitStruct memory approvalUserB_ =
                 ERC20PermitStruct({owner: userA, spender: userB, value: 0, nonce: 0, deadline: 1 days});
 
-            bytes32 digest_ = _getYieldBoxPermitAllTypedDataHash(approvalUserB_);
+            bytes32 digest_ = _getYieldBoxPermitAllTypedDataHash(approvalUserB_, true);
             YieldBoxApproveAllMsg memory permitApproval_ =
                 __getYieldBoxPermitAllData(approvalUserB_, address(yieldBox), true, digest_, userAPKey);
 
@@ -1626,7 +1632,7 @@ contract TOFTTest is TOFTTestHelper {
             ERC20PermitStruct memory approvalUserB_ =
                 ERC20PermitStruct({owner: userA, spender: userB, value: 0, nonce: 0, deadline: 1 days});
 
-            bytes32 digest_ = _getYieldBoxPermitAllTypedDataHash(approvalUserB_);
+            bytes32 digest_ = _getYieldBoxPermitAllTypedDataHash(approvalUserB_, false);
             YieldBoxApproveAllMsg memory permitApproval_ =
                 __getYieldBoxPermitAllData(approvalUserB_, address(yieldBox), false, digest_, userAPKey);
 
@@ -1700,11 +1706,11 @@ contract TOFTTest is TOFTTestHelper {
             });
 
             permitApprovalB_ = __getYieldBoxPermitAssetData(
-                approvalUserB_, address(yieldBox), true, _getYieldBoxPermitAssetTypedDataHash(approvalUserB_), userAPKey
+                approvalUserB_, address(yieldBox), true, _getYieldBoxPermitAssetTypedDataHash(approvalUserB_, true), userAPKey
             );
 
             permitApprovalC_ = __getYieldBoxPermitAssetData(
-                approvalUserC_, address(yieldBox), true, _getYieldBoxPermitAssetTypedDataHash(approvalUserC_), userAPKey
+                approvalUserC_, address(yieldBox), true, _getYieldBoxPermitAssetTypedDataHash(approvalUserC_, true), userAPKey
             );
 
             YieldBoxApproveAssetMsg[] memory approvals_ = new YieldBoxApproveAssetMsg[](2);
@@ -1784,7 +1790,7 @@ contract TOFTTest is TOFTTestHelper {
                 approvalUserB_,
                 address(yieldBox),
                 false,
-                _getYieldBoxPermitAssetTypedDataHash(approvalUserB_),
+                _getYieldBoxPermitAssetTypedDataHash(approvalUserB_, false),
                 userAPKey
             );
 
@@ -1792,7 +1798,7 @@ contract TOFTTest is TOFTTestHelper {
                 approvalUserC_,
                 address(yieldBox),
                 false,
-                _getYieldBoxPermitAssetTypedDataHash(approvalUserC_),
+                _getYieldBoxPermitAssetTypedDataHash(approvalUserC_, false),
                 userAPKey
             );
 
@@ -2011,8 +2017,10 @@ contract TOFTTest is TOFTTestHelper {
         return keccak256(abi.encodePacked("\x19\x01", singularity.DOMAIN_SEPARATOR(), structHash_));
     }
 
-    function _getYieldBoxPermitAllTypedDataHash(ERC20PermitStruct memory _permitData) private view returns (bytes32) {
-        bytes32 permitTypeHash_ = keccak256("PermitAll(address owner,address spender,uint256 nonce,uint256 deadline)");
+    function _getYieldBoxPermitAllTypedDataHash(ERC20PermitStruct memory _permitData, bool permit) private view returns (bytes32) {
+        bytes32 permitTypeHash_ = permit
+            ? keccak256("PermitAll(address owner,address spender,uint256 nonce,uint256 deadline)")
+            : keccak256("RevokeAll(address owner,address spender,uint256 nonce,uint256 deadline)");
 
         bytes32 structHash_ = keccak256(
             abi.encode(permitTypeHash_, _permitData.owner, _permitData.spender, _permitData.nonce, _permitData.deadline)
@@ -2021,13 +2029,14 @@ contract TOFTTest is TOFTTestHelper {
         return keccak256(abi.encodePacked("\x19\x01", _getYieldBoxDomainSeparator(), structHash_));
     }
 
-    function _getYieldBoxPermitAssetTypedDataHash(ERC20PermitStruct memory _permitData)
+    function _getYieldBoxPermitAssetTypedDataHash(ERC20PermitStruct memory _permitData, bool permit)
         private
         view
         returns (bytes32)
     {
-        bytes32 permitTypeHash_ =
-            keccak256("Permit(address owner,address spender,uint256 assetId,uint256 nonce,uint256 deadline)");
+        bytes32 permitTypeHash_ = permit
+            ? keccak256("Permit(address owner,address spender,uint256 assetId,uint256 nonce,uint256 deadline)")
+            : keccak256("Revoke(address owner,address spender,uint256 assetId,uint256 nonce,uint256 deadline)");
 
         bytes32 structHash_ = keccak256(
             abi.encode(
