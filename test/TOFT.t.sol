@@ -11,6 +11,7 @@ import {
 } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OptionsBuilder} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import {OFTMsgCodec} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/libs/OFTMsgCodec.sol";
+import {Origin} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
 // External
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -67,6 +68,8 @@ import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
+
+import "forge-std/console.sol";
 
 contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
@@ -1448,7 +1451,6 @@ contract TOFTTest is TOFTTestHelper {
         pearlmit.approve(20, address(bTOFT), 0, address(tOB), type(uint200).max, uint48(block.timestamp));
         pearlmit.approve(721, oTAP, 0, address(bTOFT), type(uint200).max, uint48(block.timestamp)); // Atomic approval
 
-
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
             PrepareLzCallReturn memory prepareLzCallReturn1_ = tOFTHelper.prepareLzCall( // B->A data
@@ -1535,7 +1537,6 @@ contract TOFTTest is TOFTTestHelper {
         LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
 
         (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
-
 
         {
             verifyPackets(uint32(bEid), address(bTOFT));
@@ -1706,11 +1707,19 @@ contract TOFTTest is TOFTTestHelper {
             });
 
             permitApprovalB_ = __getYieldBoxPermitAssetData(
-                approvalUserB_, address(yieldBox), true, _getYieldBoxPermitAssetTypedDataHash(approvalUserB_, true), userAPKey
+                approvalUserB_,
+                address(yieldBox),
+                true,
+                _getYieldBoxPermitAssetTypedDataHash(approvalUserB_, true),
+                userAPKey
             );
 
             permitApprovalC_ = __getYieldBoxPermitAssetData(
-                approvalUserC_, address(yieldBox), true, _getYieldBoxPermitAssetTypedDataHash(approvalUserC_, true), userAPKey
+                approvalUserC_,
+                address(yieldBox),
+                true,
+                _getYieldBoxPermitAssetTypedDataHash(approvalUserC_, true),
+                userAPKey
             );
 
             YieldBoxApproveAssetMsg[] memory approvals_ = new YieldBoxApproveAssetMsg[](2);
@@ -2017,7 +2026,11 @@ contract TOFTTest is TOFTTestHelper {
         return keccak256(abi.encodePacked("\x19\x01", singularity.DOMAIN_SEPARATOR(), structHash_));
     }
 
-    function _getYieldBoxPermitAllTypedDataHash(ERC20PermitStruct memory _permitData, bool permit) private view returns (bytes32) {
+    function _getYieldBoxPermitAllTypedDataHash(ERC20PermitStruct memory _permitData, bool permit)
+        private
+        view
+        returns (bytes32)
+    {
         bytes32 permitTypeHash_ = permit
             ? keccak256("PermitAll(address owner,address spender,uint256 nonce,uint256 deadline)")
             : keccak256("RevokeAll(address owner,address spender,uint256 nonce,uint256 deadline)");
@@ -2060,5 +2073,69 @@ contract TOFTTest is TOFTTestHelper {
         bytes32 domainSeparator =
             keccak256(abi.encode(typeHash, hashedName, hashedVersion, block.chainid, address(yieldBox)));
         return domainSeparator;
+    }
+
+    function test_transferFrom_fails_when_not_approved() public {
+        uint256 aTOFTAmount = 1000;
+        vm.startPrank(userA);
+        deal(address(aTOFT), userA, aTOFTAmount);
+        vm.expectRevert("ERC20: insufficient allowance");
+        aTOFT.transferFrom(address(userA), address(userB), aTOFTAmount);
+    }
+
+    function test_transferFrom_success() public {
+        uint256 aTOFTAmount = 1000;
+        vm.startPrank(userA);
+        deal(address(aTOFT), userA, aTOFTAmount);
+        uint256 userABalance = aTOFT.balanceOf(userA);
+        aTOFT.approve(userA, aTOFTAmount);
+        aTOFT.transferFrom(userA, userB, aTOFTAmount);
+        assertEq(aTOFT.balanceOf(userA), 0);
+        assertEq(aTOFT.balanceOf(userB), aTOFTAmount);
+    }
+
+    function test_lzReceive_fail_when_called_by_non_endpoint() public {
+        vm.startPrank(address(userA));
+        address executor = address(0x789);
+        Origin memory origin = Origin(1, bytes32(uint256(uint160(address(endpoints[bEid])))), 45);
+        bytes32 guid = keccak256(abi.encodePacked(block.timestamp, __endpoint, userA));
+        bytes memory payload = abi.encode("payload");
+        bytes memory extraData = abi.encode("extraData");
+        vm.expectRevert("RevertMsgDecoder: no data");
+
+        aTOFT.lzReceive(origin, guid, payload, executor, extraData);
+
+        vm.stopPrank();
+    }
+
+    function test_rescueEth_called_by_owner() public {
+        vm.startPrank(__owner);
+        uint256 ownerInitialBalance = address(__owner).balance;
+        vm.deal(address(aTOFT), 15 ether);
+
+        assertEq(address(aTOFT).balance, 15 ether);
+        aTOFT.rescueEth(15 ether, __owner);
+        assertEq(address(aTOFT).balance, 0);
+        assertEq(address(__owner).balance, ownerInitialBalance + 15 ether);
+    }
+
+    function test_rescueEth_called_by_non_owner() public {
+        vm.startPrank(userA);
+        vm.expectRevert("Ownable: caller is not the owner");
+        aTOFT.rescueEth(15 ether, userA);
+    }
+
+    function test_pause_revert_non_owner() public {
+        vm.startPrank(userA);
+        vm.expectRevert("Ownable: caller is not the owner");
+        aTOFT.setPause(true);
+    }
+
+    function test_pause_by_owner() public {
+        vm.startPrank(__owner);
+        aTOFT.setPause(true);
+        assertEq(aTOFT.paused(), true);
+        aTOFT.setPause(false);
+        assertEq(aTOFT.paused(), false);
     }
 }
