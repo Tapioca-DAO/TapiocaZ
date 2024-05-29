@@ -28,9 +28,9 @@ contract TOFTVaultTest is Test {
      */
 
     function setUp() public {
-        tOFTVault = new TOFTVault(address(0));
+        tOFTVault = new TOFTVault(address(0)); //native vault
         erc20Mock = new ERC20Mock("TapTest", "TT");
-        tOFTVaultERC20 = new TOFTVault(address(erc20Mock));
+        tOFTVaultERC20 = new TOFTVault(address(erc20Mock)); //ERC20 vault
         erc20Mock.mint(address(tOFTVaultERC20), AMOUNT_MOCKERC20_TOKEN);
 
         owner = address(this);

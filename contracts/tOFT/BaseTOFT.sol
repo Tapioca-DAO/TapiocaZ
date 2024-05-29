@@ -66,6 +66,10 @@ abstract contract BaseTOFT is
         erc20 = _data.erc20;
 
         _transferOwnership(_data.delegate);
+
+        vault = IToftVault(_data.vault);
+
+        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**
@@ -98,8 +102,8 @@ abstract contract BaseTOFT is
         _mint(_toAddress, _amount - _feeAmount);
     }
 
-    function _unwrap(address _toAddress, uint256 _amount) internal virtual {
-        _burn(msg.sender, _amount);
+    function _unwrap(address _from, address _toAddress, uint256 _amount) internal virtual {
+        _burn(_from, _amount);
         vault.withdraw(_toAddress, _amount);
     }
 }

@@ -5,11 +5,13 @@ pragma solidity 0.8.22;
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
+//LZ
+import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
+
 // Tapioca
 import {ITOFT, TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "../BaseTOFT.sol";
-
 
 /*
 
@@ -34,6 +36,7 @@ contract TOFTGenericReceiverModule is BaseTOFT {
     error TOFTGenericReceiverModule_NotAuthorized(address invalidAddress);
     error TOFTGenericReceiverModule_TransferFailed();
     error TOFTGenericReceiverModule_AmountMismatch();
+    error TOFTGenericReceiverModule_OnlyHostChain();
 
     event WithParamsReceived(uint256 amount, address receiver, address srcChainSender);
 
@@ -76,7 +79,8 @@ contract TOFTGenericReceiverModule is BaseTOFT {
             /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
             _internalTransferWithAllowance(msg_.receiver, srcChainSender, msg_.amount);
 
-            tOFT.unwrap(msg_.receiver, msg_.amount);
+            if (IMessagingChannel(endpoint).eid() != hostEid) revert TOFTGenericReceiverModule_OnlyHostChain();
+            _unwrap(address(this), msg_.receiver, msg_.amount);
         } else {
             if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();
         }

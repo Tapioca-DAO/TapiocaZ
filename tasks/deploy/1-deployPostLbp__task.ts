@@ -85,9 +85,35 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             ...taskArgs,
             target: 'mtoft',
             deploymentName: DEPLOYMENT_NAMES.mtETH,
-            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH,
-            name: 'MTOFT Wrapped Ether',
+            erc20: isTestnet
+                ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
+                : hre.ethers.constants.AddressZero,
+            name: 'Multi Tapioca OFT Native Ether',
             symbol: DEPLOYMENT_NAMES.mtETH,
+            hostEid: hostChainInfo.lzChainId,
+        });
+
+        // VM Add tWSTETH
+        await VMAddToftWithArgs({
+            ...taskArgs,
+            target: 'mtoft',
+            deploymentName: DEPLOYMENT_NAMES.tWSTETH,
+            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.wstETH,
+            name: 'Tapioca OFT Lido Wrapped Staked Ether',
+            symbol: DEPLOYMENT_NAMES.tWSTETH,
+            noModuleDeploy: true, // Modules are loaded here
+            hostEid: hostChainInfo.lzChainId,
+        });
+
+        // VM Add tRETH
+        await VMAddToftWithArgs({
+            ...taskArgs,
+            target: 'mtoft',
+            deploymentName: DEPLOYMENT_NAMES.tRETH,
+            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.reth,
+            name: 'Tapioca OFT Rocket Pool Ether',
+            symbol: DEPLOYMENT_NAMES.tRETH,
+            noModuleDeploy: true,
             hostEid: hostChainInfo.lzChainId,
         });
 
@@ -108,27 +134,17 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         chainInfo.name === 'arbitrum_sepolia'
     ) {
         console.log('\n[+] Adding tOFT contracts');
-        // VM Add tWSTETH
+        // VM Add tETH
         await VMAddToftWithArgs({
             ...taskArgs,
             target: 'toft',
-            deploymentName: DEPLOYMENT_NAMES.tWSTETH,
-            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.wstETH,
-            name: 'Tapioca OFT Lido Wrapped Staked Ether',
-            symbol: DEPLOYMENT_NAMES.tWSTETH,
+            deploymentName: DEPLOYMENT_NAMES.tETH,
+            erc20: isTestnet
+                ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
+                : hre.ethers.constants.AddressZero,
+            name: 'Tapioca OFT Native Ether',
+            symbol: DEPLOYMENT_NAMES.tETH,
             noModuleDeploy: true, // Modules are loaded here
-            hostEid: hostChainInfo.lzChainId,
-        });
-
-        // VM Add tRETH
-        await VMAddToftWithArgs({
-            ...taskArgs,
-            target: 'toft',
-            deploymentName: DEPLOYMENT_NAMES.tRETH,
-            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.reth,
-            name: 'Tapioca OFT Rocket Pool Ether',
-            symbol: DEPLOYMENT_NAMES.tRETH,
-            noModuleDeploy: true,
             hostEid: hostChainInfo.lzChainId,
         });
 
