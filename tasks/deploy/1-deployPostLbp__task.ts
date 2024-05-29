@@ -17,8 +17,12 @@ export const deployPostLbp__task = async (
         _taskArgs,
         {
             hre,
+            bytecodeSizeLimit: 80_000,
             // Static simulation needs to be false, constructor relies on external call. We're using 0x00 replacement with DeployerVM, which creates a false positive for static simulation.
             staticSimulation: false,
+            overrideOptions: {
+                gasLimit: 10_000_000,
+            },
         },
         tapiocaDeployTask,
         tapiocaPostDeployTask,
@@ -71,6 +75,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
     );
 
     // VM Add mtETH
+    console.log('\n[+] Adding mtOFT contracts');
     if (
         chainInfo.name === 'arbitrum' ||
         chainInfo.name === 'ethereum' ||
@@ -80,7 +85,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         chainInfo.name === 'arbitrum_sepolia' ||
         chainInfo.name === 'optimism_sepolia'
     ) {
-        console.log('\n[+] Adding mtOFT contracts');
         await VMAddToftWithArgs({
             ...taskArgs,
             target: 'mtoft',
@@ -93,6 +97,20 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             hostEid: hostChainInfo.lzChainId,
         });
 
+        // VM.add(
+        //     await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
+        //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
+        //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
+        //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
+        //         owner,
+        //     ]),
+        // );
+    }
+
+    if (
+        chainInfo.name === 'arbitrum' ||
+        chainInfo.name === 'arbitrum_sepolia'
+    ) {
         // VM Add tWSTETH
         await VMAddToftWithArgs({
             ...taskArgs,
@@ -116,15 +134,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             noModuleDeploy: true,
             hostEid: hostChainInfo.lzChainId,
         });
-
-        VM.add(
-            await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
-                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
-                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
-                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
-                owner,
-            ]),
-        );
     }
 
     // VM Add BB + SGL OFTs
