@@ -43,6 +43,12 @@ contract TOFTVaultTest is Test {
         vm.deal(owner, 15 ether);
         vm.deal(userA, 5 ether);
     }
+
+
+    ////////////////////////////////////////////
+    //////////// native token Vault ////////////
+    ///////////////////////////////////////////
+
     /**
      * @dev Tests if the ownership of the TOFTVault is claimable while the owner is address(0).
      */
@@ -240,7 +246,7 @@ contract TOFTVaultTest is Test {
     }
 
     /**
-     * @dev Adds fees to the vault before.
+     * @dev Adds fees to the vault.
      */
     modifier addFees(TOFTVault _tOFTVault) {
         _tOFTVault.registerFees{value: AMOUNT_REGISTER_FEE}(AMOUNT_REGISTER_FEE);
