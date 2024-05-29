@@ -79,7 +79,7 @@
         "inquirer": "^8.2.5",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
-        "tapioca-sdk": "^1.7.52",
+        "tapioca-sdk": "^1.8.5",
         "uuid": "^9.0.0"
     }
 }
