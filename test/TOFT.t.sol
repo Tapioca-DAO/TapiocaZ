@@ -1014,7 +1014,8 @@ contract TOFTTest is TOFTTestHelper {
                 magnetar: address(magnetar),
                 marketHelper: address(marketHelper),
                 market: address(singularity),
-                deposit: true
+                deposit: true,
+                extractFromSender: false
             }),
             withdrawParams: MagnetarWithdrawData({
                 withdraw: true,
@@ -1022,7 +1023,8 @@ contract TOFTTest is TOFTTestHelper {
                 assetId: aTOFTYieldBoxId,
                 amount: tokenAmount_,
                 unwrap: false,
-                receiver: address(this)
+                receiver: address(this),
+                extractFromSender: false
             }),
             value: 0
         });
