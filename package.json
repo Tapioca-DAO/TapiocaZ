@@ -38,6 +38,7 @@
         "@openzeppelin/contracts": "^4.9.5",
         "@openzeppelin/contracts-upgradeable": "^4.8.1",
         "@rari-capital/solmate": "^6.4.0",
+        "@swc/core": "^1.5.24",
         "@typechain/ethers-v5": "^10.1.0",
         "@typechain/hardhat": "^6.1.2",
         "@types/chai": "^4.2.22",
