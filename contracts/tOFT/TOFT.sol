@@ -2,7 +2,12 @@
 pragma solidity 0.8.22;
 
 //LZ
-import {MessagingReceipt, OFTReceipt, SendParam, MessagingFee} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {
+    MessagingReceipt,
+    OFTReceipt,
+    SendParam,
+    MessagingFee
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
 import {OAppReceiver} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OAppReceiver.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
@@ -77,7 +82,7 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         _setModule(uint8(ITOFT.Module.TOFTMarketReceiver), _modulesData.marketReceiverModule);
         _setModule(uint8(ITOFT.Module.TOFTOptionsReceiver), _modulesData.optionsReceiverModule);
         _setModule(uint8(ITOFT.Module.TOFTGenericReceiver), _modulesData.genericReceiverModule);
-        
+
         vault.claimOwnership();
     }
 
@@ -162,13 +167,33 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         );
     }
 
-    
+    /**
+     * @dev See `TapiocaOmnichainSender.sendPacket`
+     */
+    function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        public
+        payable
+        whenNotPaused
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        (msgReceipt, oftReceipt) = abi.decode(
+            _executeModule(
+                uint8(ITOFT.Module.TOFTSender),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacketFrom, (_from, _lzSendParam, _composeMsg)),
+                false
+            ),
+            (MessagingReceipt, OFTReceipt)
+        );
+    }
+
     /// @dev override default `send` behavior to add `whenNotPaused` modifier
-    function send(
-        SendParam calldata _sendParam,
-        MessagingFee calldata _fee,
-        address _refundAddress
-    ) external payable override whenNotPaused returns (MessagingReceipt memory, OFTReceipt memory) {
+    function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
+        external
+        payable
+        override
+        whenNotPaused
+        returns (MessagingReceipt memory, OFTReceipt memory)
+    {
         this.send(_sendParam, _fee, _refundAddress);
     }
 
