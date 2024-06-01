@@ -7,10 +7,11 @@ import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
 /**
  * @notice Should be called after the LBP has ended. Before `Bar` `postLbp1`
  *
- * Deploys: Arb
+ * Deploys: Arb, ETh
  * - mtETH
  * - tWSTETH
  * - tRETH
+ * - tsDAI
  *
  * Post deploy: Arb
  * - Set LzPeer for mtETH (disabled for prod)
