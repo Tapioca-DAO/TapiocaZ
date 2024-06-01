@@ -6,8 +6,15 @@ import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
 
 /**
  * @notice Should be called after the LBP has ended. Before `Bar` `postLbp1`
- * @notice Will deploy mtETH, tWSTETH, and tRETH. Will also set the LzPeer for mtETH (disabled for prod).
- * @notice Will deploy Balancer contract.
+ *
+ * Deploys: Arb
+ * - mtETH
+ * - tWSTETH
+ * - tRETH
+ *
+ * Post deploy: Arb
+ * - Set LzPeer for mtETH (disabled for prod)
+ * - Balancer contract (disabled for prod)
  */
 export const deployPostLbp__task = async (
     _taskArgs: TToftDeployerTaskArgs,

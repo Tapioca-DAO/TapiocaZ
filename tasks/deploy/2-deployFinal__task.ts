@@ -7,7 +7,13 @@ import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
 
 /**
  * @notice Should be called after Bar post lbp side chain deployment
- * Deploys sDAI OFT on Arb + Eth and link then
+ * @notice Should be called on Mainnet as main chain an Arbitrum as side chain
+ *
+ * Deploys: Arb, Eth
+ * - Tapioca OFT SGL DAI Market
+ *
+ * Post deploy: Arb, Eth
+ * - LZPeer link the SGL DAI Market OFT xChain
  */
 export const deployFinal__task = async (
     _taskArgs: TToftDeployerTaskArgs & { sDaiMarketChainName: string },

@@ -97,9 +97,9 @@ export async function getExternalContracts(params: {
 
     const yieldBox = loadGlobalContract(
         hre,
-        TAPIOCA_PROJECTS_NAME.YieldBox,
+        TAPIOCA_PROJECTS_NAME.TapiocaPeriph,
         hre.SDK.chainInfo.chainId,
-        PERIPH_DEPLOY_CONFIG.DEPLOYMENT_NAMES.YieldBox,
+        PERIPH_DEPLOY_CONFIG.DEPLOYMENT_NAMES.YIELDBOX,
         tag,
     );
 
