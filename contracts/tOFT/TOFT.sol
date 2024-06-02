@@ -186,17 +186,6 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         );
     }
 
-    /// @dev override default `send` behavior to add `whenNotPaused` modifier
-    function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
-        external
-        payable
-        override
-        whenNotPaused
-        returns (MessagingReceipt memory, OFTReceipt memory)
-    {
-        this.send(_sendParam, _fee, _refundAddress);
-    }
-
     /// =====================
     /// View
     /// =====================

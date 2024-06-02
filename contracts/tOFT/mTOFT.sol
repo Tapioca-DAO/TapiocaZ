@@ -199,6 +199,25 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         );
     }
 
+    /**
+     * @dev See `TapiocaOmnichainSender.sendPacket`
+     */
+    function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        public
+        payable
+        whenNotPaused
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        (msgReceipt, oftReceipt) = abi.decode(
+            _executeModule(
+                uint8(ITOFT.Module.TOFTSender),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacketFrom, (_from, _lzSendParam, _composeMsg)),
+                false
+            ),
+            (MessagingReceipt, OFTReceipt)
+        );
+    }
+
     /// =====================
     /// View
     /// =====================
