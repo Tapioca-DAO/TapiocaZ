@@ -41,29 +41,26 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
     const { hre, taskArgs, VM, chainInfo } = params;
     const { tag } = taskArgs;
 
-    if (
-        chainInfo.name === 'ethereum' ||
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'optimism' ||
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'arbitrum_sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
-        console.log(
-            '\n[+] Disabled setting Balancer connected OFT for mtETH...',
-        );
-        // await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
+    console.log('\n[+] Disabled setting Balancer connected OFT for mtETH...');
+    // await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
 
-        // await balancerInnitConnectedOft__task(
-        //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
-        //     hre,
-        // );
-    }
+    // await balancerInnitConnectedOft__task(
+    //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
+    //     hre,
+    // );
 }
 
 async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
-    const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet, chainInfo } =
-        params;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        taskArgs,
+        isTestnet,
+        chainInfo,
+        isHostChain,
+        isSideChain,
+    } = params;
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
@@ -73,6 +70,8 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             hre,
             isTestnet,
             tapiocaMulticallAddr,
+            isHostChain,
+            isSideChain,
             VM,
             taskArgs: args,
         });
@@ -84,41 +83,28 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
 
     // VM Add mtETH
     console.log('\n[+] Adding mtOFT contracts');
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'ethereum' ||
-        chainInfo.name === 'optimism' ||
-        // testnet
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'arbitrum_sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
-        await VMAddToftWithArgs({
-            ...taskArgs,
-            target: 'mtoft',
-            deploymentName: DEPLOYMENT_NAMES.mtETH,
-            erc20: isTestnet
-                ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
-                : hre.ethers.constants.AddressZero,
-            name: 'Multi Tapioca OFT Native Ether',
-            symbol: DEPLOYMENT_NAMES.mtETH,
-            hostEid: hostChainInfo.lzChainId,
-        });
+    await VMAddToftWithArgs({
+        ...taskArgs,
+        target: 'mtoft',
+        deploymentName: DEPLOYMENT_NAMES.mtETH,
+        erc20: isTestnet
+            ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
+            : hre.ethers.constants.AddressZero,
+        name: 'Multi Tapioca OFT Native Ether',
+        symbol: DEPLOYMENT_NAMES.mtETH,
+        hostEid: hostChainInfo.lzChainId,
+    });
 
-        // VM.add(
-        //     await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
-        //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
-        //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
-        //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
-        //         owner,
-        //     ]),
-        // );
-    }
+    // VM.add(
+    //     await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
+    //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
+    //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
+    //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
+    //         owner,
+    //     ]),
+    // );
 
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
         // VM Add tWSTETH
         await VMAddToftWithArgs({
             ...taskArgs,
@@ -145,11 +131,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
     }
 
     // VM Add BB + SGL OFTs
-    if (
-        chainInfo.name === 'arbitrum' ||
-        // testnet
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
         console.log('\n[+] Adding tOFT contracts');
         // VM Add tETH
         await VMAddToftWithArgs({
@@ -178,12 +160,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         });
     }
 
-    if (
-        chainInfo.name === 'ethereum' ||
-        // testnet
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
+    if (isSideChain) {
         console.log('\n[+] Adding tOFT contracts');
         const sideChainHostChainInfo = hre.SDK.utils.getChainBy(
             'name',

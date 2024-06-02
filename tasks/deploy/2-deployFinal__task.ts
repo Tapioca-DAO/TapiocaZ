@@ -41,26 +41,25 @@ async function tapiocaPostDeployTask(
     const { hre, taskArgs, chainInfo } = params;
     const { tag } = taskArgs;
 
-    if (
-        chainInfo.name === 'ethereum' ||
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'optimism' ||
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'arbitrum_sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
-        await setLzPeer__task(
-            { tag, targetName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET },
-            hre,
-        );
-    }
+    await setLzPeer__task(
+        { tag, targetName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET },
+        hre,
+    );
 }
 
 async function tapiocaDeployTask(
     params: TTapiocaDeployerVmPass<{ sDaiMarketChainName: string }>,
 ) {
-    const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet, chainInfo } =
-        params;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        taskArgs,
+        isTestnet,
+        chainInfo,
+        isHostChain,
+        isSideChain,
+    } = params;
     const { tag, sDaiMarketChainName } = taskArgs;
 
     const sdaiMarketChain = hre.SDK.utils.getChainBy(
@@ -81,6 +80,8 @@ async function tapiocaDeployTask(
             isTestnet,
             tapiocaMulticallAddr,
             VM,
+            isHostChain,
+            isSideChain,
             taskArgs: args,
         });
 
