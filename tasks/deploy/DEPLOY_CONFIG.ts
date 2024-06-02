@@ -71,6 +71,13 @@ const POST_LBP: TPostLbp = {
         sDAI: '0x37359B8bfbFAE28E513EE31a2A94A9Ec60668d90',
         sGLP: '',
     },
+    [EChainID.FUJI_AVALANCHE]: {
+        WETH: '0x4404EF158716dfad1c2BEffE9c7c8Fa261684544',
+        wstETH: '',
+        reth: '',
+        sDAI: '0xed18DBCb2810E4178c23668794198C81B0668b23',
+        sGLP: '',
+    },
 };
 POST_LBP['31337' as EChainID] = POST_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum
 
@@ -103,6 +110,12 @@ const MISC: TMisc = {
         STARGATE_FACTORY: '0xA296710670e16BA7791E919ddB3704c61f366118',
     },
     [EChainID.OPTIMISM_SEPOLIA]: {
+        STARGATE_ROUTER_ETH: '0xA251Af9e97aadE0F0E650525Ad531a7a534c335E', // Change to mock?
+        STARGATE_ROUTER: '0xa2dfFdDc372C6aeC3a8e79aAfa3953e8Bc956D63',
+        STARGATE_FACTORY: '0xDb6E40E8fACF1a76866ff067D57539c8EE1bfC16',
+    },
+    // Wrong ones, copied from OpSep
+    [EChainID.FUJI_AVALANCHE]: {
         STARGATE_ROUTER_ETH: '0xA251Af9e97aadE0F0E650525Ad531a7a534c335E', // Change to mock?
         STARGATE_ROUTER: '0xa2dfFdDc372C6aeC3a8e79aAfa3953e8Bc956D63',
         STARGATE_FACTORY: '0xDb6E40E8fACF1a76866ff067D57539c8EE1bfC16',
