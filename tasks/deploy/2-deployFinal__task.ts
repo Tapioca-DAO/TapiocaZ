@@ -1,9 +1,14 @@
 import * as TAPIOCA_BAR_CONFIG from '@tapioca-bar/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { loadLocalContract, setLzPeer__task } from 'tapioca-sdk';
+import {
+    loadGlobalContract,
+    loadLocalContract,
+    setLzPeer__task,
+} from 'tapioca-sdk';
 import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/DeployerVM';
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
+import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
 
 /**
  * @notice Should be called after Bar post lbp side chain deployment
@@ -66,8 +71,10 @@ async function tapiocaDeployTask(
         'name',
         sDaiMarketChainName,
     );
-    const sDaiSglMarket = loadLocalContract(
+
+    const sDaiSglMarket = loadGlobalContract(
         hre,
+        TAPIOCA_PROJECTS_NAME.TapiocaBar,
         sdaiMarketChain.chainId,
         TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
         tag,
