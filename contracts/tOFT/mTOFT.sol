@@ -2,10 +2,16 @@
 pragma solidity 0.8.22;
 
 //LZ
+import {
+    MessagingReceipt,
+    OFTReceipt,
+    SendParam,
+    MessagingFee
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
-import {MessagingReceipt, OFTReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OAppReceiver} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OAppReceiver.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
+import {OFTCore} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
@@ -216,6 +222,34 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
             ),
             (MessagingReceipt, OFTReceipt)
         );
+    }
+
+    /**
+     * See `OFTCore::send()`
+     * @dev override default `send` behavior to add `whenNotPaused` modifier
+     */
+    function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
+        external
+        payable
+        override(OFTCore)
+        whenNotPaused
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        // @dev Applies the token transfers regarding this send() operation.
+        // - amountSentLD is the amount in local decimals that was ACTUALLY sent/debited from the sender.
+        // - amountReceivedLD is the amount in local decimals that will be received/credited to the recipient on the remote OFT instance.
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            _debit(msg.sender, _sendParam.amountLD, _sendParam.minAmountLD, _sendParam.dstEid);
+
+        // @dev Builds the options and OFT message to quote in the endpoint.
+        (bytes memory message, bytes memory options) = _buildMsgAndOptions(_sendParam, amountReceivedLD);
+
+        // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
+        msgReceipt = _lzSend(_sendParam.dstEid, message, options, _fee, _refundAddress);
+        // @dev Formulate the OFT receipt.
+        oftReceipt = OFTReceipt(amountSentLD, amountReceivedLD);
+
+        emit OFTSent(msgReceipt.guid, _sendParam.dstEid, msg.sender, amountSentLD, amountReceivedLD);
     }
 
     /// =====================
