@@ -21,7 +21,7 @@ import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
  * - LZPeer link the SGL DAI Market OFT xChain
  */
 export const deployFinal__task = async (
-    _taskArgs: TToftDeployerTaskArgs & { sDaiMarketChainName: string },
+    _taskArgs: TToftDeployerTaskArgs & { sdaiMarketChainName: string },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
@@ -41,7 +41,7 @@ export const deployFinal__task = async (
 };
 
 async function tapiocaPostDeployTask(
-    params: TTapiocaDeployerVmPass<{ sDaiMarketChainName: string }>,
+    params: TTapiocaDeployerVmPass<{ sdaiMarketChainName: string }>,
 ) {
     const { hre, taskArgs, chainInfo } = params;
     const { tag } = taskArgs;
@@ -53,7 +53,7 @@ async function tapiocaPostDeployTask(
 }
 
 async function tapiocaDeployTask(
-    params: TTapiocaDeployerVmPass<{ sDaiMarketChainName: string }>,
+    params: TTapiocaDeployerVmPass<{ sdaiMarketChainName: string }>,
 ) {
     const {
         hre,
@@ -65,7 +65,7 @@ async function tapiocaDeployTask(
         isHostChain,
         isSideChain,
     } = params;
-    const { tag, sDaiMarketChainName } = taskArgs;
+    const { tag, sdaiMarketChainName } = taskArgs;
 
     /**
      *SGL GLP Market OFT on Host chain
@@ -108,7 +108,7 @@ async function tapiocaDeployTask(
      */
     const sdaiMarketChain = hre.SDK.utils.getChainBy(
         'name',
-        sDaiMarketChainName,
+        sdaiMarketChainName,
     );
 
     const sDaiSglMarket = loadGlobalContract(

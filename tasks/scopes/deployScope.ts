@@ -24,7 +24,7 @@ TAP_TASK(
             deployFinal__task,
         )
         .addParam(
-            'sDaiMarketChainName',
+            'sdaiMarketChainName',
             'Host chain name of the SGL sDai market.',
             'ethereum',
         ),
