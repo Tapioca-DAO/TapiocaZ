@@ -18,7 +18,7 @@ import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
  * - Balancer contract (disabled for prod)
  */
 export const deployPostLbp__task = async (
-    _taskArgs: TToftDeployerTaskArgs,
+    _taskArgs: TToftDeployerTaskArgs & { sdaiHostChainName: string },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
@@ -37,7 +37,9 @@ export const deployPostLbp__task = async (
     );
 };
 
-async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
+async function tapiocaPostDeployTask(
+    params: TTapiocaDeployerVmPass<{ sdaiHostChainName: string }>,
+) {
     const { hre, taskArgs, VM, chainInfo } = params;
     const { tag } = taskArgs;
 
@@ -50,7 +52,9 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
     // );
 }
 
-async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
+async function tapiocaDeployTask(
+    params: TTapiocaDeployerVmPass<{ sdaiHostChainName: string }>,
+) {
     const {
         hre,
         VM,
@@ -63,6 +67,16 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
     } = params;
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
+
+    const sdaiSideChain = hre.SDK.utils.getChainBy(
+        'name',
+        taskArgs.sdaiHostChainName,
+    );
+    if (!sdaiSideChain) {
+        throw new Error(
+            `[-] Can not find side info with chain name: ${taskArgs.sdaiHostChainName}`,
+        );
+    }
 
     const VMAddToftWithArgs = async (args: TToftDeployerTaskArgs) =>
         await VMAddToft({
@@ -162,10 +176,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
 
     if (isSideChain) {
         console.log('\n[+] Adding tOFT contracts');
-        const sideChainHostChainInfo = hre.SDK.utils.getChainBy(
-            'name',
-            isTestnet ? 'optimism_sepolia' : 'ethereum',
-        );
         // VM Add sDAI
         await VMAddToftWithArgs({
             ...taskArgs,
@@ -175,7 +185,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             name: 'Tapioca OFT Staked DAI',
             symbol: DEPLOYMENT_NAMES.tsDAI,
             noModuleDeploy: true,
-            hostEid: sideChainHostChainInfo.lzChainId,
+            hostEid: sdaiSideChain.lzChainId,
         });
     }
 }

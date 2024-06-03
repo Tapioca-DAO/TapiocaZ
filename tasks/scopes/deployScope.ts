@@ -7,11 +7,13 @@ import { deployFinal__task } from 'tasks/deploy/2-deployFinal__task';
 const deployScope = scope('deploys', 'Deployment tasks');
 
 TAP_TASK(
-    deployScope.task(
-        'postLbp',
-        'Will deploy Balancer, mtETH, tWSTETH, and tRETH.',
-        deployPostLbp__task,
-    ),
+    deployScope
+        .task(
+            'postLbp',
+            'Will deploy Balancer, mtETH, tWSTETH, and tRETH.',
+            deployPostLbp__task,
+        )
+        .addParam('sdaiHostChainName', 'Host chain name of the sDai.'),
 );
 
 TAP_TASK(
