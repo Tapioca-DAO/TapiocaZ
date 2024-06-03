@@ -13,6 +13,7 @@ export const DEPLOYMENT_NAMES = {
     TOFT_BALANCER: 'TOFT_BALANCER',
     // Meta Market TOFT
     T_SGL_SDAI_MARKET: 'T_SGL_SDAI_MARKET',
+    T_SGL_GLP_MARKET: 'T_SGL_GLP_MARKET',
     // tETH
     tETH: 'tETH',
     // mTOFT
