@@ -3,6 +3,7 @@ import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/Deployer
 import { buildBalancer } from 'tasks/deployBuilds/buildBalancer';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
+import { buildToftHelper } from 'tasks/deployBuilds/buildToftHelper';
 
 /**
  * @notice Should be called after the LBP has ended. Before `Bar` `postLbp1`
@@ -77,6 +78,8 @@ async function tapiocaDeployTask(
             `[-] Can not find side info with chain name: ${taskArgs.sdaiHostChainName}`,
         );
     }
+
+    VM.add(await buildToftHelper(hre, DEPLOYMENT_NAMES.TOFT_HELPER));
 
     const VMAddToftWithArgs = async (args: TToftDeployerTaskArgs) =>
         await VMAddToft({
