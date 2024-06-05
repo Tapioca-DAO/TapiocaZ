@@ -577,6 +577,15 @@
             "lastBlockHeight": 33672972,
             "contracts": [
                 {
+                    "name": "TOFT_HELPER",
+                    "address": "0xd4e44E0c9789194a19E37E5469aF1F82761E2ca0",
+                    "meta": {
+                        "args": [],
+                        "salt": "0x22252ff6aa2ae50dc9b60f5a2a08554352d88928f847d4ba3f8749c2ed9705c5",
+                        "create2": true
+                    }
+                },
+                {
                     "name": "TOFT_VAULT/T_SGL_SDAI_MARKET",
                     "address": "0x171643113A59f000F01e08a0de70Aa9F60065e4d",
                     "meta": {
@@ -833,6 +842,15 @@
             "name": "arbitrum_sepolia",
             "lastBlockHeight": 28901159,
             "contracts": [
+                {
+                    "name": "TOFT_HELPER",
+                    "address": "0x8a1d286D5F7ee0439e06e1cd72Caa033028E1010",
+                    "meta": {
+                        "args": [],
+                        "salt": "0xfd8da87f15f773d62693e3dd79521bf33d76d1f1e16a30a1fdcc7a857c74606b",
+                        "create2": true
+                    }
+                },
                 {
                     "name": "TOFT_VAULT/T_SGL_GLP_MARKET",
                     "address": "0x706D492A1f93579F425C03C11d27557C280dca69",
