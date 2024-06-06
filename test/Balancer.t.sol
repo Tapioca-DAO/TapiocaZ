@@ -99,7 +99,7 @@ contract TOFTTest is TOFTTestHelper {
         vm.label(address(balancer), "Balancer");
 
         pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
-        yieldBox = createYieldBox();
+        yieldBox = createYieldBox(pearlmit, address(this));
         cluster = createCluster(aEid, __owner);
         pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
 

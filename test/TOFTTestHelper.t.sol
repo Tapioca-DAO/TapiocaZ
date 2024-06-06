@@ -11,7 +11,7 @@ import {TestHelper} from "./LZSetup/TestHelper.sol";
 // Tapioca
 import {TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
-import {IPearlmit} from "tapioca-periph/interfaces/periph/IPearlmit.sol";
+import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
 import {IWrappedNative} from "yieldbox/interfaces/IWrappedNative.sol";
 import {YieldBoxURIBuilder} from "yieldbox/YieldBoxURIBuilder.sol";
 import {TokenType} from "yieldbox/enums/YieldBoxTokenType.sol";
@@ -51,10 +51,10 @@ contract TOFTTestHelper is TestHelper, TestUtils {
         return new MagnetarMock(cluster, pearlmit);
     }
 
-    function createYieldBox() public returns (YieldBox) {
+    function createYieldBox(Pearlmit pearlmit, address owner) public returns (YieldBox) {
         YieldBoxURIBuilder uriBuilder = new YieldBoxURIBuilder();
 
-        return new YieldBox(IWrappedNative(address(0)), uriBuilder);
+        return new YieldBox(IWrappedNative(address(0)), uriBuilder, pearlmit, owner);
     }
 
     function createCluster(uint32 hostEid, address owner) public returns (Cluster) {
