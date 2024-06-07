@@ -4,6 +4,7 @@ import { buildBalancer } from 'tasks/deployBuilds/buildBalancer';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
 import { buildToftHelper } from 'tasks/deployBuilds/buildToftHelper';
+import { setLzPeer__task } from 'tapioca-sdk';
 
 /**
  * @notice Should be called after the LBP has ended. Before `Bar` `postLbp1`
@@ -26,12 +27,9 @@ export const deployPostLbp__task = async (
         _taskArgs,
         {
             hre,
-            bytecodeSizeLimit: 70_000,
             // Static simulation needs to be false, constructor relies on external call. We're using 0x00 replacement with DeployerVM, which creates a false positive for static simulation.
             staticSimulation: false,
-            overrideOptions: {
-                gasLimit: 10_000_000,
-            },
+            bytecodeSizeLimit: 60_000,
         },
         tapiocaDeployTask,
         tapiocaPostDeployTask,
