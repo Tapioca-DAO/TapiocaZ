@@ -16,6 +16,7 @@ import { setLzPeer__task } from 'tapioca-sdk';
  * - tsDAI
  *
  * Post deploy: Arb
+ *  !!! REQUIRE HAVING 1 amount of sDAI, mtEth, Reth, WSTETH, SGLP, Weth in TapiocaMulticall !!!
  * - Set LzPeer for mtETH (disabled for prod)
  * - Balancer contract (disabled for prod)
  */
