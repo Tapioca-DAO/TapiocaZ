@@ -80,7 +80,10 @@
         "inquirer": "^8.2.5",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
-        "tapioca-sdk": "^1.8.15",
+        "tapioca-sdk": "^1.8.21",
         "uuid": "^9.0.0"
+    },
+    "resolutions": {
+        "@ethersproject/providers": "npm:ethersproject-providers-arbitrum-hotfix@5.7.9"
     }
 }
