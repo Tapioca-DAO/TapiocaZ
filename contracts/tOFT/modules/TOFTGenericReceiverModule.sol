@@ -74,8 +74,6 @@ contract TOFTGenericReceiverModule is BaseTOFT {
 
     function _unwrapInReceiveWithParams(SendParamsMsg memory msg_, address srcChainSender) private {
         if (msg_.unwrap) {
-            ITOFT tOFT = ITOFT(address(this));
-
             /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
             _internalTransferWithAllowance(msg_.receiver, srcChainSender, msg_.amount);
 
