@@ -84,6 +84,6 @@
         "uuid": "^9.0.0"
     },
     "resolutions": {
-        "@ethersproject/providers": "npm:ethersproject-providers-arbitrum-hotfix@5.7.9"
+        "@ethersproject/providers": "npm:ethersproject-providers-arbitrum-hotfix@5.7.10"
     }
 }
