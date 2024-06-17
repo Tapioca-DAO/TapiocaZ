@@ -32,9 +32,7 @@
         "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
         "@nomicfoundation/hardhat-foundry": "^1.1.1",
         "@nomicfoundation/hardhat-network-helpers": "^1.0.4",
-        "@nomicfoundation/hardhat-toolbox": "^2.0.2",
         "@nomiclabs/hardhat-ethers": "^2.1.1",
-        "@nomiclabs/hardhat-etherscan": "^3.1.7",
         "@openzeppelin/contracts": "^4.9.5",
         "@openzeppelin/contracts-upgradeable": "^4.8.1",
         "@rari-capital/solmate": "^6.4.0",
@@ -74,13 +72,14 @@
         "write-json-file": "4.3.0"
     },
     "dependencies": {
+        "@nomicfoundation/hardhat-verify": "^2.0.8",
         "@primitivefi/hardhat-dodoc": "^0.2.3",
         "@types/inquirer": "^9.0.3",
         "@types/uuid": "^9.0.1",
         "inquirer": "^8.2.5",
         "load-json-file": "^7.0.1",
         "lodash": "^4.17.21",
-        "tapioca-sdk": "^1.8.21",
+        "tapioca-sdk": "^1.8.26",
         "uuid": "^9.0.0"
     },
     "resolutions": {

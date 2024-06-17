@@ -28,12 +28,12 @@ export const deployFinal__task = async (
         _taskArgs,
         {
             hre,
-            bytecodeSizeLimit: 80_000,
-            // Static simulation needs to be false, constructor relies on external call. We're using 0x00 replacement with DeployerVM, which creates a false positive for static simulation.
-            staticSimulation: false,
-            overrideOptions: {
-                gasLimit: 10_000_000,
-            },
+            // // Static simulation needs to be false, constructor relies on external call. We're using 0x00 replacement with DeployerVM, which creates a false positive for static simulation.
+            // staticSimulation: false,
+            // bytecodeSizeLimit: 80_000,
+            // overrideOptions: {
+            //     gasLimit: 10_000_000,
+            // },
         },
         tapiocaDeployTask,
         tapiocaPostDeployTask,

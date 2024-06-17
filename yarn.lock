@@ -793,6 +793,20 @@
     semver "^6.3.0"
     table "^6.8.0"
     undici "^5.14.0"
+"@nomicfoundation/hardhat-verify@^2.0.8":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-verify/-/hardhat-verify-2.0.8.tgz#6a77dc03de990a1a3aa8e6dc073c393263dbf258"
+  integrity sha512-x/OYya7A2Kcz+3W/J78dyDHxr0ezU23DKTrRKfy5wDPCnePqnr79vm8EXqX3gYps6IjPBYyGPZ9K6E5BnrWx5Q==
+  dependencies:
+    "@ethersproject/abi" "^5.1.2"
+    "@ethersproject/address" "^5.0.2"
+    cbor "^8.1.0"
+    chalk "^2.4.2"
+    debug "^4.1.1"
+    lodash.clonedeep "^4.5.0"
+    semver "^6.3.0"
+    table "^6.8.0"
+    undici "^5.14.0"
 
 "@nomicfoundation/solidity-analyzer-darwin-arm64@0.1.1":
   version "0.1.1"
@@ -5207,17 +5221,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-<<<<<<< Updated upstream
-tapioca-sdk@^1.8.21:
-  version "1.8.21"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.8.21.tgz#9955e1d5670203b81726bf95f27e85193bed3a53"
-  integrity sha512-E46PG91DQi7nBKjsVKyoChKcZ3PrLC2o2kA/HA38QhVzxBA3+PqPCGkeDSVI+b+af4l8xScSm1HoM54+4tLttw==
-=======
 tapioca-sdk@^1.8.26:
   version "1.8.26"
   resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.8.26.tgz#4e4288d141da2ef71a8804aba9d95b0162d715f0"
   integrity sha512-ZAhIgqnDEpKUGxrrifxsmQkl0JMfS4aggCsTFl+5Neho3WsPP1rtEBks/PqhariKDbnkGMCLeG+5GG4/p3SJHw==
->>>>>>> Stashed changes
   dependencies:
     "@nomicfoundation/hardhat-verify" "^2.0.8"
     "@uniswap/v3-core" "^1.0.1"
