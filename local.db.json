@@ -577,262 +577,211 @@
             "lastBlockHeight": 33672972,
             "contracts": [
                 {
-                    "name": "TOFT_HELPER",
-                    "address": "0xd4e44E0c9789194a19E37E5469aF1F82761E2ca0",
-                    "meta": {
-                        "args": [],
-                        "salt": "0x22252ff6aa2ae50dc9b60f5a2a08554352d88928f847d4ba3f8749c2ed9705c5",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "TOFT_VAULT/T_SGL_SDAI_MARKET",
-                    "address": "0x171643113A59f000F01e08a0de70Aa9F60065e4d",
+                    "name": "TOFT_VAULT/mtETH",
+                    "address": "0xa48d8249AAAae7ad814c055819d0774b47052653",
                     "meta": {
                         "args": [
-                            "0xce441b7f37762eeAC37B9fAb819D4b6479779632"
+                            "0x4404EF158716dfad1c2BEffE9c7c8Fa261684544"
                         ],
-                        "salt": "0xff8c79b957c4edb24da0e6a14c6cfe53e7e49c2b216bc5b7ef9f1714323caf22",
+                        "salt": "0x6c96b61a64629ac610159c505098eee3cb7e370ef4a0d645b0c2c37b46698838",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_EXT_EXEC",
-                    "address": "0xdDc5CcD73dEFf08f759b4567a957883F814b7D5D",
+                    "address": "0x29dd9d6877DB4dc885433424247f9dF23629321C",
                     "meta": {
                         "args": [],
-                        "salt": "0x97a6833931cd73e81307196ea5d810c15722efae859e927d513ea220ee364c80",
+                        "salt": "0x83edca01d20df666a495cc8442f55f122965e7a0829433f8daa383809b9f56c5",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_GENERIC_RECEIVER_MODULE",
-                    "address": "0x8dC572b01437BF8168ab626B15e656E1Cc323EC7",
+                    "address": "0xDb65313c1ff8ffDfd9652507e951bF826f698e10",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xc4c36140a88e92fa01bf31299da58e51265487d5",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0xce441b7f37762eeAC37B9fAb819D4b6479779632",
+                                "erc20": "0x4404EF158716dfad1c2BEffE9c7c8Fa261684544",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x171643113A59f000F01e08a0de70Aa9F60065e4d",
+                                "vault": "0xa48d8249AAAae7ad814c055819d0774b47052653",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0xe9faa065d6a68e9b16023fbde46d6bd3e69902160529e7f9b9833f62063da9cc",
+                        "salt": "0x98f9d365b7d894d44c95ed447f983f1065daedf9284f91053eb5fa348279d228",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_MARKET_RECEIVER_MODULE",
-                    "address": "0x474Ca262E01B38F4EeA862561dA5a9377CBF188F",
+                    "address": "0x9D61b73A48b3Ab753EEBFa595D920446CF4aA00A",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xc4c36140a88e92fa01bf31299da58e51265487d5",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0xce441b7f37762eeAC37B9fAb819D4b6479779632",
+                                "erc20": "0x4404EF158716dfad1c2BEffE9c7c8Fa261684544",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x171643113A59f000F01e08a0de70Aa9F60065e4d",
+                                "vault": "0xa48d8249AAAae7ad814c055819d0774b47052653",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0x9d9a93a6666493653b1ee4cbf20cc5c631e79222c4b6beb56217dab3f0973427",
+                        "salt": "0x25b7bfae07cba7c5e5c7422962cc12329a43c3cfffc3424c29b8fc7b39e43c11",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_OPTIONS_RECEIVER_MODULE",
-                    "address": "0x8bc21Ab4E377065631261D59D04950E2ec065DD0",
+                    "address": "0xfE1a613F85D5f5C92B0f10D28C3f2d83eF7aD303",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xc4c36140a88e92fa01bf31299da58e51265487d5",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0xce441b7f37762eeAC37B9fAb819D4b6479779632",
+                                "erc20": "0x4404EF158716dfad1c2BEffE9c7c8Fa261684544",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x171643113A59f000F01e08a0de70Aa9F60065e4d",
+                                "vault": "0xa48d8249AAAae7ad814c055819d0774b47052653",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0x6c71d8c4463841f45cf615879347ee726856f80b45df781e10fec47d676cc6a0",
+                        "salt": "0xb1a8fed5973a81efc7c8e891a28883182837618e2f6e699986ed2c827b01b757",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_RECEIVER_MODULE",
-                    "address": "0x86B428483b3c933b090F5d170829e24ECd8d5B82",
+                    "address": "0x74102E8Cd0128D2fb81023D4dDCC1F7BCae5a2D7",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xc4c36140a88e92fa01bf31299da58e51265487d5",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0xce441b7f37762eeAC37B9fAb819D4b6479779632",
+                                "erc20": "0x4404EF158716dfad1c2BEffE9c7c8Fa261684544",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x171643113A59f000F01e08a0de70Aa9F60065e4d",
+                                "vault": "0xa48d8249AAAae7ad814c055819d0774b47052653",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0x497259bf5da76e0d66bead3d47ed9198fa0e7a3317cf02062f7f4663626a0194",
+                        "salt": "0xa37fdf033c3ee6eae4c6a53283989138ef7988ba1879a6051c9c2cbe3df7e66b",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_SENDER_MODULE",
-                    "address": "0x0290b9197577B5fA4b1F34CC06463A970FeB449d",
+                    "address": "0x3484E916b9e289C9c6Cc1917487d53025827F08c",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xc4c36140a88e92fa01bf31299da58e51265487d5",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0xce441b7f37762eeAC37B9fAb819D4b6479779632",
+                                "erc20": "0x4404EF158716dfad1c2BEffE9c7c8Fa261684544",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x171643113A59f000F01e08a0de70Aa9F60065e4d",
+                                "vault": "0xa48d8249AAAae7ad814c055819d0774b47052653",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0x55dccb8b4e35f87ecffb81270a758718ba2335ab575acc6cde78b4399303cb95",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "T_SGL_SDAI_MARKET",
-                    "address": "0xCE05af7568330A8F37f9707f24fB63bC0bC21455",
-                    "meta": {
-                        "toft": true,
-                        "args": [
-                            {
-                                "cluster": "0xc38286142d158b23DD6D5c115f20aC9A7e0Cff93",
-                                "delegate": "0xc4c36140a88e92fa01bf31299da58e51265487d5",
-                                "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0xce441b7f37762eeAC37B9fAb819D4b6479779632",
-                                "extExec": "0xdDc5CcD73dEFf08f759b4567a957883F814b7D5D",
-                                "hostEid": "40106",
-                                "name": "Tapioca OFT SGL DAI Market",
-                                "pearlmit": "0xC54EA9Fd65C10480dcd62Ee87d558A4C5CAF70BB",
-                                "symbol": "T_SGL_SDAI_MARKET",
-                                "vault": "0x171643113A59f000F01e08a0de70Aa9F60065e4d",
-                                "yieldBox": "0xd2a626C80A55231fB359c35A141Bf43f58deAa7d"
-                            },
-                            {
-                                "genericReceiverModule": "0x8dC572b01437BF8168ab626B15e656E1Cc323EC7",
-                                "marketReceiverModule": "0x474Ca262E01B38F4EeA862561dA5a9377CBF188F",
-                                "optionsReceiverModule": "0x8bc21Ab4E377065631261D59D04950E2ec065DD0",
-                                "tOFTReceiverModule": "0x86B428483b3c933b090F5d170829e24ECd8d5B82",
-                                "tOFTSenderModule": "0x0290b9197577B5fA4b1F34CC06463A970FeB449d"
-                            }
-                        ],
-                        "salt": "0xf0be54b3a7857eb1ae3059ae7ec190d97c2f8512cd0dff8d58977dd7e7d46a05",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "TOFT_VAULT/mtETH",
-                    "address": "0xd97386A57E3C0133dF8C2C7AD3202A3555Bd5d58",
-                    "meta": {
-                        "args": [
-                            "0x4404EF158716dfad1c2BEffE9c7c8Fa261684544"
-                        ],
-                        "salt": "0x8862453ee5fd0da08e0ad1584ab02ec6f3f81c80d33045839d525c52a2716910",
+                        "salt": "0xe03bd3fd7538461fec450156a80d9e5ed25086ca4956666d5efe23d164d6162e",
                         "create2": true
                     }
                 },
                 {
                     "name": "mtETH",
-                    "address": "0x97b76c6aA2923B52cF6662Acd760d4BF65d53466",
+                    "address": "0xe4e8ED5F3F5B5B4548d7Be599a8252A93B042cC5",
                     "meta": {
                         "mtoft": true,
                         "args": [
                             {
-                                "cluster": "0xc38286142d158b23DD6D5c115f20aC9A7e0Cff93",
+                                "cluster": "0x296ED6d5598980eC4927463f9B60A91022da4D3b",
                                 "delegate": "0xc4c36140a88e92fa01bf31299da58e51265487d5",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
                                 "erc20": "0x4404EF158716dfad1c2BEffE9c7c8Fa261684544",
-                                "extExec": "0xABE0891dDf9E5e0405Fce59a9330E9d379Ecaff4",
+                                "extExec": "0x29dd9d6877DB4dc885433424247f9dF23629321C",
                                 "hostEid": "40231",
                                 "name": "Multi Tapioca OFT Native Ether",
-                                "pearlmit": "0xC54EA9Fd65C10480dcd62Ee87d558A4C5CAF70BB",
+                                "pearlmit": "0xBF5b665Ed84577A63b3a49895Ba8275Df2Ffc314",
                                 "symbol": "mtETH",
-                                "vault": "0xd97386A57E3C0133dF8C2C7AD3202A3555Bd5d58",
-                                "yieldBox": "0xd2a626C80A55231fB359c35A141Bf43f58deAa7d"
+                                "vault": "0xa48d8249AAAae7ad814c055819d0774b47052653",
+                                "yieldBox": "0x039D06963bCB5e19C5385701218A00D1AC2964AD"
                             },
                             {
-                                "genericReceiverModule": "0x40f392BA2d50cA0aBD7A6030390Db606dd1429B4",
-                                "marketReceiverModule": "0x3Bd5f1ba2D731450AAaFB1Af4bD8471aE2336565",
-                                "optionsReceiverModule": "0x8aAbf7Ba8161a40C72458E9d6491B0Df544ea164",
-                                "tOFTReceiverModule": "0x5C87a93e3d9Fb83EaBb09A209Ed54144a9542582",
-                                "tOFTSenderModule": "0xDC50bf58b4cc56479e46fCd0BBa425E163BFC95d"
+                                "genericReceiverModule": "0xDb65313c1ff8ffDfd9652507e951bF826f698e10",
+                                "marketReceiverModule": "0x9D61b73A48b3Ab753EEBFa595D920446CF4aA00A",
+                                "optionsReceiverModule": "0xfE1a613F85D5f5C92B0f10D28C3f2d83eF7aD303",
+                                "tOFTReceiverModule": "0x74102E8Cd0128D2fb81023D4dDCC1F7BCae5a2D7",
+                                "tOFTSenderModule": "0x3484E916b9e289C9c6Cc1917487d53025827F08c"
                             },
                             "0xa2dfFdDc372C6aeC3a8e79aAfa3953e8Bc956D63"
                         ],
-                        "salt": "0x0f752908357e9e337f798b039b39290c66130ce99903fba9fe6d481018fab2b5",
+                        "salt": "0x7dc5c77e965125aa3efaf032d7c3907d8a76bb6c34f2dbffa281ef5653c8433b",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_VAULT/tsDAI",
-                    "address": "0x5B9F29bfbc69d8F9680abD65cc2a90D5a1243493",
+                    "address": "0xb51B7638B5C4f4FB8137f615CAD1699a83873545",
                     "meta": {
                         "args": [
                             "0xed18DBCb2810E4178c23668794198C81B0668b23"
                         ],
-                        "salt": "0xa738f2b5b1988459a3070e0965abe3e24978aebc3e9f860ba08aec43ed20aa9e",
+                        "salt": "0x7b2ec24ebcdc1a1a8d06d7e1c490c20f5227c99ea6f84d0b67483c2ff65c2095",
                         "create2": true
                     }
                 },
                 {
                     "name": "tsDAI",
-                    "address": "0x453AcCDfB7f63D6c26Fb47a381f53B6047A8ca94",
+                    "address": "0x7bAC9Bc236998f40d192793Dc644a20977c9F5c6",
                     "meta": {
                         "toft": true,
                         "args": [
                             {
-                                "cluster": "0xc38286142d158b23DD6D5c115f20aC9A7e0Cff93",
+                                "cluster": "0x296ED6d5598980eC4927463f9B60A91022da4D3b",
                                 "delegate": "0xc4c36140a88e92fa01bf31299da58e51265487d5",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
                                 "erc20": "0xed18DBCb2810E4178c23668794198C81B0668b23",
-                                "extExec": "0xABE0891dDf9E5e0405Fce59a9330E9d379Ecaff4",
-                                "hostEid": "40232",
+                                "extExec": "0x29dd9d6877DB4dc885433424247f9dF23629321C",
+                                "hostEid": "40106",
                                 "name": "Tapioca OFT Staked DAI",
-                                "pearlmit": "0xC54EA9Fd65C10480dcd62Ee87d558A4C5CAF70BB",
+                                "pearlmit": "0xBF5b665Ed84577A63b3a49895Ba8275Df2Ffc314",
                                 "symbol": "tsDAI",
-                                "vault": "0x5B9F29bfbc69d8F9680abD65cc2a90D5a1243493",
-                                "yieldBox": "0xd2a626C80A55231fB359c35A141Bf43f58deAa7d"
+                                "vault": "0xb51B7638B5C4f4FB8137f615CAD1699a83873545",
+                                "yieldBox": "0x039D06963bCB5e19C5385701218A00D1AC2964AD"
                             },
                             {
-                                "genericReceiverModule": "0x40f392BA2d50cA0aBD7A6030390Db606dd1429B4",
-                                "marketReceiverModule": "0x3Bd5f1ba2D731450AAaFB1Af4bD8471aE2336565",
-                                "optionsReceiverModule": "0x8aAbf7Ba8161a40C72458E9d6491B0Df544ea164",
-                                "tOFTReceiverModule": "0x5C87a93e3d9Fb83EaBb09A209Ed54144a9542582",
-                                "tOFTSenderModule": "0xDC50bf58b4cc56479e46fCd0BBa425E163BFC95d"
+                                "genericReceiverModule": "0xDb65313c1ff8ffDfd9652507e951bF826f698e10",
+                                "marketReceiverModule": "0x9D61b73A48b3Ab753EEBFa595D920446CF4aA00A",
+                                "optionsReceiverModule": "0xfE1a613F85D5f5C92B0f10D28C3f2d83eF7aD303",
+                                "tOFTReceiverModule": "0x74102E8Cd0128D2fb81023D4dDCC1F7BCae5a2D7",
+                                "tOFTSenderModule": "0x3484E916b9e289C9c6Cc1917487d53025827F08c"
                             }
                         ],
-                        "salt": "0xcf1e08059cff17281bfc2821f4f440ba98c4d373222ad314182f81303e52526d",
+                        "salt": "0x29960874fe34693f61f4641fb9468c8ca269fbdd66ca1c5cbeaa65db11fcd640",
                         "create2": true
                     }
                 }
@@ -843,432 +792,339 @@
             "lastBlockHeight": 28901159,
             "contracts": [
                 {
-                    "name": "TOFT_HELPER",
-                    "address": "0x8a1d286D5F7ee0439e06e1cd72Caa033028E1010",
-                    "meta": {
-                        "args": [],
-                        "salt": "0xfd8da87f15f773d62693e3dd79521bf33d76d1f1e16a30a1fdcc7a857c74606b",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "TOFT_VAULT/T_SGL_GLP_MARKET",
-                    "address": "0x706D492A1f93579F425C03C11d27557C280dca69",
+                    "name": "TOFT_VAULT/mtETH",
+                    "address": "0x56a071ae95e62dcBe08aaf7957bD89419D9A305b",
                     "meta": {
                         "args": [
-                            "0x56F147211d835272B24020B41543B76011d61676"
+                            "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
                         ],
-                        "salt": "0x485b238e2ad670b1c888958fbf52e91cd8f9d82a4b8403f14c47f4885b86e6fe",
+                        "salt": "0x08bd79e6ba49bd981e3ef1cada4898853d96df70d0ce1613a06274c08cbd5e5d",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_EXT_EXEC",
-                    "address": "0xE5d812e3F54ef601E555270adEaDa50b4bA674fA",
+                    "address": "0xa56BD6C14B80738f5E9E6351DdC7efA81F4370a0",
                     "meta": {
                         "args": [],
-                        "salt": "0x32954885bfbd3e981123bfae407e5cb7d9d56c30295b1be5256c371227061be9",
+                        "salt": "0xfca24f6656bcdfcee363ac756c272dc8e2a57e12c4134db24a8fe79ae108a9ad",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_GENERIC_RECEIVER_MODULE",
-                    "address": "0x072778D20E1B4791D86Fe86D4a2E47905445ebfD",
+                    "address": "0x11EEa3E44943F682dA8ea285f358C2bC9aE69F66",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0x56F147211d835272B24020B41543B76011d61676",
+                                "erc20": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x706D492A1f93579F425C03C11d27557C280dca69",
+                                "vault": "0x56a071ae95e62dcBe08aaf7957bD89419D9A305b",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0xe4fccabb453c91adcf06dc522f5ec66db54867827b2411929ea245bd38a33111",
+                        "salt": "0x181515cbcda48ab4fa8171a1e6255030e15d82bc748f62e1272fa3875ad37e69",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_MARKET_RECEIVER_MODULE",
-                    "address": "0xA21AD27B81c567384EfB7929b830117be6060bd2",
+                    "address": "0x8589B5A87773dd476E5F0852a584DB547426bb6A",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0x56F147211d835272B24020B41543B76011d61676",
+                                "erc20": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x706D492A1f93579F425C03C11d27557C280dca69",
+                                "vault": "0x56a071ae95e62dcBe08aaf7957bD89419D9A305b",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0x4b5e0f0fa026fae31b13505f778495926e9a8e36a7ffaad9672675faab242a3f",
+                        "salt": "0x677b737eeefa0377cb2253603ba5c0101942e9280d30e0c8b38b3b4c2219fdf8",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_OPTIONS_RECEIVER_MODULE",
-                    "address": "0x0705C2128C994F41d3E1eF64ED9CAfAbe0d53dD5",
+                    "address": "0xfF67a782DB6582782830e9B1708dA41427b95666",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0x56F147211d835272B24020B41543B76011d61676",
+                                "erc20": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x706D492A1f93579F425C03C11d27557C280dca69",
+                                "vault": "0x56a071ae95e62dcBe08aaf7957bD89419D9A305b",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0xcfd5907da6a615331a02196a74614e86207da40a632a77997e261b2ec4e6513a",
+                        "salt": "0x1b5826545a665e5a038ac06090ceaf3561cd527e645cf07d425c9bfaa7eee8f3",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_RECEIVER_MODULE",
-                    "address": "0x420c38685723c0d5cE744b284e9d11A918DBB90a",
+                    "address": "0xd2e54F5C413b32A028a56A9239c85c098A946deE",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0x56F147211d835272B24020B41543B76011d61676",
+                                "erc20": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x706D492A1f93579F425C03C11d27557C280dca69",
+                                "vault": "0x56a071ae95e62dcBe08aaf7957bD89419D9A305b",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0x3894f96220a88f463c8d41ac5d9cc2987a003a5f0539199be8a194a935f8b5ad",
+                        "salt": "0x900108b523b012f062042dae59ceda081a0b543b0ff91426647c74f24e8060c8",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_SENDER_MODULE",
-                    "address": "0x3Fb8AA9C7702944eA6964d7654240Ede60933B43",
+                    "address": "0xC33C6126F66Bb358C74aC36C5f3713b32f27aC3B",
                     "meta": {
                         "args": [
                             {
                                 "cluster": "0x0000000000000000000000000000000000000001",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0x56F147211d835272B24020B41543B76011d61676",
+                                "erc20": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
                                 "extExec": "0x0000000000000000000000000000000000000001",
                                 "hostEid": 0,
                                 "name": "TOFT Module",
                                 "pearlmit": "0x0000000000000000000000000000000000000001",
                                 "symbol": "TOFT Module",
-                                "vault": "0x706D492A1f93579F425C03C11d27557C280dca69",
+                                "vault": "0x56a071ae95e62dcBe08aaf7957bD89419D9A305b",
                                 "yieldBox": "0x0000000000000000000000000000000000000001"
                             }
                         ],
-                        "salt": "0xe92e70befa61f482972fa9dd913e2c4403870eabb319e0c88a9add7cde71e2e7",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "T_SGL_GLP_MARKET",
-                    "address": "0x7C3A083a61955519C15C4e89792dAF0C6bA37734",
-                    "meta": {
-                        "toft": true,
-                        "args": [
-                            {
-                                "cluster": "0x8157A10A06B63683B605aac04ABFD51A24D5B90D",
-                                "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
-                                "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0x56F147211d835272B24020B41543B76011d61676",
-                                "extExec": "0xE5d812e3F54ef601E555270adEaDa50b4bA674fA",
-                                "hostEid": "40231",
-                                "name": "Tapioca OFT SGL GLP Market",
-                                "pearlmit": "0x10f52CC364d200Fbe14033B927Da3Fb5D84CcA34",
-                                "symbol": "T_SGL_GLP_MARKET",
-                                "vault": "0x706D492A1f93579F425C03C11d27557C280dca69",
-                                "yieldBox": "0xba29090FeA82eB00B3Cb59011D8258BD4f8aC1EF"
-                            },
-                            {
-                                "genericReceiverModule": "0x072778D20E1B4791D86Fe86D4a2E47905445ebfD",
-                                "marketReceiverModule": "0xA21AD27B81c567384EfB7929b830117be6060bd2",
-                                "optionsReceiverModule": "0x0705C2128C994F41d3E1eF64ED9CAfAbe0d53dD5",
-                                "tOFTReceiverModule": "0x420c38685723c0d5cE744b284e9d11A918DBB90a",
-                                "tOFTSenderModule": "0x3Fb8AA9C7702944eA6964d7654240Ede60933B43"
-                            }
-                        ],
-                        "salt": "0xc0cb63d04cbf2c02090a6c14e7f1066558ae4a5a87a1803d495913187c962f61",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "TOFT_VAULT/T_SGL_SDAI_MARKET",
-                    "address": "0x8775f9291Cee0482C7EF3A688C501882B332B5E4",
-                    "meta": {
-                        "args": [
-                            "0xce441b7f37762eeAC37B9fAb819D4b6479779632"
-                        ],
-                        "salt": "0xcf79fae41b5c92ba519d7b415979c5dfa62efa100f1a1b409073168c1a3e859e",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "T_SGL_SDAI_MARKET",
-                    "address": "0x964F75A175e31ee1554F852Da09Fbf19f49D6faF",
-                    "meta": {
-                        "toft": true,
-                        "args": [
-                            {
-                                "cluster": "0x8157A10A06B63683B605aac04ABFD51A24D5B90D",
-                                "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
-                                "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
-                                "erc20": "0xce441b7f37762eeAC37B9fAb819D4b6479779632",
-                                "extExec": "0xE5d812e3F54ef601E555270adEaDa50b4bA674fA",
-                                "hostEid": "40106",
-                                "name": "Tapioca OFT SGL DAI Market",
-                                "pearlmit": "0x10f52CC364d200Fbe14033B927Da3Fb5D84CcA34",
-                                "symbol": "T_SGL_SDAI_MARKET",
-                                "vault": "0x8775f9291Cee0482C7EF3A688C501882B332B5E4",
-                                "yieldBox": "0xba29090FeA82eB00B3Cb59011D8258BD4f8aC1EF"
-                            },
-                            {
-                                "genericReceiverModule": "0x072778D20E1B4791D86Fe86D4a2E47905445ebfD",
-                                "marketReceiverModule": "0xA21AD27B81c567384EfB7929b830117be6060bd2",
-                                "optionsReceiverModule": "0x0705C2128C994F41d3E1eF64ED9CAfAbe0d53dD5",
-                                "tOFTReceiverModule": "0x420c38685723c0d5cE744b284e9d11A918DBB90a",
-                                "tOFTSenderModule": "0x3Fb8AA9C7702944eA6964d7654240Ede60933B43"
-                            }
-                        ],
-                        "salt": "0xd9695b54eadd6111036b546f52bb43c81d7fdb3e788372d2069c8ac34b865dee",
-                        "create2": true
-                    }
-                },
-                {
-                    "name": "TOFT_VAULT/mtETH",
-                    "address": "0x8560ea8Ba524085DACbE5E51fe7D3F6cA4AB10DA",
-                    "meta": {
-                        "args": [
-                            "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
-                        ],
-                        "salt": "0x3f9f19d6981311e01e681d75a19b33247e4f9dfa4f6ae6ad7e57b05e0392e1a5",
+                        "salt": "0x806ac6a69be482b3f28c04c1c32a83357a14c68c99e89835c25763f4c058107f",
                         "create2": true
                     }
                 },
                 {
                     "name": "mtETH",
-                    "address": "0xf8AC713c5FD9603891B53Bc9caC53Adee7bbC6Ac",
+                    "address": "0xc83c5F2C0BBDC4543a120B7046F177F69E882626",
                     "meta": {
                         "mtoft": true,
                         "args": [
                             {
-                                "cluster": "0x8157A10A06B63683B605aac04ABFD51A24D5B90D",
+                                "cluster": "0xD528BAc2390c8876d5Ab72C3Bff10a94D1F9de35",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
                                 "erc20": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
-                                "extExec": "0x26d0085F067fD8c3e33f990A7F495144a6ed69FE",
+                                "extExec": "0xa56BD6C14B80738f5E9E6351DdC7efA81F4370a0",
                                 "hostEid": "40231",
                                 "name": "Multi Tapioca OFT Native Ether",
-                                "pearlmit": "0x10f52CC364d200Fbe14033B927Da3Fb5D84CcA34",
+                                "pearlmit": "0x5f885c006Af8193a0c75eCDCB95D997956dbb16c",
                                 "symbol": "mtETH",
-                                "vault": "0x8560ea8Ba524085DACbE5E51fe7D3F6cA4AB10DA",
-                                "yieldBox": "0xba29090FeA82eB00B3Cb59011D8258BD4f8aC1EF"
+                                "vault": "0x56a071ae95e62dcBe08aaf7957bD89419D9A305b",
+                                "yieldBox": "0xFB9cea783160B5AD156c50BE29c38Fe736FDd025"
                             },
                             {
-                                "genericReceiverModule": "0x30d12dEfEe6f6E54e258cD29a14ab906Fe3E6886",
-                                "marketReceiverModule": "0x24463150146F598B1f2B1C0C6908e3bF90cfCc1a",
-                                "optionsReceiverModule": "0x0b8aEF681f5c277E0c7e06DF4d1b00CFEe1452D1",
-                                "tOFTReceiverModule": "0x153414679AB4a7367F2cb13593AE04F985fe020a",
-                                "tOFTSenderModule": "0x88D3D39C71a61c496402ea8888eDa272D5a48947"
+                                "genericReceiverModule": "0x11EEa3E44943F682dA8ea285f358C2bC9aE69F66",
+                                "marketReceiverModule": "0x8589B5A87773dd476E5F0852a584DB547426bb6A",
+                                "optionsReceiverModule": "0xfF67a782DB6582782830e9B1708dA41427b95666",
+                                "tOFTReceiverModule": "0xd2e54F5C413b32A028a56A9239c85c098A946deE",
+                                "tOFTSenderModule": "0xC33C6126F66Bb358C74aC36C5f3713b32f27aC3B"
                             },
                             "0x2a4C2F5ffB0E0F2dcB3f9EBBd442B8F77ECDB9Cc"
                         ],
-                        "salt": "0x770525f724355e0fa7603b242be634b50968097c1e88493f428ba5d832be4347",
+                        "salt": "0x6484257aa004e0cbd80ee33b6d4b4ff564789a5e741fabdc74fa6bdb5d63da7c",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_VAULT/tWSTETH",
-                    "address": "0xd63d6FAB1132Ed7D607aa0dE08b5bA346a06B18e",
+                    "address": "0x1b304C90840A296C3DC7185dA40204D9f60a4561",
                     "meta": {
                         "args": [
                             "0x568567fb156cDf083FA9e4A672fB462aA49673e9"
                         ],
-                        "salt": "0xd665ea39922803f94b35b5d728d0cd8ed3f059e00535415491689018d614933b",
+                        "salt": "0xcde5a38a077bc134876a1a3a5c0f90cc9c98e52b4d1fd3429a9b781ce36d45df",
                         "create2": true
                     }
                 },
                 {
                     "name": "tWSTETH",
-                    "address": "0xc9c8f2823c788CE9b76596263c00844F70d64e47",
+                    "address": "0x5A82702D2288079F5CFF2e5Cc95e498E8fD52690",
                     "meta": {
                         "mtoft": true,
                         "args": [
                             {
-                                "cluster": "0x8157A10A06B63683B605aac04ABFD51A24D5B90D",
+                                "cluster": "0xD528BAc2390c8876d5Ab72C3Bff10a94D1F9de35",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
                                 "erc20": "0x568567fb156cDf083FA9e4A672fB462aA49673e9",
-                                "extExec": "0x26d0085F067fD8c3e33f990A7F495144a6ed69FE",
+                                "extExec": "0xa56BD6C14B80738f5E9E6351DdC7efA81F4370a0",
                                 "hostEid": "40231",
                                 "name": "Tapioca OFT Lido Wrapped Staked Ether",
-                                "pearlmit": "0x10f52CC364d200Fbe14033B927Da3Fb5D84CcA34",
+                                "pearlmit": "0x5f885c006Af8193a0c75eCDCB95D997956dbb16c",
                                 "symbol": "tWSTETH",
-                                "vault": "0xd63d6FAB1132Ed7D607aa0dE08b5bA346a06B18e",
-                                "yieldBox": "0xba29090FeA82eB00B3Cb59011D8258BD4f8aC1EF"
+                                "vault": "0x1b304C90840A296C3DC7185dA40204D9f60a4561",
+                                "yieldBox": "0xFB9cea783160B5AD156c50BE29c38Fe736FDd025"
                             },
                             {
-                                "genericReceiverModule": "0x30d12dEfEe6f6E54e258cD29a14ab906Fe3E6886",
-                                "marketReceiverModule": "0x24463150146F598B1f2B1C0C6908e3bF90cfCc1a",
-                                "optionsReceiverModule": "0x0b8aEF681f5c277E0c7e06DF4d1b00CFEe1452D1",
-                                "tOFTReceiverModule": "0x153414679AB4a7367F2cb13593AE04F985fe020a",
-                                "tOFTSenderModule": "0x88D3D39C71a61c496402ea8888eDa272D5a48947"
+                                "genericReceiverModule": "0x11EEa3E44943F682dA8ea285f358C2bC9aE69F66",
+                                "marketReceiverModule": "0x8589B5A87773dd476E5F0852a584DB547426bb6A",
+                                "optionsReceiverModule": "0xfF67a782DB6582782830e9B1708dA41427b95666",
+                                "tOFTReceiverModule": "0xd2e54F5C413b32A028a56A9239c85c098A946deE",
+                                "tOFTSenderModule": "0xC33C6126F66Bb358C74aC36C5f3713b32f27aC3B"
                             },
                             "0x2a4C2F5ffB0E0F2dcB3f9EBBd442B8F77ECDB9Cc"
                         ],
-                        "salt": "0xf60a4264b07c0c1e8dc176f4345cd44041c038619fd46e569275646cf03f6e08",
+                        "salt": "0xb3ff511a4675c83ad37c401bbc840cc290342dcf47148d18915b46ae4b161865",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_VAULT/tRETH",
-                    "address": "0xea4C52e1242dAA632F68c66B68121baedF9A86D3",
+                    "address": "0x7B912B75C286A379713D459D75654F7CA95A384b",
                     "meta": {
                         "args": [
                             "0x518746126A545cC7F31EeD92bF2b04eb99eD103B"
                         ],
-                        "salt": "0x67370cccfaa67d6a15e4776a7a85f1e81d97b514997da1358c2a5b009b618d5f",
+                        "salt": "0x6aff5f7b6abed7c361a049c1c37c5d0a65137b641f778ed6f658fc1616cc18a7",
                         "create2": true
                     }
                 },
                 {
                     "name": "tRETH",
-                    "address": "0xF3b33c02e39ACA9b34ff67bB738A1242f8B1631e",
+                    "address": "0x48B717263ad040655B5fFe2673949d35A65705fe",
                     "meta": {
                         "mtoft": true,
                         "args": [
                             {
-                                "cluster": "0x8157A10A06B63683B605aac04ABFD51A24D5B90D",
+                                "cluster": "0xD528BAc2390c8876d5Ab72C3Bff10a94D1F9de35",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
                                 "erc20": "0x518746126A545cC7F31EeD92bF2b04eb99eD103B",
-                                "extExec": "0x26d0085F067fD8c3e33f990A7F495144a6ed69FE",
+                                "extExec": "0xa56BD6C14B80738f5E9E6351DdC7efA81F4370a0",
                                 "hostEid": "40231",
                                 "name": "Tapioca OFT Rocket Pool Ether",
-                                "pearlmit": "0x10f52CC364d200Fbe14033B927Da3Fb5D84CcA34",
+                                "pearlmit": "0x5f885c006Af8193a0c75eCDCB95D997956dbb16c",
                                 "symbol": "tRETH",
-                                "vault": "0xea4C52e1242dAA632F68c66B68121baedF9A86D3",
-                                "yieldBox": "0xba29090FeA82eB00B3Cb59011D8258BD4f8aC1EF"
+                                "vault": "0x7B912B75C286A379713D459D75654F7CA95A384b",
+                                "yieldBox": "0xFB9cea783160B5AD156c50BE29c38Fe736FDd025"
                             },
                             {
-                                "genericReceiverModule": "0x30d12dEfEe6f6E54e258cD29a14ab906Fe3E6886",
-                                "marketReceiverModule": "0x24463150146F598B1f2B1C0C6908e3bF90cfCc1a",
-                                "optionsReceiverModule": "0x0b8aEF681f5c277E0c7e06DF4d1b00CFEe1452D1",
-                                "tOFTReceiverModule": "0x153414679AB4a7367F2cb13593AE04F985fe020a",
-                                "tOFTSenderModule": "0x88D3D39C71a61c496402ea8888eDa272D5a48947"
+                                "genericReceiverModule": "0x11EEa3E44943F682dA8ea285f358C2bC9aE69F66",
+                                "marketReceiverModule": "0x8589B5A87773dd476E5F0852a584DB547426bb6A",
+                                "optionsReceiverModule": "0xfF67a782DB6582782830e9B1708dA41427b95666",
+                                "tOFTReceiverModule": "0xd2e54F5C413b32A028a56A9239c85c098A946deE",
+                                "tOFTSenderModule": "0xC33C6126F66Bb358C74aC36C5f3713b32f27aC3B"
                             },
                             "0x2a4C2F5ffB0E0F2dcB3f9EBBd442B8F77ECDB9Cc"
                         ],
-                        "salt": "0xcb76ad2cafa2d7cf2a83516cb6c1821de87cbac0ee68c3935c3fb64a3af2e339",
+                        "salt": "0xf2586d777e5a7183532282a3c650831b02be1e904917e8a9c376d2300254fe83",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_VAULT/tETH",
-                    "address": "0x18FA348E574Ccf04Dd1B2352832087762c81919c",
+                    "address": "0xD660c05031C5F7d05Ac7887Df15056409EA66b2c",
                     "meta": {
                         "args": [
                             "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E"
                         ],
-                        "salt": "0x424deac859e635906caa5b59c49c67b233c4b23a667b379eb2486e090414c075",
+                        "salt": "0xe5004ee80eefabf6362e6d01ab8b1060623270e14e73d6a13d2ca4312c3d20e1",
                         "create2": true
                     }
                 },
                 {
                     "name": "tETH",
-                    "address": "0x5768F89CCA29604E2Fa2e04352D1696CE63A807F",
+                    "address": "0x95819470ea3218c78Bc8050DA5501e85c43f5f83",
                     "meta": {
                         "toft": true,
                         "args": [
                             {
-                                "cluster": "0x8157A10A06B63683B605aac04ABFD51A24D5B90D",
+                                "cluster": "0xD528BAc2390c8876d5Ab72C3Bff10a94D1F9de35",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
                                 "erc20": "0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E",
-                                "extExec": "0x26d0085F067fD8c3e33f990A7F495144a6ed69FE",
+                                "extExec": "0xa56BD6C14B80738f5E9E6351DdC7efA81F4370a0",
                                 "hostEid": "40231",
                                 "name": "Tapioca OFT Native Ether",
-                                "pearlmit": "0x10f52CC364d200Fbe14033B927Da3Fb5D84CcA34",
+                                "pearlmit": "0x5f885c006Af8193a0c75eCDCB95D997956dbb16c",
                                 "symbol": "tETH",
-                                "vault": "0x18FA348E574Ccf04Dd1B2352832087762c81919c",
-                                "yieldBox": "0xba29090FeA82eB00B3Cb59011D8258BD4f8aC1EF"
+                                "vault": "0xD660c05031C5F7d05Ac7887Df15056409EA66b2c",
+                                "yieldBox": "0xFB9cea783160B5AD156c50BE29c38Fe736FDd025"
                             },
                             {
-                                "genericReceiverModule": "0x30d12dEfEe6f6E54e258cD29a14ab906Fe3E6886",
-                                "marketReceiverModule": "0x24463150146F598B1f2B1C0C6908e3bF90cfCc1a",
-                                "optionsReceiverModule": "0x0b8aEF681f5c277E0c7e06DF4d1b00CFEe1452D1",
-                                "tOFTReceiverModule": "0x153414679AB4a7367F2cb13593AE04F985fe020a",
-                                "tOFTSenderModule": "0x88D3D39C71a61c496402ea8888eDa272D5a48947"
+                                "genericReceiverModule": "0x11EEa3E44943F682dA8ea285f358C2bC9aE69F66",
+                                "marketReceiverModule": "0x8589B5A87773dd476E5F0852a584DB547426bb6A",
+                                "optionsReceiverModule": "0xfF67a782DB6582782830e9B1708dA41427b95666",
+                                "tOFTReceiverModule": "0xd2e54F5C413b32A028a56A9239c85c098A946deE",
+                                "tOFTSenderModule": "0xC33C6126F66Bb358C74aC36C5f3713b32f27aC3B"
                             }
                         ],
-                        "salt": "0x5c4cda3e2ccb40062679ab575a280de503e403d0ddde0bd436a1ad2e59dfbf10",
+                        "salt": "0x3781b6cf699efcf61a2472609bf3557f22b0bc84594211ce600fbbdfa93b409c",
                         "create2": true
                     }
                 },
                 {
                     "name": "TOFT_VAULT/tsGLP",
-                    "address": "0x639784545948E174eC730FC87a435684d6fc6275",
+                    "address": "0x535b770794339A63516A3A52bBf65F1A20970341",
                     "meta": {
                         "args": [
                             "0x1B460E311753fDB46451EF3d11d7B9eE5542b369"
                         ],
-                        "salt": "0x21aafbba6091fc6705476b4fb7927f2a4a797b670ff40a70b731261efd6a67a1",
+                        "salt": "0xcd8c85c5c4a5ce450bad452397b0bf4ad8952f7bc326fd086c7eb3eb9a5f1310",
                         "create2": true
                     }
                 },
                 {
                     "name": "tsGLP",
-                    "address": "0x62b1974CC9b66BBB307B21Bd176c9b5C5a86515a",
+                    "address": "0x2d3973EAE30D7A3a34d01138f3c4e3E44b549Cf5",
                     "meta": {
                         "toft": true,
                         "args": [
                             {
-                                "cluster": "0x8157A10A06B63683B605aac04ABFD51A24D5B90D",
+                                "cluster": "0xD528BAc2390c8876d5Ab72C3Bff10a94D1F9de35",
                                 "delegate": "0xcD5B223b3ECF18ae695E797cb033e86b7b189C88",
                                 "endpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
                                 "erc20": "0x1B460E311753fDB46451EF3d11d7B9eE5542b369",
-                                "extExec": "0x26d0085F067fD8c3e33f990A7F495144a6ed69FE",
+                                "extExec": "0xa56BD6C14B80738f5E9E6351DdC7efA81F4370a0",
                                 "hostEid": "40231",
                                 "name": "Tapioca OFT Staked GLP",
-                                "pearlmit": "0x10f52CC364d200Fbe14033B927Da3Fb5D84CcA34",
+                                "pearlmit": "0x5f885c006Af8193a0c75eCDCB95D997956dbb16c",
                                 "symbol": "tsGLP",
-                                "vault": "0x639784545948E174eC730FC87a435684d6fc6275",
-                                "yieldBox": "0xba29090FeA82eB00B3Cb59011D8258BD4f8aC1EF"
+                                "vault": "0x535b770794339A63516A3A52bBf65F1A20970341",
+                                "yieldBox": "0xFB9cea783160B5AD156c50BE29c38Fe736FDd025"
                             },
                             {
-                                "genericReceiverModule": "0x30d12dEfEe6f6E54e258cD29a14ab906Fe3E6886",
-                                "marketReceiverModule": "0x24463150146F598B1f2B1C0C6908e3bF90cfCc1a",
-                                "optionsReceiverModule": "0x0b8aEF681f5c277E0c7e06DF4d1b00CFEe1452D1",
-                                "tOFTReceiverModule": "0x153414679AB4a7367F2cb13593AE04F985fe020a",
-                                "tOFTSenderModule": "0x88D3D39C71a61c496402ea8888eDa272D5a48947"
+                                "genericReceiverModule": "0x11EEa3E44943F682dA8ea285f358C2bC9aE69F66",
+                                "marketReceiverModule": "0x8589B5A87773dd476E5F0852a584DB547426bb6A",
+                                "optionsReceiverModule": "0xfF67a782DB6582782830e9B1708dA41427b95666",
+                                "tOFTReceiverModule": "0xd2e54F5C413b32A028a56A9239c85c098A946deE",
+                                "tOFTSenderModule": "0xC33C6126F66Bb358C74aC36C5f3713b32f27aC3B"
                             }
                         ],
-                        "salt": "0xd07825261bf2cf478af976a7d5cccabd46c3d0449dc018b895c1d0d365da1c8f",
+                        "salt": "0xa8a4fb76bb8d7bd3683f58cec0c5ac0b24216e548876056f2edb062d48470750",
                         "create2": true
                     }
                 },
