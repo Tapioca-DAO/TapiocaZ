@@ -3,8 +3,9 @@ import '@nomiclabs/hardhat-ethers';
 import '@nomicfoundation/hardhat-verify';
 import '@typechain/hardhat';
 
+import '@nomicfoundation/hardhat-chai-matchers';
+import '@nomicfoundation/hardhat-foundry';
 import '@primitivefi/hardhat-dodoc';
-import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
 import { HardhatUserConfig } from 'hardhat/config';
