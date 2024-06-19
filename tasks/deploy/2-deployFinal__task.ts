@@ -9,6 +9,7 @@ import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/Deployer
 import { DEPLOYMENT_NAMES } from './DEPLOY_CONFIG';
 import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
 import { TAPIOCA_PROJECTS_NAME } from '@tapioca-sdk/api/config';
+import { findGlobalDeployment } from '@tapioca-sdk/api/db';
 
 /**
  * @notice Should be called after Bar post lbp side chain deployment
