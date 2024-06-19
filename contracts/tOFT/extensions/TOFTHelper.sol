@@ -99,7 +99,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
     function _sanitizeMsgTypeExtended(uint16 _msgType) internal pure override returns (bool) {
         if (
             _msgType == MSG_MARKET_REMOVE_COLLATERAL || _msgType == MSG_YB_SEND_SGL_BORROW
-                || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS || _msgType == MSG_LEVERAGE_UP
+                || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS || _msgType == MSG_LEVERAGE_UP || _msgType == MSG_LOCK_AND_PARTICIPATE
         ) {
             return true;
         }
