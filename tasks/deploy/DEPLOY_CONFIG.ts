@@ -49,7 +49,7 @@ const POST_LBP: TPostLbp = {
         WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
         wstETH: '',
         reth: '',
-        sDAI: '0x83f20f44975d03b1b09e64809b757c47f942beea',
+        sDAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // It's dai not sDai
         sGLP: '',
     },
     [EChainID.ARBITRUM_SEPOLIA]: {

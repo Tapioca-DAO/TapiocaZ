@@ -106,9 +106,7 @@ async function tapiocaDeployTask(
         ...taskArgs,
         target: 'mtoft',
         deploymentName: DEPLOYMENT_NAMES.mtETH,
-        erc20: isTestnet
-            ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
-            : hre.ethers.constants.AddressZero,
+        erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH,
         name: 'Multi Tapioca OFT Native Ether',
         symbol: DEPLOYMENT_NAMES.mtETH,
         hostEid: hostChainInfo.lzChainId,
@@ -157,10 +155,8 @@ async function tapiocaDeployTask(
             ...taskArgs,
             target: 'toft',
             deploymentName: DEPLOYMENT_NAMES.tETH,
-            erc20: isTestnet
-                ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
-                : hre.ethers.constants.AddressZero,
-            name: 'Tapioca OFT Native Ether',
+            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH,
+            name: 'Tapioca OFT Wrapped Ether',
             symbol: DEPLOYMENT_NAMES.tETH,
             noModuleDeploy: true, // Modules are loaded here
             hostEid: hostChainInfo.lzChainId,
