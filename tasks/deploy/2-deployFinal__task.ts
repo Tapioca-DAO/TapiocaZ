@@ -47,10 +47,10 @@ async function tapiocaPostDeployTask(
     const { hre, taskArgs, chainInfo } = params;
     const { tag } = taskArgs;
 
-    await setLzPeer__task(
-        { tag, targetName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET },
-        hre,
-    );
+    // await setLzPeer__task(
+    //     { tag, targetName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET },
+    //     hre,
+    // );
 }
 
 async function tapiocaDeployTask(
@@ -112,13 +112,13 @@ async function tapiocaDeployTask(
         sdaiMarketChainName,
     );
 
-    const sDaiSglMarket = loadGlobalContract(
-        hre,
-        TAPIOCA_PROJECTS_NAME.TapiocaBar,
-        sdaiMarketChain.chainId,
-        TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
-        tag,
-    ).address;
+    // const sDaiSglMarket = loadGlobalContract(
+    //     hre,
+    //     TAPIOCA_PROJECTS_NAME.TapiocaBar,
+    //     sdaiMarketChain.chainId,
+    //     TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
+    //     tag,
+    // ).address;
 
     const VMAddToftWithArgs = async (args: TToftDeployerTaskArgs) =>
         await VMAddToft({
@@ -132,14 +132,14 @@ async function tapiocaDeployTask(
             taskArgs: args,
         });
 
-    await VMAddToftWithArgs({
-        ...taskArgs,
-        target: 'toft',
-        deploymentName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
-        erc20: sDaiSglMarket,
-        name: 'Tapioca OFT SGL DAI Market',
-        symbol: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
-        noModuleDeploy: false,
-        hostEid: sdaiMarketChain.lzChainId,
-    });
+    // await VMAddToftWithArgs({
+    //     ...taskArgs,
+    //     target: 'toft',
+    //     deploymentName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
+    //     erc20: sDaiSglMarket,
+    //     name: 'Tapioca OFT SGL DAI Market',
+    //     symbol: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
+    //     noModuleDeploy: false,
+    //     hostEid: sdaiMarketChain.lzChainId,
+    // });
 }
