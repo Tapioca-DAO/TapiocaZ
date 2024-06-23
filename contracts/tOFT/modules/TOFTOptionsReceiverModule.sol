@@ -72,7 +72,8 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
      * @param srcChainSender The address of the sender on the source chain.
      * @param _data The call data containing info about the operation.
      * @param _data.user the user to perform the operation for
-     * @param _data.singularity the SGL address
+     * @param _data.tSglToken The address of the tOFT SGL token
+     * @param _data.yieldBox The address of the yield box
      * @param _data.fraction the amount to lock
      * @param _data.lockData the data needed to lock on tOB
      * @param _data.participateData the data needed to participate on tOLP
@@ -166,8 +167,9 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         private
         returns (LockAndParticipateData memory)
     {
+        _checkWhitelistStatus(msg_.tSglToken);
+        _checkWhitelistStatus(msg_.yieldBox);
         _checkWhitelistStatus(msg_.magnetar);
-        _checkWhitelistStatus(msg_.singularity);
         if (msg_.lockData.lock) {
             _checkWhitelistStatus(msg_.lockData.target);
             if (msg_.lockData.amount > 0) {
