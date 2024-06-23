@@ -84,7 +84,8 @@ abstract contract BaseTOFT is
     }
 
     function _wrap(address _fromAddress, address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {
-        if (_fromAddress != msg.sender) {
+        // Check internal allowance only if not the same address
+        if (_toAddress != _fromAddress) {
             if (allowance(_fromAddress, msg.sender) < _amount) {
                 revert TOFT_AllowanceNotValid();
             }
