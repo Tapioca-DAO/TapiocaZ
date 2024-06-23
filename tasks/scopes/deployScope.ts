@@ -26,6 +26,5 @@ TAP_TASK(
         .addParam(
             'sdaiMarketChainName',
             'Host chain name of the SGL sDai market.',
-            'ethereum',
         ),
 );

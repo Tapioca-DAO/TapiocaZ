@@ -30,7 +30,10 @@ export const deployPostLbp__task = async (
             hre,
             // Static simulation needs to be false, constructor relies on external call. We're using 0x00 replacement with DeployerVM, which creates a false positive for static simulation.
             staticSimulation: false,
-            bytecodeSizeLimit: 60_000,
+            // bytecodeSizeLimit: 70_000,
+            // overrideOptions: {
+            //     gasLimit: 10_000_000,
+            // },
         },
         tapiocaDeployTask,
         tapiocaPostDeployTask,
@@ -103,9 +106,7 @@ async function tapiocaDeployTask(
         ...taskArgs,
         target: 'mtoft',
         deploymentName: DEPLOYMENT_NAMES.mtETH,
-        erc20: isTestnet
-            ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
-            : hre.ethers.constants.AddressZero,
+        erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH,
         name: 'Multi Tapioca OFT Native Ether',
         symbol: DEPLOYMENT_NAMES.mtETH,
         hostEid: hostChainInfo.lzChainId,
@@ -154,10 +155,8 @@ async function tapiocaDeployTask(
             ...taskArgs,
             target: 'toft',
             deploymentName: DEPLOYMENT_NAMES.tETH,
-            erc20: isTestnet
-                ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
-                : hre.ethers.constants.AddressZero,
-            name: 'Tapioca OFT Native Ether',
+            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH,
+            name: 'Tapioca OFT Wrapped Ether',
             symbol: DEPLOYMENT_NAMES.tETH,
             noModuleDeploy: true, // Modules are loaded here
             hostEid: hostChainInfo.lzChainId,
@@ -178,6 +177,7 @@ async function tapiocaDeployTask(
 
     if (isSideChain) {
         console.log('\n[+] Adding tOFT contracts');
+
         // VM Add sDAI
         await VMAddToftWithArgs({
             ...taskArgs,
