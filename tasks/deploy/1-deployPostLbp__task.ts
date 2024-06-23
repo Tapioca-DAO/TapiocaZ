@@ -3,6 +3,8 @@ import { TTapiocaDeployerVmPass } from 'tapioca-sdk/dist/ethers/hardhat/Deployer
 import { buildBalancer } from 'tasks/deployBuilds/buildBalancer';
 import { DEPLOYMENT_NAMES, DEPLOY_CONFIG } from './DEPLOY_CONFIG';
 import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
+import { buildToftHelper } from 'tasks/deployBuilds/buildToftHelper';
+import { setLzPeer__task } from 'tapioca-sdk';
 
 /**
  * @notice Should be called after the LBP has ended. Before `Bar` `postLbp1`
@@ -14,30 +16,30 @@ import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
  * - tsDAI
  *
  * Post deploy: Arb
+ *  !!! REQUIRE HAVING 1 amount of sDAI, mtEth, Reth, WSTETH, SGLP, Weth in TapiocaMulticall !!!
  * - Set LzPeer for mtETH (disabled for prod)
  * - Balancer contract (disabled for prod)
  */
 export const deployPostLbp__task = async (
-    _taskArgs: TToftDeployerTaskArgs,
+    _taskArgs: TToftDeployerTaskArgs & { sdaiHostChainName: string },
     hre: HardhatRuntimeEnvironment,
 ) => {
     await hre.SDK.DeployerVM.tapiocaDeployTask(
         _taskArgs,
         {
             hre,
-            bytecodeSizeLimit: 70_000,
             // Static simulation needs to be false, constructor relies on external call. We're using 0x00 replacement with DeployerVM, which creates a false positive for static simulation.
             staticSimulation: false,
-            overrideOptions: {
-                gasLimit: 10_000_000,
-            },
+            bytecodeSizeLimit: 60_000,
         },
         tapiocaDeployTask,
         tapiocaPostDeployTask,
     );
 };
 
-async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
+async function tapiocaPostDeployTask(
+    params: TTapiocaDeployerVmPass<{ sdaiHostChainName: string }>,
+) {
     const { hre, taskArgs, VM, chainInfo } = params;
     const { tag } = taskArgs;
 
@@ -50,7 +52,9 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
     // );
 }
 
-async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
+async function tapiocaDeployTask(
+    params: TTapiocaDeployerVmPass<{ sdaiHostChainName: string }>,
+) {
     const {
         hre,
         VM,
@@ -63,6 +67,18 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
     } = params;
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
+
+    const sdaiSideChain = hre.SDK.utils.getChainBy(
+        'name',
+        taskArgs.sdaiHostChainName,
+    );
+    if (!sdaiSideChain) {
+        throw new Error(
+            `[-] Can not find side info with chain name: ${taskArgs.sdaiHostChainName}`,
+        );
+    }
+
+    VM.add(await buildToftHelper(hre, DEPLOYMENT_NAMES.TOFT_HELPER));
 
     const VMAddToftWithArgs = async (args: TToftDeployerTaskArgs) =>
         await VMAddToft({
@@ -162,10 +178,6 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
 
     if (isSideChain) {
         console.log('\n[+] Adding tOFT contracts');
-        const sideChainHostChainInfo = hre.SDK.utils.getChainBy(
-            'name',
-            isTestnet ? 'optimism_sepolia' : 'ethereum',
-        );
         // VM Add sDAI
         await VMAddToftWithArgs({
             ...taskArgs,
@@ -175,7 +187,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             name: 'Tapioca OFT Staked DAI',
             symbol: DEPLOYMENT_NAMES.tsDAI,
             noModuleDeploy: true,
-            hostEid: sideChainHostChainInfo.lzChainId,
+            hostEid: sdaiSideChain.lzChainId,
         });
     }
 }

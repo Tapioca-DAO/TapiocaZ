@@ -327,7 +327,33 @@
   dependencies:
     "@ethersproject/logger" "^5.7.0"
 
-"@ethersproject/providers@5.7.2", "@ethersproject/providers@^5.7.0", "@ethersproject/providers@^5.7.1", "@ethersproject/providers@^5.7.2":
+"@ethersproject/providers@5.7.2", "@ethersproject/providers@^5.7.1", "@ethersproject/providers@^5.7.2", "@ethersproject/providers@npm:ethersproject-providers-arbitrum-hotfix@5.7.10":
+  version "5.7.10"
+  resolved "https://registry.yarnpkg.com/ethersproject-providers-arbitrum-hotfix/-/ethersproject-providers-arbitrum-hotfix-5.7.10.tgz#cd3fa2ed67b30ad253d168101d01ea96ac71855f"
+  integrity sha512-Ocb7GT1pA3vSg9k8xxwItgmmDw8FCscjE52s9+eecEWtchy9UutRs00RXtQ4IjA0n8QCu3awkH/Ia7lvKMxUBg==
+  dependencies:
+    "@ethersproject/abstract-provider" "^5.7.0"
+    "@ethersproject/abstract-signer" "^5.7.0"
+    "@ethersproject/address" "^5.7.0"
+    "@ethersproject/base64" "^5.7.0"
+    "@ethersproject/basex" "^5.7.0"
+    "@ethersproject/bignumber" "^5.7.0"
+    "@ethersproject/bytes" "^5.7.0"
+    "@ethersproject/constants" "^5.7.0"
+    "@ethersproject/hash" "^5.7.0"
+    "@ethersproject/logger" "^5.7.0"
+    "@ethersproject/networks" "^5.7.0"
+    "@ethersproject/properties" "^5.7.0"
+    "@ethersproject/random" "^5.7.0"
+    "@ethersproject/rlp" "^5.7.0"
+    "@ethersproject/sha2" "^5.7.0"
+    "@ethersproject/strings" "^5.7.0"
+    "@ethersproject/transactions" "^5.7.0"
+    "@ethersproject/web" "^5.7.0"
+    bech32 "1.1.4"
+    ws "7.4.6"
+
+"@ethersproject/providers@^5.7.0":
   version "5.7.2"
   resolved "https://registry.npmjs.org/@ethersproject/providers/-/providers-5.7.2.tgz#f8b1a4f275d7ce58cf0a2eec222269a08beb18cb"
   integrity sha512-g34EWZ1WWAVgr4aptGlVBF8mhl3VWjv+8hoAnzStu8Ah22VHBsuGzP17eb6xDVRzw895G4W7vvx60lFFur/1Rg==
@@ -5182,10 +5208,10 @@ table@^6.0.9, table@^6.8.0, table@^6.8.1:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-tapioca-sdk@^1.8.11:
-  version "1.8.11"
-  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.8.11.tgz#789c03f493ef01c3cf04680378534f2c740ef068"
-  integrity sha512-e+rN545y44VBxudztEKkmKyB1OyUP7uz7mD5gqqwRhX/paD2A2g64S92Z5XGSeSsxIyHAKFHPjaXt5a/A0aUuw==
+tapioca-sdk@^1.8.21:
+  version "1.8.21"
+  resolved "https://registry.yarnpkg.com/tapioca-sdk/-/tapioca-sdk-1.8.21.tgz#9955e1d5670203b81726bf95f27e85193bed3a53"
+  integrity sha512-E46PG91DQi7nBKjsVKyoChKcZ3PrLC2o2kA/HA38QhVzxBA3+PqPCGkeDSVI+b+af4l8xScSm1HoM54+4tLttw==
   dependencies:
     "@uniswap/v3-core" "^1.0.1"
     "@uniswap/v3-periphery" "^1.4.3"
