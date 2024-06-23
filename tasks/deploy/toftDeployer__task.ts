@@ -46,11 +46,19 @@ export async function VMAddToft(
     } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
+    const vaultDeploymentName = `${DEPLOYMENT_NAMES.TOFT_VAULT}/${deploymentName}`;
+    VM.add(await buildToftVault(hre, vaultDeploymentName, [erc20]));
     if (!noModuleDeploy) {
-        await VMAddToftModule({ hre, VM, owner, tag });
+        await VMAddToftModule({
+            hre,
+            VM,
+            owner,
+            vaultDeploymentName,
+            erc20,
+            tag,
+        });
     }
 
-    const vaultDeploymentName = `${DEPLOYMENT_NAMES.TOFT_VAULT}/${deploymentName}`;
     const [initStruct, dependsOnInitStruct] = await getInitStruct({
         hre,
         tag,
@@ -64,9 +72,6 @@ export async function VMAddToft(
         chainInfo,
     });
     const [moduleStruct, dependsOnModuleStruct] = getModuleStruct({ hre });
-
-    VM.add(await buildToftVault(hre, vaultDeploymentName, [erc20]));
-
     if (target === 'toft') {
         VM.add(
             await buildTOFT(

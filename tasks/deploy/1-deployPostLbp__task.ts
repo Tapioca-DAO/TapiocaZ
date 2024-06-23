@@ -6,8 +6,16 @@ import { TToftDeployerTaskArgs, VMAddToft } from './toftDeployer__task';
 
 /**
  * @notice Should be called after the LBP has ended. Before `Bar` `postLbp1`
- * @notice Will deploy mtETH, tWSTETH, and tRETH. Will also set the LzPeer for mtETH (disabled for prod).
- * @notice Will deploy Balancer contract.
+ *
+ * Deploys: Arb, ETh
+ * - mtETH
+ * - tWSTETH
+ * - tRETH
+ * - tsDAI
+ *
+ * Post deploy: Arb
+ * - Set LzPeer for mtETH (disabled for prod)
+ * - Balancer contract (disabled for prod)
  */
 export const deployPostLbp__task = async (
     _taskArgs: TToftDeployerTaskArgs,
@@ -17,8 +25,12 @@ export const deployPostLbp__task = async (
         _taskArgs,
         {
             hre,
+            bytecodeSizeLimit: 70_000,
             // Static simulation needs to be false, constructor relies on external call. We're using 0x00 replacement with DeployerVM, which creates a false positive for static simulation.
             staticSimulation: false,
+            overrideOptions: {
+                gasLimit: 10_000_000,
+            },
         },
         tapiocaDeployTask,
         tapiocaPostDeployTask,
@@ -29,29 +41,26 @@ async function tapiocaPostDeployTask(params: TTapiocaDeployerVmPass<object>) {
     const { hre, taskArgs, VM, chainInfo } = params;
     const { tag } = taskArgs;
 
-    if (
-        chainInfo.name === 'ethereum' ||
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'optimism' ||
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'arbitrum_sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
-        console.log(
-            '\n[+] Disabled setting Balancer connected OFT for mtETH...',
-        );
-        // await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
+    console.log('\n[+] Disabled setting Balancer connected OFT for mtETH...');
+    // await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
 
-        // await balancerInnitConnectedOft__task(
-        //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
-        //     hre,
-        // );
-    }
+    // await balancerInnitConnectedOft__task(
+    //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
+    //     hre,
+    // );
 }
 
 async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
-    const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet, chainInfo } =
-        params;
+    const {
+        hre,
+        VM,
+        tapiocaMulticallAddr,
+        taskArgs,
+        isTestnet,
+        chainInfo,
+        isHostChain,
+        isSideChain,
+    } = params;
     const { tag } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
@@ -61,6 +70,8 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             hre,
             isTestnet,
             tapiocaMulticallAddr,
+            isHostChain,
+            isSideChain,
             VM,
             taskArgs: args,
         });
@@ -71,28 +82,29 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
     );
 
     // VM Add mtETH
-    if (
-        chainInfo.name === 'arbitrum' ||
-        chainInfo.name === 'ethereum' ||
-        chainInfo.name === 'optimism' ||
-        // testnet
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'arbitrum_sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
-        console.log('\n[+] Adding mtOFT contracts');
-        await VMAddToftWithArgs({
-            ...taskArgs,
-            target: 'mtoft',
-            deploymentName: DEPLOYMENT_NAMES.mtETH,
-            erc20: isTestnet
-                ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
-                : hre.ethers.constants.AddressZero,
-            name: 'Multi Tapioca OFT Native Ether',
-            symbol: DEPLOYMENT_NAMES.mtETH,
-            hostEid: hostChainInfo.lzChainId,
-        });
+    console.log('\n[+] Adding mtOFT contracts');
+    await VMAddToftWithArgs({
+        ...taskArgs,
+        target: 'mtoft',
+        deploymentName: DEPLOYMENT_NAMES.mtETH,
+        erc20: isTestnet
+            ? DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.WETH
+            : hre.ethers.constants.AddressZero,
+        name: 'Multi Tapioca OFT Native Ether',
+        symbol: DEPLOYMENT_NAMES.mtETH,
+        hostEid: hostChainInfo.lzChainId,
+    });
 
+    // VM.add(
+    //     await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
+    //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
+    //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
+    //         DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
+    //         owner,
+    //     ]),
+    // );
+
+    if (isHostChain) {
         // VM Add tWSTETH
         await VMAddToftWithArgs({
             ...taskArgs,
@@ -116,23 +128,10 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
             noModuleDeploy: true,
             hostEid: hostChainInfo.lzChainId,
         });
-
-        VM.add(
-            await buildBalancer(hre, DEPLOYMENT_NAMES.TOFT_BALANCER, [
-                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER_ETH,
-                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
-                DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
-                owner,
-            ]),
-        );
     }
 
     // VM Add BB + SGL OFTs
-    if (
-        chainInfo.name === 'arbitrum' ||
-        // testnet
-        chainInfo.name === 'arbitrum_sepolia'
-    ) {
+    if (isHostChain) {
         console.log('\n[+] Adding tOFT contracts');
         // VM Add tETH
         await VMAddToftWithArgs({
@@ -161,12 +160,7 @@ async function tapiocaDeployTask(params: TTapiocaDeployerVmPass<object>) {
         });
     }
 
-    if (
-        chainInfo.name === 'ethereum' ||
-        // testnet
-        chainInfo.name === 'sepolia' ||
-        chainInfo.name === 'optimism_sepolia'
-    ) {
+    if (isSideChain) {
         console.log('\n[+] Adding tOFT contracts');
         const sideChainHostChainInfo = hre.SDK.utils.getChainBy(
             'name',

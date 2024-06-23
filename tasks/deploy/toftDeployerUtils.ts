@@ -23,23 +23,32 @@ export async function VMAddToftModule(params: {
     hre: HardhatRuntimeEnvironment;
     VM: DeployerVM;
     owner: string;
+    vaultDeploymentName: string;
+    erc20: string;
     tag: string;
 }) {
-    const { hre, tag, VM, owner } = params;
+    const { hre, tag, vaultDeploymentName, erc20, VM, owner } = params;
     const addrOne = '0x0000000000000000000000000000000000000001';
     const initStruct: TOFTInitStructStruct = {
         cluster: addrOne,
-        delegate: addrOne,
+        delegate: owner,
         endpoint: hre.SDK.chainInfo.address, // Needs to be a real or mocked endpoint because of the external call made to it on construction
-        erc20: addrOne,
+        erc20,
         extExec: addrOne,
         hostEid: 0,
         name: 'TOFT Module',
         pearlmit: addrOne,
         symbol: 'TOFT Module',
-        vault: addrOne,
+        vault: '',
         yieldBox: addrOne,
     };
+    const dependentOn: IDependentOn[] = [
+        {
+            argPosition: 0,
+            deploymentName: vaultDeploymentName,
+            keyName: 'vault',
+        },
+    ];
 
     VM.add(await buildExtExec(hre, DEPLOYMENT_NAMES.TOFT_EXT_EXEC, [], []))
         .add(
@@ -47,6 +56,7 @@ export async function VMAddToftModule(params: {
                 hre,
                 DEPLOYMENT_NAMES.TOFT_GENERIC_RECEIVER_MODULE,
                 [initStruct],
+                dependentOn,
             ),
         )
         .add(
@@ -87,9 +97,9 @@ export async function getExternalContracts(params: {
 
     const yieldBox = loadGlobalContract(
         hre,
-        TAPIOCA_PROJECTS_NAME.YieldBox,
+        TAPIOCA_PROJECTS_NAME.TapiocaPeriph,
         hre.SDK.chainInfo.chainId,
-        PERIPH_DEPLOY_CONFIG.DEPLOYMENT_NAMES.YieldBox,
+        PERIPH_DEPLOY_CONFIG.DEPLOYMENT_NAMES.YIELDBOX,
         tag,
     );
 
