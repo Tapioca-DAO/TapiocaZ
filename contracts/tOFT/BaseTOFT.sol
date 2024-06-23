@@ -49,6 +49,7 @@ abstract contract BaseTOFT is
     error TOFT_NotValid();
     error TOFT_VaultWrongERC20();
     error TOFT_VaultWrongOwner();
+    error TOFT_NotAuthorized();
 
     constructor(TOFTInitStruct memory _data)
         BaseTapiocaOmnichainEngine(
@@ -72,16 +73,24 @@ abstract contract BaseTOFT is
         if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
+    // *********************** //
+    // *** OWNER FUNCTIONS *** //
+    // *********************** //
     /**
      * @notice Un/Pauses this contract.
      */
-    function setPause(bool _pauseState) external onlyOwner {
+    function setPause(bool _pauseState) external {
+        if (!getCluster().hasRole(msg.sender, keccak256("PAUSABLE")) && msg.sender != owner()) revert TOFT_NotAuthorized();
         if (_pauseState) {
             _pause();
         } else {
             _unpause();
         }
     }
+
+    // ************************** //
+    // *** INTERNAL FUNCTIONS *** //
+    // ************************** //
 
     function _wrap(address _fromAddress, address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {
         // Check internal allowance only if not the same address
