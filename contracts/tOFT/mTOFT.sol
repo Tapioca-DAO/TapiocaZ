@@ -193,15 +193,20 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         public
         payable
         whenNotPaused
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory msgSent,
+            bytes memory options
+        )
     {
-        (msgReceipt, oftReceipt) = abi.decode(
+        (msgReceipt, oftReceipt, msgSent, options) = abi.decode(
             _executeModule(
                 uint8(ITOFT.Module.TOFTSender),
                 abi.encodeCall(TapiocaOmnichainSender.sendPacket, (_lzSendParam, _composeMsg)),
                 false
             ),
-            (MessagingReceipt, OFTReceipt)
+            (MessagingReceipt, OFTReceipt, bytes, bytes)
         );
     }
 
@@ -212,15 +217,20 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         public
         payable
         whenNotPaused
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory msgSent,
+            bytes memory options
+        )
     {
-        (msgReceipt, oftReceipt) = abi.decode(
+        (msgReceipt, oftReceipt, msgSent, options) = abi.decode(
             _executeModule(
                 uint8(ITOFT.Module.TOFTSender),
                 abi.encodeCall(TapiocaOmnichainSender.sendPacketFrom, (_from, _lzSendParam, _composeMsg)),
                 false
             ),
-            (MessagingReceipt, OFTReceipt)
+            (MessagingReceipt, OFTReceipt, bytes, bytes)
         );
     }
 
