@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 // Tapioca
 import {TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {TOFT} from "contracts/tOFT/TOFT.sol";
+import {TOFT} from "tapiocaz/tOFT/TOFT.sol";
 
 /*
 __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\\_____________/\\\\\\\\\_____/\\\\\\\\\____        

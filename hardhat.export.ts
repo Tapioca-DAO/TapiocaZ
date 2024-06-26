@@ -1,9 +1,11 @@
 // Plugins
+import '@nomiclabs/hardhat-ethers';
+import '@nomicfoundation/hardhat-verify';
+import '@typechain/hardhat';
+
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-foundry';
-import '@nomicfoundation/hardhat-toolbox';
 import '@primitivefi/hardhat-dodoc';
-import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-tracer';
 import { HardhatUserConfig } from 'hardhat/config';
@@ -72,11 +74,21 @@ const config: HardhatUserConfig & { dodoc: any } = {
                     evmVersion: 'paris', // Latest before Shanghai
                     optimizer: {
                         enabled: true,
-                        runs: 500,
+                        runs: 20,
                     },
                 },
             },
             'contracts/tOFT/modules/TOFTOptionsReceiverModule.sol': {
+                version: '0.8.22',
+                settings: {
+                    evmVersion: 'paris', // Latest before Shanghai
+                    optimizer: {
+                        enabled: true,
+                        runs: 5000,
+                    },
+                },
+            },
+            'contracts/tOFT/modules/TOFTMarketReceiverModule.sol': {
                 version: '0.8.22',
                 settings: {
                     evmVersion: 'paris', // Latest before Shanghai

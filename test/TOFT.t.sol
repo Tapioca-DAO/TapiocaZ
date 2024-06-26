@@ -42,35 +42,31 @@ import {
     ITapiocaOptionBroker, IExerciseOptionsData
 } from "tapioca-periph/interfaces/tap-token/ITapiocaOptionBroker.sol";
 import {
-    TOFTHelper,
-    PrepareLzCallData,
-    PrepareLzCallReturn,
-    ComposeMsgData
-} from "contracts/tOFT/extensions/TOFTHelper.sol";
+    TOFTHelper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData
+} from "tapiocaz/tOFT/extensions/TOFTHelper.sol";
 import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
-import {TOFTGenericReceiverModule} from "contracts/tOFT/modules/TOFTGenericReceiverModule.sol";
-import {TOFTOptionsReceiverModule} from "contracts/tOFT/modules/TOFTOptionsReceiverModule.sol";
-import {TOFTMarketReceiverModule} from "contracts/tOFT/modules/TOFTMarketReceiverModule.sol";
+import {TOFTGenericReceiverModule} from "tapiocaz/tOFT/modules/TOFTGenericReceiverModule.sol";
+import {TOFTOptionsReceiverModule} from "tapiocaz/tOFT/modules/TOFTOptionsReceiverModule.sol";
+import {TOFTMarketReceiverModule} from "tapiocaz/tOFT/modules/TOFTMarketReceiverModule.sol";
 import {MagnetarWithdrawData} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
+import {IMtoftFeeGetter} from "tapioca-periph/interfaces/oft/IMToftFeeGetter.sol";
 import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
-import {mTOFTReceiver} from "contracts/tOFT/modules/mTOFTReceiver.sol";
+import {mTOFTReceiver} from "tapiocaz/tOFT/modules/mTOFTReceiver.sol";
 import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
-import {TOFTSender} from "contracts/tOFT/modules/TOFTSender.sol";
+import {TOFTSender} from "tapiocaz/tOFT/modules/TOFTSender.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
-import {mTOFT} from "contracts/tOFT/mTOFT.sol";
+import {mTOFT} from "tapiocaz/tOFT/mTOFT.sol";
 
 // Tapioca Tests
-import {TapiocaOptionsBrokerMock} from "./TapiocaOptionsBrokerMock.sol";
+import {TapiocaOptionsBrokerMock, OTapMock} from "./TapiocaOptionsBrokerMock.sol";
 import {MarketHelperMock} from "./MarketHelperMock.sol";
-import {TOFTVault} from "contracts/tOFT/TOFTVault.sol";
+import {TOFTVault} from "tapiocaz/tOFT/TOFTVault.sol";
 import {TOFTTestHelper} from "./TOFTTestHelper.t.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
-
-import "forge-std/console.sol";
 
 contract TOFTTest is TOFTTestHelper {
     using OptionsBuilder for bytes;
@@ -102,6 +98,7 @@ contract TOFTTest is TOFTTestHelper {
     TOFTHelper tOFTHelper;
 
     TapiocaOptionsBrokerMock tOB;
+    TapiocaOmnichainExtExec toftExtExec;
 
     uint256 aTOFTYieldBoxId;
     uint256 bTOFTYieldBoxId;
@@ -156,10 +153,10 @@ contract TOFTTest is TOFTTestHelper {
 
         setUpEndpoints(3, LibraryType.UltraLightNode);
 
-        pearlmit = new Pearlmit("Pearlmit", "1");
-        yieldBox = createYieldBox();
+        pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
+        yieldBox = createYieldBox(pearlmit, address(this));
         cluster = createCluster(aEid, __owner);
-        pearlmit = new Pearlmit("Pearlmit", "1");
+        pearlmit = new Pearlmit("Pearlmit", "1", address(this), 0);
         magnetar = createMagnetar(address(cluster), IPearlmit(address(pearlmit)));
 
         {
@@ -170,7 +167,8 @@ contract TOFTTest is TOFTTestHelper {
             vm.label(address(magnetar), "Magnetar");
         }
 
-        TapiocaOmnichainExtExec toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+        toftExtExec = new TapiocaOmnichainExtExec();
+
         TOFTVault aTOFTVault = new TOFTVault(address(aERC20));
         TOFTInitStruct memory aTOFTInitStruct = TOFTInitStruct({
             name: "Token A",
@@ -259,7 +257,7 @@ contract TOFTTest is TOFTTestHelper {
         }
 
         {
-            toftExtExec = new TapiocaOmnichainExtExec(ICluster(address(cluster)), __owner);
+            toftExtExec = new TapiocaOmnichainExtExec();
             bTOFTVault = new TOFTVault(address(bERC20));
             bTOFTInitStruct = TOFTInitStruct({
                 name: "Token B",
@@ -332,6 +330,11 @@ contract TOFTTest is TOFTTestHelper {
         cluster.updateContract(bEid, address(magnetar), true);
         cluster.updateContract(bEid, address(tOB), true);
         cluster.updateContract(bEid, address(marketHelper), true);
+        cluster.updateContract(0, address(yieldBox), true);
+        cluster.updateContract(0, address(singularity), true);
+        cluster.updateContract(0, address(magnetar), true);
+        cluster.updateContract(0, address(tOB), true);
+        cluster.updateContract(0, address(marketHelper), true);
     }
 
     /**
@@ -384,15 +387,13 @@ contract TOFTTest is TOFTTestHelper {
             _lzOFTComposedData.extraOptions,
             _lzOFTComposedData.guid,
             _lzOFTComposedData.to,
-            abi.encodePacked(
-                OFTMsgCodec.addressToBytes32(_lzOFTComposedData.srcMsgSender), _lzOFTComposedData.composeMsg
-            )
+            _lzOFTComposedData.composeMsg
         );
     }
 
     function test_constructor() public {
         assertEq(address(aTOFT.yieldBox()), address(yieldBox));
-        assertEq(address(aTOFT.cluster()), address(cluster));
+        assertEq(address(aTOFT.getCluster()), address(cluster));
         assertEq(address(aTOFT.erc20()), address(aERC20));
         assertEq(aTOFT.hostEid(), aEid);
     }
@@ -403,7 +404,7 @@ contract TOFTTest is TOFTTestHelper {
 
     function test_wrap_fail() public {
         uint256 erc20Amount_ = 1 ether;
-        pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(20, address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
         bERC20.approve(address(pearlmit), uint200(erc20Amount_));
 
         vm.expectRevert();
@@ -424,7 +425,7 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(20, address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             aERC20.approve(address(pearlmit), uint200(erc20Amount_));
             aTOFT.wrap(address(this), address(this), erc20Amount_);
 
@@ -440,49 +441,145 @@ contract TOFTTest is TOFTTestHelper {
         }
     }
 
-    function test_extract_fees() public {
-        uint256 erc20Amount_ = 1 ether;
+    // function test_unwrap_fees() public {
+    //     uint256 liquidityAmount_ = 50 ether;
+    //     uint256 unwrapAmount_ = 1 ether;
 
-        // set fee
-        {
-            mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
-                stargateRouter: address(0),
-                mintFee: 1e4,
-                mintCap: wrongHostTOFT.mintCap(),
-                connectedChain: aEid,
-                connectedChainState: true,
-                balancerStateAddress: address(0),
-                balancerState: false
-            });
-            wrongHostTOFT.setOwnerState(dataA);
-        }
+    //     // set fee
+    //     {
+    //         mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
+    //             stargateRouter: address(0),
+    //             mintFee: 0,
+    //             mintCap: wrongHostTOFT.mintCap(),
+    //             connectedChain: aEid,
+    //             connectedChainState: true,
+    //             balancerStateAddress: address(0),
+    //             balancerState: false
+    //         });
+    //         wrongHostTOFT.setOwnerState(dataA);
+    //     }
 
-        // wrap
-        uint256 feeAmount = erc20Amount_ * 1e4 / 1e5;
-        {
-            deal(address(bERC20), address(this), erc20Amount_);
+    //     IToftVault vault = wrongHostTOFT.vault();
 
-            assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
+    //     // range 0-100
+    //     {
+    //         // test wrap
+    //         deal(address(bERC20), address(this), liquidityAmount_);
+    //         assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
 
-            pearlmit.approve(
-                address(bERC20), 0, address(wrongHostTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)
-            ); // Atomic approval
-            bERC20.approve(address(pearlmit), uint200(erc20Amount_));
-            wrongHostTOFT.wrap(address(this), address(this), erc20Amount_);
+    //         pearlmit.approve(
+    //             address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp)
+    //         ); // Atomic approval
+    //         bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+    //         wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
 
-            assertLt(wrongHostTOFT.balanceOf(address(this)), erc20Amount_);
-            assertEq(wrongHostTOFT.balanceOf(address(this)), erc20Amount_ - feeAmount);
-        }
+    //         uint256 supply = vault.viewSupply();
+    //         assertEq(supply, liquidityAmount_);
 
-        // extract
-        {
-            IToftVault vault = wrongHostTOFT.vault();
-            uint256 viewFeesAmount = vault.viewFees();
-            assertGt(viewFeesAmount, 0);
-            wrongHostTOFT.withdrawFees(address(tapOFT), vault.viewFees());
-            assertEq(bERC20.balanceOf(address(tapOFT)), feeAmount);
-        }
-    }
+    //         uint256 multiplier = wrongHostTOFT.getMultiplier(liquidityAmount_);
+    //         assertEq(multiplier, 0);
+
+    //         uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, liquidityAmount_);
+    //         assertEq(feeAmount, 0);
+
+    //         uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+    //         assertEq(unwrapped, unwrapAmount_);
+    //     }
+
+    //     // range 100-1000
+    //     {
+    //         liquidityAmount_ = 500 ether;
+    //         deal(address(bERC20), address(this), liquidityAmount_);
+    //         assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
+
+    //         pearlmit.approve(
+    //             address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp)
+    //         ); // Atomic approval
+    //         bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+    //         wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
+
+    //         uint256 supply = vault.viewSupply();
+    //         assertGt(supply, liquidityAmount_);
+
+    //         uint256 multiplier = wrongHostTOFT.getMultiplier(vault.viewSupply());
+    //         assertEq(multiplier, 5);
+
+    //         uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, vault.viewSupply());
+    //         assertGt(feeAmount, 0);
+
+    //         uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+    //         assertLt(unwrapped, unwrapAmount_);
+    //         assertEq(unwrapped, unwrapAmount_ - feeAmount);
+    //     }
+
+    //     // range 1000-10000
+    //     {
+    //         liquidityAmount_ = 50_000 ether;
+    //         deal(address(bERC20), address(this), liquidityAmount_);
+    //         assertEq(bERC20.balanceOf(address(this)), liquidityAmount_);
+
+    //         pearlmit.approve(
+    //             address(bERC20), 0, address(wrongHostTOFT), uint200(liquidityAmount_), uint48(block.timestamp)
+    //         ); // Atomic approval
+    //         bERC20.approve(address(pearlmit), uint200(liquidityAmount_));
+    //         wrongHostTOFT.wrap(address(this), address(this), liquidityAmount_);
+
+    //         uint256 supply = vault.viewSupply();
+    //         assertGt(supply, liquidityAmount_);
+
+    //         uint256 multiplier = wrongHostTOFT.getMultiplier(vault.viewSupply());
+    //         assertEq(multiplier, 10);
+
+    //         uint256 feeAmount = wrongHostTOFT.computeUnwrapFees(unwrapAmount_, vault.viewSupply());
+    //         assertGt(feeAmount, 0);
+
+    //         uint256 unwrapped = wrongHostTOFT.unwrap(address(this), unwrapAmount_);
+    //         assertLt(unwrapped, unwrapAmount_);
+    //         assertEq(unwrapped, unwrapAmount_ - feeAmount);
+    //     }
+    // }
+
+    // function test_extract_fees() public {
+    //     uint256 erc20Amount_ = 1 ether;
+
+    //     // set fee
+    //     {
+    //         mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
+    //             stargateRouter: address(0),
+    //             mintFee: 1e4,
+    //             mintCap: wrongHostTOFT.mintCap(),
+    //             connectedChain: aEid,
+    //             connectedChainState: true,
+    //             balancerStateAddress: address(0),
+    //             balancerState: false
+    //         });
+    //         wrongHostTOFT.setOwnerState(dataA);
+    //     }
+
+    //     // wrap
+    //     uint256 feeAmount = erc20Amount_ * 1e4 / 1e5;
+    //     {
+    //         deal(address(bERC20), address(this), erc20Amount_);
+
+    //         assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
+
+    //         pearlmit.approve(20,address(bERC20), 0, address(wrongHostTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
+    //         bERC20.approve(address(pearlmit), uint200(erc20Amount_));
+    //         wrongHostTOFT.wrap(address(this), address(this), erc20Amount_);
+
+    //         assertLt(wrongHostTOFT.balanceOf(address(this)), erc20Amount_);
+    //         assertEq(wrongHostTOFT.balanceOf(address(this)), erc20Amount_ - feeAmount);
+    //     }
+
+    //     // extract
+    //     {
+    //         IToftVault vault = wrongHostTOFT.vault();
+    //         uint256 viewFeesAmount = vault.viewFees();
+    //         assertGt(viewFeesAmount, 0);
+    //         wrongHostTOFT.withdrawFees(address(tapOFT), vault.viewFees());
+    //         assertEq(bERC20.balanceOf(address(tapOFT)), feeAmount);
+    //     }
+    // }
 
     function test_extract_underlying() public {
         bool balancerStatus = wrongHostTOFT.balancers(address(this));
@@ -493,8 +590,8 @@ contract TOFTTest is TOFTTestHelper {
 
         {
             mTOFT.SetOwnerStateData memory dataA = mTOFT.SetOwnerStateData({
+                feeGetter: IMtoftFeeGetter(address(0)),
                 stargateRouter: address(0),
-                mintFee: 0,
                 mintCap: wrongHostTOFT.mintCap(),
                 connectedChain: 0,
                 connectedChainState: false,
@@ -572,7 +669,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -613,15 +711,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         {
             verifyPackets(uint32(bEid), address(bTOFT));
@@ -630,7 +733,7 @@ contract TOFTTest is TOFTTestHelper {
                 LzOFTComposedData(
                     PT_LEVERAGE_UP,
                     msgReceipt_.guid,
-                    composeMsg_,
+                    sentMsg,
                     bEid,
                     address(bTOFT), // Compose creator (at lzReceive)
                     address(bTOFT), // Compose receiver (at lzCompose)
@@ -646,6 +749,8 @@ contract TOFTTest is TOFTTestHelper {
      */
     function test_tOFT_erc20_approvals() public {
         address userC_ = vm.addr(0x3);
+
+        cluster.updateContract(0, address(bTOFT), true);
 
         ERC20PermitApprovalMsg memory permitApprovalB_;
         ERC20PermitApprovalMsg memory permitApprovalC_;
@@ -692,15 +797,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         verifyPackets(uint32(bEid), address(bTOFT));
 
@@ -714,7 +824,7 @@ contract TOFTTest is TOFTTestHelper {
             LzOFTComposedData(
                 PT_APPROVALS,
                 msgReceipt_.guid,
-                composeMsg_,
+                sentMsg,
                 bEid,
                 address(bTOFT), // Compose creator (at lzReceive)
                 address(bTOFT), // Compose receiver (at lzCompose)
@@ -758,7 +868,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             remoteLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -789,15 +900,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         {
             verifyPackets(uint32(bEid), address(bTOFT));
@@ -809,7 +925,7 @@ contract TOFTTest is TOFTTestHelper {
                 LzOFTComposedData(
                     PT_REMOTE_TRANSFER,
                     msgReceipt_.guid,
-                    composeMsg_,
+                    sentMsg,
                     bEid,
                     address(bTOFT), // Compose creator (at lzReceive)
                     address(bTOFT), // Compose receiver (at lzCompose)
@@ -838,11 +954,11 @@ contract TOFTTest is TOFTTestHelper {
             assertEq(aERC20.balanceOf(address(this)), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(20, address(aERC20), 0, address(aTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             aERC20.approve(address(pearlmit), uint200(erc20Amount_));
             aTOFT.wrap(address(this), address(this), erc20Amount_);
 
-            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(20, address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
 
@@ -883,7 +999,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -896,7 +1013,7 @@ contract TOFTTest is TOFTTestHelper {
         uint256 tokenAmountSD = tOFTHelper.toSD(tokenAmount_, aTOFT.decimalConversionRate());
 
         //approve magnetar
-        pearlmit.approve(address(bTOFT), 0, address(magnetar), type(uint200).max, uint48(block.timestamp + 1)); // Atomic approval
+        pearlmit.approve(20, address(bTOFT), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         bTOFT.approve(address(pearlmit), type(uint200).max);
 
         MarketBorrowMsg memory marketBorrowMsg = MarketBorrowMsg({
@@ -913,28 +1030,12 @@ contract TOFTTest is TOFTTestHelper {
                 withdraw: true,
                 yieldBox: address(yieldBox),
                 assetId: aTOFTYieldBoxId,
+                amount: tokenAmount_,
                 unwrap: false,
-                lzSendParams: LZSendParam({
-                    refundAddress: address(this),
-                    fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                    extraOptions: "0x",
-                    sendParam: SendParam({
-                        amountLD: tokenAmount_,
-                        composeMsg: "0x",
-                        dstEid: 0,
-                        extraOptions: "0x",
-                        minAmountLD: 0,
-                        oftCmd: "0x",
-                        to: OFTMsgCodec.addressToBytes32(address(this))
-                    })
-                }),
-                sendGas: 0,
-                composeGas: 0,
-                sendVal: 0,
-                composeVal: 0,
-                composeMsg: "0x",
-                composeMsgType: 0
-            })
+                receiver: address(this),
+                extractFromSender: false
+            }),
+            value: 0
         });
         bytes memory marketBorrowMsg_ = tOFTHelper.buildMarketBorrowMsg(marketBorrowMsg);
 
@@ -955,15 +1056,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         {
             verifyPackets(uint32(bEid), address(bTOFT));
@@ -972,7 +1078,7 @@ contract TOFTTest is TOFTTestHelper {
                 LzOFTComposedData(
                     PT_YB_SEND_SGL_BORROW,
                     msgReceipt_.guid,
-                    composeMsg_,
+                    sentMsg,
                     bEid,
                     address(bTOFT), // Compose creator (at lzReceive)
                     address(bTOFT), // Compose receiver (at lzCompose)
@@ -1025,7 +1131,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1052,27 +1159,11 @@ contract TOFTTest is TOFTTestHelper {
                 yieldBox: address(yieldBox),
                 assetId: bTOFTYieldBoxId,
                 unwrap: false,
-                lzSendParams: LZSendParam({
-                    refundAddress: address(this),
-                    fee: MessagingFee({lzTokenFee: 0, nativeFee: 0}),
-                    extraOptions: "0x",
-                    sendParam: SendParam({
-                        amountLD: tokenAmount_,
-                        composeMsg: "0x",
-                        dstEid: 0,
-                        extraOptions: "0x",
-                        minAmountLD: 0,
-                        oftCmd: "0x",
-                        to: OFTMsgCodec.addressToBytes32(address(this))
-                    })
-                }),
-                sendGas: 0,
-                composeGas: 0,
-                sendVal: 0,
-                composeVal: 0,
-                composeMsg: "0x",
-                composeMsgType: 0
-            })
+                amount: tokenAmount_,
+                receiver: address(this),
+                extractFromSender: false
+            }),
+            value: 0
         });
         bytes memory marketMsg_ = tOFTHelper.buildMarketRemoveCollateralMsg(marketMsg);
 
@@ -1093,15 +1184,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         {
             verifyPackets(uint32(bEid), address(bTOFT));
@@ -1110,7 +1206,7 @@ contract TOFTTest is TOFTTestHelper {
                 LzOFTComposedData(
                     PT_MARKET_REMOVE_COLLATERAL,
                     msgReceipt_.guid,
-                    composeMsg_,
+                    sentMsg,
                     bEid,
                     address(bTOFT), // Compose creator (at lzReceive)
                     address(bTOFT), // Compose receiver (at lzCompose)
@@ -1138,7 +1234,7 @@ contract TOFTTest is TOFTTestHelper {
             deal(address(bERC20), address(this), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(20, address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
@@ -1168,7 +1264,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1201,15 +1298,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         {
             verifyPackets(uint32(bEid), address(bTOFT));
@@ -1218,7 +1320,7 @@ contract TOFTTest is TOFTTestHelper {
                 LzOFTComposedData(
                     PT_SEND_PARAMS,
                     msgReceipt_.guid,
-                    composeMsg_,
+                    sentMsg,
                     bEid,
                     address(bTOFT), // Compose creator (at lzReceive)
                     address(bTOFT), // Compose receiver (at lzCompose)
@@ -1234,7 +1336,7 @@ contract TOFTTest is TOFTTestHelper {
         }
     }
 
-    function test_reaaaaaceive_with_params_userA() public {
+    function test_receive_with_params_userA() public {
         uint256 erc20Amount_ = 1 ether;
 
         //setup
@@ -1245,7 +1347,7 @@ contract TOFTTest is TOFTTestHelper {
             deal(address(bERC20), address(this), erc20Amount_);
             assertEq(bERC20.balanceOf(address(this)), erc20Amount_);
 
-            pearlmit.approve(address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp + 1)); // Atomic approval
+            pearlmit.approve(20, address(bERC20), 0, address(bTOFT), uint200(erc20Amount_), uint48(block.timestamp)); // Atomic approval
             bERC20.approve(address(pearlmit), uint200(erc20Amount_));
             bTOFT.wrap(address(this), address(this), erc20Amount_);
             assertEq(bTOFT.balanceOf(address(this)), erc20Amount_);
@@ -1274,7 +1376,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1307,15 +1410,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         {
             verifyPackets(uint32(bEid), address(bTOFT));
@@ -1328,7 +1436,7 @@ contract TOFTTest is TOFTTestHelper {
                 LzOFTComposedData(
                     PT_SEND_PARAMS,
                     msgReceipt_.guid,
-                    composeMsg_,
+                    sentMsg,
                     bEid,
                     address(bTOFT), // Compose creator (at lzReceive)
                     address(bTOFT), // Compose receiver (at lzCompose)
@@ -1362,7 +1470,11 @@ contract TOFTTest is TOFTTestHelper {
         LZSendParam memory withdrawLzSendParam_;
         MessagingFee memory withdrawMsgFee_; // Will be used as value for the composed msg
 
-        pearlmit.approve(address(bTOFT), 0, address(tOB), type(uint200).max, uint48(block.timestamp + 1));
+        address oTAP = tOB.oTAP();
+        OTapMock(oTAP).setOwner(address(this));
+
+        pearlmit.approve(20, address(bTOFT), 0, address(tOB), type(uint200).max, uint48(block.timestamp));
+        pearlmit.approve(721, oTAP, 0, address(bTOFT), type(uint200).max, uint48(block.timestamp)); // Atomic approval
 
         {
             // @dev `withdrawMsgFee_` is to be airdropped on dst to pay for the send to source operation (B->A).
@@ -1383,7 +1495,8 @@ contract TOFTTest is TOFTTestHelper {
                         prevOptionsData: bytes("")
                     }),
                     lzReceiveGas: 500_000,
-                    lzReceiveValue: 0
+                    lzReceiveValue: 0,
+                    refundAddress: address(this)
                 })
             );
             withdrawLzSendParam_ = prepareLzCallReturn1_.lzSendParam;
@@ -1418,8 +1531,7 @@ contract TOFTTest is TOFTTestHelper {
                 fee: MessagingFee({nativeFee: 0, lzTokenFee: 0}),
                 extraOptions: "0x",
                 refundAddress: address(this)
-            }),
-            composeMsg: "0x"
+            })
         });
         bytes memory sendMsg_ = tOFTHelper.buildExerciseOptionMsg(exerciseMsg);
 
@@ -1440,15 +1552,21 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 500_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
-        bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        bytes memory oftMsgOptions_ = prepareLzCallReturn2_.oftMsgOptions;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
+
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn2_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn2_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn2_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         {
             verifyPackets(uint32(bEid), address(bTOFT));
@@ -1457,7 +1575,7 @@ contract TOFTTest is TOFTTestHelper {
                 LzOFTComposedData(
                     PT_TAP_EXERCISE,
                     msgReceipt_.guid,
-                    composeMsg_,
+                    sentMsg,
                     bEid,
                     address(bTOFT), // Compose creator (at lzReceive)
                     address(bTOFT), // Compose receiver (at lzCompose)
@@ -1483,7 +1601,7 @@ contract TOFTTest is TOFTTestHelper {
             ERC20PermitStruct memory approvalUserB_ =
                 ERC20PermitStruct({owner: userA, spender: userB, value: 0, nonce: 0, deadline: 1 days});
 
-            bytes32 digest_ = _getYieldBoxPermitAllTypedDataHash(approvalUserB_);
+            bytes32 digest_ = _getYieldBoxPermitAllTypedDataHash(approvalUserB_, true);
             YieldBoxApproveAllMsg memory permitApproval_ =
                 __getYieldBoxPermitAllData(approvalUserB_, address(yieldBox), true, digest_, userAPKey);
 
@@ -1507,7 +1625,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1517,7 +1636,8 @@ contract TOFTTest is TOFTTestHelper {
 
         assertEq(yieldBox.isApprovedForAll(address(userA), address(userB)), false);
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        (MessagingReceipt memory msgReceipt_,, bytes memory sentMsg,) =
+            aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
 
         verifyPackets(uint32(bEid), address(bTOFT));
 
@@ -1525,7 +1645,7 @@ contract TOFTTest is TOFTTestHelper {
             LzOFTComposedData(
                 PT_YB_APPROVE_ALL,
                 msgReceipt_.guid,
-                composeMsg_,
+                sentMsg,
                 bEid,
                 address(bTOFT), // Compose creator (at lzReceive)
                 address(bTOFT), // Compose receiver (at lzCompose)
@@ -1544,7 +1664,7 @@ contract TOFTTest is TOFTTestHelper {
             ERC20PermitStruct memory approvalUserB_ =
                 ERC20PermitStruct({owner: userA, spender: userB, value: 0, nonce: 0, deadline: 1 days});
 
-            bytes32 digest_ = _getYieldBoxPermitAllTypedDataHash(approvalUserB_);
+            bytes32 digest_ = _getYieldBoxPermitAllTypedDataHash(approvalUserB_, false);
             YieldBoxApproveAllMsg memory permitApproval_ =
                 __getYieldBoxPermitAllData(approvalUserB_, address(yieldBox), false, digest_, userAPKey);
 
@@ -1568,7 +1688,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1580,7 +1701,8 @@ contract TOFTTest is TOFTTestHelper {
         yieldBox.setApprovalForAll(address(userB), true);
         assertEq(yieldBox.isApprovedForAll(address(userA), address(userB)), true);
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        (MessagingReceipt memory msgReceipt_,, bytes memory sentMsg,) =
+            aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
 
         verifyPackets(uint32(bEid), address(bTOFT));
 
@@ -1588,7 +1710,7 @@ contract TOFTTest is TOFTTestHelper {
             LzOFTComposedData(
                 PT_YB_APPROVE_ALL,
                 msgReceipt_.guid,
-                composeMsg_,
+                sentMsg,
                 bEid,
                 address(bTOFT), // Compose creator (at lzReceive)
                 address(bTOFT), // Compose receiver (at lzCompose)
@@ -1617,11 +1739,19 @@ contract TOFTTest is TOFTTestHelper {
             });
 
             permitApprovalB_ = __getYieldBoxPermitAssetData(
-                approvalUserB_, address(yieldBox), true, _getYieldBoxPermitAssetTypedDataHash(approvalUserB_), userAPKey
+                approvalUserB_,
+                address(yieldBox),
+                true,
+                _getYieldBoxPermitAssetTypedDataHash(approvalUserB_, true),
+                userAPKey
             );
 
             permitApprovalC_ = __getYieldBoxPermitAssetData(
-                approvalUserC_, address(yieldBox), true, _getYieldBoxPermitAssetTypedDataHash(approvalUserC_), userAPKey
+                approvalUserC_,
+                address(yieldBox),
+                true,
+                _getYieldBoxPermitAssetTypedDataHash(approvalUserC_, true),
+                userAPKey
             );
 
             YieldBoxApproveAssetMsg[] memory approvals_ = new YieldBoxApproveAssetMsg[](2);
@@ -1648,7 +1778,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1659,7 +1790,8 @@ contract TOFTTest is TOFTTestHelper {
         assertEq(yieldBox.isApprovedForAsset(address(userA), address(userB), aTOFTYieldBoxId), false);
         assertEq(yieldBox.isApprovedForAsset(address(userA), address(this), bTOFTYieldBoxId), false);
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        (MessagingReceipt memory msgReceipt_,, bytes memory sentMsg,) =
+            aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
 
         verifyPackets(uint32(bEid), address(bTOFT));
 
@@ -1667,7 +1799,7 @@ contract TOFTTest is TOFTTestHelper {
             LzOFTComposedData(
                 PT_YB_APPROVE_ASSET,
                 msgReceipt_.guid,
-                composeMsg_,
+                sentMsg,
                 bEid,
                 address(bTOFT), // Compose creator (at lzReceive)
                 address(bTOFT), // Compose receiver (at lzCompose)
@@ -1700,7 +1832,7 @@ contract TOFTTest is TOFTTestHelper {
                 approvalUserB_,
                 address(yieldBox),
                 false,
-                _getYieldBoxPermitAssetTypedDataHash(approvalUserB_),
+                _getYieldBoxPermitAssetTypedDataHash(approvalUserB_, false),
                 userAPKey
             );
 
@@ -1708,7 +1840,7 @@ contract TOFTTest is TOFTTestHelper {
                 approvalUserC_,
                 address(yieldBox),
                 false,
-                _getYieldBoxPermitAssetTypedDataHash(approvalUserC_),
+                _getYieldBoxPermitAssetTypedDataHash(approvalUserC_, false),
                 userAPKey
             );
 
@@ -1736,7 +1868,8 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
         bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
@@ -1751,7 +1884,8 @@ contract TOFTTest is TOFTTestHelper {
         assertEq(yieldBox.isApprovedForAsset(address(userA), address(userB), aTOFTYieldBoxId), true);
         assertEq(yieldBox.isApprovedForAsset(address(userA), address(this), bTOFTYieldBoxId), true);
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        (MessagingReceipt memory msgReceipt_,, bytes memory sentMsg,) =
+            aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
 
         verifyPackets(uint32(bEid), address(bTOFT));
 
@@ -1759,7 +1893,7 @@ contract TOFTTest is TOFTTestHelper {
             LzOFTComposedData(
                 PT_YB_APPROVE_ASSET,
                 msgReceipt_.guid,
-                composeMsg_,
+                sentMsg,
                 bEid,
                 address(bTOFT), // Compose creator (at lzReceive)
                 address(bTOFT), // Compose receiver (at lzCompose)
@@ -1773,6 +1907,7 @@ contract TOFTTest is TOFTTestHelper {
     }
 
     function test_tOFT_market_permit_asset() public {
+        cluster.updateContract(0, address(singularity), true);
         bytes memory approvalMsg_;
         {
             // @dev v,r,s will be completed on `__getMarketPermitData`
@@ -1811,15 +1946,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         verifyPackets(uint32(bEid), address(bTOFT));
 
@@ -1827,7 +1967,7 @@ contract TOFTTest is TOFTTestHelper {
             LzOFTComposedData(
                 PT_MARKET_PERMIT,
                 msgReceipt_.guid,
-                composeMsg_,
+                sentMsg,
                 bEid,
                 address(bTOFT), // Compose creator (at lzReceive)
                 address(bTOFT), // Compose receiver (at lzCompose)
@@ -1878,15 +2018,20 @@ contract TOFTTest is TOFTTestHelper {
                     prevOptionsData: bytes("")
                 }),
                 lzReceiveGas: 1_000_000,
-                lzReceiveValue: 0
+                lzReceiveValue: 0,
+                refundAddress: address(this)
             })
         );
-        bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
         bytes memory oftMsgOptions_ = prepareLzCallReturn_.oftMsgOptions;
-        MessagingFee memory msgFee_ = prepareLzCallReturn_.msgFee;
-        LZSendParam memory lzSendParam_ = prepareLzCallReturn_.lzSendParam;
+        MessagingReceipt memory msgReceipt_;
+        bytes memory sentMsg;
 
-        (MessagingReceipt memory msgReceipt_,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        {
+            bytes memory composeMsg_ = prepareLzCallReturn_.composeMsg;
+            MessagingFee memory msgFee_ = prepareLzCallReturn_.msgFee;
+            LZSendParam memory lzSendParam_ = prepareLzCallReturn_.lzSendParam;
+            (msgReceipt_,, sentMsg,) = aTOFT.sendPacket{value: msgFee_.nativeFee}(lzSendParam_, composeMsg_);
+        }
 
         verifyPackets(uint32(bEid), address(bTOFT));
 
@@ -1894,7 +2039,7 @@ contract TOFTTest is TOFTTestHelper {
             LzOFTComposedData(
                 PT_MARKET_PERMIT,
                 msgReceipt_.guid,
-                composeMsg_,
+                sentMsg,
                 bEid,
                 address(bTOFT), // Compose creator (at lzReceive)
                 address(bTOFT), // Compose receiver (at lzCompose)
@@ -1923,8 +2068,14 @@ contract TOFTTest is TOFTTestHelper {
         return keccak256(abi.encodePacked("\x19\x01", singularity.DOMAIN_SEPARATOR(), structHash_));
     }
 
-    function _getYieldBoxPermitAllTypedDataHash(ERC20PermitStruct memory _permitData) private view returns (bytes32) {
-        bytes32 permitTypeHash_ = keccak256("PermitAll(address owner,address spender,uint256 nonce,uint256 deadline)");
+    function _getYieldBoxPermitAllTypedDataHash(ERC20PermitStruct memory _permitData, bool permit)
+        private
+        view
+        returns (bytes32)
+    {
+        bytes32 permitTypeHash_ = permit
+            ? keccak256("PermitAll(address owner,address spender,uint256 nonce,uint256 deadline)")
+            : keccak256("RevokeAll(address owner,address spender,uint256 nonce,uint256 deadline)");
 
         bytes32 structHash_ = keccak256(
             abi.encode(permitTypeHash_, _permitData.owner, _permitData.spender, _permitData.nonce, _permitData.deadline)
@@ -1933,13 +2084,14 @@ contract TOFTTest is TOFTTestHelper {
         return keccak256(abi.encodePacked("\x19\x01", _getYieldBoxDomainSeparator(), structHash_));
     }
 
-    function _getYieldBoxPermitAssetTypedDataHash(ERC20PermitStruct memory _permitData)
+    function _getYieldBoxPermitAssetTypedDataHash(ERC20PermitStruct memory _permitData, bool permit)
         private
         view
         returns (bytes32)
     {
-        bytes32 permitTypeHash_ =
-            keccak256("Permit(address owner,address spender,uint256 assetId,uint256 nonce,uint256 deadline)");
+        bytes32 permitTypeHash_ = permit
+            ? keccak256("Permit(address owner,address spender,uint256 assetId,uint256 nonce,uint256 deadline)")
+            : keccak256("Revoke(address owner,address spender,uint256 assetId,uint256 nonce,uint256 deadline)");
 
         bytes32 structHash_ = keccak256(
             abi.encode(

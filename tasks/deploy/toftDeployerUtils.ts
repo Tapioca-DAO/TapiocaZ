@@ -23,44 +23,40 @@ export async function VMAddToftModule(params: {
     hre: HardhatRuntimeEnvironment;
     VM: DeployerVM;
     owner: string;
+    vaultDeploymentName: string;
+    erc20: string;
     tag: string;
 }) {
-    const { hre, tag, VM, owner } = params;
+    const { hre, tag, vaultDeploymentName, erc20, VM, owner } = params;
     const addrOne = '0x0000000000000000000000000000000000000001';
     const initStruct: TOFTInitStructStruct = {
         cluster: addrOne,
-        delegate: addrOne,
+        delegate: owner,
         endpoint: hre.SDK.chainInfo.address, // Needs to be a real or mocked endpoint because of the external call made to it on construction
-        erc20: addrOne,
+        erc20,
         extExec: addrOne,
         hostEid: 0,
         name: 'TOFT Module',
         pearlmit: addrOne,
         symbol: 'TOFT Module',
-        vault: addrOne,
+        vault: '',
         yieldBox: addrOne,
     };
-    const { cluster } = await getExternalContracts({
-        hre,
-        tag,
-    });
+    const dependentOn: IDependentOn[] = [
+        {
+            argPosition: 0,
+            deploymentName: vaultDeploymentName,
+            keyName: 'vault',
+        },
+    ];
 
-    VM.add(
-        await buildExtExec(
-            hre,
-            DEPLOYMENT_NAMES.TOFT_EXT_EXEC,
-            [
-                cluster.address, // Cluster
-                owner, // Owner
-            ],
-            [],
-        ),
-    )
+    VM.add(await buildExtExec(hre, DEPLOYMENT_NAMES.TOFT_EXT_EXEC, [], []))
         .add(
             await buildTOFTGenericReceiverModule(
                 hre,
                 DEPLOYMENT_NAMES.TOFT_GENERIC_RECEIVER_MODULE,
                 [initStruct],
+                dependentOn,
             ),
         )
         .add(
@@ -101,9 +97,9 @@ export async function getExternalContracts(params: {
 
     const yieldBox = loadGlobalContract(
         hre,
-        TAPIOCA_PROJECTS_NAME.YieldBox,
+        TAPIOCA_PROJECTS_NAME.TapiocaPeriph,
         hre.SDK.chainInfo.chainId,
-        PERIPH_DEPLOY_CONFIG.DEPLOYMENT_NAMES.YieldBox,
+        PERIPH_DEPLOY_CONFIG.DEPLOYMENT_NAMES.YIELDBOX,
         tag,
     );
 
@@ -148,6 +144,7 @@ export async function getInitStruct(params: {
     tag: string;
     owner: string;
     erc20: string;
+    hostEid: string | number;
     name: string;
     symbol: string;
     vaultDeploymentName: string;
@@ -158,7 +155,7 @@ export async function getInitStruct(params: {
         hre,
         tag,
         owner,
-        isTestnet,
+        hostEid,
         chainInfo,
         vaultDeploymentName,
         erc20,
@@ -167,9 +164,6 @@ export async function getInitStruct(params: {
     } = params;
 
     const addrZero = hre.ethers.constants.AddressZero;
-    const arbitrumEid = isTestnet
-        ? getChainBy('name', 'arbitrum').lzChainId
-        : getChainBy('name', 'arbitrum_sepolia').lzChainId;
 
     const { cluster, pearlmit, yieldBox } = await getExternalContracts({
         hre,
@@ -183,7 +177,7 @@ export async function getInitStruct(params: {
             endpoint: chainInfo.address,
             erc20,
             extExec: addrZero,
-            hostEid: arbitrumEid,
+            hostEid,
             name,
             pearlmit: pearlmit.address,
             symbol,

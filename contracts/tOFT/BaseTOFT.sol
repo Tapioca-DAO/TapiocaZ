@@ -44,36 +44,43 @@ abstract contract BaseTOFT is
     IToftVault public immutable vault;
     uint256 public immutable hostEid;
     address public immutable erc20;
-    ICluster public cluster;
 
     error TOFT_AllowanceNotValid();
     error TOFT_NotValid();
     error TOFT_VaultWrongERC20();
     error TOFT_VaultWrongOwner();
+    error TOFT_NotAuthorized();
 
     constructor(TOFTInitStruct memory _data)
-        BaseTapiocaOmnichainEngine(_data.name, _data.symbol, _data.endpoint, _data.delegate, _data.extExec, _data.pearlmit)
+        BaseTapiocaOmnichainEngine(
+            _data.name,
+            _data.symbol,
+            _data.endpoint,
+            _data.delegate,
+            _data.extExec,
+            _data.pearlmit,
+            ICluster(_data.cluster)
+        )
     {
         yieldBox = IYieldBox(_data.yieldBox);
-        cluster = ICluster(_data.cluster);
         hostEid = _data.hostEid;
         erc20 = _data.erc20;
 
         _transferOwnership(_data.delegate);
+
+        vault = IToftVault(_data.vault);
+
+        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
-    /**
-     * @notice set the Cluster address.
-     * @param _cluster the new Cluster address
-     */
-    function setCluster(address _cluster) external virtual onlyOwner {
-        cluster = ICluster(_cluster);
-    }
-
+    // *********************** //
+    // *** OWNER FUNCTIONS *** //
+    // *********************** //
     /**
      * @notice Un/Pauses this contract.
      */
-    function setPause(bool _pauseState) external onlyOwner {
+    function setPause(bool _pauseState) external {
+        if (!getCluster().hasRole(msg.sender, keccak256("PAUSABLE")) && msg.sender != owner()) revert TOFT_NotAuthorized();
         if (_pauseState) {
             _pause();
         } else {
@@ -81,8 +88,13 @@ abstract contract BaseTOFT is
         }
     }
 
+    // ************************** //
+    // *** INTERNAL FUNCTIONS *** //
+    // ************************** //
+
     function _wrap(address _fromAddress, address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {
-        if (_fromAddress != msg.sender) {
+        // Check internal allowance only if not the same address
+        if (_toAddress != _fromAddress) {
             if (allowance(_fromAddress, msg.sender) < _amount) {
                 revert TOFT_AllowanceNotValid();
             }
@@ -96,12 +108,12 @@ abstract contract BaseTOFT is
     }
 
     function _wrapNative(address _toAddress, uint256 _amount, uint256 _feeAmount) internal virtual {
-        vault.depositNative{value: _amount}();
+        vault.depositNative{value: _amount - _feeAmount}();
         _mint(_toAddress, _amount - _feeAmount);
     }
 
-    function _unwrap(address _toAddress, uint256 _amount) internal virtual {
-        _burn(msg.sender, _amount);
+    function _unwrap(address _from, address _toAddress, uint256 _amount) internal virtual {
+        _burn(_from, _amount);
         vault.withdraw(_toAddress, _amount);
     }
 }

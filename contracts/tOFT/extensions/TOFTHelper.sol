@@ -21,7 +21,8 @@ import {
     MarketPermitActionMsg,
     YieldBoxApproveAssetMsg
 } from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
+import { LockAndParticipateData } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
+import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
 import {BaseTOFTTokenMsgType} from "../BaseTOFTTokenMsgType.sol";
 
 /*
@@ -39,6 +40,14 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
     /// =======================
     /// Builder functions
     /// =======================
+    /**
+     * @notice Encodes the message for the PT_LOCK_AND_PARTICIPATE operation.
+     *
+     */
+    function buildLockAndParticipateMsg(LockAndParticipateData calldata _msg) public pure returns (bytes memory) {
+        return TOFTMsgCodec.buildLockAndParticipateMsg(_msg);
+    }
+
     /**
      * @notice Encodes the message for the PT_SEND_PARAMS operation.
      *
@@ -90,7 +99,7 @@ contract TOFTHelper is TapiocaOmnichainEngineHelper, BaseTOFTTokenMsgType {
     function _sanitizeMsgTypeExtended(uint16 _msgType) internal pure override returns (bool) {
         if (
             _msgType == MSG_MARKET_REMOVE_COLLATERAL || _msgType == MSG_YB_SEND_SGL_BORROW
-                || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS || _msgType == MSG_LEVERAGE_UP
+                || _msgType == MSG_TAP_EXERCISE || _msgType == MSG_SEND_PARAMS || _msgType == MSG_LEVERAGE_UP || _msgType == MSG_LOCK_AND_PARTICIPATE
         ) {
             return true;
         }

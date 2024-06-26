@@ -16,6 +16,7 @@ import {
 export type TToftDeployerTaskArgs = TTapiocaDeployTaskArgs & {
     erc20: string;
     target: 'toft' | 'mtoft';
+    hostEid: string | number;
     deploymentName: string;
     name: string;
     symbol: string;
@@ -33,20 +34,37 @@ export async function VMAddToft(
 ) {
     const { hre, VM, tapiocaMulticallAddr, taskArgs, isTestnet, chainInfo } =
         params;
-    const { tag, deploymentName, erc20, name, symbol, target, noModuleDeploy } =
-        taskArgs;
+    const {
+        tag,
+        deploymentName,
+        erc20,
+        name,
+        symbol,
+        target,
+        noModuleDeploy,
+        hostEid,
+    } = taskArgs;
     const owner = tapiocaMulticallAddr;
 
+    const vaultDeploymentName = `${DEPLOYMENT_NAMES.TOFT_VAULT}/${deploymentName}`;
+    VM.add(await buildToftVault(hre, vaultDeploymentName, [erc20]));
     if (!noModuleDeploy) {
-        await VMAddToftModule({ hre, VM, owner, tag });
+        await VMAddToftModule({
+            hre,
+            VM,
+            owner,
+            vaultDeploymentName,
+            erc20,
+            tag,
+        });
     }
 
-    const vaultDeploymentName = `${DEPLOYMENT_NAMES.TOFT_VAULT}/${deploymentName}`;
     const [initStruct, dependsOnInitStruct] = await getInitStruct({
         hre,
         tag,
         owner,
         erc20,
+        hostEid,
         name,
         symbol,
         vaultDeploymentName,
@@ -54,9 +72,6 @@ export async function VMAddToft(
         chainInfo,
     });
     const [moduleStruct, dependsOnModuleStruct] = getModuleStruct({ hre });
-
-    VM.add(await buildToftVault(hre, vaultDeploymentName, [erc20]));
-
     if (target === 'toft') {
         VM.add(
             await buildTOFT(
@@ -67,7 +82,6 @@ export async function VMAddToft(
             ),
         );
     } else if (target === 'mtoft') {
-        const toft = await hre.ethers.getContractFactory('TOFT');
         VM.add(
             await buildMTOFT(
                 hre,

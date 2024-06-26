@@ -14,5 +14,8 @@ export const buildTOFT = async (
         deploymentName,
         args,
         dependsOn,
+        meta: {
+            toft: true,
+        },
     };
 };

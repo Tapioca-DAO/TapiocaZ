@@ -5,10 +5,13 @@ pragma solidity 0.8.22;
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
+//LZ
+import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
+
 // Tapioca
 import {ITOFT, TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
-import {BaseTOFT} from "contracts/tOFT/BaseTOFT.sol";
+import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
+import {BaseTOFT} from "../BaseTOFT.sol";
 
 /*
 
@@ -32,6 +35,10 @@ contract TOFTGenericReceiverModule is BaseTOFT {
 
     error TOFTGenericReceiverModule_NotAuthorized(address invalidAddress);
     error TOFTGenericReceiverModule_TransferFailed();
+    error TOFTGenericReceiverModule_AmountMismatch();
+    error TOFTGenericReceiverModule_OnlyHostChain();
+
+    event WithParamsReceived(uint256 amount, address receiver, address srcChainSender);
 
     constructor(TOFTInitStruct memory _data) BaseTOFT(_data) {}
 
@@ -47,38 +54,33 @@ contract TOFTGenericReceiverModule is BaseTOFT {
     function receiveWithParamsReceiver(address srcChainSender, bytes memory _data) public payable {
         SendParamsMsg memory msg_ = TOFTMsgCodec.decodeSendParamsMsg(_data);
 
-        msg_.amount = _toLD(msg_.amount.toUint64());
+        /**
+        * @dev validate data
+        */
+        msg_ = _validateReceiveWithParams(msg_);
 
-        if (msg_.unwrap) {
-            ITOFT tOFT = ITOFT(address(this));
-            address toftERC20 = tOFT.erc20();
+        /**
+        * @dev executes unwrap or revert
+        */
+        _unwrapInReceiveWithParams(msg_, srcChainSender);
 
-            /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
-            _internalTransferWithAllowance(msg_.receiver, srcChainSender, msg_.amount);
-            tOFT.unwrap(address(this), msg_.amount);
-
-            if (toftERC20 != address(0)) {
-                IERC20(toftERC20).safeTransfer(msg_.receiver, msg_.amount);
-            } else {
-                (bool sent,) = msg_.receiver.call{value: msg_.amount}("");
-                if (!sent) revert TOFTGenericReceiverModule_TransferFailed();
-            }
-        }
+        emit WithParamsReceived(msg_.amount, msg_.receiver, srcChainSender);
     }
 
-    /**
-     * @dev Performs a transfer with an allowance check and consumption against the xChain msg sender.
-     * @dev Can only transfer to this address.
-     *
-     * @param _owner The account to transfer from.
-     * @param srcChainSender The address of the sender on the source chain.
-     * @param _amount The amount to transfer
-     */
-    function _internalTransferWithAllowance(address _owner, address srcChainSender, uint256 _amount) internal {
-        if (_owner != srcChainSender) {
-            _spendAllowance(_owner, srcChainSender, _amount);
-        }
+    function _validateReceiveWithParams(SendParamsMsg memory msg_) private view returns (SendParamsMsg memory) {
+        msg_.amount = _toLD(msg_.amount.toUint64());
+        return msg_;
+    }
 
-        _transfer(_owner, address(this), _amount);
+    function _unwrapInReceiveWithParams(SendParamsMsg memory msg_, address srcChainSender) private {
+        if (msg_.unwrap) {
+            /// @dev xChain owner needs to have approved dst srcChain `sendPacket()` msg.sender in a previous composedMsg. Or be the same address.
+            _internalTransferWithAllowance(msg_.receiver, srcChainSender, msg_.amount);
+
+            if (IMessagingChannel(endpoint).eid() != hostEid) revert TOFTGenericReceiverModule_OnlyHostChain();
+            _unwrap(address(this), msg_.receiver, msg_.amount);
+        } else {
+            if (msg.value > 0) revert TOFTGenericReceiverModule_AmountMismatch();
+        }
     }
 }

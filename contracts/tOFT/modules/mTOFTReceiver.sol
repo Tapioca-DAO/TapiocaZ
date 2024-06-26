@@ -21,7 +21,7 @@ import {BaseTOFTReceiver} from "./BaseTOFTReceiver.sol";
 contract mTOFTReceiver is BaseTOFTReceiver {
     constructor(TOFTInitStruct memory _data) BaseTOFTReceiver(_data) {}
 
-    function _toftCustomComposeReceiver(uint16 _msgType, address, bytes memory _toeComposeMsg)
+    function _toftCustomComposeReceiver(uint16 _msgType, address _srcChainSender, bytes memory _toeComposeMsg)
         internal
         override
         returns (bool success)
@@ -29,20 +29,13 @@ contract mTOFTReceiver is BaseTOFTReceiver {
         if (_msgType == MSG_LEVERAGE_UP) {
             _executeModule(
                 uint8(ITOFT.Module.TOFTMarketReceiver),
-                abi.encodeWithSelector(TOFTMarketReceiverModule.leverageUpReceiver.selector, _toeComposeMsg),
-                false
-            );
-            return true;
-        } else if (_msgType == MSG_XCHAIN_LEND_XCHAIN_LOCK) {
-            _executeModule(
-                uint8(ITOFT.Module.TOFTOptionsReceiver),
                 abi.encodeWithSelector(
-                    TOFTOptionsReceiverModule.mintLendXChainSGLXChainLockAndParticipateReceiver.selector, _toeComposeMsg
+                    TOFTMarketReceiverModule.leverageUpReceiver.selector, _srcChainSender, _toeComposeMsg
                 ),
                 false
             );
-        } else {
-            return false;
+            return true;
         }
+        return false;
     }
 }

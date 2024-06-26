@@ -2,10 +2,16 @@
 pragma solidity 0.8.22;
 
 //LZ
+import {
+    MessagingReceipt,
+    OFTReceipt,
+    SendParam,
+    MessagingFee
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
-import {MessagingReceipt, OFTReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OAppReceiver} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OAppReceiver.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
+import {OFTCore} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
@@ -25,6 +31,7 @@ import {
 import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
 import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {IStargateReceiver} from "tapioca-periph/interfaces/external/stargate/IStargateReceiver.sol";
+import {IMtoftFeeGetter} from "tapioca-periph/interfaces/oft/IMToftFeeGetter.sol";
 import {TOFTReceiver} from "./modules/TOFTReceiver.sol";
 import {TOFTSender} from "./modules/TOFTSender.sol";
 import {BaseTOFT} from "./BaseTOFT.sol";
@@ -65,12 +72,9 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
      */
     uint256 public mintCap;
 
-    /**
-     * @notice current non-host chain mint fee
-     */
-    uint256 public mintFee;
-
     address private _stargateRouter;
+
+    IMtoftFeeGetter public feeGetter; // Wrap and Unwrap fees are pulled from this address
 
     /*
      * @notice event emitted when rebalancing is performed
@@ -93,7 +97,6 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         }
 
         mintCap = 1_000_000 * 1e18; // TOFT is always in 18 decimals
-        mintFee = 5e2; // 0.5%
 
         // Set TOFT execution modules
         if (_modulesData.tOFTSenderModule == address(0)) revert TOFT_NotValid();
@@ -118,10 +121,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
 
         _stargateRouter = _stgRouter;
 
-        vault = IToftVault(_tOFTData.vault);
         vault.claimOwnership();
-
-        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**
@@ -133,14 +133,6 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     }
 
     receive() external payable {}
-
-    function transferFrom(address from, address to, uint256 value)
-        public
-        override(BaseTapiocaOmnichainEngine, ERC20)
-        returns (bool)
-    {
-        return BaseTapiocaOmnichainEngine.transferFrom(from, to, value);
-    }
 
     /**
      * @dev Slightly modified version of the OFT _lzReceive() operation.
@@ -168,27 +160,6 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
             abi.encodeWithSelector(OAppReceiver.lzReceive.selector, _origin, _guid, _message, _executor, _extraData),
             false
         );
-    }
-
-    /**
-     * @notice Execute a call to a module.
-     * @dev Example on how `_data` should be encoded:
-     *      - abi.encodeCall(IERC20.transfer, (to, amount));
-     * @dev Use abi.encodeCall to encode the function call and its parameters with type safety.
-     *
-     * @param _module The module to execute.
-     * @param _data The data to execute. Should be ABI encoded with the selector.
-     * @param _forwardRevert If true, forward the revert message from the module.
-     *
-     * @return returnData The return data from the module execution, if any.
-     */
-    function executeModule(ITOFT.Module _module, bytes memory _data, bool _forwardRevert)
-        external
-        payable
-        whenNotPaused
-        returns (bytes memory returnData)
-    {
-        return _executeModule(uint8(_module), _data, _forwardRevert);
     }
 
     /**
@@ -222,16 +193,73 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         public
         payable
         whenNotPaused
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory msgSent,
+            bytes memory options
+        )
     {
-        (msgReceipt, oftReceipt) = abi.decode(
+        (msgReceipt, oftReceipt, msgSent, options) = abi.decode(
             _executeModule(
                 uint8(ITOFT.Module.TOFTSender),
                 abi.encodeCall(TapiocaOmnichainSender.sendPacket, (_lzSendParam, _composeMsg)),
                 false
             ),
-            (MessagingReceipt, OFTReceipt)
+            (MessagingReceipt, OFTReceipt, bytes, bytes)
         );
+    }
+
+    /**
+     * @dev See `TapiocaOmnichainSender.sendPacket`
+     */
+    function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        public
+        payable
+        whenNotPaused
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory msgSent,
+            bytes memory options
+        )
+    {
+        (msgReceipt, oftReceipt, msgSent, options) = abi.decode(
+            _executeModule(
+                uint8(ITOFT.Module.TOFTSender),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacketFrom, (_from, _lzSendParam, _composeMsg)),
+                false
+            ),
+            (MessagingReceipt, OFTReceipt, bytes, bytes)
+        );
+    }
+
+    /**
+     * See `OFTCore::send()`
+     * @dev override default `send` behavior to add `whenNotPaused` modifier
+     */
+    function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
+        external
+        payable
+        override(OFTCore)
+        whenNotPaused
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        // @dev Applies the token transfers regarding this send() operation.
+        // - amountSentLD is the amount in local decimals that was ACTUALLY sent/debited from the sender.
+        // - amountReceivedLD is the amount in local decimals that will be received/credited to the recipient on the remote OFT instance.
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            _debit(msg.sender, _sendParam.amountLD, _sendParam.minAmountLD, _sendParam.dstEid);
+
+        // @dev Builds the options and OFT message to quote in the endpoint.
+        (bytes memory message, bytes memory options) = _buildMsgAndOptions(_sendParam, amountReceivedLD);
+
+        // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
+        msgReceipt = _lzSend(_sendParam.dstEid, message, options, _fee, _refundAddress);
+        // @dev Formulate the OFT receipt.
+        oftReceipt = OFTReceipt(amountSentLD, amountReceivedLD);
+
+        emit OFTSent(msgReceipt.guid, _sendParam.dstEid, msg.sender, amountSentLD, amountReceivedLD);
     }
 
     /// =====================
@@ -284,8 +312,9 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
             if (totalSupply() + _amount > mintCap) revert mTOFT_CapNotValid();
         }
 
-        uint256 feeAmount = _checkAndExtractFees(_amount);
+        uint256 feeAmount = _checkAndExtractWrapFees(_amount);
         if (erc20 == address(0)) {
+            if (msg.value != _amount) revert mTOFT_Failed();
             _wrapNative(_toAddress, _amount, feeAmount);
         } else {
             if (msg.value > 0) revert mTOFT_NotNative();
@@ -300,10 +329,18 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of tokens to unwrap.
      */
-    function unwrap(address _toAddress, uint256 _amount) external nonReentrant whenNotPaused {
+    function unwrap(address _toAddress, uint256 _amount)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (uint256 unwrapped)
+    {
         if (!connectedChains[_getChainId()]) revert mTOFT_NotHost();
         if (balancers[msg.sender]) revert mTOFT_BalancerNotAuthorized();
-        _unwrap(_toAddress, _amount);
+
+        uint256 feeAmount = _checkAndRegisterUnwrapFees(_amount);
+        unwrapped = _amount - feeAmount;
+        _unwrap(msg.sender, _toAddress, unwrapped);
     }
 
     /**
@@ -323,6 +360,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     /// =====================
     /// Owner
     /// =====================
+
     /**
      * @notice rescues unused ETH from the contract
      * @param amount the amount to rescue
@@ -338,7 +376,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
      */
     struct SetOwnerStateData {
         address stargateRouter;
-        uint256 mintFee;
+        IMtoftFeeGetter feeGetter;
         uint256 mintCap;
         // connected chains
         uint256 connectedChain;
@@ -352,8 +390,8 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
         if (_stargateRouter != _data.stargateRouter) {
             _stargateRouter = _data.stargateRouter;
         }
-        if (mintFee != _data.mintFee) {
-            mintFee = _data.mintFee;
+        if (feeGetter != _data.feeGetter) {
+            feeGetter = _data.feeGetter;
         }
         if (mintCap != _data.mintCap) {
             if (_data.mintCap < totalSupply()) revert mTOFT_CapNotValid();
@@ -392,26 +430,44 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     /// =====================
     /// Private
     /// =====================
-    function _checkAndExtractFees(uint256 _amount) private returns (uint256 feeAmount) {
-        feeAmount = 0;
+    function _checkAndExtractWrapFees(uint256 _amount) private returns (uint256 feeAmount) {
+        if (address(feeGetter) == address(0)) {
+            return feeAmount;
+        }
+        feeAmount = feeGetter.getWrapFee(_amount);
 
         // not on host chain; extract fee
         // fees are used to rebalance liquidity to host chain
-        if (_getChainId() != hostEid && mintFee > 0) {
-            feeAmount = (_amount * mintFee) / 1e5;
-            if (feeAmount > 0) {
-                if (erc20 == address(0)) {
-                    vault.registerFees{value: feeAmount}(feeAmount);
-                } else {
-                    vault.registerFees(feeAmount);
-                }
+        if (feeAmount > 0) {
+            if (erc20 == address(0)) {
+                vault.registerFees{value: feeAmount}(feeAmount);
+            } else {
+                vault.registerFees(feeAmount);
             }
         }
     }
+
+    function _checkAndRegisterUnwrapFees(uint256 _amount) private returns (uint256 feeAmount) {
+        if (address(feeGetter) == address(0)) {
+            return feeAmount;
+        }
+
+        feeAmount = feeGetter.getUnwrapFee(_amount);
+
+        if (feeAmount > 0) {
+            _unwrap(msg.sender, address(this), feeAmount);
+
+            if (erc20 == address(0)) {
+                vault.registerFees{value: feeAmount}(feeAmount);
+            } else {
+                vault.registerFees(feeAmount);
+            }
+        }
+    }
+
     /**
      * @notice Return the current chain EID.
      */
-
     function _getChainId() internal view override returns (uint32) {
         return IMessagingChannel(endpoint).eid();
     }

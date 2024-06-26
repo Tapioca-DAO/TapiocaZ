@@ -1,4 +1,7 @@
 {
+  "ts-node": {
+    "swc": true
+  },
   "compilerOptions": {
     "target": "es2020",
     "module": "commonjs",
@@ -13,6 +16,7 @@
       "@tapioca-sdk/*": ["gitmodule/tapioca-sdk/src/*"],
       "@typechain/*": ["gen/typechain/*"],
       "@tapioca-periph/config":["gitmodule/tapioca-periph/tasks/deploy/DEPLOY_CONFIG.ts"],
+      "@tapioca-bar/config":["gitmodule/tapioca-bar/tasks/deploy/DEPLOY_CONFIG.ts"],
     }
   },
   "include": [

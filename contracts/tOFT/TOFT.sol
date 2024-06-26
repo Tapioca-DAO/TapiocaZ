@@ -2,10 +2,16 @@
 pragma solidity 0.8.22;
 
 //LZ
+import {
+    MessagingReceipt,
+    OFTReceipt,
+    SendParam,
+    MessagingFee
+} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
-import {MessagingReceipt, OFTReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import {OAppReceiver} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OAppReceiver.sol";
 import {Origin} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
+import {OFTCore} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // External
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
@@ -78,10 +84,7 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         _setModule(uint8(ITOFT.Module.TOFTOptionsReceiver), _modulesData.optionsReceiverModule);
         _setModule(uint8(ITOFT.Module.TOFTGenericReceiver), _modulesData.genericReceiverModule);
 
-        vault = IToftVault(_tOFTData.vault);
         vault.claimOwnership();
-
-        if (address(vault._token()) != erc20) revert TOFT_VaultWrongERC20();
     }
 
     /**
@@ -93,14 +96,6 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
     }
 
     receive() external payable {}
-
-    function transferFrom(address from, address to, uint256 value)
-        public
-        override(BaseTapiocaOmnichainEngine, ERC20)
-        returns (bool)
-    {
-        return BaseTapiocaOmnichainEngine.transferFrom(from, to, value);
-    }
 
     /**
      * @dev Slightly modified version of the OFT _lzReceive() operation.
@@ -128,27 +123,6 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
             abi.encodeWithSelector(OAppReceiver.lzReceive.selector, _origin, _guid, _message, _executor, _extraData),
             false
         );
-    }
-
-    /**
-     * @notice Execute a call to a module.
-     * @dev Example on how `_data` should be encoded:
-     *      - abi.encodeCall(IERC20.transfer, (to, amount));
-     * @dev Use abi.encodeCall to encode the function call and its parameters with type safety.
-     *
-     * @param _module The module to execute.
-     * @param _data The data to execute. Should be ABI encoded with the selector.
-     * @param _forwardRevert If true, forward the revert message from the module.
-     *
-     * @return returnData The return data from the module execution, if any.
-     */
-    function executeModule(ITOFT.Module _module, bytes memory _data, bool _forwardRevert)
-        external
-        payable
-        whenNotPaused
-        returns (bytes memory returnData)
-    {
-        return _executeModule(uint8(_module), _data, _forwardRevert);
     }
 
     /**
@@ -182,16 +156,73 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         public
         payable
         whenNotPaused
-        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory msgSent,
+            bytes memory options
+        )
     {
-        (msgReceipt, oftReceipt) = abi.decode(
+        (msgReceipt, oftReceipt, msgSent, options) = abi.decode(
             _executeModule(
                 uint8(ITOFT.Module.TOFTSender),
                 abi.encodeCall(TapiocaOmnichainSender.sendPacket, (_lzSendParam, _composeMsg)),
                 false
             ),
-            (MessagingReceipt, OFTReceipt)
+            (MessagingReceipt, OFTReceipt, bytes, bytes)
         );
+    }
+
+    /**
+     * @dev See `TapiocaOmnichainSender.sendPacket`
+     */
+    function sendPacketFrom(address _from, LZSendParam calldata _lzSendParam, bytes calldata _composeMsg)
+        public
+        payable
+        whenNotPaused
+        returns (
+            MessagingReceipt memory msgReceipt,
+            OFTReceipt memory oftReceipt,
+            bytes memory msgSent,
+            bytes memory options
+        )
+    {
+        (msgReceipt, oftReceipt, msgSent, options) = abi.decode(
+            _executeModule(
+                uint8(ITOFT.Module.TOFTSender),
+                abi.encodeCall(TapiocaOmnichainSender.sendPacketFrom, (_from, _lzSendParam, _composeMsg)),
+                false
+            ),
+            (MessagingReceipt, OFTReceipt, bytes, bytes)
+        );
+    }
+
+    /**
+     * See `OFTCore::send()`
+     * @dev override default `send` behavior to add `whenNotPaused` modifier
+     */
+    function send(SendParam calldata _sendParam, MessagingFee calldata _fee, address _refundAddress)
+        external
+        payable
+        override(OFTCore)
+        whenNotPaused
+        returns (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt)
+    {
+        // @dev Applies the token transfers regarding this send() operation.
+        // - amountSentLD is the amount in local decimals that was ACTUALLY sent/debited from the sender.
+        // - amountReceivedLD is the amount in local decimals that will be received/credited to the recipient on the remote OFT instance.
+        (uint256 amountSentLD, uint256 amountReceivedLD) =
+            _debit(msg.sender, _sendParam.amountLD, _sendParam.minAmountLD, _sendParam.dstEid);
+
+        // @dev Builds the options and OFT message to quote in the endpoint.
+        (bytes memory message, bytes memory options) = _buildMsgAndOptions(_sendParam, amountReceivedLD);
+
+        // @dev Sends the message to the LayerZero endpoint and returns the LayerZero msg receipt.
+        msgReceipt = _lzSend(_sendParam.dstEid, message, options, _fee, _refundAddress);
+        // @dev Formulate the OFT receipt.
+        oftReceipt = OFTReceipt(amountSentLD, amountReceivedLD);
+
+        emit OFTSent(msgReceipt.guid, _sendParam.dstEid, msg.sender, amountSentLD, amountReceivedLD);
     }
 
     /// =====================
@@ -247,6 +278,7 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
         returns (uint256 minted)
     {
         if (erc20 == address(0)) {
+            if (msg.value != _amount) revert TOFT_Failed();
             _wrapNative(_toAddress, _amount, 0);
         } else {
             if (msg.value > 0) revert TOFT_NotNative();
@@ -278,8 +310,14 @@ contract TOFT is BaseTOFT, ReentrancyGuard, ERC20Permit {
      * @param _toAddress The address to wrap the ERC20 to.
      * @param _amount The amount of tokens to unwrap.
      */
-    function unwrap(address _toAddress, uint256 _amount) external onlyHostChain nonReentrant {
-        _unwrap(_toAddress, _amount);
+    function unwrap(address _toAddress, uint256 _amount)
+        external
+        onlyHostChain
+        nonReentrant
+        returns (uint256 unwrapped)
+    {
+        _unwrap(msg.sender, _toAddress, _amount);
+        return _amount;
     }
 
     /**
