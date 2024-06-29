@@ -1024,7 +1024,8 @@ contract TOFTTest is TOFTTestHelper {
                 magnetar: address(magnetar),
                 marketHelper: address(marketHelper),
                 market: address(singularity),
-                deposit: true
+                deposit: true,
+                extractFromSender: false
             }),
             withdrawParams: MagnetarWithdrawData({
                 withdraw: true,
