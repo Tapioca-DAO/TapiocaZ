@@ -25,6 +25,7 @@ export const DEPLOYMENT_NAMES = {
     // tOFT SGL
     tsDAI: 'tsDAI',
     tsGLP: 'tsGLP',
+    tUsdcMock: 'tUsdcMock',
 };
 
 type TPostLbp = {
@@ -34,6 +35,7 @@ type TPostLbp = {
         reth: string;
         sDAI: string;
         sGLP: string;
+        usdcMock: string;
     };
 };
 
@@ -44,6 +46,7 @@ const POST_LBP: TPostLbp = {
         reth: '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8',
         sDAI: '',
         sGLP: '0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf',
+        usdcMock: '',
     },
     [EChainID.MAINNET]: {
         WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -51,6 +54,7 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // It's dai not sDai
         sGLP: '',
+        usdcMock: '',
     },
     [EChainID.ARBITRUM_SEPOLIA]: {
         WETH: '0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E',
@@ -58,6 +62,7 @@ const POST_LBP: TPostLbp = {
         reth: '0x518746126A545cC7F31EeD92bF2b04eb99eD103B',
         sDAI: '',
         sGLP: '0x1B460E311753fDB46451EF3d11d7B9eE5542b369',
+        usdcMock: '0x31FE585B3182E3c1b6838Fd728CCb66A63E3c8e4',
     },
     [EChainID.SEPOLIA]: {
         WETH: '0xD8a79b479b0c47675E3882A1DAA494b6775CE227',
@@ -65,6 +70,7 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0xC6EA2075314a58cf74DE8430b24714E600A21Dd8',
         sGLP: '',
+        usdcMock: '',
     },
     [EChainID.OPTIMISM_SEPOLIA]: {
         WETH: '0x4fB538Ed1a085200bD08F66083B72c0bfEb29112',
@@ -72,6 +78,7 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0x37359B8bfbFAE28E513EE31a2A94A9Ec60668d90',
         sGLP: '',
+        usdcMock: '',
     },
     [EChainID.FUJI_AVALANCHE]: {
         WETH: '0x4404EF158716dfad1c2BEffE9c7c8Fa261684544',
@@ -79,6 +86,7 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0xed18DBCb2810E4178c23668794198C81B0668b23',
         sGLP: '',
+        usdcMock: '',
     },
 };
 POST_LBP['31337' as EChainID] = POST_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum

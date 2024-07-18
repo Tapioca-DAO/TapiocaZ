@@ -47,7 +47,7 @@ async function tapiocaPostDeployTask(
     const { tag } = taskArgs;
 
     console.log('\n[+] Disabled setting Balancer connected OFT for mtETH...');
-    // await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
+    await setLzPeer__task({ tag, targetName: DEPLOYMENT_NAMES.mtETH }, hre);
 
     // await balancerInnitConnectedOft__task(
     //     { ...taskArgs, targetName: DEPLOYMENT_NAMES.mtETH },
@@ -99,6 +99,18 @@ async function tapiocaDeployTask(
         'name',
         isTestnet ? 'arbitrum_sepolia' : 'arbitrum',
     );
+    if (isTestnet) {
+        await VMAddToftWithArgs({
+            ...taskArgs,
+            target: 'toft',
+            deploymentName: DEPLOYMENT_NAMES.tUsdcMock,
+            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.usdcMock,
+            name: 'Tapioca OFT USDC Mock',
+            symbol: DEPLOYMENT_NAMES.tUsdcMock,
+            noModuleDeploy: false,
+            hostEid: hostChainInfo.lzChainId,
+        });
+    }
 
     // VM Add mtETH
     console.log('\n[+] Adding mtOFT contracts');
