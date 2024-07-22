@@ -12,13 +12,13 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Tapioca
-import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT, TOFTInitStruct} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {
     YieldBoxApproveAllMsg,
     MarketPermitActionMsg,
     YieldBoxApproveAssetMsg
-} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {TapiocaOmnichainReceiver} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainReceiver.sol";
+} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {TapiocaOmnichainReceiver} from "tap-utils/tapiocaOmnichainEngine/TapiocaOmnichainReceiver.sol";
 import {TOFTGenericReceiverModule} from "./TOFTGenericReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "./TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "./TOFTMarketReceiverModule.sol";

@@ -4,11 +4,11 @@ pragma solidity 0.8.22;
 // External
 import {Rebase} from "@boringcrypto/boring-solidity/contracts/libraries/BoringRebase.sol";
 
-import {IMarketLiquidatorReceiver} from "tapioca-periph/interfaces/bar/IMarketLiquidatorReceiver.sol";
-import {ITapiocaOracle} from "tapioca-periph/interfaces/periph/ITapiocaOracle.sol";
-import {ISingularity} from "tapioca-periph/interfaces/bar/ISingularity.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
+import {IMarketLiquidatorReceiver} from "tap-utils/interfaces/bar/IMarketLiquidatorReceiver.sol";
+import {ITapiocaOracle} from "tap-utils/interfaces/periph/ITapiocaOracle.sol";
+import {ISingularity} from "tap-utils/interfaces/bar/ISingularity.sol";
+import {IYieldBox} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
+import {IMarket, Module} from "tap-utils/interfaces/bar/IMarket.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 
 contract MarketHelperMock {

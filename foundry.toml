@@ -17,9 +17,9 @@ remappings = [
 	"solidity-bytes-utils/=node_modules/@layerzerolabs/solidity-bytes-utils/",
 	"forge-std/=lib/forge-std/src/",
 	"tapioca-sdk/=gitmodule/tapioca-sdk/contracts/",
-	"tapioca-periph/=gitmodule/tapioca-periph/contracts/",
+	"tap-utils/=lib/tap-utils/contracts/",
 	"yieldbox/=gitmodule/tap-yieldbox/contracts/",
-	"permitc/=gitmodule/tapioca-periph/gitmodule/permitc/src/", # Needs to be init in the periph repo
+	"permitc/=lib/tap-utils/lib/permitc/src/", # Needs to be init in the periph repo
 ]
 
 # forge-dpeloy

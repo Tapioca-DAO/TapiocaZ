@@ -2,8 +2,8 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
-import {ITOFT, TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TapiocaOmnichainSender} from "tap-utils/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
+import {ITOFT, TOFTInitStruct} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {BaseTOFT} from "../BaseTOFT.sol";
 
 /*

@@ -12,18 +12,17 @@ import {
     MarketBorrowMsg,
     MarketRemoveCollateralMsg,
     LeverageUpActionMsg
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {
     IMagnetar,
     MagnetarCall,
     DepositAddCollateralAndBorrowFromMarketData,
     MagnetarAction
-} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {MagnetarCollateralModule} from "tapioca-periph/Magnetar/modules/MagnetarCollateralModule.sol";
-import {MagnetarYieldBoxModule} from "tapioca-periph/Magnetar/modules/MagnetarYieldBoxModule.sol";
-import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
+} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {IMagnetarCollateralModule, IMagnetarYieldBoxModule} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {IMarketHelper} from "tap-utils/interfaces/bar/IMarketHelper.sol";
+import {IYieldBox} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
+import {IMarket, Module} from "tap-utils/interfaces/bar/IMarket.sol";
 import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "../BaseTOFT.sol";
 
@@ -198,7 +197,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
 
     function _marketBorrow(MarketBorrowMsg memory msg_) private {
         bytes memory call = abi.encodeWithSelector(
-            MagnetarCollateralModule.depositAddCollateralAndBorrowFromMarket.selector,
+            IMagnetarCollateralModule.depositAddCollateralAndBorrowFromMarket.selector,
             DepositAddCollateralAndBorrowFromMarketData(
                 msg_.borrowParams.market,
                 msg_.borrowParams.marketHelper,
@@ -244,7 +243,7 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     }
     function _magnetarWithdraw(MarketRemoveCollateralMsg memory msg_) private {
         bytes memory call =
-            abi.encodeWithSelector(MagnetarYieldBoxModule.withdrawHere.selector, msg_.withdrawParams);
+            abi.encodeWithSelector(IMagnetarYieldBoxModule.withdrawHere.selector, msg_.withdrawParams);
         MagnetarCall[] memory magnetarCall = new MagnetarCall[](1);
         magnetarCall[0] = MagnetarCall({
             id: uint8(MagnetarAction.YieldBoxModule),

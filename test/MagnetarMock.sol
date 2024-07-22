@@ -14,9 +14,9 @@ import {
     PrepareLzCallData,
     PrepareLzCallReturn,
     ComposeMsgData
-} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+} from "tap-utils/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {TapiocaOmnichainEngineHelper} from
-    "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+    "tap-utils/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {
     IMagnetar,
     DepositAddCollateralAndBorrowFromMarketData,
@@ -24,16 +24,16 @@ import {
     MagnetarCall,
     MagnetarModule,
     MagnetarAction
-} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {ITapiocaOmnichainEngine, LZSendParam} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import {PearlmitHandler, IPearlmit} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
-import {IMarketHelper} from "tapioca-periph/interfaces/bar/IMarketHelper.sol";
-import {IPermitAll} from "tapioca-periph/interfaces/common/IPermitAll.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {IMarket, Module} from "tapioca-periph/interfaces/bar/IMarket.sol";
-import {IOftSender} from "tapioca-periph/interfaces/oft/IOftSender.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
-import {IPermit} from "tapioca-periph/interfaces/common/IPermit.sol";
+} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {ITapiocaOmnichainEngine, LZSendParam} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import {PearlmitHandler, IPearlmit} from "tap-utils/pearlmit/PearlmitHandler.sol";
+import {IMarketHelper} from "tap-utils/interfaces/bar/IMarketHelper.sol";
+import {IPermitAll} from "tap-utils/interfaces/common/IPermitAll.sol";
+import {IYieldBox} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
+import {IMarket, Module} from "tap-utils/interfaces/bar/IMarket.sol";
+import {IOftSender} from "tap-utils/interfaces/oft/IOftSender.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
+import {IPermit} from "tap-utils/interfaces/common/IPermit.sol";
 
 /*
 * @dev need this because of via-ir: true error on original Magnetar

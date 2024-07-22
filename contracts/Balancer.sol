@@ -12,10 +12,10 @@ import {
     IStargateRouterBase,
     IStargateFactory,
     IStargatePool
-} from "tapioca-periph/interfaces/external/stargate/IStargateRouter.sol";
-import {IStargateEthVault} from "tapioca-periph/interfaces/external/stargate/IStargateEthVault.sol";
-import {ITOFTVault} from "tapioca-periph/interfaces/tapiocaz/ITOFTVault.sol";
-import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+} from "tap-utils/interfaces/external/stargate/IStargateRouter.sol";
+import {IStargateEthVault} from "tap-utils/interfaces/external/stargate/IStargateEthVault.sol";
+import {ITOFTVault} from "tap-utils/interfaces/tapiocaz/ITOFTVault.sol";
+import {ITOFT} from "tap-utils/interfaces/oft/ITOFT.sol";
 
 /*
 

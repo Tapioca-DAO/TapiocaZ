@@ -7,21 +7,21 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // Lz
 import {TestHelper} from "./LZSetup/TestHelper.sol";
 
-import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
+import {Pearlmit, IPearlmit} from "tap-utils/pearlmit/Pearlmit.sol";
 import {StargateRouterMock, StargateFactoryMock} from "./StargateRouterMock.sol";
 import {Balancer} from "tapiocaz/Balancer.sol";
 import {TestUtils} from "./TestUtils.t.sol";
 
-import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT, TOFTInitStruct, TOFTModulesInitStruct} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {
     TOFTHelper, PrepareLzCallData, PrepareLzCallReturn, ComposeMsgData
 } from "tapiocaz/tOFT/extensions/TOFTHelper.sol";
-import {TapiocaOmnichainExtExec} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
+import {TapiocaOmnichainExtExec} from "tap-utils/tapiocaOmnichainEngine/extension/TapiocaOmnichainExtExec.sol";
 import {TOFTGenericReceiverModule} from "tapiocaz/tOFT/modules/TOFTGenericReceiverModule.sol";
 import {TOFTOptionsReceiverModule} from "tapiocaz/tOFT/modules/TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "tapiocaz/tOFT/modules/TOFTMarketReceiverModule.sol";
-import {IMtoftFeeGetter} from "tapioca-periph/interfaces/oft/IMToftFeeGetter.sol";
-import {ICluster, Cluster} from "tapioca-periph/Cluster/Cluster.sol";
+import {IMtoftFeeGetter} from "tap-utils/interfaces/oft/IMToftFeeGetter.sol";
+import {ICluster, Cluster} from "tap-utils/Cluster/Cluster.sol";
 import {TOFTSender} from "tapiocaz/tOFT/modules/TOFTSender.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";
 

@@ -7,11 +7,11 @@ import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Tapioca
-import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
-import {TOFTInitStruct, IToftVault} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {PearlmitHandler} from "tapioca-periph/pearlmit/PearlmitHandler.sol";
-import {IYieldBox} from "tapioca-periph/interfaces/yieldbox/IYieldBox.sol";
-import {ICluster} from "tapioca-periph/interfaces/periph/ICluster.sol";
+import {BaseTapiocaOmnichainEngine} from "tap-utils/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
+import {TOFTInitStruct, IToftVault} from "tap-utils/interfaces/oft/ITOFT.sol";
+import {PearlmitHandler} from "tap-utils/pearlmit/PearlmitHandler.sol";
+import {IYieldBox} from "tap-utils/interfaces/yieldbox/IYieldBox.sol";
+import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
 import {BaseTOFTTokenMsgType} from "./BaseTOFTTokenMsgType.sol";
 import {ModuleManager} from "./modules/ModuleManager.sol";
 
