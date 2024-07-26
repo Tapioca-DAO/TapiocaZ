@@ -9,20 +9,20 @@ import {
     SendParamsMsg,
     ExerciseOptionsMsg,
     LeverageUpActionMsg
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {
     TapiocaOmnichainEngineHelper,
     PrepareLzCallData,
     PrepareLzCallReturn,
     ComposeMsgData
-} from "tapioca-periph/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
+} from "tap-utils/tapiocaOmnichainEngine/extension/TapiocaOmnichainEngineHelper.sol";
 import {
     YieldBoxApproveAllMsg,
     MarketPermitActionMsg,
     YieldBoxApproveAssetMsg
-} from "tapioca-periph/interfaces/periph/ITapiocaOmnichainEngine.sol";
-import { LockAndParticipateData } from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {TOFTMsgCodec} from "tapiocaz/tOFT/libraries/TOFTMsgCodec.sol";
+} from "tap-utils/interfaces/periph/ITapiocaOmnichainEngine.sol";
+import { LockAndParticipateData } from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {TOFTMsgCodec} from "contracts/tOFT/libraries/TOFTMsgCodec.sol";
 import {BaseTOFTTokenMsgType} from "../BaseTOFTTokenMsgType.sol";
 
 /*

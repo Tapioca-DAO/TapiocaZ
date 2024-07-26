@@ -25,9 +25,9 @@ import {
     LZSendParam,
     ERC20PermitStruct,
     IToftVault
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
-import {BaseTapiocaOmnichainEngine} from "tapioca-periph/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
-import {TapiocaOmnichainSender} from "tapioca-periph/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
+} from "tap-utils/interfaces/oft/ITOFT.sol";
+import {BaseTapiocaOmnichainEngine} from "tap-utils/tapiocaOmnichainEngine/BaseTapiocaOmnichainEngine.sol";
+import {TapiocaOmnichainSender} from "tap-utils/tapiocaOmnichainEngine/TapiocaOmnichainSender.sol";
 import {TOFTReceiver} from "./modules/TOFTReceiver.sol";
 import {TOFTSender} from "./modules/TOFTSender.sol";
 import {BaseTOFT} from "./BaseTOFT.sol";

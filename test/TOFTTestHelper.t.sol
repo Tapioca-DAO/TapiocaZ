@@ -9,15 +9,15 @@ import {IERC20} from "@boringcrypto/boring-solidity/contracts/interfaces/IERC20.
 import {TestHelper} from "./LZSetup/TestHelper.sol";
 
 // Tapioca
-import {TOFTInitStruct, TOFTModulesInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TOFTInitStruct, TOFTModulesInitStruct} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {ERC20WithoutStrategy} from "yieldbox/strategies/ERC20WithoutStrategy.sol";
-import {Pearlmit, IPearlmit} from "tapioca-periph/pearlmit/Pearlmit.sol";
+import {Pearlmit, IPearlmit} from "tap-utils/pearlmit/Pearlmit.sol";
 import {IWrappedNative} from "yieldbox/interfaces/IWrappedNative.sol";
 import {YieldBoxURIBuilder} from "yieldbox/YieldBoxURIBuilder.sol";
 import {TokenType} from "yieldbox/enums/YieldBoxTokenType.sol";
 import {IYieldBox} from "yieldbox/interfaces/IYieldBox.sol";
 import {IStrategy} from "yieldbox/interfaces/IStrategy.sol";
-import {Cluster} from "tapioca-periph/Cluster/Cluster.sol";
+import {Cluster} from "tap-utils/Cluster/Cluster.sol";
 import {SingularityMock} from "./SingularityMock.sol";
 import {MagnetarMock} from "./MagnetarMock.sol";
 import {YieldBox} from "yieldbox/YieldBox.sol";

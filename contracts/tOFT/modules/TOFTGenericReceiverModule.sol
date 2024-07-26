@@ -9,7 +9,7 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IMessagingChannel} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessagingChannel.sol";
 
 // Tapioca
-import {ITOFT, TOFTInitStruct, SendParamsMsg} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {ITOFT, TOFTInitStruct, SendParamsMsg} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {TOFTMsgCodec} from "../libraries/TOFTMsgCodec.sol";
 import {BaseTOFT} from "../BaseTOFT.sol";
 

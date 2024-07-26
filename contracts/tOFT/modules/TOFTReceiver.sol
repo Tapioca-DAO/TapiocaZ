@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
 
 // Tapioca
-import {TOFTInitStruct} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TOFTInitStruct} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {BaseTOFTReceiver} from "./BaseTOFTReceiver.sol";
 
 /*

@@ -4,12 +4,10 @@
 [submodule "gitmodule/tapioca-sdk"]
 	path = gitmodule/tapioca-sdk
 	url = https://github.com/Tapioca-DAO/tapioca-sdk
-[submodule "gitmodule/tapioca-periph"]
-	path = gitmodule/tapioca-periph
-	url = https://github.com/Tapioca-DAO/tapioca-periph.git
-[submodule "gitmodule/tap-yieldbox"]
-	path = gitmodule/tap-yieldbox
+[submodule "lib/tap-yieldbox"]
+	path = lib/tap-yieldbox
 	url = https://github.com/Tapioca-DAO/tap-yieldbox
-[submodule "gitmodule/tapioca-bar"]
-	path = gitmodule/tapioca-bar
-	url = https://github.com/Tapioca-DAO/tapioca-bar
+	branch = fix-dependencies
+[submodule "lib/tap-utils"]
+	path = lib/tap-utils
+	url = https://github.com/Tapioca-DAO/tap-utils

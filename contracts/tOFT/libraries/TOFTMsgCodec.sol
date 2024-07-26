@@ -10,11 +10,11 @@ import {
     ExerciseOptionsMsg,
     SendParamsMsg,
     LeverageUpActionMsg
-} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {
     LockAndParticipateData
-} from "tapioca-periph/interfaces/periph/IMagnetar.sol";
-import {ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+} from "tap-utils/interfaces/periph/IMagnetar.sol";
+import {ITOFT} from "tap-utils/interfaces/oft/ITOFT.sol";
 
 /*
 

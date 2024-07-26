@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 // Tapioca
-import {ERC721Permit} from "tapiocaz/util/ERC4494.sol";
+import {ERC721Permit} from "contracts/util/ERC4494.sol";
 
 contract ERC721Mock is ERC721, ERC721Permit {
     constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) ERC721Permit(name_) {}

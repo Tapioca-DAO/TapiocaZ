@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 // Tapioca
-import {TOFTInitStruct, LeverageUpActionMsg, ITOFT} from "tapioca-periph/interfaces/oft/ITOFT.sol";
+import {TOFTInitStruct, LeverageUpActionMsg, ITOFT} from "tap-utils/interfaces/oft/ITOFT.sol";
 import {TOFTOptionsReceiverModule} from "./TOFTOptionsReceiverModule.sol";
 import {TOFTMarketReceiverModule} from "./TOFTMarketReceiverModule.sol";
 import {BaseTOFTReceiver} from "./BaseTOFTReceiver.sol";
