@@ -133,3 +133,38 @@ contract BaseTOFTTest is TOFTTestHelper {
         assertTrue(balanceWrapToken == amountToWrap);
     }
 
+    function test_unwrapSuccess() public {
+        setVaultOwnership(address(baseTOFT));
+        vm.startPrank(alice);
+        uint200 tokenAmount = 1e18;
+
+        setApprovals(tokenAmount);
+        baseTOFT.wrap_(alice, alice, tokenAmount, 0);
+
+        // Record Alice's ERC20 balance before unwrapping
+        uint256 aliceERC20BalanceBefore = erc20.balanceOf(alice);
+
+        // Unwrap tokens: Convert wrapped tokens back to ERC20 tokens
+        baseTOFT.unwrap_(alice, alice, tokenAmount);
+
+        // Record Alice's ERC20 balance after unwrapping
+        uint256 aliceERC20BalanceAfter = erc20.balanceOf(alice);
+
+        // Check Alice's wrapped token balance
+        uint256 aliceWrappedTokenBalance = baseTOFT.balanceOf(alice);
+
+        // Check Alice's final ERC20 token balance
+        uint256 aliceFinalERC20Balance = erc20.balanceOf(alice);
+
+        // Assert that Alice has no wrapped tokens left
+        assertEq(aliceWrappedTokenBalance, 0, "Alice should have no wrapped tokens left");
+
+        // Assert that Alice received back her ERC20 tokens
+        assertEq(
+            aliceFinalERC20Balance,
+            aliceERC20BalanceBefore + tokenAmount,
+            "Alice should have received back her ERC20 tokens"
+        );
+        vm.stopPrank();
+    }
+
