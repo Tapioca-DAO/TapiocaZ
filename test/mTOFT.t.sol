@@ -267,3 +267,20 @@ contract mTOFTTest is TOFTTestHelper {
         verifyPackets(uint32(2), address(mTOFTChain2));
         assertEq(mTOFTChain2.balanceOf(bob), amount, "Amount transfered to Chain 2 should match sent amount");
     }
+    function test_sendPacketFrom_fail_Without_TOE_Role() public {
+        vm.startPrank(alice);
+        uint200 amount = 1e18;
+        LZSendParam memory lzSendParam = getLzParams(2, alice, amount, alice);
+        vm.expectRevert();
+        mTOFTChain1.sendPacketFrom{value: 300000}(alice, lzSendParam, "0x");
+        vm.stopPrank();
+    }
+
+    function test_sendPacketFrom_fail_From_Zero_Address() public {
+        vm.startPrank(alice);
+        uint200 amount = 1e18;
+        LZSendParam memory lzSendParam = getLzParams(2, alice, amount, alice);
+        vm.expectRevert();
+        mTOFTChain1.sendPacketFrom{value: 300000}(address(0), lzSendParam, "0x");
+        vm.stopPrank();
+    }
