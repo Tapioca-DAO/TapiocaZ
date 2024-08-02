@@ -91,3 +91,18 @@ contract BaseTOFTTest is TOFTTestHelper {
         baseTOFT.setPause(false);
     }
 
+    function test_wrapSuccess() public {
+        //test wrap function
+        vm.startPrank(alice);
+        uint256 aliceBalanceBefore = erc20.balanceOf(alice);
+        uint200 amountToWrap = 1e18;
+        assert(baseTOFT.balanceOf(alice) == 0);
+        setApprovals(amountToWrap);
+        baseTOFT.wrap_(alice, alice, amountToWrap, 0);
+
+        uint256 aliceBalanceAfter = erc20.balanceOf(alice);
+        uint256 balanceWrapToken = baseTOFT.balanceOf(alice);
+        assertTrue(aliceBalanceAfter == aliceBalanceBefore - amountToWrap);
+        assertTrue(balanceWrapToken == amountToWrap);
+    }
+
