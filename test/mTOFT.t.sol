@@ -299,6 +299,7 @@ contract mTOFTTest is TOFTTestHelper {
         bytes32 hash2 = mTOFTChain1.getTypedDataHash(permitData);
 
         assertEq(hash1, hash2, "Hash should be deterministic for the same input");
+    }
 
     function test_wrap_success() public {
         vm.startPrank(alice);
