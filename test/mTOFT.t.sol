@@ -298,6 +298,15 @@ contract mTOFTTest is TOFTTestHelper {
 
         assertEq(hash1, hash2, "Hash should be deterministic for the same input");
 
+    function test_wrap_success() public {
+        vm.startPrank(alice);
+        uint200 amountToWrap = 1e18;
+        setApprovals(mTOFTChain1, ERC20Chain1, amountToWrap);
+        mTOFTChain1.wrap(alice, alice, amountToWrap);
+        assertEq(mTOFTChain1.balanceOf(alice), amountToWrap, "Alice balance in mTOFTChain1 should be 1 after wrapping");
+        vm.stopPrank();
+    }
+
     function test_wrap_reverts_when_called_by_balancers() public {
         setOwnerState(mTOFTChain1, 2, true, MINT_CAP); //Set balancer address to be address(this)
         vm.expectRevert(mTOFT_BalancerNotAuthorized.selector);
