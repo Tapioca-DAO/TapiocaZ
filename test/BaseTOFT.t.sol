@@ -75,3 +75,19 @@ contract BaseTOFTTest is TOFTTestHelper {
         erc20.mint(alice, AMOUNT_TO_MINT);
     }
 
+    function test_setPause() public {
+        //test admin capabilities to pause and unpause
+        vm.startPrank(address(owner));
+        baseTOFT.setPause(true);
+        assertTrue(baseTOFT.paused());
+        baseTOFT.setPause(false);
+        assertFalse(baseTOFT.paused());
+        vm.stopPrank();
+        //assert that a random address cannot pause or unpause
+        vm.startPrank(alice);
+        vm.expectRevert(TOFT_NotAuthorized.selector);
+        baseTOFT.setPause(true);
+        vm.expectRevert(TOFT_NotAuthorized.selector);
+        baseTOFT.setPause(false);
+    }
+
