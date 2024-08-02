@@ -81,3 +81,28 @@ contract TOFTGenericReceiverModuleTest is TOFTTestHelper {
         receiverMock = new TOFTGenericReceiverModuleMock(_toftInitStruct);
     }
 
+    function test_receiveWithParamsReceiver_unwrapAndTransfer_success() public {
+        vm.startPrank(address(receiverMock));
+        aTOFTVault.claimOwnership();
+        uint64 amount = 1e18;
+
+        vm.startPrank(alice);
+        vm.deal(alice, 20 ether);
+
+        uint256 convertedAmount = receiverMock.toLD(amount);
+        receiverMock.mint(convertedAmount, alice); //using OTF mint function to mint alice's token
+        aERC20.mint(address(aTOFTVault), convertedAmount); //minting the same amount to aTOFTVault
+        assertEq(
+            receiverMock.balanceOf(alice),
+            convertedAmount,
+            "Alice's balance should equal the minted amount before transfer"
+        );
+        assertEq(aERC20.balanceOf(address(alice)), 0, "Alice's balance should be zero before transfer");
+
+        SendParamsMsg memory sendMsg = SendParamsMsg({receiver: alice, unwrap: true, amount: amount});
+        bytes memory _data = tOFTHelper.buildSendWithParamsMsg(sendMsg);
+        receiverMock.receiveWithParamsReceiver{value: 1 ether}(alice, _data); //transfering tokens from alice to receiverMock
+        assertEq(aERC20.balanceOf(address(aTOFTVault)), 0, "aTOFTVault's balance should be zero");
+        assertEq(aERC20.balanceOf(alice), convertedAmount, "Alice's balance should be equal to the minted amount");
+    }
+
