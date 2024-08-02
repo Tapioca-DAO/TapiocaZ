@@ -34,3 +34,9 @@ contract ModuleManagerTest is BaseTOFTTest {
         assertEq(extractedModule, moduleAddress,"Should extract module address correctly");
     }
 
+    function test_extract_module_not_authorized() public {
+        // Extract module
+        vm.expectRevert(ModuleManager__ModuleNotAuthorized.selector);
+        baseTOFT.extractModule_(0);
+    }
+
