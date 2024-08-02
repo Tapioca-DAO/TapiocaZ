@@ -213,3 +213,43 @@ contract mTOFTTest is TOFTTestHelper {
         this.wireOApps(ofts);
     }
 
+    function test_send_success() public {
+        vm.deal(alice, 1 ether); // Fund Alice with ether for transaction fees
+        vm.startPrank(alice);
+        uint256 EthBalanceBefore = address(alice).balance;
+        uint200 amount = 1e18; // Amount to send: 1 token
+        uint32 dstEid = 2; // Destination chain ID (Chain 2)
+        bytes32 to = bytes32(uint256(uint160(alice))); // Convert Alice's address to bytes32
+
+        setApprovals(mTOFTChain1, ERC20Chain1, amount);
+        mTOFTChain1.wrap(alice, alice, amount);
+        // Prepare SendParam
+        SendParam memory sendParam = SendParam({
+            dstEid: dstEid,
+            to: to,
+            amountLD: amount,
+            minAmountLD: amount, // Set min amount equal to sent amount for this test
+            extraOptions: abi.encodePacked(TYPE_1, GAS_LIMIT),
+            composeMsg: "0x",
+            oftCmd: "0x"
+        });
+
+        // Prepare MessagingFee
+        uint256 _nativeFee = 210526; // Amount of fee needed for send
+        MessagingFee memory fee = MessagingFee({nativeFee: _nativeFee, lzTokenFee: 0});
+
+        // Call send function
+        (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) =
+            mTOFTChain1.send{value: fee.nativeFee}(sendParam, fee, alice);
+
+        verifyPackets(uint32(2), address(mTOFTChain2));
+        uint256 EthBalanceAfter = address(alice).balance;
+
+        uint256 amountInChain2 = mTOFTChain2.balanceOf(alice);
+        assertEq(amountInChain2, amount, "Amount transfered to Chain 2 should match sent amount");
+        assertEq(mTOFTChain1.balanceOf(alice), 0, "Alice balance on Chain 1 should be 0 after sending to Chain 2");
+        assertNotEq(msgReceipt.guid, bytes32(0), "GUID should not be empty");
+        assertEq(EthBalanceBefore, EthBalanceAfter + _nativeFee, "Fee paid should be deducted from Alice's balance");
+        vm.stopPrank();
+    }
+
