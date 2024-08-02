@@ -480,3 +480,48 @@ contract mTOFTTest is TOFTTestHelper {
         );
     }
 
+    function test_wrap_fees_are_correctly_registred() public {
+        setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
+        uint200 amount = 1 ether;
+        uint256 feesBefore = TOFTVaultChain1.viewFees();
+        uint256 feesCharged = mockFeeGetter.FEE();
+        assertEq(feesBefore, 0, "Fees should be 0 before transaction");
+        vm.startPrank(alice);
+        setApprovals(mTOFTChain1, ERC20Chain1, amount);
+        mTOFTChain1.wrap(alice, alice, amount);
+        uint256 feesAfter = TOFTVaultChain1.viewFees();
+        assertEq(feesAfter, feesCharged, "Fees should be equal to the fee charged by the protocol");
+    }
+
+    function test_unwrap_fees_are_correctly_registered() public {
+        uint256 mintAmount = 150 ether;
+        uint200 transactionAmount = 4 ether;
+        setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
+        ERC20Chain1.mint(address(TOFTVaultChain1), mintAmount); // used to increase total supply
+
+        // Check initial state
+        uint256 initialFees = TOFTVaultChain1.viewFees();
+        assertEq(initialFees, 0, "Initial fees should be zero");
+
+        // Perform wrap operation
+        vm.startPrank(alice);
+        setApprovals(mTOFTChain1, ERC20Chain1, transactionAmount);
+        mTOFTChain1.wrap(alice, alice, transactionAmount);
+
+        // Check fees after wrap
+        uint256 feePerOperation = mockFeeGetter.FEE();
+        uint256 feesAfterWrap = TOFTVaultChain1.viewFees();
+        assertEq(feesAfterWrap, feePerOperation, "Fees after wrap should equal one operation fee");
+
+        // Perform unwrap operation
+        uint256 amountToUnwrap = transactionAmount - feePerOperation;
+        mTOFTChain1.unwrap(alice, amountToUnwrap);
+
+        // Check final state
+        uint256 expectedTotalFees = feePerOperation * 2; // Fees for wrap and unwrap
+        uint256 actualTotalFees = TOFTVaultChain1.viewFees();
+        assertEq(actualTotalFees, expectedTotalFees, "Total fees should equal fees for wrap and unwrap");
+
+        vm.stopPrank();
+    }
+
