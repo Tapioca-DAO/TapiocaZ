@@ -525,3 +525,18 @@ contract mTOFTTest is TOFTTestHelper {
         vm.stopPrank();
     }
 
+    function test_receive_acceptsEther() public {
+        vm.startPrank(alice);
+        uint256 initialBalance = address(mTOFTChain1).balance;
+        uint256 amountToSend = 1 ether;
+
+        // Send Ether to the contract
+        (bool success,) = address(mTOFTChain1).call{value: amountToSend}("");
+
+        // Assert: The transaction should succeed
+        assertTrue(success, "Failed to send Ether to the contract");
+
+        // Assert: The contract's balance should increase
+        assertEq(address(mTOFTChain1).balance, initialBalance + amountToSend, "Contract balance increase correctly");
+    }
+
