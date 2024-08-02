@@ -168,3 +168,39 @@ contract BaseTOFTTest is TOFTTestHelper {
         vm.stopPrank();
     }
 
+    /////////////////////////////////////////////
+    //////////////Helper functions //////////////
+    /////////////////////////////////////////////
+
+    function setApprovals(uint200 _amount) public {
+        uint48 deadline = uint48(block.timestamp);
+
+        pearlmit.approve(20, address(erc20), 0, address(baseTOFT), _amount, deadline);
+        erc20.approve(address(pearlmit), _amount);
+    }
+
+    //@dev this allow some modularity in the setup of the vault. It can be a native vault or an ERC20 vault
+    function initTOFTData(address _erc20, address _vaultAddress) public view returns (TOFTInitStruct memory) {
+        TOFTInitStruct memory toftData = TOFTInitStruct({
+            name: "TOFT",
+            symbol: "TOFT",
+            endpoint: endpoints[1],
+            delegate: address(owner),
+            yieldBox: address(yieldBox),
+            cluster: address(cluster),
+            erc20: _erc20,
+            vault: _vaultAddress,
+            hostEid: 1,
+            extExec: address(toftExtExec),
+            pearlmit: IPearlmit(address(pearlmit))
+        });
+
+        return toftData;
+    }
+
+    function setVaultOwnership(address _owner) public {
+        vm.startPrank(_owner);
+        toftVault.claimOwnership();
+        vm.stopPrank();
+    }
+}
