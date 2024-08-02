@@ -283,4 +283,18 @@ contract mTOFTTest is TOFTTestHelper {
         vm.expectRevert();
         mTOFTChain1.sendPacketFrom{value: 300000}(address(0), lzSendParam, "0x");
         vm.stopPrank();
+    function test_getTypedDataHash_deterministicOutput() public {
+        address userA = address(0x123);
+        address spender = address(0x456);
+        uint256 amount = 1000;
+        uint256 nonce = 0;
+        uint256 deadline = block.timestamp;
+
+        ERC20PermitStruct memory permitData =
+            ERC20PermitStruct({owner: alice, spender: bob, value: amount, nonce: nonce, deadline: deadline});
+
+        bytes32 hash1 = mTOFTChain1.getTypedDataHash(permitData);
+        bytes32 hash2 = mTOFTChain1.getTypedDataHash(permitData);
+
+        assertEq(hash1, hash2, "Hash should be deterministic for the same input");
     }
