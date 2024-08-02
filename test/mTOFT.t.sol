@@ -442,4 +442,16 @@ contract mTOFTTest is TOFTTestHelper {
         uint256 balanceAfter = address(this).balance;
         assertEq(balanceAfter, balanceBefore + amount, "Contract balance should increase by the amount");
     }
+    function test_setOwnerState_reverts_when_not_owner() public {
+        vm.startPrank(alice);
+        vm.expectRevert("Ownable: caller is not the owner");
+        setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
+    }
+
+
+    function test_withdrawFees_reverts_when_not_owner() public {
+        vm.startPrank(alice);
+        vm.expectRevert("Ownable: caller is not the owner");
+        mTOFTChain1.withdrawFees(address(this), 1 ether);
+    }
 
