@@ -267,6 +267,7 @@ contract mTOFTTest is TOFTTestHelper {
         verifyPackets(uint32(2), address(mTOFTChain2));
         assertEq(mTOFTChain2.balanceOf(bob), amount, "Amount transfered to Chain 2 should match sent amount");
     }
+
     function test_sendPacketFrom_success() public {
         uint200 amount = 1e18; // Amount to send: 1 token
 
@@ -461,11 +462,13 @@ contract mTOFTTest is TOFTTestHelper {
         uint256 balanceAfter = address(this).balance;
         assertEq(balanceAfter, balanceBefore + amount, "Contract balance should increase by the amount");
     }
+
     function test_setOwnerState_reverts_when_not_owner() public {
         vm.startPrank(alice);
         vm.expectRevert("Ownable: caller is not the owner");
         setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
     }
+
     function test_setOwnerState_reverts_when_new_mintCap_less_than_totalSupply() public {
         ERC20Chain1.mint(address(this), 40 ether);
         setApprovals(mTOFTChain1, ERC20Chain1, 40 ether);
