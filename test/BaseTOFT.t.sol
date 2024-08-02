@@ -106,3 +106,17 @@ contract BaseTOFTTest is TOFTTestHelper {
         assertTrue(balanceWrapToken == amountToWrap);
     }
 
+    function test_wrapWithoutAllowance() public {
+        vm.startPrank(alice);
+        uint200 amountToWrap = 1e18;
+        vm.expectRevert(TOFT_AllowanceNotValid.selector);
+        baseTOFT.wrap_(bob, alice, amountToWrap, 0);
+    }
+
+    function test_wrapWithZeroAmount() public {
+        vm.startPrank(alice);
+        uint200 amountToWrap = 0;
+        vm.expectRevert(TOFT_NotValid.selector);
+        baseTOFT.wrap_(alice, alice, amountToWrap, 0);
+    }
+
