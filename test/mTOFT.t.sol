@@ -434,3 +434,12 @@ contract mTOFTTest is TOFTTestHelper {
         mTOFTChain1.rescueEth(1 ether, alice);
     }
 
+    function test_rescueEth_success() public {
+        vm.deal(address(mTOFTChain1), 10 ether);
+        uint256 amount = 1 ether;
+        uint256 balanceBefore = address(this).balance;
+        mTOFTChain1.rescueEth(amount, address(this));
+        uint256 balanceAfter = address(this).balance;
+        assertEq(balanceAfter, balanceBefore + amount, "Contract balance should increase by the amount");
+    }
+
