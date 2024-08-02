@@ -540,3 +540,84 @@ contract mTOFTTest is TOFTTestHelper {
         assertEq(address(mTOFTChain1).balance, initialBalance + amountToSend, "Contract balance increase correctly");
     }
 
+    //////////////////////////
+    ///////// HELPERS ////////
+    //////////////////////////
+
+    function setOwnerState(mTOFT _mTOFTChain, uint256 _connectedChain, bool _connectedChainState, uint256 _mintCap)
+        public
+    {
+        _mTOFTChain.setOwnerState(
+            mTOFT.SetOwnerStateData({
+                stargateRouter: address(stargateRouter),
+                feeGetter: IMtoftFeeGetter(address(mockFeeGetter)),
+                mintCap: _mintCap,
+                connectedChain: _connectedChain,
+                connectedChainState: _connectedChainState,
+                balancerStateAddress: address(this),
+                balancerState: true
+            })
+        );
+    }
+
+    function getLzParams(uint32 _dst, address _to, uint256 _amount, address _refundAddress)
+        public
+        returns (LZSendParam memory)
+    {
+        LZSendParam memory lzSendParam = LZSendParam({
+            sendParam: SendParam({
+                dstEid: _dst,
+                to: bytes32(uint256(uint160(_to))),
+                amountLD: _amount,
+                minAmountLD: _amount,
+                extraOptions: abi.encodePacked(TYPE_1, GAS_LIMIT),
+                composeMsg: "0x",
+                oftCmd: "0x"
+            }),
+            fee: MessagingFee({nativeFee: 300000, lzTokenFee: 0}),
+            extraOptions: abi.encodePacked(TYPE_1, GAS_LIMIT),
+            refundAddress: _refundAddress
+        });
+
+        return lzSendParam;
+    }
+
+    function setApprovals(mTOFT _mTOFTChain, ERC20Mock _ERC20Chain, uint200 _amount) public {
+        uint48 deadline = uint48(block.timestamp);
+
+        // Approvals
+        _ERC20Chain.approve(address(_mTOFTChain), _amount);
+        pearlmit.approve(20, address(ERC20Chain1), 0, address(_mTOFTChain), _amount, deadline);
+        _ERC20Chain.approve(address(pearlmit), _amount);
+    }
+
+    function initTOFTData(
+        string memory _name,
+        string memory _symbol,
+        address _endpoint,
+        address _delegate,
+        address _yieldBoxAddress,
+        address _clusterAddress,
+        address _erc20,
+        address _vaultAddress,
+        uint256 _hostEid,
+        address _extExecAddress,
+        IPearlmit _pearlmit
+    ) public view returns (TOFTInitStruct memory) {
+        TOFTInitStruct memory toftData = TOFTInitStruct({
+            name: _name,
+            symbol: _symbol,
+            endpoint: _endpoint,
+            delegate: _delegate,
+            yieldBox: _yieldBoxAddress,
+            cluster: _clusterAddress,
+            erc20: _erc20,
+            vault: _vaultAddress,
+            hostEid: _hostEid,
+            extExec: _extExecAddress,
+            pearlmit: _pearlmit
+        });
+
+        return toftData;
+    }
+}
