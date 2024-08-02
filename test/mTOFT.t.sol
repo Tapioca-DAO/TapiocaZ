@@ -448,6 +448,18 @@ contract mTOFTTest is TOFTTestHelper {
         setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
     }
 
+    function test_withdrawFees_success() public {
+        vm.startPrank(address(mTOFTChain1));
+        vm.deal(address(TOFTVaultChain1), 10 ether);
+        ERC20Chain1.mint(address(TOFTVaultChain1), 5 ether);
+        TOFTVaultChain1.registerFees(1 ether); //add fees to the vault
+        vm.stopPrank();
+
+        uint256 feesBefore = TOFTVaultChain1.viewFees();
+        mTOFTChain1.withdrawFees(address(this), feesBefore);
+        uint256 feesAfter = TOFTVaultChain1.viewFees();
+        assertEq(feesAfter, 0, "Fees should be 0 after withdrawal");
+    }
 
     function test_withdrawFees_reverts_when_not_owner() public {
         vm.startPrank(alice);
