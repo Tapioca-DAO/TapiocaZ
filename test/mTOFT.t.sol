@@ -366,6 +366,8 @@ contract mTOFTTest is TOFTTestHelper {
         uint200 amountToUnwrap = 1e18;
         vm.expectRevert(mTOFT_NotHost.selector);
         mTOFTChain1.unwrap(alice, amountToUnwrap);
+    }
+
     function test_unwrap_success() public {
         vm.startPrank(alice);
         uint200 amountToUnwrap = 1e18;
@@ -373,5 +375,25 @@ contract mTOFTTest is TOFTTestHelper {
         mTOFTChain1.wrap(alice, alice, amountToUnwrap);
         mTOFTChain1.unwrap(alice, amountToUnwrap);
         assertEq(mTOFTChain1.balanceOf(alice), 0, "Alice balance in mTOFTChain1 should be 0 after unwrapping");
+    }
+
+    function test_sgReceive_reverts_when_caller_is_not_stargateRouter() public {
+        vm.startPrank(alice);
+        address _token = address(mTOFTChain1);
+        uint256 amountLD = 1 ether;
+        uint16 _srcChainID = 1;
+        uint256 nonce = 0;
+        bytes memory payload = "0x1234";
+        bytes memory _srcAddress = abi.encodePacked(address(this));
+        vm.expectRevert(mTOFT_NotAuthorized.selector);
+        // Call the function
+        mTOFTChain1.sgReceive{value: amountLD}(
+            _srcChainID, // uint16
+            _srcAddress, // bytes memory
+            nonce, // uint256
+            _token, // address
+            amountLD, // uint256 amountLD
+            payload // bytes memory
+        );
     }
 
