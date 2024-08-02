@@ -297,4 +297,46 @@ contract mTOFTTest is TOFTTestHelper {
         bytes32 hash2 = mTOFTChain1.getTypedDataHash(permitData);
 
         assertEq(hash1, hash2, "Hash should be deterministic for the same input");
+
+    function test_wrap_reverts_when_called_by_balancers() public {
+        setOwnerState(mTOFTChain1, 2, true, MINT_CAP); //Set balancer address to be address(this)
+        vm.expectRevert(mTOFT_BalancerNotAuthorized.selector);
+        uint200 amountToWrap = 1e18;
+        mTOFTChain1.wrap(msg.sender, msg.sender, amountToWrap);
+    }
+
+    function test_wrap_reverts_when_chain_not_connected() public {
+        setOwnerState(mTOFTChain2, 2, false, MINT_CAP);
+        vm.startPrank(alice);
+        uint200 amountToWrap = 1e18;
+        ERC20Chain2.mint(alice, amountToWrap);
+        uint48 deadline = uint48(block.timestamp);
+
+        // Approvals
+        ERC20Chain2.approve(address(mTOFTChain2), amountToWrap);
+        pearlmit.approve(20, address(ERC20Chain2), 0, address(mTOFTChain2), amountToWrap, deadline);
+        ERC20Chain2.approve(address(pearlmit), amountToWrap);
+
+        vm.expectRevert(mTOFT_NotHost.selector);
+        // Wrap tokens into mTOFT
+        mTOFTChain2.wrap(alice, alice, amountToWrap);
+        vm.stopPrank();
+    }
+
+    function test_wrap_reverts_invalid_cap() public {
+        setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
+        vm.startPrank(alice);
+        uint200 amountToWrap = 1e18;
+        ERC20Chain1.mint(alice, amountToWrap);
+        uint48 deadline = uint48(block.timestamp);
+
+        // Approvals
+        ERC20Chain1.approve(address(mTOFTChain1), amountToWrap);
+        pearlmit.approve(20, address(ERC20Chain1), 0, address(mTOFTChain1), amountToWrap, deadline);
+        ERC20Chain1.approve(address(pearlmit), amountToWrap);
+
+        vm.expectRevert(mTOFT_CapNotValid.selector);
+        // Wrap tokens into mTOFT
+        mTOFTChain1.wrap(alice, alice, MINT_CAP + 1);
+        vm.stopPrank();
     }
