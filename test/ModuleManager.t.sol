@@ -40,3 +40,10 @@ contract ModuleManagerTest is BaseTOFTTest {
         baseTOFT.extractModule_(0);
     }
 
+    function test_execute_module_sucess() public {
+        // Set module
+        baseTOFT.setModule_(module, moduleAddress);
+        // Execute module
+        baseTOFT.executeModule_(module, abi.encodeWithSignature("test()"), true);
+    }
+
