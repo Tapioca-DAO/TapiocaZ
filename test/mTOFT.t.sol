@@ -428,3 +428,9 @@ contract mTOFTTest is TOFTTestHelper {
         );
     }
 
+    function test_rescueEth_reverts_when_not_owner() public {
+        vm.startPrank(alice);
+        vm.expectRevert("Ownable: caller is not the owner");
+        mTOFTChain1.rescueEth(1 ether, alice);
+    }
+
