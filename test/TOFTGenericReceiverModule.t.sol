@@ -106,3 +106,14 @@ contract TOFTGenericReceiverModuleTest is TOFTTestHelper {
         assertEq(aERC20.balanceOf(alice), convertedAmount, "Alice's balance should be equal to the minted amount");
     }
 
+    function test_receiveWithParamsReceiver_transfer_fail_amountMismatch() public {
+        uint256 amount = 1; //random amount
+        vm.deal(alice, 20 ether);
+
+        vm.startPrank(alice);
+        SendParamsMsg memory sendMsg = SendParamsMsg({receiver: alice, unwrap: false, amount: amount});
+        bytes memory _data = tOFTHelper.buildSendWithParamsMsg(sendMsg);
+        vm.expectRevert(TOFTGenericReceiverModule_AmountMismatch.selector);
+        receiverMock.receiveWithParamsReceiver{value: 1 ether}(alice, _data);
+    }
+}
