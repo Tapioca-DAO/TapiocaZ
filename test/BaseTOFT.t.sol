@@ -120,3 +120,16 @@ contract BaseTOFTTest is TOFTTestHelper {
         baseTOFT.wrap_(alice, alice, amountToWrap, 0);
     }
 
+    function test_wrapNative() public {
+        vm.startPrank(address(baseTOFTNative));
+        toftVaultNative.claimOwnership();
+        vm.stopPrank();
+
+        vm.startPrank(alice);
+        vm.deal(alice, 10 ether);
+        uint256 amountToWrap = 1 ether;
+        baseTOFTNative.wrapNative_{value: 1 ether}(address(owner), amountToWrap, 0);
+        uint256 balanceWrapToken = baseTOFTNative.balanceOf(owner);
+        assertTrue(balanceWrapToken == amountToWrap);
+    }
+
