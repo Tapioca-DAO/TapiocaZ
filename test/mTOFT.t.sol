@@ -267,6 +267,25 @@ contract mTOFTTest is TOFTTestHelper {
         verifyPackets(uint32(2), address(mTOFTChain2));
         assertEq(mTOFTChain2.balanceOf(bob), amount, "Amount transfered to Chain 2 should match sent amount");
     }
+    function test_sendPacketFrom_success() public {
+        uint200 amount = 1e18; // Amount to send: 1 token
+
+        bytes32 role = keccak256("TOE");
+        cluster.setRoleForContract(address(this), role, true); // Set role "TOE" for contract to be able to call sendPacketFrom
+        vm.deal(address(this), 5 ether);
+        setApprovals(mTOFTChain1, ERC20Chain1, amount);
+        mTOFTChain1.wrap(address(this), address(this), amount);
+
+        assertEq(mTOFTChain2.balanceOf(alice), 0, "Alice balance in chain 2 should be 0 before sending");
+        console.log("Alice balance in chain2 before transfer : ", mTOFTChain2.balanceOf(alice));
+        LZSendParam memory lzSendParam = getLzParams(2, alice, amount, alice);
+        mTOFTChain1.sendPacketFrom{value: 300000}(alice, lzSendParam, "0x");
+        verifyPackets(uint32(2), address(mTOFTChain2));
+        console.log("Alice balance in chain2 after transfer : ", mTOFTChain2.balanceOf(alice));
+
+        assertEq(mTOFTChain2.balanceOf(alice), amount, "Amount transfered to Chain 2 should match sent amount");
+    }
+
     function test_sendPacketFrom_fail_Without_TOE_Role() public {
         vm.startPrank(alice);
         uint200 amount = 1e18;
