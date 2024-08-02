@@ -447,6 +447,15 @@ contract mTOFTTest is TOFTTestHelper {
         vm.expectRevert("Ownable: caller is not the owner");
         setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
     }
+    function test_setOwnerState_reverts_when_new_mintCap_less_than_totalSupply() public {
+        ERC20Chain1.mint(address(this), 40 ether);
+        setApprovals(mTOFTChain1, ERC20Chain1, 40 ether);
+        mTOFTChain1.wrap(address(this), address(this), 40 ether);
+        uint256 totalSupply = mTOFTChain1.totalSupply();
+        uint256 amount = totalSupply - 1; // set a smaller amount than total supply to trigger mTOFT_CapNotValid error
+        vm.expectRevert(mTOFT_CapNotValid.selector);
+        setOwnerState(mTOFTChain1, 2, true, amount);
+    }
 
     function test_withdrawFees_success() public {
         vm.startPrank(address(mTOFTChain1));
