@@ -419,7 +419,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
      * @param _amount the amount used for rebalancing
      */
     function extractUnderlying(uint256 _amount) external nonReentrant {
-        if (!balancers[msg.sender]) revert mTOFT_BalancerNotAuthorized();
+        if (!balancers[msg.sender]) revert mTOFT_BalancerNotAuthorized(); //@audit info: this error message might be mTOFT_CallerIsNotBalancer
         if (_amount == 0) revert TOFT_NotValid();
 
         vault.withdraw(msg.sender, _amount);

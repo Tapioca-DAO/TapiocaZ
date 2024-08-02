@@ -48,7 +48,7 @@ abstract contract BaseTOFT is
     error TOFT_AllowanceNotValid();
     error TOFT_NotValid();
     error TOFT_VaultWrongERC20();
-    error TOFT_VaultWrongOwner();
+    error TOFT_VaultWrongOwner(); //@audit Not used anywhere. TO REMOVE 
     error TOFT_NotAuthorized();
 
     constructor(TOFTInitStruct memory _data)
