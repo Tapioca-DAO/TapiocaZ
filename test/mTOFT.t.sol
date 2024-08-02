@@ -283,6 +283,8 @@ contract mTOFTTest is TOFTTestHelper {
         vm.expectRevert();
         mTOFTChain1.sendPacketFrom{value: 300000}(address(0), lzSendParam, "0x");
         vm.stopPrank();
+    }
+
     function test_getTypedDataHash_deterministicOutput() public {
         address userA = address(0x123);
         address spender = address(0x456);
@@ -348,6 +350,8 @@ contract mTOFTTest is TOFTTestHelper {
         // Wrap tokens into mTOFT
         mTOFTChain1.wrap(alice, alice, MINT_CAP + 1);
         vm.stopPrank();
+    }
+
     function test_unwrap_reverts_when_called_by_balancers() public {
         uint200 amountToUnwrap = 1e18;
         setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
