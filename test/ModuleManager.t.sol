@@ -26,3 +26,11 @@ contract ModuleManagerTest is BaseTOFTTest {
         assertEq(checkWhiteListAfter, moduleAddress, "Module should be set correctly");
     }
 
+    function test_extract_module_sucess() public {
+        // Set module
+        baseTOFT.setModule_(module, moduleAddress);
+        // Extract module
+        address extractedModule = baseTOFT.extractModule_(module);
+        assertEq(extractedModule, moduleAddress,"Should extract module address correctly");
+    }
+
