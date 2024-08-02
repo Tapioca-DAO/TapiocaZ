@@ -47,3 +47,12 @@ contract ModuleManagerTest is BaseTOFTTest {
         baseTOFT.executeModule_(module, abi.encodeWithSignature("test()"), true);
     }
 
+    /////////////////////////////////
+    //////// Helper functions ///////
+    /////////////////////////////////
+
+    function whiteListedModule(uint8 _module) public returns (address) {
+        address whiteListedAddress = baseTOFT.whiteListedModule_(_module);
+        return whiteListedAddress;
+    }
+}
