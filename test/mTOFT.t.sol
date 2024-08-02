@@ -467,3 +467,16 @@ contract mTOFTTest is TOFTTestHelper {
         mTOFTChain1.extractUnderlying(0);
     }
 
+    function test_extractUnderlying_success() public {
+        setOwnerState(mTOFTChain1, 2, true, MINT_CAP); //set address(this) as balancer
+        vm.deal(address(this), 10 ether);
+        ERC20Chain1.mint(address(TOFTVaultChain1), 5 ether);
+        uint200 amountToExtract = 5 ether;
+        uint256 balanceBefore = ERC20Chain1.balanceOf(address(this));
+        mTOFTChain1.extractUnderlying(amountToExtract);
+        uint256 balanceAfter = amountToExtract + balanceBefore;
+        assertEq(
+            ERC20Chain1.balanceOf(address(this)), balanceAfter, "ERC20Chain1 balance should increase by the amount"
+        );
+    }
+
