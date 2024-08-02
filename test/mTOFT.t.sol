@@ -455,3 +455,15 @@ contract mTOFTTest is TOFTTestHelper {
         mTOFTChain1.withdrawFees(address(this), 1 ether);
     }
 
+    function test_extractUnderlying_revert_when_not_balancer() public {
+        vm.startPrank(alice);
+        vm.expectRevert(mTOFT_BalancerNotAuthorized.selector);
+        mTOFTChain1.extractUnderlying(1 ether);
+    }
+
+    function test_extractUnderlying_reverts_zero_amount() public {
+        setOwnerState(mTOFTChain1, 2, true, MINT_CAP); //set address(this) as balancer
+        vm.expectRevert(TOFT_NotValid.selector);
+        mTOFTChain1.extractUnderlying(0);
+    }
+
