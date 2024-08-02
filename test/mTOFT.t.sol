@@ -366,4 +366,12 @@ contract mTOFTTest is TOFTTestHelper {
         uint200 amountToUnwrap = 1e18;
         vm.expectRevert(mTOFT_NotHost.selector);
         mTOFTChain1.unwrap(alice, amountToUnwrap);
+    function test_unwrap_success() public {
+        vm.startPrank(alice);
+        uint200 amountToUnwrap = 1e18;
+        setApprovals(mTOFTChain1, ERC20Chain1, amountToUnwrap);
+        mTOFTChain1.wrap(alice, alice, amountToUnwrap);
+        mTOFTChain1.unwrap(alice, amountToUnwrap);
+        assertEq(mTOFTChain1.balanceOf(alice), 0, "Alice balance in mTOFTChain1 should be 0 after unwrapping");
     }
+
