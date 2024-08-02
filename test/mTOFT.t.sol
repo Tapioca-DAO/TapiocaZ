@@ -253,3 +253,17 @@ contract mTOFTTest is TOFTTestHelper {
         vm.stopPrank();
     }
 
+    function test_sendPacket_success() public {
+        vm.startPrank(alice);
+        console.log("Bob balance in chain 2 before : ", mTOFTChain2.balanceOf(bob));
+        uint200 amount = 1e18; // Amount to send: 1 token
+        setApprovals(mTOFTChain1, ERC20Chain1, amount);
+        mTOFTChain1.wrap(alice, alice, amount);
+        LZSendParam memory lzSendParam = getLzParams(2, bob, amount, alice);
+
+        assertEq(mTOFTChain2.balanceOf(bob), 0, "Bob balance in chain 2 should be 0 before sending");
+        mTOFTChain1.sendPacket{value: 350000}(lzSendParam, "");
+
+        verifyPackets(uint32(2), address(mTOFTChain2));
+        assertEq(mTOFTChain2.balanceOf(bob), amount, "Amount transfered to Chain 2 should match sent amount");
+    }
