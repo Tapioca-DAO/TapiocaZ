@@ -348,4 +348,17 @@ contract mTOFTTest is TOFTTestHelper {
         // Wrap tokens into mTOFT
         mTOFTChain1.wrap(alice, alice, MINT_CAP + 1);
         vm.stopPrank();
+    function test_unwrap_reverts_when_called_by_balancers() public {
+        uint200 amountToUnwrap = 1e18;
+        setOwnerState(mTOFTChain1, 2, true, MINT_CAP);
+        vm.expectRevert(mTOFT_BalancerNotAuthorized.selector);
+        mTOFTChain1.unwrap(address(this), amountToUnwrap);
+    }
+
+    function test_unwrap_reverts_when_chain_not_connected() public {
+        setOwnerState(mTOFTChain1, 1, false, MINT_CAP);
+        vm.startPrank(alice);
+        uint200 amountToUnwrap = 1e18;
+        vm.expectRevert(mTOFT_NotHost.selector);
+        mTOFTChain1.unwrap(alice, amountToUnwrap);
     }
