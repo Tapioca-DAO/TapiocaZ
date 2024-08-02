@@ -16,3 +16,13 @@ contract ModuleManagerTest is BaseTOFTTest {
         super.setUp();
     }
 
+    function test_set_module() public {
+        // Set module
+        address checkWhiteListBefore = whiteListedModule(module);
+        console.log(checkWhiteListBefore);
+        assertEq(checkWhiteListBefore, address(0), "No address should be set yet");
+        baseTOFT.setModule_(module, moduleAddress);
+        address checkWhiteListAfter = whiteListedModule(module);
+        assertEq(checkWhiteListAfter, moduleAddress, "Module should be set correctly");
+    }
+
