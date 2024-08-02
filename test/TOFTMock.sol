@@ -21,5 +21,11 @@ __/\\\\\\\\\\\\\\\_____/\\\\\\\\\_____/\\\\\\\\\\\\\____/\\\\\\\\\\\_______/\\\\
 contract TOFTMock is TOFT {
     constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _moduleData)
         TOFT(_tOFTData, _moduleData)
-    {}
+    {
+
+    }
+        /// @dev this function is implemented as public for tests purposes
+        function mint(address to, uint256 amount) public {
+            _mint(to, amount);
+        }
 }
