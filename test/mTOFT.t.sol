@@ -397,3 +397,34 @@ contract mTOFTTest is TOFTTestHelper {
         );
     }
 
+    function test_sgReceive_caller_is_stargateRouter() public {
+        vm.startPrank(address(stargateRouter));
+        vm.deal(address(stargateRouter), 10 ether);
+        ERC20Chain1.mint(address(mTOFTChain1), 1 ether);
+        address _token = address(mTOFTChain1);
+        uint256 amountLD = 1 ether;
+        uint16 _srcChainID = 1;
+        uint256 nonce = 0;
+        bytes memory payload = "0x1234";
+        bytes memory _srcAddress = abi.encodePacked(address(this));
+
+        console.log(ERC20Chain1.balanceOf(address(TOFTVaultChain1)));
+        assertEq(
+            ERC20Chain1.balanceOf(address(TOFTVaultChain1)), 0, "TOFTVaultChain1 balance should be 0 before sgReceive"
+        );
+        // Call the function
+        mTOFTChain1.sgReceive{value: amountLD}(
+            _srcChainID, // uint16
+            _srcAddress, // bytes memory
+            nonce, // uint256
+            _token, // address
+            amountLD, // uint256 amountLD
+            payload // bytes memory
+        );
+        assertEq(
+            ERC20Chain1.balanceOf(address(TOFTVaultChain1)),
+            amountLD,
+            "TOFTVaultChain1 balance should be 1 after sgReceive"
+        );
+    }
+
