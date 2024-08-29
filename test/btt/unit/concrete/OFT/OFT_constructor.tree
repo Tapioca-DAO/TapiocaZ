@@ -1,0 +1,46 @@
+OFT_constructor.t.sol
+├── when TOFT is created
+│   ├── when TOFT created with the right parameters
+│   │   ├── it should set the sender module
+│   │   ├── it should set the receiver module
+│   │   ├── it should set the market receiver module
+│   │   ├── it should set the options receiver module
+│   │   ├── it should set the generic receiver module
+│   │   ├── it should claim vault ownership
+│   │   ├── it should set the owner
+│   │   ├── it should set the host endpoint
+│   │   ├── it should have the right underlying token
+│   │   ├── it should return 18 decimals
+│   │   └── it should set YieldBox
+│   └── when TOFT created with wrong parameters
+│       ├── when empty address is used for TOFT
+│       │   ├── it should revert for sender module
+│       │   ├── it should revert for receiver module
+│       │   ├── it should revert for market receiver module
+│       │   ├── it should revert for options receiver module
+│       │   └── it should revert for generic receiver module
+│       └── when TOFT vault token is different
+│           └── it should revert
+└── when mTOFT is created
+    ├── when mTOFT created with the right parameters
+    │   ├── it should set the sender module
+    │   ├── it should set the receiver module
+    │   ├── it should set the market receiver module
+    │   ├── it should set the options receiver module
+    │   ├── it should set the generic receiver module
+    │   ├── it should claim vault ownership
+    │   ├── it should set the owner
+    │   ├── it should set the host endpoint
+    │   ├── it should have the right underlying token
+    │   ├── it should return 18 decimals
+    │   ├── it should set YieldBox
+    │   └── it should set a default mint cap
+    └── when mTOFT created with wrong parameters
+        ├── when empty address is used for mTOFT
+        │   ├── it should revert for sender module
+        │   ├── it should revert for receiver module
+        │   ├── it should revert for market receiver module
+        │   ├── it should revert for options receiver module
+        │   └── it should revert for generic receiver module
+        └── when mTOFT vault token is different
+            └── it should revert

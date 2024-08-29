@@ -91,7 +91,7 @@ contract mTOFT is BaseTOFT, ReentrancyGuard, ERC20Permit, IStargateReceiver {
     constructor(TOFTInitStruct memory _tOFTData, TOFTModulesInitStruct memory _modulesData, address _stgRouter)
         BaseTOFT(_tOFTData)
         ERC20Permit(_tOFTData.name)
-    {
+    {   
         if (_getChainId() == hostEid) {
             connectedChains[hostEid] = true;
         }

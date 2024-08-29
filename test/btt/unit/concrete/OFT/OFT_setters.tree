@@ -1,0 +1,43 @@
+TOFT_setters.t.sol
+├── when called for mTOFT
+│   ├── when mTOFT rescueEth is called from non-owner
+│   │   └── it should revert
+│   ├── when mTOFT recueEth is called from owner with an invalid amount
+│   │   └── it should revert
+│   ├── when mTOFT rescueEth is called from owner with an available amount
+│   │   └── it should transfer ETH
+│   ├── when mTOFT setPause is called from non-owner and non-pauser
+│   │   └── it should revert
+│   ├── when mTOFT setPause is called from owner  
+│   │   └── it should pause or unpause
+│   ├── when mTOFT setPause is called from Pauser
+│   │   └── it should pause or unpause
+│   ├── when withdrawFees called from non-owner
+│   │   └── it should revert
+│   ├── when withdrawFees called from owner
+│   │   └── it should withdraw vault fees
+│   ├── when extractUnderlying called from non balancer
+│   │   └── it should revert
+│   ├── when extractUnderlying called with amount 0
+│   │   └── it should revert
+│   ├── when extractUnderlying is called from balancer with valid amount
+│   │   └── it should withdraw from vault
+│   ├── when setOwnerState is called from non owner
+│   │   └── it should revert
+│   └── when setOwnerState is called from owner
+│       ├── when mintCap is smaller than supply
+│       │   └── it should revert
+│       └── it should update all different values
+└── when called for TOFT
+    ├── when rescueEth is called from non-owner
+    │   └── it should revert
+    ├── when recueEth is called from owner with an invalid amount
+    │   └── it should revert
+    ├── when rescueEth is called from owner with an available amount
+    │   └── it should transfer ETH
+    ├── when setPause is called from non-owner and non-pauser
+    │   └── it should revert
+    ├── when setPause is called from owner  
+    │   └── it should pause or unpause
+    └── when setPause is called from Pauser
+        └── it should pause or unpause
