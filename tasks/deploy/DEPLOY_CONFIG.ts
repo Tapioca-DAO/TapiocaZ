@@ -80,6 +80,13 @@ const POST_LBP: TPostLbp = {
         sDAI: '0xed18DBCb2810E4178c23668794198C81B0668b23',
         sGLP: '',
     },
+    [EChainID.BASE_SEPOLIA]: {
+        WETH: '0x4aF9F18Eb6e595D7f876E71BBF6ac95EA99cF140',
+        wstETH: '',
+        reth: '',
+        sDAI: '0x9384B3c4700f4B82e5961d98BE215A6eF2FAEeA5',
+        sGLP: '',
+    },
 };
 POST_LBP['31337' as EChainID] = POST_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum
 
