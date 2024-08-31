@@ -51,10 +51,6 @@ async function tapiocaPostDeployTask(
         { tag, targetName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET },
         hre,
     );
-    await setLzPeer__task(
-        { tag, targetName: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET },
-        hre,
-    );
 }
 
 async function tapiocaDeployTask(
@@ -84,10 +80,10 @@ async function tapiocaDeployTask(
             taskArgs: args,
         });
 
-    /**
-     *SGL GLP Market OFT on Host chain
-     */
     if (isHostChain) {
+        /**
+         *SGL GLP Market OFT on Host chain
+         */
         const sglGlpMarket = loadGlobalContract(
             hre,
             TAPIOCA_PROJECTS_NAME.TapiocaBar,
@@ -103,6 +99,28 @@ async function tapiocaDeployTask(
             erc20: sglGlpMarket,
             name: 'Tapioca OFT SGL GLP Market',
             symbol: DEPLOYMENT_NAMES.T_SGL_GLP_MARKET,
+            noModuleDeploy: false,
+            hostEid: chainInfo.lzChainId,
+        });
+
+        /**
+         * usdcMockMarketChain from Side chain
+         */
+        const usdcMockSglMarket = loadGlobalContract(
+            hre,
+            TAPIOCA_PROJECTS_NAME.TapiocaBar,
+            chainInfo.chainId,
+            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_USDC_MOCK_MARKET,
+            tag,
+        ).address;
+
+        await VMAddToftWithArgs({
+            ...taskArgs,
+            target: 'toft',
+            deploymentName: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
+            erc20: usdcMockSglMarket,
+            name: 'Tapioca OFT SGL USDC Mock Market',
+            symbol: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
             noModuleDeploy: false,
             hostEid: chainInfo.lzChainId,
         });
@@ -131,28 +149,6 @@ async function tapiocaDeployTask(
         erc20: sDaiSglMarket,
         name: 'Tapioca OFT SGL DAI Market',
         symbol: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
-        noModuleDeploy: false,
-        hostEid: sdaiMarketChain.lzChainId,
-    });
-
-    /**
-     * usdcMockMarketChain from Side chain
-     */
-    const usdcMockSglMarket = loadGlobalContract(
-        hre,
-        TAPIOCA_PROJECTS_NAME.TapiocaBar,
-        sdaiMarketChain.chainId,
-        TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_USDC_MOCK_MARKET,
-        tag,
-    ).address;
-
-    await VMAddToftWithArgs({
-        ...taskArgs,
-        target: 'toft',
-        deploymentName: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
-        erc20: usdcMockSglMarket,
-        name: 'Tapioca OFT SGL USDC Mock Market',
-        symbol: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
         noModuleDeploy: false,
         hostEid: sdaiMarketChain.lzChainId,
     });
