@@ -103,27 +103,29 @@ async function tapiocaDeployTask(
             hostEid: chainInfo.lzChainId,
         });
 
-        /**
-         * usdcMockMarketChain from Side chain
-         */
-        const usdcMockSglMarket = loadGlobalContract(
-            hre,
-            TAPIOCA_PROJECTS_NAME.TapiocaBar,
-            chainInfo.chainId,
-            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_USDC_MOCK_MARKET,
-            tag,
-        ).address;
+        if (isTestnet) {
+            /**
+             * usdcMockMarketChain from Side chain
+             */
+            const usdcMockSglMarket = loadGlobalContract(
+                hre,
+                TAPIOCA_PROJECTS_NAME.TapiocaBar,
+                chainInfo.chainId,
+                TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_USDC_MOCK_MARKET,
+                tag,
+            ).address;
 
-        await VMAddToftWithArgs({
-            ...taskArgs,
-            target: 'toft',
-            deploymentName: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
-            erc20: usdcMockSglMarket,
-            name: 'Tapioca OFT SGL USDC Mock Market',
-            symbol: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
-            noModuleDeploy: false,
-            hostEid: chainInfo.lzChainId,
-        });
+            await VMAddToftWithArgs({
+                ...taskArgs,
+                target: 'toft',
+                deploymentName: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
+                erc20: usdcMockSglMarket,
+                name: 'Tapioca OFT SGL USDC Mock Market',
+                symbol: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
+                noModuleDeploy: false,
+                hostEid: chainInfo.lzChainId,
+            });
+        }
     }
 
     /**
