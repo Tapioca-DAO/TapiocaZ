@@ -86,11 +86,7 @@ export async function VMAddToft(
             await buildMTOFT(
                 hre,
                 deploymentName,
-                [
-                    initStruct,
-                    moduleStruct,
-                    DEPLOY_CONFIG.MISC[chainInfo.chainId]!.STARGATE_ROUTER,
-                ],
+                [initStruct, moduleStruct, hre.ethers.constants.AddressZero],
                 [...dependsOnInitStruct, ...dependsOnModuleStruct],
             ),
         );
