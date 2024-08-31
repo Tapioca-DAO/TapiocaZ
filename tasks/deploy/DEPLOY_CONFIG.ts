@@ -15,6 +15,7 @@ export const DEPLOYMENT_NAMES = {
     // Meta Market TOFT
     T_SGL_SDAI_MARKET: 'T_SGL_SDAI_MARKET',
     T_SGL_GLP_MARKET: 'T_SGL_GLP_MARKET',
+    T_SGL_USDC_MOCK_MARKET: 'T_SGL_USDC_MOCK_MARKET',
     // tETH
     tETH: 'tETH',
     // mTOFT
