@@ -167,11 +167,11 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         private
         returns (LockAndParticipateData memory)
     {
-        _checkWhitelistStatus(msg_.tSglToken);
-        _checkWhitelistStatus(msg_.yieldBox);
-        _checkWhitelistStatus(msg_.magnetar);
+        _checkWhitelistStatus(msg_.tSglToken, "OFT_MARKET_CALLEE");
+        _checkWhitelistStatus(msg_.yieldBox, "OFT_YIELDBOX_CALLEE");
+        _checkWhitelistStatus(msg_.magnetar, "OFT_MAGNETAR_CALLEE");
         if (msg_.lockData.lock) {
-            _checkWhitelistStatus(msg_.lockData.target);
+            _checkWhitelistStatus(msg_.lockData.target, "OFT_TAP_CALLEE");
             if (msg_.lockData.amount > 0) {
                 msg_.lockData.amount = _toLD(uint256(msg_.lockData.amount).toUint64()).toUint128();
             }
@@ -182,7 +182,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         }
 
         if (msg_.participateData.participate) {
-            _checkWhitelistStatus(msg_.participateData.target);
+            _checkWhitelistStatus(msg_.participateData.target, "OFT_TAP_CALLEE");
         }
 
         return msg_;
@@ -201,7 +201,7 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         view
         returns (ExerciseOptionsMsg memory)
     {
-        _checkWhitelistStatus(msg_.optionsData.target);
+        _checkWhitelistStatus(msg_.optionsData.target, "OFT_TAP_CALLEE");
 
         if (msg_.optionsData.tapAmount > 0) {
             msg_.optionsData.tapAmount = _toLD(msg_.optionsData.tapAmount.toUint64());
@@ -288,9 +288,10 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
         }
     }
 
-    function _checkWhitelistStatus(address _addr) private view {
+    function _checkWhitelistStatus(address _addr, bytes memory role) private view {
         if (_addr != address(0)) {
-            if (!getCluster().isWhitelisted(0, _addr)) {
+            // if (!getCluster().isWhitelisted(0, _addr)) {
+            if (!getCluster().hasRole(_addr, keccak256(role))) {
                 revert TOFTOptionsReceiverModule_NotAuthorized(_addr);
             }
         }

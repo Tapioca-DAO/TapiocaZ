@@ -155,8 +155,8 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     }
 
     function _validateLeverageUpReceiver(LeverageUpActionMsg memory msg_, address srcChainSender) private returns (LeverageUpActionMsg memory) {
-        _checkWhitelistStatus(msg_.market);
-        _checkWhitelistStatus(msg_.marketHelper);
+        _checkWhitelistStatus(msg_.market, "OFT_MARKET_CALLEE");
+        _checkWhitelistStatus(msg_.marketHelper, "OFT_HELPER_CALLEE");
 
         msg_.borrowAmount = _toLD(msg_.borrowAmount.toUint64());
         if (msg_.supplyAmount > 0) {
@@ -181,9 +181,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     }
 
      function _validateMarketBorrowReceiver(MarketBorrowMsg memory msg_, address srcChainSender) private returns (MarketBorrowMsg memory) {
-        _checkWhitelistStatus(msg_.borrowParams.marketHelper);
-        _checkWhitelistStatus(msg_.borrowParams.magnetar);
-        _checkWhitelistStatus(msg_.borrowParams.market);
+        _checkWhitelistStatus(msg_.borrowParams.marketHelper, "OFT_HELPER_CALLEE");
+        _checkWhitelistStatus(msg_.borrowParams.magnetar, "OFT_MAGNETAR_CALLEE");
+        _checkWhitelistStatus(msg_.borrowParams.market, "OFT_MARKET_CALLEE");
 
         msg_.borrowParams.amount = _toLD(msg_.borrowParams.amount.toUint64());
         msg_.borrowParams.borrowAmount = _toLD(msg_.borrowParams.borrowAmount.toUint64());
@@ -219,9 +219,9 @@ contract TOFTMarketReceiverModule is BaseTOFT {
     }
 
     function _validateMarketRemoveCollateral(MarketRemoveCollateralMsg memory msg_, address srcChainSender) private returns (MarketRemoveCollateralMsg memory) {
-        _checkWhitelistStatus(msg_.removeParams.market);
-        _checkWhitelistStatus(msg_.removeParams.marketHelper);
-        _checkWhitelistStatus(msg_.removeParams.magnetar);
+        _checkWhitelistStatus(msg_.removeParams.market, "OFT_MARKET_CALLEE");
+        _checkWhitelistStatus(msg_.removeParams.marketHelper, "OFT_HELPER_CALLEE");
+        _checkWhitelistStatus(msg_.removeParams.magnetar, "OFT_MAGNETAR_CALLEE");
 
         msg_.removeParams.amount = _toLD(msg_.removeParams.amount.toUint64());
 
@@ -254,9 +254,10 @@ contract TOFTMarketReceiverModule is BaseTOFT {
         IMagnetar(payable(msg_.removeParams.magnetar)).burst{value: msg_.value}(magnetarCall);
     }
 
-    function _checkWhitelistStatus(address _addr) private view {
+    function _checkWhitelistStatus(address _addr, bytes memory role) private view {
         if (_addr != address(0)) {
-            if (!getCluster().isWhitelisted(0, _addr)) {
+            if (!getCluster().hasRole(_addr, keccak256(role))) {
+            // if (!getCluster().isWhitelisted(0, _addr)) {
                 revert TOFTMarketReceiverModule_NotAuthorized(_addr);
             }
         }
