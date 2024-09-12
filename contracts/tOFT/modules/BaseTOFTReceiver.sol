@@ -121,7 +121,6 @@ abstract contract BaseTOFTReceiver is BaseTOFT, TapiocaOmnichainReceiver, Reentr
     // ***** RECEIVERS ***** //
     // ********************* //
     function _sanitizeTarget(address target, bytes memory role) internal view {
-        // if (!getCluster().isWhitelisted(0, target)) {
         if (!getCluster().hasRole(target, keccak256(role))) {
             revert InvalidApprovalTarget(target);
         }

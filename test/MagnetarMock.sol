@@ -35,6 +35,7 @@ import {IOftSender} from "tap-utils/interfaces/oft/IOftSender.sol";
 import {ICluster} from "tap-utils/interfaces/periph/ICluster.sol";
 import {IPermit} from "tap-utils/interfaces/common/IPermit.sol";
 
+// TODO: refactor with roles
 /*
 * @dev need this because of via-ir: true error on original Magnetar
 **/

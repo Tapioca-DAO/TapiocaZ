@@ -290,7 +290,6 @@ contract TOFTOptionsReceiverModule is BaseTOFT {
 
     function _checkWhitelistStatus(address _addr, bytes memory role) private view {
         if (_addr != address(0)) {
-            // if (!getCluster().isWhitelisted(0, _addr)) {
             if (!getCluster().hasRole(_addr, keccak256(role))) {
                 revert TOFTOptionsReceiverModule_NotAuthorized(_addr);
             }
