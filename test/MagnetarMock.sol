@@ -43,7 +43,7 @@ contract MagnetarMock is PearlmitHandler {
     using SafeCast for uint256;
     using SafeERC20 for IERC20;
 
-    error MagnetarMock_NotAuthorized();
+    error MagnetarMock_NotAuthorized(bytes reason);
     error MagnetarMock_Failed();
     error MagnetarMock_TargetNotWhitelisted(address target);
     error MagnetarMock_GasMismatch(uint256 expected, uint256 received);
@@ -154,7 +154,7 @@ contract MagnetarMock is PearlmitHandler {
         external
         payable
     {
-        if (!cluster.isWhitelisted(cluster.lzChainId(), address(_data.market))) revert MagnetarMock_NotAuthorized();
+        if (!cluster.hasRole(address(_data.market), keccak256("MAGNETAR_MARKET_CALLEE"))) revert MagnetarMock_NotAuthorized("MAGNETAR_MARKET_CALLEE");
 
         IYieldBox yieldBox = IYieldBox(IMarket(_data.market)._yieldBox());
 
@@ -223,13 +223,13 @@ contract MagnetarMock is PearlmitHandler {
     }
 
     function _checkSender(address _from) internal view {
-        if (_from != msg.sender && !cluster.isWhitelisted(0, msg.sender)) {
-            revert MagnetarMock_NotAuthorized();
+        if (_from != msg.sender && !cluster.hasRole(msg.sender, keccak256(abi.encodePacked("CALLER_ALLOWED_FOR_", _from)))) {
+            revert MagnetarMock_NotAuthorized(abi.encodePacked("CALLER_ALLOWED_FOR_", _from));
         }
     }
 
     function _withdrawToChain(MagnetarWithdrawData memory data) private {
-        if (!cluster.isWhitelisted(0, address(data.yieldBox))) {
+        if (!cluster.hasRole(address(data.yieldBox),  keccak256("YIELDBOX_WITHDRAW"))) {
             revert MagnetarMock_TargetNotWhitelisted(address(data.yieldBox));
         }
         IYieldBox _yieldBox = IYieldBox(data.yieldBox);
@@ -241,7 +241,7 @@ contract MagnetarMock is PearlmitHandler {
         uint256 balanceBefore = IERC20(_token).balanceOf(address(this));
         // IERC20(_token).safeTransferFrom(_from, address(this), _amount);
         bool isErr = pearlmit.transferFromERC20(_from, address(this), _token, _amount);
-        if (isErr) revert MagnetarMock_NotAuthorized();
+        if (isErr) revert MagnetarMock_NotAuthorized("");
         uint256 balanceAfter = IERC20(_token).balanceOf(address(this));
         if (balanceAfter <= balanceBefore) revert MagnetarMock_Failed();
         return balanceAfter - balanceBefore;

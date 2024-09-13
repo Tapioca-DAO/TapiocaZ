@@ -320,21 +320,18 @@ contract TOFTTest is TOFTTestHelper {
 
         marketHelper = new MarketHelperMock();
 
-        cluster.updateContract(aEid, address(yieldBox), true);
-        cluster.updateContract(aEid, address(singularity), true);
-        cluster.updateContract(aEid, address(magnetar), true);
-        cluster.updateContract(aEid, address(tOB), true);
-        cluster.updateContract(aEid, address(marketHelper), true);
-        cluster.updateContract(bEid, address(yieldBox), true);
-        cluster.updateContract(bEid, address(singularity), true);
-        cluster.updateContract(bEid, address(magnetar), true);
-        cluster.updateContract(bEid, address(tOB), true);
-        cluster.updateContract(bEid, address(marketHelper), true);
-        cluster.updateContract(0, address(yieldBox), true);
-        cluster.updateContract(0, address(singularity), true);
-        cluster.updateContract(0, address(magnetar), true);
-        cluster.updateContract(0, address(tOB), true);
-        cluster.updateContract(0, address(marketHelper), true);
+        cluster.setRoleForContract(address(marketHelper), keccak256("OFT_HELPER_CALLEE"), true);
+        cluster.setRoleForContract(address(magnetar), keccak256("OFT_MAGNETAR_CALLEE"), true);
+        cluster.setRoleForContract(address(singularity), keccak256("OFT_MARKET_CALLEE"), true);
+        cluster.setRoleForContract(address(yieldBox), keccak256("OFT_YIELDBOX_CALLEE"), true);
+
+        cluster.setRoleForContract(address(singularity), keccak256("MAGNETAR_MARKET_CALLEE"), true);
+        cluster.setRoleForContract(address(marketHelper), keccak256("MAGNETAR_HELPER_CALLEE"), true);
+        cluster.setRoleForContract(address(tOB), keccak256("MAGNETAR_TAP_CALLEE"), true);
+        cluster.setRoleForContract(address(magnetar), keccak256("MAGNETAR_CALLEE"), true);
+        cluster.setRoleForContract(address(yieldBox), keccak256("MAGNETAR_YIELDBOX_CALLEE"), true);
+
+        cluster.setRoleForContract(address(yieldBox), keccak256("YIELDBOX_WITHDRAW"), true);
     }
 
     /**
@@ -754,9 +751,7 @@ contract TOFTTest is TOFTTestHelper {
     function test_tOFT_erc20_approvals() public {
         address userC_ = vm.addr(0x3);
 
-        // cluster.updateContract(0, address(bTOFT), true);
         cluster.setRoleForContract(address(bTOFT),  keccak256("PERMIT_ERC20_CALLEE"), true);
-
 
         ERC20PermitApprovalMsg memory permitApprovalB_;
         ERC20PermitApprovalMsg memory permitApprovalC_;
@@ -1022,9 +1017,6 @@ contract TOFTTest is TOFTTestHelper {
         pearlmit.approve(20, address(bTOFT), 0, address(magnetar), type(uint200).max, uint48(block.timestamp)); // Atomic approval
         bTOFT.approve(address(pearlmit), type(uint200).max);
 
-        cluster.setRoleForContract(address(marketHelper), keccak256("OFT_HELPER_CALLEE"), true);
-        cluster.setRoleForContract(address(magnetar), keccak256("OFT_MAGNETAR_CALLEE"), true);
-        cluster.setRoleForContract(address(singularity), keccak256("OFT_MARKET_CALLEE"), true);
 
         MarketBorrowMsg memory marketBorrowMsg = MarketBorrowMsg({
             user: address(this),
@@ -1933,8 +1925,6 @@ contract TOFTTest is TOFTTestHelper {
     }
 
     function test_tOFT_market_permit_asset() public {
-        // cluster.updateContract(0, address(singularity), true);
-
         cluster.setRoleForContract(address(singularity),  keccak256("PERMIT_MARKET_CALLEE"), true);
 
         bytes memory approvalMsg_;
