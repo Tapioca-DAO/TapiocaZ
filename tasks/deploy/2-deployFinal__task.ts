@@ -47,10 +47,10 @@ async function tapiocaPostDeployTask(
     const { hre, taskArgs, chainInfo } = params;
     const { tag } = taskArgs;
 
-    await setLzPeer__task(
-        { tag, targetName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET },
-        hre,
-    );
+    // await setLzPeer__task(
+    //     { tag, targetName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET },
+    //     hre,
+    // );
 }
 
 async function tapiocaDeployTask(
@@ -95,63 +95,63 @@ async function tapiocaDeployTask(
         await VMAddToftWithArgs({
             ...taskArgs,
             target: 'toft',
-            deploymentName: DEPLOYMENT_NAMES.T_SGL_GLP_MARKET,
+            deploymentName: DEPLOYMENT_NAMES.T_SGL_STG_USDC_V2_MARKET,
             erc20: sglGlpMarket,
-            name: 'Tapioca OFT SGL GLP Market',
-            symbol: DEPLOYMENT_NAMES.T_SGL_GLP_MARKET,
+            name: 'Tapioca OFT SGL Stargate USDC V2 Market',
+            symbol: DEPLOYMENT_NAMES.T_SGL_STG_USDC_V2_MARKET,
             noModuleDeploy: false,
             hostEid: chainInfo.lzChainId,
         });
 
-        if (isTestnet) {
-            /**
-             * usdcMockMarketChain from Side chain
-             */
-            const usdcMockSglMarket = loadGlobalContract(
-                hre,
-                TAPIOCA_PROJECTS_NAME.TapiocaBar,
-                chainInfo.chainId,
-                TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_USDC_MOCK_MARKET,
-                tag,
-            ).address;
+        // if (isTestnet) {
+        //     /**
+        //      * usdcMockMarketChain from Side chain
+        //      */
+        //     const usdcMockSglMarket = loadGlobalContract(
+        //         hre,
+        //         TAPIOCA_PROJECTS_NAME.TapiocaBar,
+        //         chainInfo.chainId,
+        //         TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_USDC_MOCK_MARKET,
+        //         tag,
+        //     ).address;
 
-            await VMAddToftWithArgs({
-                ...taskArgs,
-                target: 'toft',
-                deploymentName: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
-                erc20: usdcMockSglMarket,
-                name: 'Tapioca OFT SGL USDC Mock Market',
-                symbol: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
-                noModuleDeploy: false,
-                hostEid: chainInfo.lzChainId,
-            });
-        }
+        //     await VMAddToftWithArgs({
+        //         ...taskArgs,
+        //         target: 'toft',
+        //         deploymentName: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
+        //         erc20: usdcMockSglMarket,
+        //         name: 'Tapioca OFT SGL USDC Mock Market',
+        //         symbol: DEPLOYMENT_NAMES.T_SGL_USDC_MOCK_MARKET,
+        //         noModuleDeploy: false,
+        //         hostEid: chainInfo.lzChainId,
+        //     });
+        // }
     }
 
     /**
      * sDaiMarketChain from Side chain
      */
-    const sdaiMarketChain = hre.SDK.utils.getChainBy(
-        'name',
-        sdaiMarketChainName,
-    );
+    // const sdaiMarketChain = hre.SDK.utils.getChainBy(
+    //     'name',
+    //     sdaiMarketChainName,
+    // );
 
-    const sDaiSglMarket = loadGlobalContract(
-        hre,
-        TAPIOCA_PROJECTS_NAME.TapiocaBar,
-        sdaiMarketChain.chainId,
-        TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
-        tag,
-    ).address;
+    // const sDaiSglMarket = loadGlobalContract(
+    //     hre,
+    //     TAPIOCA_PROJECTS_NAME.TapiocaBar,
+    //     sdaiMarketChain.chainId,
+    //     TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_DAI_MARKET,
+    //     tag,
+    // ).address;
 
-    await VMAddToftWithArgs({
-        ...taskArgs,
-        target: 'toft',
-        deploymentName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
-        erc20: sDaiSglMarket,
-        name: 'Tapioca OFT SGL DAI Market',
-        symbol: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
-        noModuleDeploy: false,
-        hostEid: sdaiMarketChain.lzChainId,
-    });
+    // await VMAddToftWithArgs({
+    //     ...taskArgs,
+    //     target: 'toft',
+    //     deploymentName: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
+    //     erc20: sDaiSglMarket,
+    //     name: 'Tapioca OFT SGL DAI Market',
+    //     symbol: DEPLOYMENT_NAMES.T_SGL_SDAI_MARKET,
+    //     noModuleDeploy: false,
+    //     hostEid: sdaiMarketChain.lzChainId,
+    // });
 }

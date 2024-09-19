@@ -13,8 +13,7 @@ export const DEPLOYMENT_NAMES = {
     TOFT_BALANCER: 'TOFT_BALANCER',
     TOFT_HELPER: 'TOFT_HELPER',
     // Meta Market TOFT
-    T_SGL_SDAI_MARKET: 'T_SGL_SDAI_MARKET',
-    T_SGL_GLP_MARKET: 'T_SGL_GLP_MARKET',
+    T_SGL_STG_USDC_V2_MARKET: 'T_SGL_STG_USDC_V2_MARKET',
     T_SGL_USDC_MOCK_MARKET: 'T_SGL_USDC_MOCK_MARKET',
     // tETH
     tETH: 'tETH',
@@ -23,9 +22,9 @@ export const DEPLOYMENT_NAMES = {
     // tOFT BB
     tWSTETH: 'tWSTETH',
     tRETH: 'tRETH',
+    tZRO: 'tZRO',
     // tOFT SGL
-    tsDAI: 'tsDAI',
-    tsGLP: 'tsGLP',
+    tStgUsdcV2: 'tStgUsdcV2',
 };
 
 type TPostLbp = {
@@ -35,6 +34,8 @@ type TPostLbp = {
         reth: string;
         sDAI: string;
         sGLP: string;
+        zro: string;
+        stgUsdcV2: string;
     };
 };
 
@@ -45,6 +46,8 @@ const POST_LBP: TPostLbp = {
         reth: '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8',
         sDAI: '',
         sGLP: '0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf',
+        zro: '',
+        stgUsdcV2: '',
     },
     [EChainID.MAINNET]: {
         WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -52,6 +55,8 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // It's dai not sDai
         sGLP: '',
+        zro: '',
+        stgUsdcV2: '',
     },
     [EChainID.ARBITRUM_SEPOLIA]: {
         WETH: '0x2EAe4fbc552fE35C1D3Df2B546032409bb0E431E',
@@ -59,6 +64,8 @@ const POST_LBP: TPostLbp = {
         reth: '0x518746126A545cC7F31EeD92bF2b04eb99eD103B',
         sDAI: '',
         sGLP: '0x1B460E311753fDB46451EF3d11d7B9eE5542b369',
+        zro: '0xE9a42512a091bCb4a05C0bc9970d08823d8A6D48',
+        stgUsdcV2: '0xEea2F7EB8D51d02f2cB3A49e254f65A60169F0d5',
     },
     [EChainID.SEPOLIA]: {
         WETH: '0xD8a79b479b0c47675E3882A1DAA494b6775CE227',
@@ -66,6 +73,8 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0xC6EA2075314a58cf74DE8430b24714E600A21Dd8',
         sGLP: '',
+        zro: '',
+        stgUsdcV2: '',
     },
     [EChainID.OPTIMISM_SEPOLIA]: {
         WETH: '0x4fB538Ed1a085200bD08F66083B72c0bfEb29112',
@@ -73,6 +82,8 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0x37359B8bfbFAE28E513EE31a2A94A9Ec60668d90',
         sGLP: '',
+        zro: '',
+        stgUsdcV2: '',
     },
     [EChainID.FUJI_AVALANCHE]: {
         WETH: '0x4404EF158716dfad1c2BEffE9c7c8Fa261684544',
@@ -80,6 +91,8 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0xed18DBCb2810E4178c23668794198C81B0668b23',
         sGLP: '',
+        zro: '',
+        stgUsdcV2: '',
     },
     [EChainID.BASE_SEPOLIA]: {
         WETH: '0x4aF9F18Eb6e595D7f876E71BBF6ac95EA99cF140',
@@ -87,6 +100,8 @@ const POST_LBP: TPostLbp = {
         reth: '',
         sDAI: '0x9384B3c4700f4B82e5961d98BE215A6eF2FAEeA5',
         sGLP: '',
+        zro: '',
+        stgUsdcV2: '',
     },
 };
 POST_LBP['31337' as EChainID] = POST_LBP[EChainID.ARBITRUM]; // Copy from Arbitrum

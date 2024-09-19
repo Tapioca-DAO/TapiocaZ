@@ -13,7 +13,8 @@ import { setLzPeer__task } from 'tapioca-sdk';
  * - mtETH
  * - tWSTETH
  * - tRETH
- * - tsDAI
+ * - tZRO
+ * - tStgUsdcV2
  *
  * Post deploy: Arb
  *  !!! REQUIRE HAVING 1 amount of sDAI, mtEth, Reth, WSTETH, SGLP, Weth in TapiocaMulticall !!!
@@ -145,6 +146,18 @@ async function tapiocaDeployTask(
             noModuleDeploy: true,
             hostEid: hostChainInfo.lzChainId,
         });
+
+        // VM Add tZRO
+        await VMAddToftWithArgs({
+            ...taskArgs,
+            target: 'mtoft',
+            deploymentName: DEPLOYMENT_NAMES.tZRO,
+            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.zro,
+            name: 'Tapioca OFT ZRO',
+            symbol: DEPLOYMENT_NAMES.tZRO,
+            noModuleDeploy: true,
+            hostEid: hostChainInfo.lzChainId,
+        });
     }
 
     // VM Add BB + SGL OFTs
@@ -162,32 +175,32 @@ async function tapiocaDeployTask(
             hostEid: hostChainInfo.lzChainId,
         });
 
-        // VM Add sGLP
+        // VM Add StgUsdcV2
         await VMAddToftWithArgs({
             ...taskArgs,
             target: 'toft',
-            deploymentName: DEPLOYMENT_NAMES.tsGLP,
-            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.sGLP,
-            name: 'Tapioca OFT Staked GLP',
-            symbol: DEPLOYMENT_NAMES.tsGLP,
+            deploymentName: DEPLOYMENT_NAMES.tStgUsdcV2,
+            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.stgUsdcV2,
+            name: 'Tapioca OFT Stargate Usdc V2',
+            symbol: DEPLOYMENT_NAMES.tStgUsdcV2,
             noModuleDeploy: true,
             hostEid: hostChainInfo.lzChainId,
         });
     }
 
-    if (isSideChain) {
-        console.log('\n[+] Adding tOFT contracts');
+    // if (isSideChain) {
+    //     console.log('\n[+] Adding tOFT contracts');
 
-        // VM Add sDAI
-        await VMAddToftWithArgs({
-            ...taskArgs,
-            target: 'toft',
-            deploymentName: DEPLOYMENT_NAMES.tsDAI,
-            erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.sDAI,
-            name: 'Tapioca OFT Staked DAI',
-            symbol: DEPLOYMENT_NAMES.tsDAI,
-            noModuleDeploy: true,
-            hostEid: sdaiSideChain.lzChainId,
-        });
-    }
+    //     // VM Add sDAI
+    //     await VMAddToftWithArgs({
+    //         ...taskArgs,
+    //         target: 'toft',
+    //         deploymentName: DEPLOYMENT_NAMES.tsDAI,
+    //         erc20: DEPLOY_CONFIG.POST_LBP[chainInfo.chainId]!.sDAI,
+    //         name: 'Tapioca OFT Staked DAI',
+    //         symbol: DEPLOYMENT_NAMES.tsDAI,
+    //         noModuleDeploy: true,
+    //         hostEid: sdaiSideChain.lzChainId,
+    //     });
+    // }
 }
