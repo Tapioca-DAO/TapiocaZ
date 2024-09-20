@@ -37,8 +37,6 @@ import {mTOFT} from "contracts/tOFT/mTOFT.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
 import {TOFTMock} from "./TOFTMock.sol";
 
-import "forge-std/console.sol";
-
 contract TOFTTest is TOFTTestHelper {
     Balancer balancer;
     StargateRouterMock routerA;

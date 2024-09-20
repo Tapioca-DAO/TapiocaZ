@@ -1,0 +1,65 @@
+TOFT_wrapUnwrap.t.sol
+├── when called against TOFT
+│   ├── when TOFT wrap reverts
+│   │   ├── when TOFT wrap called for paused contract
+│   │   │   └── it should revert
+│   │   └── when TOFT wrap called from non host chain
+│   │       └── it should revert
+│   ├── when TOFT wrap does not revert
+│   │   ├── when TOFT wrap called for ETH
+│   │   │   ├── it should deposit ETH amount to the vault
+│   │   │   ├── it should mint OFT to the reicever
+│   │   │   └── it should increase supply
+│   │   ├── when TOFT wrap called for token with the same decimals
+│   │   │   ├── it should deposit token amount to the vault
+│   │   │   ├── it should mint OFT to the reicever
+│   │   │   └── it should increase supply
+│   │   └── when TOFT wrap called for token with the different decimals
+│   │       ├── it should deposit token amount to the vault
+│   │       ├── it should mint OFT to the reicever
+│   │       └── it should increase supply
+│   ├── when TOFT unwrap reverts
+│   │   ├── when TOFT unwrap called from non host chain
+│   │   │   └── it should revert
+│   │   └── when TOFT unwrap called with invalid amount
+│   │       └── it should revert
+│   └── when TOFT unwrap does not revert
+│       ├── when TOFT unwrap called for ETH
+│       │   ├── it should withdraw from vault
+│       │   └── it should decrease supply
+│       └── when TOFT unwrap called for token
+│           ├── it should withdraw from vault
+│           └── it should decrease supply
+└── when called against mTOFT
+    ├── when mTOFT wrap reverts
+    │   ├── when mTOFT wrap called for paused contract
+    │   │   └── it should revert
+    │   └── when mTOFT wrap called from non host chain
+    │       └── it should revert
+    ├── when mTOFT wrap does not revert
+    │   ├── when mTOFT wrap called for ETH
+    │   │   ├── it should deposit ETH amount to the vault
+    │   │   ├── it should mint OFT to the reicever
+    │   │   └── it should increase supply
+    │   ├── when mTOFT wrap called for token with the same decimals
+    │   │   ├── it should deposit token amount to the vault
+    │   │   ├── it should mint OFT to the reicever
+    │   │   └── it should increase supply
+    │   └── when mTOFT wrap called for token with the different decimals
+    │       ├── it should deposit token amount to the vault
+    │       ├── it should mint OFT to the reicever
+    │       └── it should increase supply
+    ├── when mTOFT unwrap reverts
+    │   ├── when mTOFT unwrap called from non host chain
+    │   │   └── it should revert
+    │   └── when mTOFT unwrap called with invalid amount
+    │       └── it should revert
+    └── when mTOFT unwrap does not revert
+        ├── when mTOFT unwrap called for ETH
+        │   ├── it should withdraw from vault
+        │   ├── it should check fees
+        │   └── it should decrease supply
+        └── when mTOFT unwrap called for token
+            ├── it should withdraw from vault
+            ├── it should check fees
+            └── it should decrease supply
