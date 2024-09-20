@@ -84,11 +84,18 @@ async function tapiocaDeployTask(
         /**
          *SGL GLP Market OFT on Host chain
          */
-        const sglGlpMarket = loadGlobalContract(
+        // const sglGlpMarket = loadGlobalContract(
+        //     hre,
+        //     TAPIOCA_PROJECTS_NAME.TapiocaBar,
+        //     chainInfo.chainId,
+        //     TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
+        //     tag,
+        // ).address;
+        const sglStgUsdcMarket = loadGlobalContract(
             hre,
             TAPIOCA_PROJECTS_NAME.TapiocaBar,
             chainInfo.chainId,
-            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_S_GLP_MARKET,
+            TAPIOCA_BAR_CONFIG.DEPLOYMENT_NAMES.SGL_STG_USDC_V2_MARKET,
             tag,
         ).address;
 
@@ -96,7 +103,7 @@ async function tapiocaDeployTask(
             ...taskArgs,
             target: 'toft',
             deploymentName: DEPLOYMENT_NAMES.T_SGL_STG_USDC_V2_MARKET,
-            erc20: sglGlpMarket,
+            erc20: sglStgUsdcMarket,
             name: 'Tapioca OFT SGL Stargate USDC V2 Market',
             symbol: DEPLOYMENT_NAMES.T_SGL_STG_USDC_V2_MARKET,
             noModuleDeploy: false,
